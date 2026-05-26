@@ -16,31 +16,43 @@ import {
 } from "lucide-react";
 
 const JENJANG = [
-  { id: "sd", label: "SD", desc: "Kelas 1–6", icon: School, color: "#e84c2b" },
-  { id: "smp", label: "SMP", desc: "Kelas 7–9", icon: Ruler, color: "#2563eb" },
   {
-    id: "sma",
+    slug: "sd",
+    label: "SD",
+    desc: "Kelas 1–6",
+    icon: School,
+    color: "#e84c2b",
+  },
+  {
+    slug: "smp",
+    label: "SMP",
+    desc: "Kelas 7–9",
+    icon: Ruler,
+    color: "#2563eb",
+  },
+  {
+    slug: "sma",
     label: "SMA",
     desc: "Kelas 10–12",
     icon: BarChart2,
     color: "#1a8a6e",
   },
   {
-    id: "utbk",
+    slug: "utbk",
     label: "UTBK",
     desc: "Persiapan PTN",
     icon: Target,
     color: "#f5a623",
   },
   {
-    id: "cpns",
+    slug: "cpns",
     label: "CPNS",
     desc: "TIU Numerik",
     icon: Landmark,
     color: "#7c3aed",
   },
   {
-    id: "osn",
+    slug: "osn",
     label: "OSN",
     desc: "Olimpiade",
     icon: Trophy,
@@ -213,10 +225,14 @@ export default function HomePage() {
             marginBottom: "52px",
           }}
         >
-          {JENJANG.map(({ id, label, desc, icon: Icon, color }) => (
+          {JENJANG.map(({ slug, label, desc, icon: Icon, color }) => (
             <div
-              key={id}
-              onClick={() => navigate(`/browse?jenjang=${id}`)}
+              key={slug}
+              onClick={() =>
+                navigate(`/browse/${slug}`, {
+                  state: { jenjangNama: label, jenjangSlug: slug },
+                })
+              }
               style={{
                 background: "white",
                 borderRadius: "14px",
