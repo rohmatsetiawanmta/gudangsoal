@@ -4,6 +4,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import Breadcrumb from "../../components/Breadcrumb";
 import { getSubjenjang } from "./browseApi";
+import Navbar from "../../components/Navbar";
 
 export default function BrowseSubjenjang() {
   const navigate = useNavigate();
@@ -25,40 +26,7 @@ export default function BrowseSubjenjang() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
-      <nav
-        style={{
-          background: "white",
-          borderBottom: "1px solid #e2ddd5",
-          padding: "0 40px",
-          height: "64px",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div
-            style={{
-              width: "34px",
-              height: "34px",
-              background: "#e84c2b",
-              borderRadius: "10px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              fontWeight: "800",
-              fontSize: "13px",
-            }}
-          >
-            GS
-          </div>
-          <span
-            style={{ fontWeight: "700", fontSize: "17px", color: "#0f0e17" }}
-          >
-            Gudang Soal
-          </span>
-        </div>
-      </nav>
+      <Navbar />
 
       <main style={{ maxWidth: "720px", margin: "0 auto", padding: "40px" }}>
         <div style={{ marginBottom: "32px" }}>
