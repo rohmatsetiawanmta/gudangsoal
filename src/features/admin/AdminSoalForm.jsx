@@ -1,10 +1,11 @@
 // src/features/admin/AdminSoalForm.jsx
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Plus, Trash2, ChevronDown } from "lucide-react";
+import { Plus, Trash2, ChevronDown, Sparkles } from "lucide-react";
 import api from "../../lib/api";
 import MathRenderer from "../../components/MathRenderer";
 import MarkdownEditor from "../../components/MarkdownEditor";
+import AdminSoalAI from "./AdminSoalAI";
 
 const LABELS = ["A", "B", "C", "D", "E"];
 const emptyOption = (label) => ({ label, text: "" });
@@ -284,6 +285,7 @@ export default function AdminSoalForm() {
   const [loading, setLoading] = useState(false);
   const [loadingStruktur, setLoadingStruktur] = useState(true);
   const [error, setError] = useState("");
+  const [generatingExplanation, setGeneratingExplanation] = useState(false);
 
   useEffect(() => {
     api
@@ -370,6 +372,41 @@ export default function AdminSoalForm() {
     }));
   };
 
+  const handleGenerateExplanation = async () => {
+    if (!form.body || !form.answer || form.options.some((o) => !o.text)) return;
+    setGeneratingExplanation(true);
+    try {
+      const optionsText = form.options
+        .map((o) => `${o.label}. ${o.text}`)
+        .join("\n");
+      const prompt = `Kamu adalah guru matematika profesional untuk siswa Indonesia.
+
+Berikut adalah soal matematika beserta pilihan jawabannya:
+
+SOAL:
+${form.body}
+
+PILIHAN JAWABAN:
+${optionsText}
+
+JAWABAN BENAR: ${form.answer}
+
+Buat pembahasan langkah per langkah yang jelas dan mudah dipahami untuk soal ini.
+Gunakan LaTeX untuk rumus matematika dengan format $...$ untuk inline dan $$...$$ untuk display.
+Gunakan markdown untuk formatting (bold, list, dll).
+
+OUTPUT HANYA pembahasan saja dalam format teks, tanpa JSON, tanpa preamble apapun.`;
+
+      const result = await api.post("/admin/ai/generate", { prompt });
+      const text = result.text || result.parsed?.explanation || "";
+      if (text) setForm((f) => ({ ...f, explanation: text.trim() }));
+    } catch {
+      alert("Gagal generate pembahasan. Coba lagi.");
+    } finally {
+      setGeneratingExplanation(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -405,25 +442,44 @@ export default function AdminSoalForm() {
     }
   };
 
+  const canGenerateExplanation =
+    form.body.trim() && form.answer && form.options.every((o) => o.text.trim());
+
   return (
     <div>
-      <div style={{ marginBottom: "32px" }}>
-        <h1
-          style={{
-            fontSize: "24px",
-            fontWeight: "800",
-            color: "#0f0e17",
-            letterSpacing: "-0.5px",
-            marginBottom: "4px",
-          }}
-        >
-          {isEdit ? "Edit Soal" : "Tambah Soal"}
-        </h1>
-        <p style={{ fontSize: "14px", color: "#6b6860" }}>
-          {isEdit
-            ? "Ubah soal yang sudah ada"
-            : "Tambahkan soal baru ke bank soal"}
-        </p>
+      {/* Header */}
+      <div
+        style={{
+          marginBottom: "32px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <div>
+          <h1
+            style={{
+              fontSize: "24px",
+              fontWeight: "800",
+              color: "#0f0e17",
+              letterSpacing: "-0.5px",
+              marginBottom: "4px",
+            }}
+          >
+            {isEdit ? "Edit Soal" : "Tambah Soal"}
+          </h1>
+          <p style={{ fontSize: "14px", color: "#6b6860" }}>
+            {isEdit
+              ? "Ubah soal yang sudah ada"
+              : "Tambahkan soal baru ke bank soal"}
+          </p>
+        </div>
+        <AdminSoalAI
+          form={form}
+          setForm={setForm}
+          struktur={struktur}
+          selected={selected}
+        />
       </div>
 
       {error && (
@@ -828,22 +884,81 @@ export default function AdminSoalForm() {
           >
             <div
               style={{
-                fontSize: "14px",
-                fontWeight: "700",
-                color: "#0f0e17",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
                 marginBottom: "16px",
               }}
             >
-              Pembahasan{" "}
-              <span
+              <div
                 style={{
-                  fontWeight: "400",
-                  color: "#6b6860",
-                  fontSize: "13px",
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  color: "#0f0e17",
                 }}
               >
-                (opsional)
-              </span>
+                Pembahasan{" "}
+                <span
+                  style={{
+                    fontWeight: "400",
+                    color: "#6b6860",
+                    fontSize: "13px",
+                  }}
+                >
+                  (opsional)
+                </span>
+              </div>
+              {canGenerateExplanation && (
+                <button
+                  type="button"
+                  onClick={handleGenerateExplanation}
+                  disabled={generatingExplanation}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "7px 14px",
+                    borderRadius: "8px",
+                    border: "1px solid #e2ddd5",
+                    background: "white",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    cursor: generatingExplanation ? "not-allowed" : "pointer",
+                    fontFamily: "inherit",
+                    color: "#0f0e17",
+                    transition: "all .15s",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!generatingExplanation)
+                      e.currentTarget.style.background = "#f2efe8";
+                  }}
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "white")
+                  }
+                >
+                  {generatingExplanation ? (
+                    <>
+                      <span
+                        style={{
+                          width: "12px",
+                          height: "12px",
+                          border: "2px solid #e2ddd5",
+                          borderTopColor: "#6b6860",
+                          borderRadius: "50%",
+                          animation: "spin 0.7s linear infinite",
+                          display: "block",
+                        }}
+                      />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={13} color="#e84c2b" />
+                      Generate Pembahasan
+                    </>
+                  )}
+                </button>
+              )}
             </div>
             <MarkdownEditor
               value={form.explanation}
@@ -904,6 +1019,8 @@ export default function AdminSoalForm() {
           <PreviewPanel form={form} />
         </div>
       </div>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

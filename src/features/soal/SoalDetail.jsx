@@ -5,7 +5,7 @@ import { ChevronLeft, Lock, CheckCircle, XCircle } from "lucide-react";
 import MathRenderer from "../../components/MathRenderer";
 import Breadcrumb from "../../components/Breadcrumb";
 import Navbar from "../../components/Navbar";
-import { getSoalDetail } from "./soalApi";
+import { getSoalDetail, getSoalStatus } from "./soalApi";
 import { saveSession } from "../profile/profileApi";
 
 function DifficultyBadge({ level }) {
@@ -41,6 +41,7 @@ export default function SoalDetail() {
   const [error, setError] = useState("");
   const [chosen, setChosen] = useState(null);
   const [submitted, setSubmitted] = useState(false);
+  const [alreadyCorrect, setAlreadyCorrect] = useState(false);
 
   const [breadcrumb, setBreadcrumb] = useState({
     jenjangNama: state?.jenjangNama || "",
@@ -58,9 +59,11 @@ export default function SoalDetail() {
   useEffect(() => {
     setChosen(null);
     setSubmitted(false);
+    setAlreadyCorrect(false);
     setLoading(true);
-    getSoalDetail(kode)
-      .then((data) => {
+
+    Promise.all([getSoalDetail(kode), getSoalStatus(kode)])
+      .then(([data, status]) => {
         setSoal(data);
         if (!state?.jenjangSlug) {
           setBreadcrumb({
@@ -76,24 +79,28 @@ export default function SoalDetail() {
             subtopikSlug: data.subtopik_slug,
           });
         }
+        if (status?.answered_correct) {
+          setAlreadyCorrect(true);
+          setSubmitted(true);
+          setChosen(data.answer);
+        }
       })
       .catch(() => setError("Gagal memuat soal"))
       .finally(() => setLoading(false));
   }, [kode]);
 
   const handleSubmit = async () => {
-    if (!chosen) return;
+    if (!chosen || alreadyCorrect) return;
     setSubmitted(true);
 
     try {
       await saveSession({
         soal_id: soal.id,
         kode: soal.kode,
+        difficulty: soal.difficulty,
         is_correct: chosen === soal.answer ? 1 : 0,
       });
-    } catch {
-      // Gagal simpan tidak block user
-    }
+    } catch {}
   };
 
   const handleReset = () => {
@@ -308,14 +315,17 @@ export default function SoalDetail() {
                 {soal.options?.map((opt) => (
                   <div
                     key={opt.label}
-                    onClick={() => !submitted && setChosen(opt.label)}
+                    onClick={() =>
+                      !submitted && !alreadyCorrect && setChosen(opt.label)
+                    }
                     style={{
                       display: "flex",
                       alignItems: "center",
                       gap: "12px",
                       padding: "13px 16px",
                       borderRadius: "12px",
-                      cursor: submitted ? "default" : "pointer",
+                      cursor:
+                        submitted || alreadyCorrect ? "default" : "pointer",
                       transition: "all .15s",
                       ...getOptStyle(opt.label),
                     }}
@@ -374,47 +384,49 @@ export default function SoalDetail() {
               </div>
 
               {/* Submit / Reset */}
-              <div style={{ display: "flex", gap: "10px" }}>
-                {!submitted ? (
-                  <button
-                    onClick={handleSubmit}
-                    disabled={!chosen}
-                    style={{
-                      flex: 1,
-                      padding: "12px",
-                      borderRadius: "12px",
-                      background: chosen ? "#e84c2b" : "#e2ddd5",
-                      color: chosen ? "white" : "#b4b2a9",
-                      border: "none",
-                      fontWeight: "700",
-                      fontSize: "15px",
-                      cursor: chosen ? "pointer" : "not-allowed",
-                      fontFamily: "inherit",
-                      transition: "all .15s",
-                    }}
-                  >
-                    Submit Jawaban
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleReset}
-                    style={{
-                      flex: 1,
-                      padding: "12px",
-                      borderRadius: "12px",
-                      background: "white",
-                      color: "#0f0e17",
-                      border: "1px solid #e2ddd5",
-                      fontWeight: "600",
-                      fontSize: "15px",
-                      cursor: "pointer",
-                      fontFamily: "inherit",
-                    }}
-                  >
-                    Coba Lagi
-                  </button>
-                )}
-              </div>
+              {!alreadyCorrect && (
+                <div style={{ display: "flex", gap: "10px" }}>
+                  {!submitted ? (
+                    <button
+                      onClick={handleSubmit}
+                      disabled={!chosen}
+                      style={{
+                        flex: 1,
+                        padding: "12px",
+                        borderRadius: "12px",
+                        background: chosen ? "#e84c2b" : "#e2ddd5",
+                        color: chosen ? "white" : "#b4b2a9",
+                        border: "none",
+                        fontWeight: "700",
+                        fontSize: "15px",
+                        cursor: chosen ? "pointer" : "not-allowed",
+                        fontFamily: "inherit",
+                        transition: "all .15s",
+                      }}
+                    >
+                      Submit Jawaban
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleReset}
+                      style={{
+                        flex: 1,
+                        padding: "12px",
+                        borderRadius: "12px",
+                        background: "white",
+                        color: "#0f0e17",
+                        border: "1px solid #e2ddd5",
+                        fontWeight: "600",
+                        fontSize: "15px",
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      Coba Lagi
+                    </button>
+                  )}
+                </div>
+              )}
 
               {/* Navigasi */}
               <div
@@ -533,7 +545,11 @@ export default function SoalDetail() {
                           color: isCorrect ? "#0F6E56" : "#b91c1c",
                         }}
                       >
-                        {isCorrect ? "Jawaban benar!" : "Jawaban kurang tepat"}
+                        {alreadyCorrect
+                          ? "Sudah pernah dijawab benar!"
+                          : isCorrect
+                          ? "Jawaban benar!"
+                          : "Jawaban kurang tepat"}
                       </div>
                       <div
                         style={{

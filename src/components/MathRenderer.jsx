@@ -4,7 +4,9 @@ import katex from "katex";
 import { marked } from "marked";
 import "katex/dist/katex.min.css";
 
-marked.setOptions({ breaks: true });
+marked.use({ gfm: true, breaks: true });
+
+const IMAGE_BASE_URL = "https://gudangsoal.com/uploads/";
 
 export default function MathRenderer({ text = "", block = false }) {
   const ref = useRef(null);
@@ -12,9 +14,19 @@ export default function MathRenderer({ text = "", block = false }) {
   useEffect(() => {
     if (!ref.current || !text) return;
 
-    // 1. Lindungi LaTeX dari markdown parser
+    // 1. Parse custom image syntax [FILENAME|width] atau [FILENAME]
+    let processed = text.replace(
+      /\[([A-Z0-9]{6}(?:\.[a-z]+)?)(?:\|(\d+))?\]/g,
+      (_, filename, width) => {
+        const url = IMAGE_BASE_URL + filename;
+        const w = width ? `width="${width}"` : 'style="max-width:100%"';
+        return `<img src="${url}" ${w} style="height:auto;display:block;margin:8px 0;border-radius:8px;" alt="${filename}" />`;
+      }
+    );
+
+    // 2. Lindungi LaTeX dari markdown parser
     const mathBlocks = [];
-    const protectedText = text.replace(
+    const protectedText = processed.replace(
       /(\$\$[\s\S]+?\$\$|\$[^$]+?\$)/g,
       (match) => {
         mathBlocks.push(match);
@@ -22,12 +34,12 @@ export default function MathRenderer({ text = "", block = false }) {
       }
     );
 
-    // 2. Render markdown
+    // 3. Render markdown
     const html = block
       ? marked.parse(protectedText)
       : marked.parseInline(protectedText);
 
-    // 3. Restore LaTeX lalu render KaTeX
+    // 4. Restore LaTeX lalu render KaTeX
     const restored = html.replace(/%%MATH(\d+)%%/g, (_, idx) => {
       const latex = mathBlocks[parseInt(idx)];
       const isDisplay = latex.startsWith("$$");

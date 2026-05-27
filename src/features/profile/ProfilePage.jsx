@@ -11,6 +11,7 @@ import {
   XCircle,
   Eye,
   EyeOff,
+  Zap,
 } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import { useAuthStore } from "../auth/authStore";
@@ -682,7 +683,7 @@ export default function ProfilePage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr 1fr",
+                gridTemplateColumns: "1fr 1fr 1fr 1fr",
                 gap: "14px",
               }}
             >
@@ -694,9 +695,15 @@ export default function ProfilePage() {
               />
               <StatCard
                 icon={Flame}
-                label="Streak"
+                label="Streak Hari"
                 value={`${data?.user?.streak || 0} hari`}
                 color="#e84c2b"
+              />
+              <StatCard
+                icon={Zap}
+                label="Streak Soal"
+                value={data?.user?.soal_streak || 0}
+                color="#2563eb"
               />
               <StatCard
                 icon={CheckCircle}
@@ -929,7 +936,7 @@ export default function ProfilePage() {
                         e.currentTarget.style.boxShadow = "none";
                       }}
                     >
-                      {r.is_correct ? (
+                      {r.is_correct == 1 ? (
                         <CheckCircle
                           size={18}
                           color="#1a8a6e"

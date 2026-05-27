@@ -1,5 +1,5 @@
 // src/components/MarkdownEditor.jsx
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   Bold,
   Italic,
@@ -7,7 +7,10 @@ import {
   List,
   ListOrdered,
   Minus,
+  Image,
+  Table,
 } from "lucide-react";
+import api from "../lib/api";
 
 const TOOLS = [
   { icon: Bold, label: "Bold", wrap: ["**", "**"], default: "teks tebal" },
@@ -18,7 +21,8 @@ const TOOLS = [
     wrap: ["__", "__"],
     default: "teks garis bawah",
   },
-  null, // divider
+  null,
+  { icon: Table, label: "Tabel", wrap: null, default: null, isTable: true },
   { icon: List, label: "Bullet", wrap: ["\n- ", ""], default: "item" },
   {
     icon: ListOrdered,
@@ -26,7 +30,7 @@ const TOOLS = [
     wrap: ["\n1. ", ""],
     default: "item",
   },
-  null, // divider
+  null,
   { icon: Minus, label: "Divider", wrap: ["\n---\n", ""], default: "" },
 ];
 
@@ -37,6 +41,8 @@ export default function MarkdownEditor({
   rows = 4,
 }) {
   const ref = useRef(null);
+  const fileRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
 
   const insertFormat = (wrap, defaultText) => {
     const el = ref.current;
@@ -48,7 +54,6 @@ export default function MarkdownEditor({
     const before = value.slice(0, start);
     const after = value.slice(end);
 
-    // Kalau bullet/numbering dan ada banyak baris yang diselect, format tiap baris
     const isList = wrap[0].startsWith("\n-") || wrap[0].startsWith("\n1");
     let inserted = "";
 
@@ -68,6 +73,58 @@ export default function MarkdownEditor({
       const newPos = start + inserted.length;
       el.setSelectionRange(newPos, newPos);
     }, 0);
+  };
+
+  const insertAtCursor = (text) => {
+    const el = ref.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const before = value.slice(0, start);
+    const after = value.slice(start);
+    const newValue = before + text + after;
+    onChange(newValue);
+    setTimeout(() => {
+      el.focus();
+      el.setSelectionRange(start + text.length, start + text.length);
+    }, 0);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/upload/image`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.url) {
+        const filename = data.filename;
+        insertAtCursor(`[${filename}|500]`);
+      } else {
+        alert(data.error || "Gagal upload gambar");
+      }
+    } catch {
+      alert("Gagal upload gambar");
+    } finally {
+      setUploading(false);
+      // Reset input biar bisa upload file yang sama lagi
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  const insertTable = () => {
+    const template = `\n| Kolom 1 | Kolom 2 | Kolom 3 |\n| --- | --- | --- |\n| Data 1 | Data 2 | Data 3 |\n| Data 4 | Data 5 | Data 6 |\n`;
+    insertAtCursor(template);
   };
 
   return (
@@ -105,13 +162,15 @@ export default function MarkdownEditor({
                 }}
               />
             );
-          const { icon: Icon, label, wrap, default: def } = tool;
+          const { icon: Icon, label, wrap, default: def, isTable } = tool;
           return (
             <button
               key={label}
               type="button"
               title={label}
-              onClick={() => insertFormat(wrap, def)}
+              onClick={() =>
+                isTable ? insertTable() : insertFormat(wrap, def)
+              }
               style={{
                 width: "28px",
                 height: "28px",
@@ -134,6 +193,63 @@ export default function MarkdownEditor({
             </button>
           );
         })}
+
+        <div
+          style={{
+            width: "1px",
+            height: "16px",
+            background: "#e2ddd5",
+            margin: "0 4px",
+          }}
+        />
+
+        {/* Upload gambar */}
+        <button
+          type="button"
+          title="Upload Gambar"
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          style={{
+            width: "28px",
+            height: "28px",
+            borderRadius: "6px",
+            border: "none",
+            background: "none",
+            cursor: uploading ? "not-allowed" : "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: uploading ? "#b4b2a9" : "#6b6860",
+            transition: "background .15s",
+          }}
+          onMouseEnter={(e) => {
+            if (!uploading) e.currentTarget.style.background = "#e2ddd5";
+          }}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+        >
+          {uploading ? (
+            <span
+              style={{
+                width: "12px",
+                height: "12px",
+                border: "2px solid #e2ddd5",
+                borderTopColor: "#6b6860",
+                borderRadius: "50%",
+                animation: "spin 0.7s linear infinite",
+                display: "block",
+              }}
+            />
+          ) : (
+            <Image size={14} />
+          )}
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          onChange={handleImageUpload}
+          style={{ display: "none" }}
+        />
 
         <div style={{ marginLeft: "auto" }}>
           <span
@@ -173,6 +289,8 @@ export default function MarkdownEditor({
           (e.currentTarget.parentElement.style.borderColor = "#e2ddd5")
         }
       />
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

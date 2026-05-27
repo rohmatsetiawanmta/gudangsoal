@@ -1,5 +1,5 @@
 // src/features/admin/AdminStruktur.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronRight, Plus, Pencil, Trash2, X, ArrowLeft } from "lucide-react";
 import api from "../../lib/api";
 import ToggleSwitch from "../../components/ToggleSwitch";
@@ -138,8 +138,14 @@ function Modal({ title, onClose, onSubmit, loading, error, children }) {
 
 export default function AdminStruktur() {
   const [stack, setStack] = useState([{ level: "jenjang", item: null }]);
-  const [items, setItems] = useState({});
-  const [loadingLevel, setLoadingLevel] = useState({});
+  const [allData, setAllData] = useState({
+    jenjang: [],
+    subjenjang: [],
+    mapel: [],
+    topik: [],
+    subtopik: [],
+  });
+  const [loading, setLoading] = useState(true);
   const [publishLoading, setPublishLoading] = useState({});
   const [modal, setModal] = useState(null);
   const [modalForm, setModalForm] = useState({ nama: "", urutan: "" });
@@ -148,50 +154,38 @@ export default function AdminStruktur() {
 
   const currentStack = stack[stack.length - 1];
   const currentLevel = LEVELS.find((l) => l.key === currentStack.level);
-  const cacheKey = currentStack.level + (currentStack.item?.id || "");
-  const currentItems = items[cacheKey] || [];
-  const isLoading = loadingLevel[cacheKey];
   const isLastLevel =
     LEVELS.findIndex((l) => l.key === currentStack.level) === LEVELS.length - 1;
 
-  const fetchItems = (level, parentItem) => {
-    const key = level + (parentItem?.id || "");
-    const levelInfo = LEVELS.find((l) => l.key === level);
-    setLoadingLevel((l) => ({ ...l, [key]: true }));
+  // Fetch semua data setiap kali diperlukan
+  const fetchAll = () => {
+    setLoading(true);
     api
       .get("/admin/struktur")
-      .then((data) => {
-        const allItems = data[level] || [];
-        const filtered =
-          levelInfo.parentKey && parentItem
-            ? allItems.filter((i) => i[levelInfo.parentIdCol] == parentItem.id)
-            : allItems;
-        setItems((prev) => ({ ...prev, [key]: filtered }));
-      })
+      .then((data) => setAllData(data))
       .catch(() => {})
-      .finally(() => setLoadingLevel((l) => ({ ...l, [key]: false })));
+      .finally(() => setLoading(false));
   };
 
-  useState(() => {
-    fetchItems("jenjang", null);
-  });
+  useEffect(() => {
+    fetchAll();
+  }, []);
 
-  const invalidateCache = (level, parentItem) => {
-    const key = level + (parentItem?.id || "");
-    setItems((prev) => {
-      const n = { ...prev };
-      delete n[key];
-      return n;
-    });
-    fetchItems(level, parentItem);
+  // Filter items berdasarkan stack saat ini
+  const getCurrentItems = () => {
+    const data = allData[currentStack.level] || [];
+    const levelInfo = LEVELS.find((l) => l.key === currentStack.level);
+    if (!levelInfo.parentKey || !currentStack.item) return data;
+    return data.filter((i) => i[levelInfo.parentIdCol] == currentStack.item.id);
   };
+
+  const currentItems = getCurrentItems();
 
   const handleDrillDown = (item) => {
     const nextIndex = LEVELS.findIndex((l) => l.key === currentStack.level) + 1;
     if (nextIndex >= LEVELS.length) return;
     const nextLevel = LEVELS[nextIndex].key;
     setStack([...stack, { level: nextLevel, item }]);
-    fetchItems(nextLevel, item);
   };
 
   const handleBack = () => {
@@ -210,9 +204,9 @@ export default function AdminStruktur() {
       const res = await api.put(
         `/admin/publish/${currentStack.level}?id=${item.id}`
       );
-      setItems((prev) => ({
+      setAllData((prev) => ({
         ...prev,
-        [cacheKey]: prev[cacheKey]?.map((i) =>
+        [currentStack.level]: prev[currentStack.level].map((i) =>
           i.id === item.id
             ? { ...i, is_published: res.is_published ? 1 : 0 }
             : i
@@ -265,17 +259,8 @@ export default function AdminStruktur() {
         payload.urutan = parseInt(modalForm.urutan) || 0;
       }
       await api.post(`/admin/struktur/${currentStack.level}`, payload);
-
-      // Clear cache lalu force fetch ulang
-      const parentItem = stack[stack.length - 2]?.item || null;
-      const key = currentStack.level + (parentItem?.id || "");
-      setItems((prev) => {
-        const n = { ...prev };
-        delete n[key];
-        return n;
-      });
-
       closeModal();
+      fetchAll(); // fetch ulang semua data
     } catch (err) {
       setModalError(err.error || "Gagal menambahkan");
     } finally {
@@ -294,11 +279,8 @@ export default function AdminStruktur() {
         `/admin/struktur/${currentStack.level}?id=${modal.item.id}`,
         { nama: modalForm.nama }
       );
-      invalidateCache(
-        currentStack.level,
-        stack[stack.length - 2]?.item || null
-      );
       closeModal();
+      fetchAll();
     } catch (err) {
       setModalError(err.error || "Gagal mengupdate");
     } finally {
@@ -312,11 +294,8 @@ export default function AdminStruktur() {
       await api.delete(
         `/admin/struktur/${currentStack.level}?id=${modal.item.id}`
       );
-      invalidateCache(
-        currentStack.level,
-        stack[stack.length - 2]?.item || null
-      );
       closeModal();
+      fetchAll();
     } catch (err) {
       setModalError(
         err.error || "Gagal menghapus. Pastikan tidak ada data di bawahnya."
@@ -458,7 +437,7 @@ export default function AdminStruktur() {
         </div>
 
         {/* Loading */}
-        {isLoading && (
+        {loading && (
           <div style={{ display: "flex", flexDirection: "column" }}>
             {Array.from({ length: 4 }).map((_, i) => (
               <div
@@ -475,7 +454,7 @@ export default function AdminStruktur() {
         )}
 
         {/* Empty */}
-        {!isLoading && currentItems.length === 0 && (
+        {!loading && currentItems.length === 0 && (
           <div
             style={{
               textAlign: "center",
@@ -489,7 +468,7 @@ export default function AdminStruktur() {
         )}
 
         {/* Items */}
-        {!isLoading &&
+        {!loading &&
           currentItems.map((item, i) => (
             <div
               key={item.id}

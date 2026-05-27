@@ -89,3 +89,28 @@ h3 {
   display: block;
   margin-bottom: 4px;
 }
+
+.math-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+.math-content th,
+.math-content td {
+  border: 1px solid #e2ddd5;
+  padding: 8px 12px;
+  text-align: left;
+  line-height: 1.5;
+}
+
+.math-content th {
+  background: #f2efe8;
+  font-weight: 700;
+  color: #0f0e17;
+}
+
+.math-content tr:nth-child(even) td {
+  background: #faf9f6;
+}
