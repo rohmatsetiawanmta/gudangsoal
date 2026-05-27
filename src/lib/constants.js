@@ -6,6 +6,11 @@ import {
   Target,
   Landmark,
   Trophy,
+  PartyPopper,
+  Flame,
+  Star,
+  Zap,
+  Map,
 } from "lucide-react";
 
 export const FALLBACK_JENJANG = [
@@ -71,16 +76,38 @@ export const XP_VALUES = {
 export const BADGES = [
   {
     id: "first_quiz",
+    icon: PartyPopper,
     label: "Langkah Pertama",
     desc: "Selesaikan kuis pertama",
   },
   {
     id: "streak_7",
+    icon: Flame,
     label: "Seminggu Penuh",
     desc: "Streak 7 hari berturut-turut",
   },
-  { id: "perfect_score", label: "Sempurna", desc: "Skor 100% dalam satu sesi" },
-  { id: "hundred_correct", label: "Centurion", desc: "100 soal dijawab benar" },
-  { id: "speed_demon", label: "Kilat", desc: "Jawab 10 soal dalam < 5 menit" },
-  { id: "all_topics", label: "Penjelajah", desc: "Latihan di 5 topik berbeda" },
+  {
+    id: "perfect_score",
+    icon: Star,
+    label: "Sempurna",
+    desc: "Skor 100% dalam satu sesi",
+  },
+  {
+    id: "hundred_correct",
+    icon: Trophy,
+    label: "Centurion",
+    desc: "100 soal dijawab benar",
+  },
+  {
+    id: "speed_demon",
+    icon: Zap,
+    label: "Kilat",
+    desc: "Jawab 10 soal dalam < 5 menit",
+  },
+  {
+    id: "all_topics",
+    icon: Map,
+    label: "Penjelajah",
+    desc: "Latihan di 5 topik berbeda",
+  },
 ];

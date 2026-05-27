@@ -6,6 +6,7 @@ import MathRenderer from "../../components/MathRenderer";
 import Breadcrumb from "../../components/Breadcrumb";
 import Navbar from "../../components/Navbar";
 import { getSoalDetail } from "./soalApi";
+import { saveSession } from "../profile/profileApi";
 
 function DifficultyBadge({ level }) {
   const map = {
@@ -41,7 +42,6 @@ export default function SoalDetail() {
   const [chosen, setChosen] = useState(null);
   const [submitted, setSubmitted] = useState(false);
 
-  // Breadcrumb — dari state kalau ada, dari API kalau tidak
   const [breadcrumb, setBreadcrumb] = useState({
     jenjangNama: state?.jenjangNama || "",
     jenjangSlug: state?.jenjangSlug || "",
@@ -62,7 +62,6 @@ export default function SoalDetail() {
     getSoalDetail(kode)
       .then((data) => {
         setSoal(data);
-        // Kalau state kosong, isi dari response API
         if (!state?.jenjangSlug) {
           setBreadcrumb({
             jenjangNama: data.jenjang_nama,
@@ -82,9 +81,19 @@ export default function SoalDetail() {
       .finally(() => setLoading(false));
   }, [kode]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!chosen) return;
     setSubmitted(true);
+
+    try {
+      await saveSession({
+        soal_id: soal.id,
+        kode: soal.kode,
+        is_correct: chosen === soal.answer ? 1 : 0,
+      });
+    } catch {
+      // Gagal simpan tidak block user
+    }
   };
 
   const handleReset = () => {
