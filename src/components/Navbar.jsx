@@ -9,6 +9,7 @@ import {
   User,
   LogOut,
   ChevronDown,
+  LayoutDashboard,
 } from "lucide-react";
 import { useAuthStore } from "../features/auth/authStore";
 
@@ -359,6 +360,19 @@ export default function Navbar() {
 
               {/* Menu items */}
               {[
+                ...(user?.role === "admin"
+                  ? [
+                      {
+                        icon: LayoutDashboard,
+                        label: "Admin Panel",
+                        onClick: () => {
+                          navigate("/admin");
+                          setDropdownOpen(false);
+                        },
+                        danger: false,
+                      },
+                    ]
+                  : []),
                 {
                   icon: User,
                   label: "Profile",

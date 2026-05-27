@@ -70,6 +70,19 @@ export default function AdminSoal() {
     setSearch(searchInput);
   };
 
+  const handleTogglePublish = async (id, currentStatus) => {
+    try {
+      await api.put(`/admin/publish/soal?id=${id}`);
+      setSoal((prev) =>
+        prev.map((s) =>
+          s.id === id ? { ...s, is_published: currentStatus ? 0 : 1 } : s
+        )
+      );
+    } catch {
+      alert("Gagal mengubah status publish");
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleting(true);
@@ -204,14 +217,14 @@ export default function AdminSoal() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "40px 1fr 160px 80px 80px",
+            gridTemplateColumns: "40px 1fr 160px 80px 80px 140px",
             gap: "16px",
             padding: "12px 20px",
             background: "#f2efe8",
             borderBottom: "1px solid #e2ddd5",
           }}
         >
-          {["#", "Soal", "Lokasi", "Sulit", "Aksi"].map((h) => (
+          {["#", "Soal", "Lokasi", "Sulit", "Status", "Aksi"].map((h) => (
             <div
               key={h}
               style={{
@@ -251,7 +264,7 @@ export default function AdminSoal() {
               key={s.id}
               style={{
                 display: "grid",
-                gridTemplateColumns: "40px 1fr 160px 80px 80px",
+                gridTemplateColumns: "40px 1fr 160px 80px 80px 140px",
                 gap: "16px",
                 padding: "14px 20px",
                 borderBottom: "1px solid #f2efe8",
@@ -277,13 +290,7 @@ export default function AdminSoal() {
               </div>
 
               {/* Lokasi */}
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#6b6860",
-                  overflow: "hidden",
-                }}
-              >
+              <div style={{ fontSize: "12px", color: "#6b6860" }}>
                 <div
                   style={{
                     overflow: "hidden",
@@ -308,8 +315,42 @@ export default function AdminSoal() {
               {/* Difficulty */}
               <DifficultyBadge level={s.difficulty} />
 
+              {/* Status */}
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: "700",
+                  padding: "3px 8px",
+                  borderRadius: "6px",
+                  background: s.is_published ? "#e4f5f0" : "#f2efe8",
+                  color: s.is_published ? "#1a8a6e" : "#6b6860",
+                }}
+              >
+                {s.is_published ? "Published" : "Draft"}
+              </span>
+
               {/* Aksi */}
               <div style={{ display: "flex", gap: "6px" }}>
+                <button
+                  onClick={() => handleTogglePublish(s.id, s.is_published)}
+                  style={{
+                    padding: "0 8px",
+                    height: "30px",
+                    borderRadius: "8px",
+                    border: `1px solid ${
+                      s.is_published ? "#e2ddd5" : "#1a8a6e"
+                    }`,
+                    background: s.is_published ? "white" : "#e4f5f0",
+                    cursor: "pointer",
+                    fontSize: "11px",
+                    fontWeight: "600",
+                    color: s.is_published ? "#6b6860" : "#1a8a6e",
+                    fontFamily: "inherit",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {s.is_published ? "Unpublish" : "Publish"}
+                </button>
                 <button
                   onClick={() => navigate(`/admin/soal/edit/${s.id}`)}
                   style={{

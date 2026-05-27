@@ -72,7 +72,6 @@ function Modal({ title, onClose, onSubmit, loading, error, children }) {
             <X size={18} />
           </button>
         </div>
-
         {error && (
           <div
             style={{
@@ -88,9 +87,7 @@ function Modal({ title, onClose, onSubmit, loading, error, children }) {
             {error}
           </div>
         )}
-
         {children}
-
         <div
           style={{
             display: "flex",
@@ -139,12 +136,9 @@ function Modal({ title, onClose, onSubmit, loading, error, children }) {
 }
 
 export default function AdminStruktur() {
-  // Stack navigasi: [{level, item}]
   const [stack, setStack] = useState([{ level: "jenjang", item: null }]);
   const [items, setItems] = useState({});
   const [loadingLevel, setLoadingLevel] = useState({});
-
-  // Modal
   const [modal, setModal] = useState(null);
   const [modalForm, setModalForm] = useState({ nama: "", urutan: "" });
   const [modalLoading, setModalLoading] = useState(false);
@@ -152,42 +146,49 @@ export default function AdminStruktur() {
 
   const currentStack = stack[stack.length - 1];
   const currentLevel = LEVELS.find((l) => l.key === currentStack.level);
-  const currentItems =
-    items[currentStack.level + (currentStack.item?.id || "")] || [];
+  const cacheKey = currentStack.level + (currentStack.item?.id || "");
+  const currentItems = items[cacheKey] || [];
+  const isLoading = loadingLevel[cacheKey];
+  const isLastLevel =
+    LEVELS.findIndex((l) => l.key === currentStack.level) === LEVELS.length - 1;
 
   const fetchItems = (level, parentItem) => {
-    const cacheKey = level + (parentItem?.id || "");
-    if (items[cacheKey]) return;
-
+    const key = level + (parentItem?.id || "");
+    if (items[key] !== undefined) return;
     const levelInfo = LEVELS.find((l) => l.key === level);
-    setLoadingLevel((l) => ({ ...l, [cacheKey]: true }));
-
-    let url = `/admin/struktur`;
+    setLoadingLevel((l) => ({ ...l, [key]: true }));
     api
-      .get(url)
+      .get("/admin/struktur")
       .then((data) => {
         const allItems = data[level] || [];
         const filtered =
           levelInfo.parentKey && parentItem
             ? allItems.filter((i) => i[levelInfo.parentIdCol] == parentItem.id)
             : allItems;
-        setItems((prev) => ({ ...prev, [cacheKey]: filtered }));
+        setItems((prev) => ({ ...prev, [key]: filtered }));
       })
       .catch(() => {})
-      .finally(() => setLoadingLevel((l) => ({ ...l, [cacheKey]: false })));
+      .finally(() => setLoadingLevel((l) => ({ ...l, [key]: false })));
   };
 
-  // Load level pertama saat mount
   useState(() => {
     fetchItems("jenjang", null);
   });
 
-  const handleDrillDown = (item) => {
-    const nextLevelIndex =
-      LEVELS.findIndex((l) => l.key === currentStack.level) + 1;
-    if (nextLevelIndex >= LEVELS.length) return;
+  const invalidateCache = (level, parentItem) => {
+    const key = level + (parentItem?.id || "");
+    setItems((prev) => {
+      const n = { ...prev };
+      delete n[key];
+      return n;
+    });
+    fetchItems(level, parentItem);
+  };
 
-    const nextLevel = LEVELS[nextLevelIndex].key;
+  const handleDrillDown = (item) => {
+    const nextIndex = LEVELS.findIndex((l) => l.key === currentStack.level) + 1;
+    if (nextIndex >= LEVELS.length) return;
+    const nextLevel = LEVELS[nextIndex].key;
     const newStack = [...stack, { level: nextLevel, item }];
     setStack(newStack);
     fetchItems(nextLevel, item);
@@ -202,14 +203,23 @@ export default function AdminStruktur() {
     setStack((s) => s.slice(0, index + 1));
   };
 
-  const invalidateCache = (level, parentItem) => {
-    const cacheKey = level + (parentItem?.id || "");
-    setItems((prev) => {
-      const n = { ...prev };
-      delete n[cacheKey];
-      return n;
-    });
-    fetchItems(level, parentItem);
+  const handleTogglePublish = async (e, item) => {
+    e.stopPropagation();
+    try {
+      const res = await api.put(
+        `/admin/publish/${currentStack.level}?id=${item.id}`
+      );
+      setItems((prev) => ({
+        ...prev,
+        [cacheKey]: prev[cacheKey]?.map((i) =>
+          i.id === item.id
+            ? { ...i, is_published: res.is_published ? 1 : 0 }
+            : i
+        ),
+      }));
+    } catch {
+      alert("Gagal mengubah status publish");
+    }
   };
 
   const openTambah = () => {
@@ -307,14 +317,8 @@ export default function AdminStruktur() {
     }
   };
 
-  const isLastLevel =
-    LEVELS.findIndex((l) => l.key === currentStack.level) === LEVELS.length - 1;
-  const isLoading =
-    loadingLevel[currentStack.level + (currentStack.item?.id || "")];
-
   return (
     <div>
-      {/* Header */}
       <div style={{ marginBottom: "28px" }}>
         <h1
           style={{
@@ -332,7 +336,7 @@ export default function AdminStruktur() {
         </p>
       </div>
 
-      {/* Breadcrumb navigasi */}
+      {/* Breadcrumb */}
       <div
         style={{
           display: "flex",
@@ -521,10 +525,45 @@ export default function AdminStruktur() {
 
               {!isLastLevel && <ChevronRight size={16} color="#b4b2a9" />}
 
+              {/* Publish badge */}
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: "700",
+                  padding: "3px 8px",
+                  borderRadius: "6px",
+                  flexShrink: 0,
+                  background: item.is_published ? "#e4f5f0" : "#f2efe8",
+                  color: item.is_published ? "#1a8a6e" : "#6b6860",
+                }}
+              >
+                {item.is_published ? "Published" : "Draft"}
+              </span>
+
               <div
                 style={{ display: "flex", gap: "6px" }}
                 onClick={(e) => e.stopPropagation()}
               >
+                <button
+                  onClick={(e) => handleTogglePublish(e, item)}
+                  style={{
+                    padding: "0 10px",
+                    height: "30px",
+                    borderRadius: "8px",
+                    border: `1px solid ${
+                      item.is_published ? "#e2ddd5" : "#1a8a6e"
+                    }`,
+                    background: item.is_published ? "white" : "#e4f5f0",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    color: item.is_published ? "#6b6860" : "#1a8a6e",
+                    fontFamily: "inherit",
+                    flexShrink: 0,
+                  }}
+                >
+                  {item.is_published ? "Unpublish" : "Publish"}
+                </button>
                 <button
                   onClick={() => openEdit(item)}
                   style={{
