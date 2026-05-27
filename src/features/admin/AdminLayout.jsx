@@ -7,6 +7,9 @@ import {
   FolderTree,
   LogOut,
   ChevronRight,
+  ChevronLeft,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { useAuthStore } from "../auth/authStore";
 
@@ -16,7 +19,7 @@ const MENU = [
   { to: "/admin/struktur", label: "Kelola Struktur", icon: FolderTree },
 ];
 
-function SidebarLink({ to, label, icon: Icon, end }) {
+function SidebarLink({ to, label, icon: Icon, end, collapsed }) {
   const [hovered, setHovered] = useState(false);
   return (
     <NavLink
@@ -24,16 +27,18 @@ function SidebarLink({ to, label, icon: Icon, end }) {
       end={end}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      title={collapsed ? label : undefined}
       style={({ isActive }) => ({
         display: "flex",
         alignItems: "center",
-        gap: "10px",
-        padding: "10px 12px",
+        gap: collapsed ? 0 : "10px",
+        padding: "10px",
         borderRadius: "10px",
         textDecoration: "none",
         fontSize: "14px",
         fontWeight: "500",
         transition: "all .15s",
+        justifyContent: collapsed ? "center" : "flex-start",
         background: isActive
           ? "rgba(232,76,43,0.15)"
           : hovered
@@ -46,8 +51,8 @@ function SidebarLink({ to, label, icon: Icon, end }) {
           : "rgba(255,255,255,0.6)",
       })}
     >
-      <Icon size={17} />
-      {label}
+      <Icon size={18} />
+      {!collapsed && label}
     </NavLink>
   );
 }
@@ -56,6 +61,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuthStore();
+  const [collapsed, setCollapsed] = useState(false);
   const [logoutHovered, setLogoutHovered] = useState(false);
   const [backHovered, setBackHovered] = useState(false);
 
@@ -80,7 +86,7 @@ export default function AdminLayout() {
       {/* Sidebar */}
       <aside
         style={{
-          width: "240px",
+          width: collapsed ? "64px" : "240px",
           background: "#0f0e17",
           display: "flex",
           flexDirection: "column",
@@ -88,35 +94,48 @@ export default function AdminLayout() {
           position: "sticky",
           top: 0,
           height: "100vh",
+          transition: "width .2s ease",
+          overflow: "hidden",
         }}
       >
         {/* Logo */}
         <div
           style={{
-            padding: "24px 20px",
+            padding: collapsed ? "20px 12px" : "24px 20px",
             borderBottom: "1px solid rgba(255,255,255,0.08)",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            justifyContent: collapsed ? "center" : "flex-start",
+            transition: "padding .2s",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div
-              style={{
-                width: "34px",
-                height: "34px",
-                background: "#e84c2b",
-                borderRadius: "10px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontWeight: "800",
-                fontSize: "13px",
-              }}
-            >
-              GS
-            </div>
+          <div
+            style={{
+              width: "34px",
+              height: "34px",
+              background: "#e84c2b",
+              borderRadius: "10px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
+              fontWeight: "800",
+              fontSize: "13px",
+              flexShrink: 0,
+            }}
+          >
+            GS
+          </div>
+          {!collapsed && (
             <div>
               <div
-                style={{ color: "white", fontWeight: "700", fontSize: "15px" }}
+                style={{
+                  color: "white",
+                  fontWeight: "700",
+                  fontSize: "15px",
+                  whiteSpace: "nowrap",
+                }}
               >
                 Gudang Soal
               </div>
@@ -130,91 +149,95 @@ export default function AdminLayout() {
                 Admin Panel
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Menu */}
         <nav
           style={{
             flex: 1,
-            padding: "16px 12px",
+            padding: "16px 8px",
             display: "flex",
             flexDirection: "column",
             gap: "4px",
           }}
         >
           {MENU.map((item) => (
-            <SidebarLink key={item.to} {...item} />
+            <SidebarLink key={item.to} {...item} collapsed={collapsed} />
           ))}
         </nav>
 
         {/* User + Logout */}
         <div
           style={{
-            padding: "16px 12px",
+            padding: "16px 8px",
             borderTop: "1px solid rgba(255,255,255,0.08)",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "10px 12px",
-              marginBottom: "4px",
-            }}
-          >
+          {!collapsed && (
             <div
               style={{
-                width: "30px",
-                height: "30px",
-                borderRadius: "8px",
-                background: "#e84c2b",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontWeight: "700",
-                fontSize: "13px",
-                flexShrink: 0,
+                gap: "10px",
+                padding: "10px 8px",
+                marginBottom: "4px",
               }}
             >
-              {user?.name?.[0]?.toUpperCase() || "A"}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
               <div
                 style={{
+                  width: "30px",
+                  height: "30px",
+                  borderRadius: "8px",
+                  background: "#e84c2b",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   color: "white",
+                  fontWeight: "700",
                   fontSize: "13px",
-                  fontWeight: "600",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
+                  flexShrink: 0,
                 }}
               >
-                {user?.name}
+                {user?.name?.[0]?.toUpperCase() || "A"}
               </div>
-              <div
-                style={{
-                  color: "rgba(255,255,255,0.4)",
-                  fontSize: "11px",
-                  marginTop: "1px",
-                }}
-              >
-                Administrator
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  style={{
+                    color: "white",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {user?.name}
+                </div>
+                <div
+                  style={{
+                    color: "rgba(255,255,255,0.4)",
+                    fontSize: "11px",
+                    marginTop: "1px",
+                  }}
+                >
+                  Administrator
+                </div>
               </div>
             </div>
-          </div>
+          )}
           <button
             onClick={handleLogout}
             onMouseEnter={() => setLogoutHovered(true)}
             onMouseLeave={() => setLogoutHovered(false)}
+            title={collapsed ? "Keluar" : undefined}
             style={{
               width: "100%",
               display: "flex",
               alignItems: "center",
-              gap: "10px",
-              padding: "10px 12px",
+              justifyContent: collapsed ? "center" : "flex-start",
+              gap: collapsed ? 0 : "10px",
+              padding: "10px",
               borderRadius: "10px",
               border: "none",
               background: logoutHovered ? "rgba(232,76,43,0.15)" : "none",
@@ -228,7 +251,7 @@ export default function AdminLayout() {
             }}
           >
             <LogOut size={17} />
-            Keluar
+            {!collapsed && "Keluar"}
           </button>
         </div>
       </aside>
@@ -247,21 +270,58 @@ export default function AdminLayout() {
             justifyContent: "space-between",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              fontSize: "13px",
-              color: "#6b6860",
-            }}
-          >
-            <span>Admin</span>
-            <ChevronRight size={14} />
-            <span style={{ color: "#0f0e17", fontWeight: "500" }}>
-              {getPageTitle()}
-            </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            {/* Toggle button */}
+            <button
+              onClick={() => setCollapsed((c) => !c)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "32px",
+                height: "32px",
+                borderRadius: "8px",
+                border: "1px solid #e2ddd5",
+                background: "white",
+                cursor: "pointer",
+                color: "#6b6860",
+                transition: "all .15s",
+                flexShrink: 0,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#f2efe8";
+                e.currentTarget.style.color = "#0f0e17";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "white";
+                e.currentTarget.style.color = "#6b6860";
+              }}
+              title={collapsed ? "Buka sidebar" : "Tutup sidebar"}
+            >
+              {collapsed ? (
+                <PanelLeftOpen size={15} />
+              ) : (
+                <PanelLeftClose size={15} />
+              )}
+            </button>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                fontSize: "13px",
+                color: "#6b6860",
+              }}
+            >
+              <span>Admin</span>
+              <ChevronRight size={14} />
+              <span style={{ color: "#0f0e17", fontWeight: "500" }}>
+                {getPageTitle()}
+              </span>
+            </div>
           </div>
+
           <a
             href="/home"
             onMouseEnter={() => setBackHovered(true)}

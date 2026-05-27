@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { ChevronRight, Plus, Pencil, Trash2, X, ArrowLeft } from "lucide-react";
 import api from "../../lib/api";
+import ToggleSwitch from "../../components/ToggleSwitch";
 
 const LEVELS = [
   { key: "jenjang", label: "Jenjang", parentKey: null, parentIdCol: null },
@@ -139,6 +140,7 @@ export default function AdminStruktur() {
   const [stack, setStack] = useState([{ level: "jenjang", item: null }]);
   const [items, setItems] = useState({});
   const [loadingLevel, setLoadingLevel] = useState({});
+  const [publishLoading, setPublishLoading] = useState({});
   const [modal, setModal] = useState(null);
   const [modalForm, setModalForm] = useState({ nama: "", urutan: "" });
   const [modalLoading, setModalLoading] = useState(false);
@@ -154,7 +156,6 @@ export default function AdminStruktur() {
 
   const fetchItems = (level, parentItem) => {
     const key = level + (parentItem?.id || "");
-    if (items[key] !== undefined) return;
     const levelInfo = LEVELS.find((l) => l.key === level);
     setLoadingLevel((l) => ({ ...l, [key]: true }));
     api
@@ -189,8 +190,7 @@ export default function AdminStruktur() {
     const nextIndex = LEVELS.findIndex((l) => l.key === currentStack.level) + 1;
     if (nextIndex >= LEVELS.length) return;
     const nextLevel = LEVELS[nextIndex].key;
-    const newStack = [...stack, { level: nextLevel, item }];
-    setStack(newStack);
+    setStack([...stack, { level: nextLevel, item }]);
     fetchItems(nextLevel, item);
   };
 
@@ -205,6 +205,7 @@ export default function AdminStruktur() {
 
   const handleTogglePublish = async (e, item) => {
     e.stopPropagation();
+    setPublishLoading((p) => ({ ...p, [item.id]: true }));
     try {
       const res = await api.put(
         `/admin/publish/${currentStack.level}?id=${item.id}`
@@ -219,6 +220,8 @@ export default function AdminStruktur() {
       }));
     } catch {
       alert("Gagal mengubah status publish");
+    } finally {
+      setPublishLoading((p) => ({ ...p, [item.id]: false }));
     }
   };
 
@@ -262,10 +265,16 @@ export default function AdminStruktur() {
         payload.urutan = parseInt(modalForm.urutan) || 0;
       }
       await api.post(`/admin/struktur/${currentStack.level}`, payload);
-      invalidateCache(
-        currentStack.level,
-        stack[stack.length - 2]?.item || null
-      );
+
+      // Clear cache lalu force fetch ulang
+      const parentItem = stack[stack.length - 2]?.item || null;
+      const key = currentStack.level + (parentItem?.id || "");
+      setItems((prev) => {
+        const n = { ...prev };
+        delete n[key];
+        return n;
+      });
+
       closeModal();
     } catch (err) {
       setModalError(err.error || "Gagal menambahkan");
@@ -525,45 +534,15 @@ export default function AdminStruktur() {
 
               {!isLastLevel && <ChevronRight size={16} color="#b4b2a9" />}
 
-              {/* Publish badge */}
-              <span
-                style={{
-                  fontSize: "11px",
-                  fontWeight: "700",
-                  padding: "3px 8px",
-                  borderRadius: "6px",
-                  flexShrink: 0,
-                  background: item.is_published ? "#e4f5f0" : "#f2efe8",
-                  color: item.is_published ? "#1a8a6e" : "#6b6860",
-                }}
-              >
-                {item.is_published ? "Published" : "Draft"}
-              </span>
-
               <div
-                style={{ display: "flex", gap: "6px" }}
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <button
-                  onClick={(e) => handleTogglePublish(e, item)}
-                  style={{
-                    padding: "0 10px",
-                    height: "30px",
-                    borderRadius: "8px",
-                    border: `1px solid ${
-                      item.is_published ? "#e2ddd5" : "#1a8a6e"
-                    }`,
-                    background: item.is_published ? "white" : "#e4f5f0",
-                    cursor: "pointer",
-                    fontSize: "12px",
-                    fontWeight: "600",
-                    color: item.is_published ? "#6b6860" : "#1a8a6e",
-                    fontFamily: "inherit",
-                    flexShrink: 0,
-                  }}
-                >
-                  {item.is_published ? "Unpublish" : "Publish"}
-                </button>
+                <ToggleSwitch
+                  checked={item.is_published == 1}
+                  onChange={(e) => handleTogglePublish(e, item)}
+                  loading={publishLoading[item.id]}
+                />
                 <button
                   onClick={() => openEdit(item)}
                   style={{

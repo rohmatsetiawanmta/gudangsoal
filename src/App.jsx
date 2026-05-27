@@ -61,7 +61,7 @@ export default function App() {
           path="/browse/:jenjangSlug/:subjenjangSlug/:mapelSlug/:topikSlug/:subtopikSlug"
           element={<BrowseSoal />}
         />
-        <Route path="/soal/:id" element={<SoalDetail />} />
+        <Route path="/soal/:kode" element={<SoalDetail />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" />} />

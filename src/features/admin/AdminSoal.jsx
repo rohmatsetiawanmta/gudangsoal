@@ -10,6 +10,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import api from "../../lib/api";
+import ToggleSwitch from "../../components/ToggleSwitch";
 
 function DifficultyBadge({ level }) {
   const map = {
@@ -45,6 +46,7 @@ export default function AdminSoal() {
   const [total, setTotal] = useState(0);
   const [deleteId, setDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [publishLoading, setPublishLoading] = useState({});
 
   const limit = 20;
 
@@ -71,15 +73,20 @@ export default function AdminSoal() {
   };
 
   const handleTogglePublish = async (id, currentStatus) => {
+    setPublishLoading((p) => ({ ...p, [id]: true }));
     try {
       await api.put(`/admin/publish/soal?id=${id}`);
       setSoal((prev) =>
         prev.map((s) =>
-          s.id === id ? { ...s, is_published: currentStatus ? 0 : 1 } : s
+          s.id === id
+            ? { ...s, is_published: currentStatus == 1 ? "0" : "1" }
+            : s
         )
       );
     } catch {
       alert("Gagal mengubah status publish");
+    } finally {
+      setPublishLoading((p) => ({ ...p, [id]: false }));
     }
   };
 
@@ -217,27 +224,29 @@ export default function AdminSoal() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "40px 1fr 160px 80px 80px 140px",
+            gridTemplateColumns: "40px 70px 1fr 160px 80px 120px 70px",
             gap: "16px",
             padding: "12px 20px",
             background: "#f2efe8",
             borderBottom: "1px solid #e2ddd5",
           }}
         >
-          {["#", "Soal", "Lokasi", "Sulit", "Status", "Aksi"].map((h) => (
-            <div
-              key={h}
-              style={{
-                fontSize: "12px",
-                fontWeight: "700",
-                color: "#6b6860",
-                textTransform: "uppercase",
-                letterSpacing: ".06em",
-              }}
-            >
-              {h}
-            </div>
-          ))}
+          {["#", "Kode", "Soal", "Lokasi", "Sulit", "Published", "Aksi"].map(
+            (h) => (
+              <div
+                key={h}
+                style={{
+                  fontSize: "12px",
+                  fontWeight: "700",
+                  color: "#6b6860",
+                  textTransform: "uppercase",
+                  letterSpacing: ".06em",
+                }}
+              >
+                {h}
+              </div>
+            )
+          )}
         </div>
 
         {/* Loading */}
@@ -264,19 +273,27 @@ export default function AdminSoal() {
               key={s.id}
               style={{
                 display: "grid",
-                gridTemplateColumns: "40px 1fr 160px 80px 80px 140px",
+                gridTemplateColumns: "40px 70px 1fr 160px 80px 120px 70px",
                 gap: "16px",
                 padding: "14px 20px",
                 borderBottom: "1px solid #f2efe8",
                 alignItems: "center",
               }}
             >
-              {/* No */}
               <div style={{ fontSize: "13px", color: "#6b6860" }}>
                 {(page - 1) * limit + i + 1}
               </div>
-
-              {/* Body */}
+              <div
+                style={{
+                  fontSize: "12px",
+                  fontWeight: "700",
+                  color: "#6b6860",
+                  fontFamily: "monospace",
+                  letterSpacing: ".05em",
+                }}
+              >
+                {s.kode || "—"}
+              </div>
               <div
                 style={{
                   fontSize: "14px",
@@ -288,8 +305,6 @@ export default function AdminSoal() {
               >
                 {s.body.replace(/\$[^$]+\$/g, "[math]")}
               </div>
-
-              {/* Lokasi */}
               <div style={{ fontSize: "12px", color: "#6b6860" }}>
                 <div
                   style={{
@@ -311,46 +326,13 @@ export default function AdminSoal() {
                   {s.mapel} — {s.subtopik}
                 </div>
               </div>
-
-              {/* Difficulty */}
               <DifficultyBadge level={s.difficulty} />
-
-              {/* Status */}
-              <span
-                style={{
-                  fontSize: "11px",
-                  fontWeight: "700",
-                  padding: "3px 8px",
-                  borderRadius: "6px",
-                  background: s.is_published ? "#e4f5f0" : "#f2efe8",
-                  color: s.is_published ? "#1a8a6e" : "#6b6860",
-                }}
-              >
-                {s.is_published ? "Published" : "Draft"}
-              </span>
-
-              {/* Aksi */}
+              <ToggleSwitch
+                checked={s.is_published == 1}
+                onChange={() => handleTogglePublish(s.id, s.is_published)}
+                loading={publishLoading[s.id]}
+              />
               <div style={{ display: "flex", gap: "6px" }}>
-                <button
-                  onClick={() => handleTogglePublish(s.id, s.is_published)}
-                  style={{
-                    padding: "0 8px",
-                    height: "30px",
-                    borderRadius: "8px",
-                    border: `1px solid ${
-                      s.is_published ? "#e2ddd5" : "#1a8a6e"
-                    }`,
-                    background: s.is_published ? "white" : "#e4f5f0",
-                    cursor: "pointer",
-                    fontSize: "11px",
-                    fontWeight: "600",
-                    color: s.is_published ? "#6b6860" : "#1a8a6e",
-                    fontFamily: "inherit",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {s.is_published ? "Unpublish" : "Publish"}
-                </button>
                 <button
                   onClick={() => navigate(`/admin/soal/edit/${s.id}`)}
                   style={{

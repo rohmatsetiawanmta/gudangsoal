@@ -1,17 +1,11 @@
 // src/features/soal/SoalDetail.jsx
 import { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Lock,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
+import { ChevronLeft, Lock, CheckCircle, XCircle } from "lucide-react";
 import MathRenderer from "../../components/MathRenderer";
 import Breadcrumb from "../../components/Breadcrumb";
-import { getSoalDetail } from "./soalApi";
 import Navbar from "../../components/Navbar";
+import { getSoalDetail } from "./soalApi";
 
 function DifficultyBadge({ level }) {
   const map = {
@@ -37,20 +31,9 @@ function DifficultyBadge({ level }) {
 }
 
 export default function SoalDetail() {
-  const { id } = useParams();
+  const { kode } = useParams();
   const { state } = useLocation();
   const navigate = useNavigate();
-
-  const jenjangNama = state?.jenjangNama || "";
-  const jenjangSlug = state?.jenjangSlug || "";
-  const subjenjangNama = state?.subjenjangNama || "";
-  const subjenjangSlug = state?.subjenjangSlug || "";
-  const mapelNama = state?.mapelNama || "";
-  const mapelSlug = state?.mapelSlug || "";
-  const topikNama = state?.topikNama || "";
-  const topikSlug = state?.topikSlug || "";
-  const subtopikNama = state?.subtopikNama || "";
-  const subtopikSlug = state?.subtopikSlug || "";
 
   const [soal, setSoal] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -58,14 +41,46 @@ export default function SoalDetail() {
   const [chosen, setChosen] = useState(null);
   const [submitted, setSubmitted] = useState(false);
 
+  // Breadcrumb — dari state kalau ada, dari API kalau tidak
+  const [breadcrumb, setBreadcrumb] = useState({
+    jenjangNama: state?.jenjangNama || "",
+    jenjangSlug: state?.jenjangSlug || "",
+    subjenjangNama: state?.subjenjangNama || "",
+    subjenjangSlug: state?.subjenjangSlug || "",
+    mapelNama: state?.mapelNama || "",
+    mapelSlug: state?.mapelSlug || "",
+    topikNama: state?.topikNama || "",
+    topikSlug: state?.topikSlug || "",
+    subtopikNama: state?.subtopikNama || "",
+    subtopikSlug: state?.subtopikSlug || "",
+  });
+
   useEffect(() => {
     setChosen(null);
     setSubmitted(false);
-    getSoalDetail(id)
-      .then((data) => setSoal(data))
+    setLoading(true);
+    getSoalDetail(kode)
+      .then((data) => {
+        setSoal(data);
+        // Kalau state kosong, isi dari response API
+        if (!state?.jenjangSlug) {
+          setBreadcrumb({
+            jenjangNama: data.jenjang_nama,
+            jenjangSlug: data.jenjang_slug,
+            subjenjangNama: data.subjenjang_nama,
+            subjenjangSlug: data.subjenjang_slug,
+            mapelNama: data.mapel_nama,
+            mapelSlug: data.mapel_slug,
+            topikNama: data.topik_nama,
+            topikSlug: data.topik_slug,
+            subtopikNama: data.subtopik_nama,
+            subtopikSlug: data.subtopik_slug,
+          });
+        }
+      })
       .catch(() => setError("Gagal memuat soal"))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [kode]);
 
   const handleSubmit = () => {
     if (!chosen) return;
@@ -98,6 +113,19 @@ export default function SoalDetail() {
     if (label === chosen && !isCorrect) return "#e84c2b";
     return "#6b6860";
   };
+
+  const {
+    jenjangNama,
+    jenjangSlug,
+    subjenjangNama,
+    subjenjangSlug,
+    mapelNama,
+    mapelSlug,
+    topikNama,
+    topikSlug,
+    subtopikNama,
+    subtopikSlug,
+  } = breadcrumb;
 
   const backUrl = `/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}/${topikSlug}/${subtopikSlug}`;
 
@@ -153,11 +181,12 @@ export default function SoalDetail() {
                 },
               },
               { label: subtopikNama, to: backUrl, state },
-              { label: `Soal #${id}` },
+              { label: `Soal #${kode}` },
             ]}
           />
         </div>
 
+        {/* Loading */}
         {loading && (
           <div style={{ display: "flex", gap: "24px" }}>
             {[1, 2].map((i) => (
@@ -176,6 +205,7 @@ export default function SoalDetail() {
           </div>
         )}
 
+        {/* Error */}
         {error && (
           <div
             style={{
@@ -220,17 +250,30 @@ export default function SoalDetail() {
                   justifyContent: "space-between",
                 }}
               >
-                <span
-                  style={{
-                    fontSize: "12px",
-                    fontWeight: "700",
-                    letterSpacing: ".08em",
-                    textTransform: "uppercase",
-                    color: "#6b6860",
-                  }}
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
                 >
-                  {mapelNama} — {topikNama}
-                </span>
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: "700",
+                      letterSpacing: ".08em",
+                      textTransform: "uppercase",
+                      color: "#6b6860",
+                    }}
+                  >
+                    {mapelNama || "Soal"}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      color: "#b4b2a9",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    #{kode}
+                  </span>
+                </div>
                 <DifficultyBadge level={soal.difficulty} />
               </div>
 
@@ -238,12 +281,11 @@ export default function SoalDetail() {
               <div
                 style={{
                   fontSize: "17px",
-                  lineHeight: "1.75",
                   color: "#0f0e17",
                   fontWeight: "500",
                 }}
               >
-                <MathRenderer text={soal.body} />
+                <MathRenderer text={soal.body} block />
               </div>
 
               {/* Pilihan jawaban */}
@@ -322,7 +364,7 @@ export default function SoalDetail() {
                 ))}
               </div>
 
-              {/* Tombol submit / reset */}
+              {/* Submit / Reset */}
               <div style={{ display: "flex", gap: "10px" }}>
                 {!submitted ? (
                   <button
@@ -365,7 +407,7 @@ export default function SoalDetail() {
                 )}
               </div>
 
-              {/* Navigasi soal */}
+              {/* Navigasi */}
               <div
                 style={{
                   display: "flex",
@@ -375,9 +417,7 @@ export default function SoalDetail() {
                 }}
               >
                 <button
-                  onClick={() =>
-                    navigate(`/soal/${parseInt(id) - 1}`, { state })
-                  }
+                  onClick={() => navigate(-1)}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -391,26 +431,7 @@ export default function SoalDetail() {
                     padding: 0,
                   }}
                 >
-                  <ChevronLeft size={16} /> Soal sebelumnya
-                </button>
-                <button
-                  onClick={() =>
-                    navigate(`/soal/${parseInt(id) + 1}`, { state })
-                  }
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "#6b6860",
-                    fontSize: "14px",
-                    fontFamily: "inherit",
-                    padding: 0,
-                  }}
-                >
-                  Soal berikutnya <ChevronRight size={16} />
+                  <ChevronLeft size={16} /> Kembali
                 </button>
               </div>
             </div>
@@ -532,14 +553,8 @@ export default function SoalDetail() {
                       >
                         Pembahasan
                       </div>
-                      <div
-                        style={{
-                          fontSize: "15px",
-                          lineHeight: "1.75",
-                          color: "#0f0e17",
-                        }}
-                      >
-                        <MathRenderer text={soal.explanation} />
+                      <div style={{ fontSize: "15px", color: "#0f0e17" }}>
+                        <MathRenderer text={soal.explanation} block />
                       </div>
                     </div>
                   ) : (

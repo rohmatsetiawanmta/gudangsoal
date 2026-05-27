@@ -23,6 +23,7 @@ function DifficultyBadge({ level }) {
         borderRadius: "6px",
         background: d.bg,
         color: d.color,
+        flexShrink: 0,
       }}
     >
       {d.label}
@@ -201,17 +202,17 @@ export default function BrowseSoal() {
               <div
                 key={s.id}
                 onClick={() =>
-                  navigate(`/soal/${s.id}`, {
+                  navigate(`/soal/${s.kode}`, {
                     state: { ...state, subtopikNama },
                   })
                 }
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "16px",
+                  gap: "14px",
                   background: "white",
                   borderRadius: "14px",
-                  padding: "18px 20px",
+                  padding: "16px 20px",
                   border: "1px solid #e2ddd5",
                   cursor: "pointer",
                   transition: "transform .15s, box-shadow .15s",
@@ -229,8 +230,8 @@ export default function BrowseSoal() {
                 {/* Nomor */}
                 <div
                   style={{
-                    width: "32px",
-                    height: "32px",
+                    width: "30px",
+                    height: "30px",
                     borderRadius: "8px",
                     background: "#f2efe8",
                     display: "flex",
@@ -245,7 +246,21 @@ export default function BrowseSoal() {
                   {i + 1}
                 </div>
 
-                {/* Body soal */}
+                {/* Kode */}
+                <div
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: "700",
+                    color: "#b4b2a9",
+                    fontFamily: "monospace",
+                    letterSpacing: ".05em",
+                    flexShrink: 0,
+                  }}
+                >
+                  {s.kode}
+                </div>
+
+                {/* Body soal — strip markdown & latex untuk preview */}
                 <div
                   style={{
                     flex: 1,
@@ -256,7 +271,9 @@ export default function BrowseSoal() {
                     whiteSpace: "nowrap",
                   }}
                 >
-                  <MathRenderer text={s.body} />
+                  {s.body
+                    .replace(/\$\$?[^$]+\$\$?/g, "[math]")
+                    .replace(/[*_~`#]/g, "")}
                 </div>
 
                 {/* Difficulty + arrow */}
@@ -264,7 +281,7 @@ export default function BrowseSoal() {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "12px",
+                    gap: "10px",
                     flexShrink: 0,
                   }}
                 >

@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Plus, Trash2, ChevronDown } from "lucide-react";
 import api from "../../lib/api";
+import MathRenderer from "../../components/MathRenderer";
+import MarkdownEditor from "../../components/MarkdownEditor";
 
 const LABELS = ["A", "B", "C", "D", "E"];
-
 const emptyOption = (label) => ({ label, text: "" });
-
 const defaultForm = {
   subtopik_id: "",
   body: "",
@@ -15,6 +15,12 @@ const defaultForm = {
   answer: "",
   explanation: "",
   difficulty: 1,
+};
+
+const DIFFICULTY_MAP = {
+  1: { label: "Easy", color: "#1a8a6e", bg: "#e4f5f0" },
+  2: { label: "Medium", color: "#854F0B", bg: "#faeeda" },
+  3: { label: "Hard", color: "#e84c2b", bg: "#fff3f0" },
 };
 
 function Select({ label, value, onChange, options, placeholder, disabled }) {
@@ -65,6 +71,197 @@ function Select({ label, value, onChange, options, placeholder, disabled }) {
   );
 }
 
+function PreviewPanel({ form }) {
+  const diff = DIFFICULTY_MAP[form.difficulty] || DIFFICULTY_MAP[1];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <span
+          style={{
+            fontSize: "12px",
+            fontWeight: "700",
+            letterSpacing: ".08em",
+            textTransform: "uppercase",
+            color: "#6b6860",
+          }}
+        >
+          Preview
+        </span>
+        <span
+          style={{
+            fontSize: "11px",
+            fontWeight: "700",
+            padding: "3px 8px",
+            borderRadius: "6px",
+            background: diff.bg,
+            color: diff.color,
+          }}
+        >
+          {diff.label}
+        </span>
+      </div>
+
+      {/* Soal */}
+      <div
+        style={{
+          background: "white",
+          borderRadius: "14px",
+          border: "1px solid #e2ddd5",
+          padding: "24px",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "12px",
+            fontWeight: "700",
+            letterSpacing: ".08em",
+            textTransform: "uppercase",
+            color: "#6b6860",
+            marginBottom: "12px",
+          }}
+        >
+          Soal
+        </div>
+        {form.body ? (
+          <div
+            style={{ fontSize: "15px", color: "#0f0e17", fontWeight: "500" }}
+          >
+            <MathRenderer text={form.body} block />
+          </div>
+        ) : (
+          <div
+            style={{ fontSize: "14px", color: "#b4b2a9", fontStyle: "italic" }}
+          >
+            Soal belum diisi...
+          </div>
+        )}
+      </div>
+
+      {/* Pilihan */}
+      <div
+        style={{
+          background: "white",
+          borderRadius: "14px",
+          border: "1px solid #e2ddd5",
+          padding: "24px",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "12px",
+            fontWeight: "700",
+            letterSpacing: ".08em",
+            textTransform: "uppercase",
+            color: "#6b6860",
+            marginBottom: "12px",
+          }}
+        >
+          Pilihan Jawaban
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          {form.options.map((opt) => {
+            const isAnswer = form.answer === opt.label;
+            return (
+              <div
+                key={opt.label}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: "10px 14px",
+                  borderRadius: "10px",
+                  border: isAnswer ? "2px solid #1a8a6e" : "1px solid #e2ddd5",
+                  background: isAnswer ? "#e4f5f0" : "white",
+                }}
+              >
+                <span
+                  style={{
+                    width: "26px",
+                    height: "26px",
+                    borderRadius: "7px",
+                    border: "2px solid currentColor",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "12px",
+                    fontWeight: "700",
+                    flexShrink: 0,
+                    color: isAnswer ? "#1a8a6e" : "#6b6860",
+                  }}
+                >
+                  {opt.label}
+                </span>
+                <span style={{ fontSize: "14px", color: "#0f0e17", flex: 1 }}>
+                  {opt.text ? (
+                    <MathRenderer text={opt.text} />
+                  ) : (
+                    <span style={{ color: "#b4b2a9", fontStyle: "italic" }}>
+                      Pilihan {opt.label} belum diisi...
+                    </span>
+                  )}
+                </span>
+                {isAnswer && (
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: "700",
+                      color: "#1a8a6e",
+                      flexShrink: 0,
+                    }}
+                  >
+                    ✓ Benar
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Pembahasan */}
+      <div
+        style={{
+          background: "white",
+          borderRadius: "14px",
+          border: "1px solid #e2ddd5",
+          padding: "24px",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "12px",
+            fontWeight: "700",
+            letterSpacing: ".08em",
+            textTransform: "uppercase",
+            color: "#6b6860",
+            marginBottom: "12px",
+          }}
+        >
+          Pembahasan
+        </div>
+        {form.explanation ? (
+          <div style={{ fontSize: "14px", color: "#0f0e17" }}>
+            <MathRenderer text={form.explanation} block />
+          </div>
+        ) : (
+          <div
+            style={{ fontSize: "14px", color: "#b4b2a9", fontStyle: "italic" }}
+          >
+            Pembahasan belum diisi...
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminSoalForm() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -88,7 +285,6 @@ export default function AdminSoalForm() {
   const [loadingStruktur, setLoadingStruktur] = useState(true);
   const [error, setError] = useState("");
 
-  // Load struktur
   useEffect(() => {
     api
       .get("/admin/struktur")
@@ -97,9 +293,8 @@ export default function AdminSoalForm() {
       .finally(() => setLoadingStruktur(false));
   }, []);
 
-  // Load soal jika edit
   useEffect(() => {
-    if (!isEdit) return;
+    if (!isEdit || !struktur.subtopik.length) return;
     api
       .get(`/admin/soal/detail?id=${id}`)
       .then((data) => {
@@ -111,7 +306,6 @@ export default function AdminSoalForm() {
           explanation: data.explanation || "",
           difficulty: data.difficulty,
         });
-        // Resolve parent chain dari subtopik_id
         const subtopik = struktur.subtopik.find(
           (s) => s.id == data.subtopik_id
         );
@@ -123,14 +317,13 @@ export default function AdminSoalForm() {
               const sj = struktur.subjenjang.find(
                 (s) => s.id == mapel.subjenjang_id
               );
-              if (sj) {
+              if (sj)
                 setSelected({
                   jenjang: sj.jenjang_id,
                   subjenjang: sj.id,
                   mapel: mapel.id,
                   topik: topik.id,
                 });
-              }
             }
           }
         }
@@ -138,7 +331,6 @@ export default function AdminSoalForm() {
       .catch(() => setError("Gagal memuat soal"));
   }, [id, struktur.subtopik.length]);
 
-  // Filtered options
   const filteredSubjenjang = struktur.subjenjang.filter(
     (s) => s.jenjang_id == selected.jenjang
   );
@@ -181,7 +373,6 @@ export default function AdminSoalForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
     if (!form.subtopik_id) {
       setError("Pilih subtopik terlebih dahulu");
       return;
@@ -215,8 +406,7 @@ export default function AdminSoalForm() {
   };
 
   return (
-    <div style={{ maxWidth: "720px" }}>
-      {/* Header */}
+    <div>
       <div style={{ marginBottom: "32px" }}>
         <h1
           style={{
@@ -252,463 +442,468 @@ export default function AdminSoalForm() {
         </div>
       )}
 
-      <form
-        onSubmit={handleSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: "24px" }}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "24px",
+          alignItems: "start",
+        }}
       >
-        {/* Lokasi soal */}
-        <div
-          style={{
-            background: "white",
-            borderRadius: "14px",
-            border: "1px solid #e2ddd5",
-            padding: "24px",
-          }}
+        {/* Kiri — Form */}
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "flex", flexDirection: "column", gap: "20px" }}
         >
+          {/* Lokasi soal */}
           <div
             style={{
-              fontSize: "14px",
-              fontWeight: "700",
-              color: "#0f0e17",
-              marginBottom: "16px",
-            }}
-          >
-            Lokasi Soal
-          </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "12px",
-            }}
-          >
-            <Select
-              label="Jenjang"
-              value={selected.jenjang}
-              onChange={(v) =>
-                setSelected({
-                  jenjang: v,
-                  subjenjang: "",
-                  mapel: "",
-                  topik: "",
-                })
-              }
-              options={struktur.jenjang.map((j) => ({
-                value: j.id,
-                label: j.nama,
-              }))}
-              placeholder="Pilih jenjang"
-              disabled={loadingStruktur}
-            />
-            <Select
-              label="Subjenjang"
-              value={selected.subjenjang}
-              onChange={(v) =>
-                setSelected((s) => ({
-                  ...s,
-                  subjenjang: v,
-                  mapel: "",
-                  topik: "",
-                }))
-              }
-              options={filteredSubjenjang.map((j) => ({
-                value: j.id,
-                label: j.nama,
-              }))}
-              placeholder="Pilih subjenjang"
-              disabled={!selected.jenjang}
-            />
-            <Select
-              label="Mata Pelajaran"
-              value={selected.mapel}
-              onChange={(v) =>
-                setSelected((s) => ({ ...s, mapel: v, topik: "" }))
-              }
-              options={filteredMapel.map((m) => ({
-                value: m.id,
-                label: m.nama,
-              }))}
-              placeholder="Pilih mapel"
-              disabled={!selected.subjenjang}
-            />
-            <Select
-              label="Topik"
-              value={selected.topik}
-              onChange={(v) => setSelected((s) => ({ ...s, topik: v }))}
-              options={filteredTopik.map((t) => ({
-                value: t.id,
-                label: t.nama,
-              }))}
-              placeholder="Pilih topik"
-              disabled={!selected.mapel}
-            />
-            <div style={{ gridColumn: "1 / -1" }}>
-              <Select
-                label="Subtopik"
-                value={form.subtopik_id}
-                onChange={(v) => setForm((f) => ({ ...f, subtopik_id: v }))}
-                options={filteredSubtopik.map((s) => ({
-                  value: s.id,
-                  label: s.nama,
-                }))}
-                placeholder="Pilih subtopik"
-                disabled={!selected.topik}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Body soal */}
-        <div
-          style={{
-            background: "white",
-            borderRadius: "14px",
-            border: "1px solid #e2ddd5",
-            padding: "24px",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "14px",
-              fontWeight: "700",
-              color: "#0f0e17",
-              marginBottom: "16px",
-            }}
-          >
-            Soal
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label
-              style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}
-            >
-              Teks Soal
-            </label>
-            <textarea
-              value={form.body}
-              onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))}
-              placeholder="Tulis soal di sini... Gunakan $...$ untuk LaTeX inline, $$...$$ untuk display"
-              rows={4}
-              style={{
-                padding: "12px 14px",
-                borderRadius: "10px",
-                border: "1px solid #e2ddd5",
-                fontSize: "14px",
-                outline: "none",
-                fontFamily: "inherit",
-                color: "#0f0e17",
-                resize: "vertical",
-                lineHeight: "1.6",
-              }}
-              onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
-              onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
-            />
-            <p style={{ fontSize: "12px", color: "#b4b2a9" }}>
-              Gunakan $x^2$ untuk rumus inline, $$\frac{"{a}{b}"}$$ untuk
-              display
-            </p>
-          </div>
-
-          {/* Difficulty */}
-          <div style={{ marginTop: "16px" }}>
-            <label
-              style={{
-                fontSize: "13px",
-                fontWeight: "600",
-                color: "#0f0e17",
-                display: "block",
-                marginBottom: "8px",
-              }}
-            >
-              Tingkat Kesulitan
-            </label>
-            <div style={{ display: "flex", gap: "8px" }}>
-              {[
-                { value: 1, label: "Easy", color: "#1a8a6e" },
-                { value: 2, label: "Medium", color: "#f5a623" },
-                { value: 3, label: "Hard", color: "#e84c2b" },
-              ].map((d) => (
-                <button
-                  key={d.value}
-                  type="button"
-                  onClick={() =>
-                    setForm((f) => ({ ...f, difficulty: d.value }))
-                  }
-                  style={{
-                    padding: "8px 16px",
-                    borderRadius: "10px",
-                    border: `2px solid ${
-                      form.difficulty === d.value ? d.color : "#e2ddd5"
-                    }`,
-                    background:
-                      form.difficulty === d.value ? d.color + "18" : "white",
-                    color: form.difficulty === d.value ? d.color : "#6b6860",
-                    fontWeight: "700",
-                    fontSize: "13px",
-                    cursor: "pointer",
-                    fontFamily: "inherit",
-                    transition: "all .15s",
-                  }}
-                >
-                  {d.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Pilihan jawaban */}
-        <div
-          style={{
-            background: "white",
-            borderRadius: "14px",
-            border: "1px solid #e2ddd5",
-            padding: "24px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: "16px",
+              background: "white",
+              borderRadius: "14px",
+              border: "1px solid #e2ddd5",
+              padding: "24px",
             }}
           >
             <div
-              style={{ fontSize: "14px", fontWeight: "700", color: "#0f0e17" }}
+              style={{
+                fontSize: "14px",
+                fontWeight: "700",
+                color: "#0f0e17",
+                marginBottom: "16px",
+              }}
             >
-              Pilihan Jawaban
+              Lokasi Soal
             </div>
-            {form.options.length < 5 && (
-              <button
-                type="button"
-                onClick={addOption}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  color: "#e84c2b",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                }}
-              >
-                <Plus size={14} /> Tambah Pilihan
-              </button>
-            )}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "12px",
+              }}
+            >
+              <Select
+                label="Jenjang"
+                value={selected.jenjang}
+                onChange={(v) =>
+                  setSelected({
+                    jenjang: v,
+                    subjenjang: "",
+                    mapel: "",
+                    topik: "",
+                  })
+                }
+                options={struktur.jenjang.map((j) => ({
+                  value: j.id,
+                  label: j.nama,
+                }))}
+                placeholder="Pilih jenjang"
+                disabled={loadingStruktur}
+              />
+              <Select
+                label="Subjenjang"
+                value={selected.subjenjang}
+                onChange={(v) =>
+                  setSelected((s) => ({
+                    ...s,
+                    subjenjang: v,
+                    mapel: "",
+                    topik: "",
+                  }))
+                }
+                options={filteredSubjenjang.map((j) => ({
+                  value: j.id,
+                  label: j.nama,
+                }))}
+                placeholder="Pilih subjenjang"
+                disabled={!selected.jenjang}
+              />
+              <Select
+                label="Mata Pelajaran"
+                value={selected.mapel}
+                onChange={(v) =>
+                  setSelected((s) => ({ ...s, mapel: v, topik: "" }))
+                }
+                options={filteredMapel.map((m) => ({
+                  value: m.id,
+                  label: m.nama,
+                }))}
+                placeholder="Pilih mapel"
+                disabled={!selected.subjenjang}
+              />
+              <Select
+                label="Topik"
+                value={selected.topik}
+                onChange={(v) => setSelected((s) => ({ ...s, topik: v }))}
+                options={filteredTopik.map((t) => ({
+                  value: t.id,
+                  label: t.nama,
+                }))}
+                placeholder="Pilih topik"
+                disabled={!selected.mapel}
+              />
+              <div style={{ gridColumn: "1 / -1" }}>
+                <Select
+                  label="Subtopik"
+                  value={form.subtopik_id}
+                  onChange={(v) => setForm((f) => ({ ...f, subtopik_id: v }))}
+                  options={filteredSubtopik.map((s) => ({
+                    value: s.id,
+                    label: s.nama,
+                  }))}
+                  placeholder="Pilih subtopik"
+                  disabled={!selected.topik}
+                />
+              </div>
+            </div>
           </div>
 
+          {/* Body soal */}
           <div
             style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "10px",
-              marginBottom: "16px",
+              background: "white",
+              borderRadius: "14px",
+              border: "1px solid #e2ddd5",
+              padding: "24px",
             }}
           >
-            {form.options.map((opt, i) => (
+            <div
+              style={{
+                fontSize: "14px",
+                fontWeight: "700",
+                color: "#0f0e17",
+                marginBottom: "16px",
+              }}
+            >
+              Soal
+            </div>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            >
               <div
-                key={opt.label}
-                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                style={{ display: "flex", flexDirection: "column", gap: "6px" }}
               >
-                <div
+                <label
                   style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "8px",
-                    background:
-                      form.answer === opt.label ? "#e84c2b" : "#f2efe8",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: form.answer === opt.label ? "white" : "#6b6860",
-                    fontWeight: "700",
                     fontSize: "13px",
-                    flexShrink: 0,
-                  }}
-                >
-                  {opt.label}
-                </div>
-                <input
-                  value={opt.text}
-                  onChange={(e) => handleOptionChange(i, e.target.value)}
-                  placeholder={`Pilihan ${opt.label}`}
-                  style={{
-                    flex: 1,
-                    padding: "10px 14px",
-                    borderRadius: "10px",
-                    border: "1px solid #e2ddd5",
-                    fontSize: "14px",
-                    outline: "none",
-                    fontFamily: "inherit",
+                    fontWeight: "600",
                     color: "#0f0e17",
                   }}
-                  onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
-                  onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
+                >
+                  Teks Soal
+                </label>
+                <MarkdownEditor
+                  value={form.body}
+                  onChange={(v) => setForm((f) => ({ ...f, body: v }))}
+                  placeholder="Tulis soal... Gunakan $...$ untuk LaTeX inline, $$...$$ untuk display"
+                  rows={4}
                 />
-                {form.options.length > 2 && (
-                  <button
-                    type="button"
-                    onClick={() => removeOption(i)}
+              </div>
+
+              {/* Difficulty */}
+              <div>
+                <label
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    color: "#0f0e17",
+                    display: "block",
+                    marginBottom: "8px",
+                  }}
+                >
+                  Tingkat Kesulitan
+                </label>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  {[
+                    { value: 1, label: "Easy", color: "#1a8a6e" },
+                    { value: 2, label: "Medium", color: "#f5a623" },
+                    { value: 3, label: "Hard", color: "#e84c2b" },
+                  ].map((d) => (
+                    <button
+                      key={d.value}
+                      type="button"
+                      onClick={() =>
+                        setForm((f) => ({ ...f, difficulty: d.value }))
+                      }
+                      style={{
+                        padding: "8px 16px",
+                        borderRadius: "10px",
+                        border: `2px solid ${
+                          form.difficulty === d.value ? d.color : "#e2ddd5"
+                        }`,
+                        background:
+                          form.difficulty === d.value
+                            ? d.color + "18"
+                            : "white",
+                        color:
+                          form.difficulty === d.value ? d.color : "#6b6860",
+                        fontWeight: "700",
+                        fontSize: "13px",
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                        transition: "all .15s",
+                      }}
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Pilihan jawaban */}
+          <div
+            style={{
+              background: "white",
+              borderRadius: "14px",
+              border: "1px solid #e2ddd5",
+              padding: "24px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "16px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  color: "#0f0e17",
+                }}
+              >
+                Pilihan Jawaban
+              </div>
+              {form.options.length < 5 && (
+                <button
+                  type="button"
+                  onClick={addOption}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    color: "#e84c2b",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  <Plus size={14} /> Tambah Pilihan
+                </button>
+              )}
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+                marginBottom: "16px",
+              }}
+            >
+              {form.options.map((opt, i) => (
+                <div
+                  key={opt.label}
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                >
+                  <div
                     style={{
                       width: "32px",
                       height: "32px",
                       borderRadius: "8px",
-                      border: "1px solid #fca5a5",
-                      background: "#fff3f0",
-                      cursor: "pointer",
+                      background:
+                        form.answer === opt.label ? "#e84c2b" : "#f2efe8",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      color: "#e84c2b",
+                      color: form.answer === opt.label ? "white" : "#6b6860",
+                      fontWeight: "700",
+                      fontSize: "13px",
                       flexShrink: 0,
                     }}
                   >
-                    <Trash2 size={13} />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Jawaban benar */}
-          <div>
-            <label
-              style={{
-                fontSize: "13px",
-                fontWeight: "600",
-                color: "#0f0e17",
-                display: "block",
-                marginBottom: "8px",
-              }}
-            >
-              Jawaban Benar
-            </label>
-            <div style={{ display: "flex", gap: "8px" }}>
-              {form.options.map((opt) => (
-                <button
-                  key={opt.label}
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, answer: opt.label }))}
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "10px",
-                    border: `2px solid ${
-                      form.answer === opt.label ? "#1a8a6e" : "#e2ddd5"
-                    }`,
-                    background: form.answer === opt.label ? "#e4f5f0" : "white",
-                    color: form.answer === opt.label ? "#1a8a6e" : "#6b6860",
-                    fontWeight: "700",
-                    fontSize: "14px",
-                    cursor: "pointer",
-                    fontFamily: "inherit",
-                    transition: "all .15s",
-                  }}
-                >
-                  {opt.label}
-                </button>
+                    {opt.label}
+                  </div>
+                  <input
+                    value={opt.text}
+                    onChange={(e) => handleOptionChange(i, e.target.value)}
+                    placeholder={`Pilihan ${opt.label}`}
+                    style={{
+                      flex: 1,
+                      padding: "10px 14px",
+                      borderRadius: "10px",
+                      border: "1px solid #e2ddd5",
+                      fontSize: "14px",
+                      outline: "none",
+                      fontFamily: "inherit",
+                      color: "#0f0e17",
+                    }}
+                    onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
+                    onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
+                  />
+                  {form.options.length > 2 && (
+                    <button
+                      type="button"
+                      onClick={() => removeOption(i)}
+                      style={{
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "8px",
+                        border: "1px solid #fca5a5",
+                        background: "#fff3f0",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#e84c2b",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
-          </div>
-        </div>
 
-        {/* Pembahasan */}
-        <div
-          style={{
-            background: "white",
-            borderRadius: "14px",
-            border: "1px solid #e2ddd5",
-            padding: "24px",
-          }}
-        >
+            {/* Jawaban benar */}
+            <div>
+              <label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#0f0e17",
+                  display: "block",
+                  marginBottom: "8px",
+                }}
+              >
+                Jawaban Benar
+              </label>
+              <div style={{ display: "flex", gap: "8px" }}>
+                {form.options.map((opt) => (
+                  <button
+                    key={opt.label}
+                    type="button"
+                    onClick={() =>
+                      setForm((f) => ({ ...f, answer: opt.label }))
+                    }
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "10px",
+                      border: `2px solid ${
+                        form.answer === opt.label ? "#1a8a6e" : "#e2ddd5"
+                      }`,
+                      background:
+                        form.answer === opt.label ? "#e4f5f0" : "white",
+                      color: form.answer === opt.label ? "#1a8a6e" : "#6b6860",
+                      fontWeight: "700",
+                      fontSize: "14px",
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      transition: "all .15s",
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Pembahasan */}
           <div
             style={{
-              fontSize: "14px",
-              fontWeight: "700",
-              color: "#0f0e17",
-              marginBottom: "16px",
-            }}
-          >
-            Pembahasan{" "}
-            <span
-              style={{ fontWeight: "400", color: "#6b6860", fontSize: "13px" }}
-            >
-              (opsional)
-            </span>
-          </div>
-          <textarea
-            value={form.explanation}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, explanation: e.target.value }))
-            }
-            placeholder="Tulis pembahasan langkah per langkah... Bisa pakai LaTeX"
-            rows={5}
-            style={{
-              width: "100%",
-              padding: "12px 14px",
-              borderRadius: "10px",
-              border: "1px solid #e2ddd5",
-              fontSize: "14px",
-              outline: "none",
-              fontFamily: "inherit",
-              color: "#0f0e17",
-              resize: "vertical",
-              lineHeight: "1.6",
-              boxSizing: "border-box",
-            }}
-            onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
-            onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
-          />
-        </div>
-
-        {/* Actions */}
-        <div
-          style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}
-        >
-          <button
-            type="button"
-            onClick={() => navigate("/admin/soal")}
-            style={{
-              padding: "11px 24px",
-              borderRadius: "10px",
-              border: "1px solid #e2ddd5",
               background: "white",
-              fontSize: "14px",
-              fontWeight: "600",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              color: "#0f0e17",
+              borderRadius: "14px",
+              border: "1px solid #e2ddd5",
+              padding: "24px",
             }}
           >
-            Batal
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              padding: "11px 24px",
-              borderRadius: "10px",
-              border: "none",
-              background: loading ? "#f5a07a" : "#e84c2b",
-              color: "white",
-              fontSize: "14px",
-              fontWeight: "600",
-              cursor: loading ? "not-allowed" : "pointer",
-              fontFamily: "inherit",
-              minWidth: "120px",
-            }}
+            <div
+              style={{
+                fontSize: "14px",
+                fontWeight: "700",
+                color: "#0f0e17",
+                marginBottom: "16px",
+              }}
+            >
+              Pembahasan{" "}
+              <span
+                style={{
+                  fontWeight: "400",
+                  color: "#6b6860",
+                  fontSize: "13px",
+                }}
+              >
+                (opsional)
+              </span>
+            </div>
+            <MarkdownEditor
+              value={form.explanation}
+              onChange={(v) => setForm((f) => ({ ...f, explanation: v }))}
+              placeholder="Tulis pembahasan langkah per langkah... Bisa pakai LaTeX dan Markdown"
+              rows={5}
+            />
+          </div>
+
+          {/* Actions */}
+          <div
+            style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}
           >
-            {loading
-              ? "Menyimpan..."
-              : isEdit
-              ? "Simpan Perubahan"
-              : "Tambah Soal"}
-          </button>
+            <button
+              type="button"
+              onClick={() => navigate("/admin/soal")}
+              style={{
+                padding: "11px 24px",
+                borderRadius: "10px",
+                border: "1px solid #e2ddd5",
+                background: "white",
+                fontSize: "14px",
+                fontWeight: "600",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                color: "#0f0e17",
+              }}
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                padding: "11px 24px",
+                borderRadius: "10px",
+                border: "none",
+                background: loading ? "#f5a07a" : "#e84c2b",
+                color: "white",
+                fontSize: "14px",
+                fontWeight: "600",
+                cursor: loading ? "not-allowed" : "pointer",
+                fontFamily: "inherit",
+                minWidth: "120px",
+              }}
+            >
+              {loading
+                ? "Menyimpan..."
+                : isEdit
+                ? "Simpan Perubahan"
+                : "Tambah Soal"}
+            </button>
+          </div>
+        </form>
+
+        {/* Kanan — Preview */}
+        <div style={{ position: "sticky", top: "24px" }}>
+          <PreviewPanel form={form} />
         </div>
-      </form>
+      </div>
     </div>
   );
 }
