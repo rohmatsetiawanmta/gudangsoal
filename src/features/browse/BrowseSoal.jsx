@@ -7,21 +7,26 @@ import MathRenderer from "../../components/MathRenderer";
 import { getSoal } from "./browseApi";
 import Navbar from "../../components/Navbar";
 
-function DifficultyDots({ level = 1 }) {
+function DifficultyBadge({ level }) {
+  const map = {
+    1: { label: "Easy", color: "#1a8a6e", bg: "#e4f5f0" },
+    2: { label: "Medium", color: "#854F0B", bg: "#faeeda" },
+    3: { label: "Hard", color: "#e84c2b", bg: "#fff3f0" },
+  };
+  const d = map[level] || map[1];
   return (
-    <div style={{ display: "flex", gap: "3px" }}>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div
-          key={i}
-          style={{
-            width: "6px",
-            height: "6px",
-            borderRadius: "50%",
-            background: i < level ? "#e84c2b" : "#e2ddd5",
-          }}
-        />
-      ))}
-    </div>
+    <span
+      style={{
+        fontSize: "11px",
+        fontWeight: "700",
+        padding: "3px 8px",
+        borderRadius: "6px",
+        background: d.bg,
+        color: d.color,
+      }}
+    >
+      {d.label}
+    </span>
   );
 }
 
@@ -263,7 +268,7 @@ export default function BrowseSoal() {
                     flexShrink: 0,
                   }}
                 >
-                  <DifficultyDots level={s.difficulty} />
+                  <DifficultyBadge level={s.difficulty} />
                   <ChevronRight size={16} color="#b4b2a9" />
                 </div>
               </div>

@@ -14,6 +14,7 @@ import {
   Star,
   ChevronRight,
 } from "lucide-react";
+import Navbar from "../../components/Navbar";
 
 const JENJANG = [
   {
@@ -82,102 +83,7 @@ export default function HomePage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
-      {/* Navbar */}
-      <nav
-        style={{
-          background: "white",
-          borderBottom: "1px solid #e2ddd5",
-          padding: "0 40px",
-          height: "64px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div
-            style={{
-              width: "34px",
-              height: "34px",
-              background: "#e84c2b",
-              borderRadius: "10px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              fontWeight: "800",
-              fontSize: "13px",
-            }}
-          >
-            GS
-          </div>
-          <span
-            style={{ fontWeight: "700", fontSize: "17px", color: "#0f0e17" }}
-          >
-            Gudang Soal
-          </span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          {/* Streak */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              background: "#fff3f0",
-              borderRadius: "100px",
-              padding: "6px 14px",
-            }}
-          >
-            <Flame size={15} color="#e84c2b" />
-            <span
-              style={{ fontSize: "13px", fontWeight: "700", color: "#e84c2b" }}
-            >
-              {user?.streak || 0} hari
-            </span>
-          </div>
-          {/* XP */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              background: "#faeeda",
-              borderRadius: "100px",
-              padding: "6px 14px",
-            }}
-          >
-            <Star size={15} color="#854F0B" />
-            <span
-              style={{ fontSize: "13px", fontWeight: "700", color: "#854F0B" }}
-            >
-              {user?.xp || 0} XP
-            </span>
-          </div>
-          {/* Avatar */}
-          <div style={{ position: "relative" }}>
-            <div
-              style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "50%",
-                background: "#e84c2b",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontWeight: "700",
-                fontSize: "14px",
-                cursor: "pointer",
-              }}
-              onClick={() => logout()}
-              title="Logout"
-            >
-              {user?.name?.[0]?.toUpperCase() || "U"}
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <main
         style={{ maxWidth: "1000px", margin: "0 auto", padding: "48px 40px" }}

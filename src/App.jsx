@@ -16,6 +16,13 @@ import BrowseSubtopik from "./features/browse/BrowseSubtopik";
 import BrowseSoal from "./features/browse/BrowseSoal";
 import SoalDetail from "./features/soal/SoalDetail";
 
+import AdminRoute from "./components/AdminRoute";
+import AdminLayout from "./features/admin/AdminLayout";
+import AdminDashboard from "./features/admin/AdminDashboard";
+import AdminSoal from "./features/admin/AdminSoal";
+import AdminSoalForm from "./features/admin/AdminSoalForm";
+import AdminStruktur from "./features/admin/AdminStruktur";
+
 export default function App() {
   const { isLoggedIn } = useAuthStore();
 
@@ -58,6 +65,16 @@ export default function App() {
       </Route>
 
       <Route path="*" element={<Navigate to="/" />} />
+
+      <Route element={<AdminRoute />}>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="soal" element={<AdminSoal />} />
+          <Route path="soal/tambah" element={<AdminSoalForm />} />
+          <Route path="soal/edit/:id" element={<AdminSoalForm />} />
+          <Route path="struktur" element={<AdminStruktur />} />
+        </Route>
+      </Route>
     </Routes>
   );
 }
