@@ -23,6 +23,8 @@ import AdminSoal from "./features/admin/AdminSoal";
 import AdminSoalForm from "./features/admin/AdminSoalForm";
 import AdminStruktur from "./features/admin/AdminStruktur";
 
+import SearchPage from "./features/search/SearchPage";
+
 export default function App() {
   const { isLoggedIn } = useAuthStore();
 
@@ -62,6 +64,8 @@ export default function App() {
           element={<BrowseSoal />}
         />
         <Route path="/soal/:kode" element={<SoalDetail />} />
+
+        <Route path="/search" element={<SearchPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" />} />

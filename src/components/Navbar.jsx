@@ -10,6 +10,7 @@ import {
   LogOut,
   ChevronDown,
   LayoutDashboard,
+  Warehouse,
 } from "lucide-react";
 import { useAuthStore } from "../features/auth/authStore";
 
@@ -100,7 +101,7 @@ export default function Navbar() {
               flexShrink: 0,
             }}
           >
-            GS
+            <Warehouse size={18} />
           </div>
           <span
             style={{ fontWeight: "700", fontSize: "17px", color: "#0f0e17" }}

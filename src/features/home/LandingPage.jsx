@@ -11,6 +11,7 @@ import {
   Timer,
   TrendingUp,
 } from "lucide-react";
+import Navbar from "../../components/Navbar";
 
 const JENJANG = [
   { id: "sd", label: "SD", icon: School, color: "#e84c2b", soal: "1.200+" },
@@ -61,75 +62,7 @@ export default function LandingPage() {
       }}
     >
       {/* Navbar */}
-      <nav
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 100,
-          background: "rgba(250,249,246,0.9)",
-          backdropFilter: "blur(12px)",
-          borderBottom: "1px solid #e2ddd5",
-          padding: "0 40px",
-          height: "64px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div
-            style={{
-              width: "34px",
-              height: "34px",
-              background: "#e84c2b",
-              borderRadius: "10px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              fontWeight: "800",
-              fontSize: "13px",
-            }}
-          >
-            GS
-          </div>
-          <span
-            style={{ fontWeight: "700", fontSize: "17px", color: "#0f0e17" }}
-          >
-            Gudang Soal
-          </span>
-        </div>
-        <div style={{ display: "flex", gap: "12px" }}>
-          <Link
-            to="/login"
-            style={{
-              padding: "8px 20px",
-              borderRadius: "10px",
-              border: "1px solid #e2ddd5",
-              fontSize: "14px",
-              fontWeight: "600",
-              color: "#0f0e17",
-              textDecoration: "none",
-            }}
-          >
-            Masuk
-          </Link>
-          <Link
-            to="/register"
-            style={{
-              padding: "8px 20px",
-              borderRadius: "10px",
-              background: "#e84c2b",
-              fontSize: "14px",
-              fontWeight: "600",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Daftar Gratis
-          </Link>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero */}
       <section
