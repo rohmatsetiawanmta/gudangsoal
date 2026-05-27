@@ -22,6 +22,7 @@ import AdminDashboard from "./features/admin/AdminDashboard";
 import AdminSoal from "./features/admin/AdminSoal";
 import AdminSoalForm from "./features/admin/AdminSoalForm";
 import AdminStruktur from "./features/admin/AdminStruktur";
+import AdminUsers from "./features/admin/AdminUsers";
 
 import SearchPage from "./features/search/SearchPage";
 import ProfilePage from "./features/profile/ProfilePage";
@@ -79,6 +80,7 @@ export default function App() {
           <Route path="soal/tambah" element={<AdminSoalForm />} />
           <Route path="soal/edit/:id" element={<AdminSoalForm />} />
           <Route path="struktur" element={<AdminStruktur />} />
+          <Route path="users" element={<AdminUsers />} />
         </Route>
       </Route>
     </Routes>

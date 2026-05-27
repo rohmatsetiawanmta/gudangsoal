@@ -53,11 +53,11 @@ export default function BrowseMapel() {
               marginBottom: "6px",
             }}
           >
-            Pilih Mata Pelajaran
+            Pilih{" "}
+            {["utbk", "cpns", "osn"].includes(jenjangSlug)
+              ? "Subtes"
+              : "Mata Pelajaran"}
           </h1>
-          <p style={{ fontSize: "14px", color: "#6b6860" }}>
-            {jenjangNama} — {subjenjangNama}
-          </p>
         </div>
 
         {error && (

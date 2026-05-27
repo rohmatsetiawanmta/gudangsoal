@@ -31,6 +31,20 @@ function DifficultyBadge({ level }) {
   );
 }
 
+const getYouTubeId = (url) => {
+  if (!url) return null;
+  const patterns = [
+    /youtube\.com\/watch\?v=([^&]+)/,
+    /youtu\.be\/([^?]+)/,
+    /youtube\.com\/embed\/([^?]+)/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+};
+
 export default function SoalDetail() {
   const { kode } = useParams();
   const { state } = useLocation();
@@ -278,7 +292,7 @@ export default function SoalDetail() {
                       color: "#6b6860",
                     }}
                   >
-                    {mapelNama || "Soal"}
+                    Soal
                   </span>
                   <span
                     style={{
@@ -591,6 +605,43 @@ export default function SoalDetail() {
                       }}
                     >
                       Pembahasan belum tersedia untuk soal ini.
+                    </div>
+                  )}
+
+                  {/* Video Pembahasan */}
+                  {soal.video_url && getYouTubeId(soal.video_url) && (
+                    <div>
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: "700",
+                          letterSpacing: ".08em",
+                          textTransform: "uppercase",
+                          color: "#6b6860",
+                          marginBottom: "12px",
+                        }}
+                      >
+                        Video Pembahasan
+                      </div>
+                      <div
+                        style={{
+                          borderRadius: "12px",
+                          overflow: "hidden",
+                          aspectRatio: "16/9",
+                        }}
+                      >
+                        <iframe
+                          width="100%"
+                          height="100%"
+                          src={`https://www.youtube.com/embed/${getYouTubeId(
+                            soal.video_url
+                          )}`}
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          style={{ display: "block" }}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>

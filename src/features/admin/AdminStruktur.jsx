@@ -1,6 +1,14 @@
 // src/features/admin/AdminStruktur.jsx
 import { useState, useEffect } from "react";
-import { ChevronRight, Plus, Pencil, Trash2, X, ArrowLeft } from "lucide-react";
+import {
+  ChevronRight,
+  Plus,
+  Pencil,
+  Trash2,
+  X,
+  ArrowLeft,
+  Minus,
+} from "lucide-react";
 import api from "../../lib/api";
 import ToggleSwitch from "../../components/ToggleSwitch";
 
@@ -147,6 +155,9 @@ export default function AdminStruktur() {
   });
   const [loading, setLoading] = useState(true);
   const [publishLoading, setPublishLoading] = useState({});
+  const [urutanLoading, setUrutanLoading] = useState({});
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editingValue, setEditingValue] = useState("");
   const [modal, setModal] = useState(null);
   const [modalForm, setModalForm] = useState({ nama: "", urutan: "" });
   const [modalLoading, setModalLoading] = useState(false);
@@ -157,7 +168,6 @@ export default function AdminStruktur() {
   const isLastLevel =
     LEVELS.findIndex((l) => l.key === currentStack.level) === LEVELS.length - 1;
 
-  // Fetch semua data setiap kali diperlukan
   const fetchAll = () => {
     setLoading(true);
     api
@@ -171,7 +181,6 @@ export default function AdminStruktur() {
     fetchAll();
   }, []);
 
-  // Filter items berdasarkan stack saat ini
   const getCurrentItems = () => {
     const data = allData[currentStack.level] || [];
     const levelInfo = LEVELS.find((l) => l.key === currentStack.level);
@@ -184,18 +193,13 @@ export default function AdminStruktur() {
   const handleDrillDown = (item) => {
     const nextIndex = LEVELS.findIndex((l) => l.key === currentStack.level) + 1;
     if (nextIndex >= LEVELS.length) return;
-    const nextLevel = LEVELS[nextIndex].key;
-    setStack([...stack, { level: nextLevel, item }]);
+    setStack([...stack, { level: LEVELS[nextIndex].key, item }]);
   };
 
   const handleBack = () => {
-    if (stack.length <= 1) return;
-    setStack((s) => s.slice(0, -1));
+    if (stack.length > 1) setStack((s) => s.slice(0, -1));
   };
-
-  const handleGoTo = (index) => {
-    setStack((s) => s.slice(0, index + 1));
-  };
+  const handleGoTo = (i) => setStack((s) => s.slice(0, i + 1));
 
   const handleTogglePublish = async (e, item) => {
     e.stopPropagation();
@@ -219,23 +223,87 @@ export default function AdminStruktur() {
     }
   };
 
+  // Swap satu langkah naik/turun
+  const handleUrutanChange = async (item, delta) => {
+    const items = getCurrentItems();
+    const index = items.findIndex((i) => i.id === item.id);
+    const newIndex = index + delta;
+
+    if (newIndex < 0 || newIndex >= items.length) return;
+
+    const targetItem = items[newIndex];
+
+    setUrutanLoading((u) => ({ ...u, [item.id]: true }));
+    try {
+      await Promise.all([
+        api.put(`/admin/urutan/${currentStack.level}?id=${item.id}`, {
+          urutan: newIndex,
+        }),
+        api.put(`/admin/urutan/${currentStack.level}?id=${targetItem.id}`, {
+          urutan: index,
+        }),
+      ]);
+      fetchAll();
+    } catch {
+      alert("Gagal mengubah urutan");
+    } finally {
+      setUrutanLoading((u) => ({ ...u, [item.id]: false }));
+    }
+  };
+
+  // Klik index untuk edit langsung
+  const handleIndexClick = (item, currentIndex) => {
+    setEditingIndex(item.id);
+    setEditingValue(String(currentIndex + 1));
+  };
+
+  // Submit edit index — geser semua item di antara posisi lama dan baru
+  const handleIndexSubmit = async (item, currentIndex) => {
+    const items = getCurrentItems();
+    const newIndex = parseInt(editingValue) - 1; // convert ke 0-based
+
+    setEditingIndex(null);
+
+    if (isNaN(newIndex) || newIndex === currentIndex) return;
+    if (newIndex < 0 || newIndex >= items.length) return;
+
+    setUrutanLoading((u) => ({ ...u, [item.id]: true }));
+    try {
+      // Buat array baru dengan item dipindah ke posisi baru
+      const newItems = [...items];
+      newItems.splice(currentIndex, 1); // hapus dari posisi lama
+      newItems.splice(newIndex, 0, item); // insert ke posisi baru
+
+      // Update urutan semua item sekaligus
+      await Promise.all(
+        newItems.map((it, idx) =>
+          api.put(`/admin/urutan/${currentStack.level}?id=${it.id}`, {
+            urutan: idx,
+          })
+        )
+      );
+      fetchAll();
+    } catch {
+      alert("Gagal mengubah urutan");
+    } finally {
+      setUrutanLoading((u) => ({ ...u, [item.id]: false }));
+    }
+  };
+
   const openTambah = () => {
     setModal({ type: "tambah" });
     setModalForm({ nama: "", urutan: "" });
     setModalError("");
   };
-
   const openEdit = (item) => {
     setModal({ type: "edit", item });
     setModalForm({ nama: item.nama, urutan: item.urutan || "" });
     setModalError("");
   };
-
   const openHapus = (item) => {
     setModal({ type: "hapus", item });
     setModalError("");
   };
-
   const closeModal = () => {
     setModal(null);
     setModalError("");
@@ -248,19 +316,16 @@ export default function AdminStruktur() {
     }
     setModalLoading(true);
     try {
-      const payload = { nama: modalForm.nama };
+      const payload = {
+        nama: modalForm.nama,
+        urutan: parseInt(modalForm.urutan) || currentItems.length,
+      };
       if (currentLevel.parentIdCol && currentStack.item) {
         payload[currentLevel.parentIdCol] = currentStack.item.id;
       }
-      if (
-        currentStack.level === "jenjang" ||
-        currentStack.level === "subjenjang"
-      ) {
-        payload.urutan = parseInt(modalForm.urutan) || 0;
-      }
       await api.post(`/admin/struktur/${currentStack.level}`, payload);
       closeModal();
-      fetchAll(); // fetch ulang semua data
+      fetchAll();
     } catch (err) {
       setModalError(err.error || "Gagal menambahkan");
     } finally {
@@ -391,13 +456,10 @@ export default function AdminStruktur() {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "4px",
                   background: "none",
                   border: "none",
                   cursor: "pointer",
                   color: "#6b6860",
-                  fontSize: "13px",
-                  fontFamily: "inherit",
                   padding: 0,
                 }}
               >
@@ -443,7 +505,7 @@ export default function AdminStruktur() {
               <div
                 key={i}
                 style={{
-                  height: "56px",
+                  height: "60px",
                   borderBottom: "1px solid #f2efe8",
                   animation: "pulse 1.5s infinite",
                   background: i % 2 === 0 ? "white" : "#faf9f6",
@@ -475,8 +537,8 @@ export default function AdminStruktur() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "14px",
-                padding: "14px 20px",
+                gap: "12px",
+                padding: "12px 20px",
                 borderBottom:
                   i < currentItems.length - 1 ? "1px solid #f2efe8" : "none",
                 cursor: !isLastLevel ? "pointer" : "default",
@@ -490,15 +552,140 @@ export default function AdminStruktur() {
                 e.currentTarget.style.background = "white";
               }}
             >
-              <div style={{ flex: 1 }}>
-                <div
+              {/* Urutan controls */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  flexShrink: 0,
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => handleUrutanChange(item, -1)}
+                  disabled={i === 0 || urutanLoading[item.id]}
                   style={{
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    color: "#0f0e17",
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "6px",
+                    border: "1px solid #e2ddd5",
+                    background: "white",
+                    cursor: i === 0 ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: i === 0 ? "#e2ddd5" : "#6b6860",
                   }}
                 >
-                  {item.nama}
+                  <Minus size={11} />
+                </button>
+
+                {/* Index — klik untuk edit */}
+                {editingIndex === item.id ? (
+                  <input
+                    autoFocus
+                    value={editingValue}
+                    onChange={(e) => setEditingValue(e.target.value)}
+                    onBlur={() => handleIndexSubmit(item, i)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleIndexSubmit(item, i);
+                      if (e.key === "Escape") setEditingIndex(null);
+                    }}
+                    style={{
+                      width: "32px",
+                      height: "24px",
+                      borderRadius: "6px",
+                      border: "1.5px solid #e84c2b",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      textAlign: "center",
+                      outline: "none",
+                      fontFamily: "inherit",
+                      color: "#0f0e17",
+                      padding: 0,
+                    }}
+                  />
+                ) : (
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleIndexClick(item, i);
+                    }}
+                    title="Klik untuk edit urutan"
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      color: "#b4b2a9",
+                      minWidth: "24px",
+                      textAlign: "center",
+                      cursor: "text",
+                      padding: "2px 4px",
+                      borderRadius: "4px",
+                      transition: "background .15s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.background = "#f2efe8")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background = "none")
+                    }
+                  >
+                    {urutanLoading[item.id] ? "…" : i + 1}
+                  </span>
+                )}
+
+                <button
+                  onClick={() => handleUrutanChange(item, 1)}
+                  disabled={
+                    i === currentItems.length - 1 || urutanLoading[item.id]
+                  }
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "6px",
+                    border: "1px solid #e2ddd5",
+                    background: "white",
+                    cursor:
+                      i === currentItems.length - 1 ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color:
+                      i === currentItems.length - 1 ? "#e2ddd5" : "#6b6860",
+                  }}
+                >
+                  <Plus size={11} />
+                </button>
+              </div>
+
+              {/* Info */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                >
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "500",
+                      color: "#0f0e17",
+                    }}
+                  >
+                    {item.nama}
+                  </div>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: "600",
+                      padding: "2px 7px",
+                      borderRadius: "6px",
+                      background: item.jumlah_soal > 0 ? "#e4f5f0" : "#f2efe8",
+                      color: item.jumlah_soal > 0 ? "#1a8a6e" : "#b4b2a9",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {item.jumlah_soal} soal
+                  </span>
                 </div>
                 <div
                   style={{
@@ -511,10 +698,22 @@ export default function AdminStruktur() {
                 </div>
               </div>
 
-              {!isLastLevel && <ChevronRight size={16} color="#b4b2a9" />}
+              {!isLastLevel && (
+                <ChevronRight
+                  size={16}
+                  color="#b4b2a9"
+                  style={{ flexShrink: 0 }}
+                />
+              )}
 
+              {/* Actions */}
               <div
-                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  flexShrink: 0,
+                }}
                 onClick={(e) => e.stopPropagation()}
               >
                 <ToggleSwitch
@@ -605,41 +804,41 @@ export default function AdminStruktur() {
                 onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
               />
             </div>
-            {(currentStack.level === "jenjang" ||
-              currentStack.level === "subjenjang") && (
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: "6px" }}
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "6px" }}
+            >
+              <label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#0f0e17",
+                }}
               >
-                <label
-                  style={{
-                    fontSize: "13px",
-                    fontWeight: "600",
-                    color: "#0f0e17",
-                  }}
-                >
-                  Urutan
-                </label>
-                <input
-                  value={modalForm.urutan}
-                  onChange={(e) =>
-                    setModalForm((f) => ({ ...f, urutan: e.target.value }))
-                  }
-                  placeholder="0"
-                  type="number"
-                  style={{
-                    padding: "10px 14px",
-                    borderRadius: "10px",
-                    border: "1px solid #e2ddd5",
-                    fontSize: "14px",
-                    outline: "none",
-                    fontFamily: "inherit",
-                    color: "#0f0e17",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
-                  onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
-                />
-              </div>
-            )}
+                Urutan{" "}
+                <span style={{ fontWeight: "400", color: "#6b6860" }}>
+                  (opsional, default: akhir list)
+                </span>
+              </label>
+              <input
+                value={modalForm.urutan}
+                onChange={(e) =>
+                  setModalForm((f) => ({ ...f, urutan: e.target.value }))
+                }
+                placeholder={`${currentItems.length + 1}`}
+                type="number"
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: "10px",
+                  border: "1px solid #e2ddd5",
+                  fontSize: "14px",
+                  outline: "none",
+                  fontFamily: "inherit",
+                  color: "#0f0e17",
+                }}
+                onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
+                onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
+              />
+            </div>
           </div>
         </Modal>
       )}

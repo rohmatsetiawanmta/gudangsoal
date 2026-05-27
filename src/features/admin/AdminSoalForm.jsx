@@ -16,6 +16,7 @@ const defaultForm = {
   answer: "",
   explanation: "",
   difficulty: 1,
+  video_url: "",
 };
 
 const DIFFICULTY_MAP = {
@@ -71,6 +72,20 @@ function Select({ label, value, onChange, options, placeholder, disabled }) {
     </div>
   );
 }
+
+const getYouTubeId = (url) => {
+  if (!url) return null;
+  const patterns = [
+    /youtube\.com\/watch\?v=([^&]+)/,
+    /youtu\.be\/([^?]+)/,
+    /youtube\.com\/embed\/([^?]+)/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+};
 
 function PreviewPanel({ form }) {
   const diff = DIFFICULTY_MAP[form.difficulty] || DIFFICULTY_MAP[1];
@@ -307,6 +322,7 @@ export default function AdminSoalForm() {
           answer: data.answer,
           explanation: data.explanation || "",
           difficulty: data.difficulty,
+          video_url: data.video_url || "",
         });
         const subtopik = struktur.subtopik.find(
           (s) => s.id == data.subtopik_id
@@ -966,6 +982,97 @@ OUTPUT HANYA pembahasan saja dalam format teks, tanpa JSON, tanpa preamble apapu
               placeholder="Tulis pembahasan langkah per langkah... Bisa pakai LaTeX dan Markdown"
               rows={5}
             />
+          </div>
+
+          {/* Video Pembahasan */}
+          <div
+            style={{
+              background: "white",
+              borderRadius: "14px",
+              border: "1px solid #e2ddd5",
+              padding: "24px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                marginBottom: "16px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  color: "#0f0e17",
+                }}
+              >
+                Video Pembahasan
+              </div>
+              <span
+                style={{
+                  fontWeight: "400",
+                  color: "#6b6860",
+                  fontSize: "13px",
+                }}
+              >
+                (opsional)
+              </span>
+            </div>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "6px" }}
+            >
+              <label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#0f0e17",
+                }}
+              >
+                URL YouTube
+              </label>
+              <input
+                value={form.video_url}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, video_url: e.target.value }))
+                }
+                placeholder="https://www.youtube.com/watch?v=..."
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: "10px",
+                  border: "1px solid #e2ddd5",
+                  fontSize: "14px",
+                  outline: "none",
+                  fontFamily: "inherit",
+                  color: "#0f0e17",
+                }}
+                onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
+                onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
+              />
+              {form.video_url && getYouTubeId(form.video_url) && (
+                <div
+                  style={{
+                    marginTop: "10px",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    aspectRatio: "16/9",
+                  }}
+                >
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${getYouTubeId(
+                      form.video_url
+                    )}`}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    style={{ display: "block" }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Actions */}

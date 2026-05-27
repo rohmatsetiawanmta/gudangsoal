@@ -51,7 +51,9 @@ export default function BrowseSubjenjang() {
             {["utbk", "cpns", "osn"].includes(jenjangSlug) ? "Rumpun" : "Kelas"}
           </h1>
           <p style={{ fontSize: "14px", color: "#6b6860" }}>
-            {jenjangNama} — pilih tingkatan yang ingin kamu pelajari.
+            Pilih{" "}
+            {["utbk", "cpns", "osn"].includes(jenjangSlug) ? "rumpun" : "kelas"}{" "}
+            yang ingin kamu pelajari.
           </p>
         </div>
 

@@ -66,9 +66,6 @@ export default function BrowseTopik() {
           >
             Pilih Topik
           </h1>
-          <p style={{ fontSize: "14px", color: "#6b6860" }}>
-            {jenjangNama} — {subjenjangNama} — {mapelNama}
-          </p>
         </div>
 
         {error && (

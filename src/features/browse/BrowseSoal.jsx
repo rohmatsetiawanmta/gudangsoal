@@ -113,26 +113,21 @@ export default function BrowseSoal() {
           style={{
             marginBottom: "28px",
             display: "flex",
-            alignItems: "flex-end",
+            alignItems: "center",
             justifyContent: "space-between",
           }}
         >
-          <div>
-            <h1
-              style={{
-                fontSize: "26px",
-                fontWeight: "800",
-                color: "#0f0e17",
-                letterSpacing: "-0.5px",
-                marginBottom: "6px",
-              }}
-            >
-              {subtopikNama}
-            </h1>
-            <p style={{ fontSize: "14px", color: "#6b6860" }}>
-              {jenjangNama} — {subjenjangNama} — {mapelNama} — {topikNama}
-            </p>
-          </div>
+          <h1
+            style={{
+              fontSize: "26px",
+              fontWeight: "800",
+              color: "#0f0e17",
+              letterSpacing: "-0.5px",
+              marginBottom: "6px",
+            }}
+          >
+            {subtopikNama}
+          </h1>
           {!loading && (
             <span
               style={{

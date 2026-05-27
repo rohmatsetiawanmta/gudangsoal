@@ -79,9 +79,6 @@ export default function BrowseSubtopik() {
           >
             Pilih Subtopik
           </h1>
-          <p style={{ fontSize: "14px", color: "#6b6860" }}>
-            {jenjangNama} — {subjenjangNama} — {mapelNama} — {topikNama}
-          </p>
         </div>
 
         {error && (
