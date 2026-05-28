@@ -13,6 +13,7 @@ import {
   Warehouse,
   Flame,
   Shuffle,
+  MessageSquarePlus,
 } from "lucide-react";
 import { useAuthStore } from "../features/auth/authStore";
 import RandomSoal from "./RandomSoal";
@@ -22,6 +23,7 @@ const NAV_LINKS = [{ to: "/browse", label: "Direktori Soal", icon: BookOpen }];
 const NAV_LINKS_LOGGED_IN = [
   { to: "/home", label: "Beranda", icon: Home },
   { to: "/browse", label: "Direktori Soal", icon: BookOpen },
+  { to: "/request-soal", label: "Request Soal", icon: MessageSquarePlus },
 ];
 
 export default function Navbar() {

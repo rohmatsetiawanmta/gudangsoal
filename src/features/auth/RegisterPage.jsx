@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserPlus, Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 import { useAuthStore } from "./authStore";
 import { register } from "./authApi";
+import Navbar from "../../components/Navbar";
 
 function InputField({
   label,
@@ -135,252 +136,239 @@ export default function RegisterPage() {
   );
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex" }}>
-      {/* Kiri — Branding */}
-      <div
-        style={{
-          display: "none",
-          width: "50%",
-          background: "#0f0e17",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          padding: "48px",
-        }}
-        className="lg-left"
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+    <div>
+      <Navbar />
+      <div style={{ minHeight: "90vh", display: "flex" }}>
+        {/* Kiri — Branding */}
+        <div
+          style={{
+            display: "none",
+            width: "50%",
+            background: "#0f0e17",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            padding: "48px",
+          }}
+          className="lg-left"
+        >
           <div
-            style={{
-              width: "36px",
-              height: "36px",
-              background: "#e84c2b",
-              borderRadius: "10px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              fontWeight: "700",
-              fontSize: "14px",
-            }}
-          >
-            GS
-          </div>
-          <span style={{ color: "white", fontWeight: "700", fontSize: "18px" }}>
-            Gudang Soal
-          </span>
-        </div>
+            style={{ display: "flex", alignItems: "center", gap: "12px" }}
+          ></div>
 
-        <div>
-          <h1
-            style={{
-              color: "white",
-              fontSize: "40px",
-              fontWeight: "800",
-              lineHeight: "1.15",
-              marginBottom: "16px",
-            }}
-          >
-            Mulai belajar hari ini,
-            <br />
-            gratis selamanya.
-          </h1>
-          <p
-            style={{
-              color: "rgba(255,255,255,0.5)",
-              fontSize: "17px",
-              lineHeight: "1.65",
-            }}
-          >
-            Daftar dalam 30 detik. Tidak perlu kartu kredit.
-          </p>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          {[
-            { step: "01", text: "Buat akun gratis" },
-            { step: "02", text: "Pilih jenjang & topik" },
-            { step: "03", text: "Mulai latihan & kumpulkan XP" },
-          ].map(({ step, text }) => (
-            <div
-              key={step}
-              style={{ display: "flex", alignItems: "center", gap: "16px" }}
-            >
-              <div
-                style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "8px",
-                  background: "rgba(255,255,255,0.1)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "rgba(255,255,255,0.4)",
-                  fontSize: "12px",
-                  fontWeight: "700",
-                  flexShrink: 0,
-                }}
-              >
-                {step}
-              </div>
-              <span
-                style={{ color: "rgba(255,255,255,0.6)", fontSize: "15px" }}
-              >
-                {text}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Kanan — Form */}
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "48px 32px",
-          background: "#faf9f6",
-        }}
-      >
-        <div style={{ width: "100%", maxWidth: "380px" }}>
-          <div style={{ marginBottom: "32px" }}>
-            <h2
+          <div>
+            <h1
               style={{
-                fontSize: "26px",
+                color: "white",
+                fontSize: "40px",
                 fontWeight: "800",
-                color: "#0f0e17",
-                marginBottom: "6px",
+                lineHeight: "1.15",
+                marginBottom: "16px",
               }}
             >
-              Daftar
-            </h2>
-            <p style={{ fontSize: "14px", color: "#6b6860" }}>
-              Sudah punya akun?{" "}
-              <Link
-                to="/login"
-                style={{
-                  color: "#e84c2b",
-                  fontWeight: "600",
-                  textDecoration: "none",
-                }}
-              >
-                Masuk di sini
-              </Link>
+              Mulai belajar hari ini,
+              <br />
+              gratis selamanya.
+            </h1>
+            <p
+              style={{
+                color: "rgba(255,255,255,0.5)",
+                fontSize: "17px",
+                lineHeight: "1.65",
+              }}
+            >
+              Daftar dalam 30 detik. Tidak perlu kartu kredit.
             </p>
           </div>
 
-          {error && (
-            <div
-              style={{
-                background: "#fff3f0",
-                border: "1px solid #fca5a5",
-                color: "#b91c1c",
-                fontSize: "14px",
-                borderRadius: "12px",
-                padding: "12px 16px",
-                marginBottom: "20px",
-              }}
-            >
-              {error}
-            </div>
-          )}
-
-          <form
-            onSubmit={handleSubmit}
+          <div
             style={{ display: "flex", flexDirection: "column", gap: "16px" }}
           >
-            <InputField
-              label="Nama lengkap"
-              icon={User}
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="Nama kamu"
-              required
-            />
-            <InputField
-              label="Email"
-              icon={Mail}
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="kamu@email.com"
-              required
-            />
-            <InputField
-              label="Password"
-              icon={Lock}
-              type={showPassword ? "text" : "password"}
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="Minimal 8 karakter"
-              required
-              rightElement={togglePassword}
-            />
-            <InputField
-              label="Konfirmasi password"
-              icon={Lock}
-              type={showPassword ? "text" : "password"}
-              name="confirmPassword"
-              value={form.confirmPassword}
-              onChange={handleChange}
-              placeholder="Ulangi password"
-              required
-            />
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                marginTop: "8px",
-                width: "100%",
-                background: loading ? "#f5a07a" : "#e84c2b",
-                color: "white",
-                fontWeight: "600",
-                padding: "12px",
-                borderRadius: "12px",
-                border: "none",
-                cursor: loading ? "not-allowed" : "pointer",
-                fontSize: "15px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                fontFamily: "inherit",
-                transition: "background .2s",
-              }}
-            >
-              {loading ? (
-                <span
+            {[
+              { step: "01", text: "Buat akun gratis" },
+              { step: "02", text: "Pilih jenjang & topik" },
+              { step: "03", text: "Mulai latihan & kumpulkan XP" },
+            ].map(({ step, text }) => (
+              <div
+                key={step}
+                style={{ display: "flex", alignItems: "center", gap: "16px" }}
+              >
+                <div
                   style={{
-                    width: "16px",
-                    height: "16px",
-                    border: "2px solid rgba(255,255,255,0.3)",
-                    borderTopColor: "white",
-                    borderRadius: "50%",
-                    animation: "spin 0.7s linear infinite",
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "8px",
+                    background: "rgba(255,255,255,0.1)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "rgba(255,255,255,0.4)",
+                    fontSize: "12px",
+                    fontWeight: "700",
+                    flexShrink: 0,
                   }}
-                />
-              ) : (
-                <>
-                  <UserPlus size={16} /> Buat Akun
-                </>
-              )}
-            </button>
-          </form>
+                >
+                  {step}
+                </div>
+                <span
+                  style={{ color: "rgba(255,255,255,0.6)", fontSize: "15px" }}
+                >
+                  {text}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <style>{`
+        {/* Kanan — Form */}
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "48px 32px",
+            background: "#faf9f6",
+          }}
+        >
+          <div style={{ width: "100%", maxWidth: "380px" }}>
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "26px",
+                  fontWeight: "800",
+                  color: "#0f0e17",
+                  marginBottom: "6px",
+                }}
+              >
+                Daftar
+              </h2>
+              <p style={{ fontSize: "14px", color: "#6b6860" }}>
+                Sudah punya akun?{" "}
+                <Link
+                  to="/login"
+                  style={{
+                    color: "#e84c2b",
+                    fontWeight: "600",
+                    textDecoration: "none",
+                  }}
+                >
+                  Masuk di sini
+                </Link>
+              </p>
+            </div>
+
+            {error && (
+              <div
+                style={{
+                  background: "#fff3f0",
+                  border: "1px solid #fca5a5",
+                  color: "#b91c1c",
+                  fontSize: "14px",
+                  borderRadius: "12px",
+                  padding: "12px 16px",
+                  marginBottom: "20px",
+                }}
+              >
+                {error}
+              </div>
+            )}
+
+            <form
+              onSubmit={handleSubmit}
+              style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+            >
+              <InputField
+                label="Nama lengkap"
+                icon={User}
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                placeholder="Nama kamu"
+                required
+              />
+              <InputField
+                label="Email"
+                icon={Mail}
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="kamu@email.com"
+                required
+              />
+              <InputField
+                label="Password"
+                icon={Lock}
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="Minimal 8 karakter"
+                required
+                rightElement={togglePassword}
+              />
+              <InputField
+                label="Konfirmasi password"
+                icon={Lock}
+                type={showPassword ? "text" : "password"}
+                name="confirmPassword"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                placeholder="Ulangi password"
+                required
+              />
+
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  marginTop: "8px",
+                  width: "100%",
+                  background: loading ? "#f5a07a" : "#e84c2b",
+                  color: "white",
+                  fontWeight: "600",
+                  padding: "12px",
+                  borderRadius: "12px",
+                  border: "none",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  fontSize: "15px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  fontFamily: "inherit",
+                  transition: "background .2s",
+                }}
+              >
+                {loading ? (
+                  <span
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      border: "2px solid rgba(255,255,255,0.3)",
+                      borderTopColor: "white",
+                      borderRadius: "50%",
+                      animation: "spin 0.7s linear infinite",
+                    }}
+                  />
+                ) : (
+                  <>
+                    <UserPlus size={16} /> Buat Akun
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <style>{`
         @media (min-width: 1024px) {
           .lg-left { display: flex !important; }
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         input::placeholder { color: #b4b2a9; }
       `}</style>
+      </div>
     </div>
   );
 }

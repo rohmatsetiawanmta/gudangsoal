@@ -39,6 +39,7 @@ export default function MarkdownEditor({
   onChange,
   placeholder,
   rows = 4,
+  hideImage = false,
 }) {
   const ref = useRef(null);
   const fileRef = useRef(null);
@@ -193,64 +194,66 @@ export default function MarkdownEditor({
             </button>
           );
         })}
-
-        <div
-          style={{
-            width: "1px",
-            height: "16px",
-            background: "#e2ddd5",
-            margin: "0 4px",
-          }}
-        />
-
-        {/* Upload gambar */}
-        <button
-          type="button"
-          title="Upload Gambar"
-          onClick={() => fileRef.current?.click()}
-          disabled={uploading}
-          style={{
-            width: "28px",
-            height: "28px",
-            borderRadius: "6px",
-            border: "none",
-            background: "none",
-            cursor: uploading ? "not-allowed" : "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: uploading ? "#b4b2a9" : "#6b6860",
-            transition: "background .15s",
-          }}
-          onMouseEnter={(e) => {
-            if (!uploading) e.currentTarget.style.background = "#e2ddd5";
-          }}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
-        >
-          {uploading ? (
-            <span
+        {!hideImage && (
+          <>
+            <div
               style={{
-                width: "12px",
-                height: "12px",
-                border: "2px solid #e2ddd5",
-                borderTopColor: "#6b6860",
-                borderRadius: "50%",
-                animation: "spin 0.7s linear infinite",
-                display: "block",
+                width: "1px",
+                height: "16px",
+                background: "#e2ddd5",
+                margin: "0 4px",
               }}
             />
-          ) : (
-            <Image size={14} />
-          )}
-        </button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          onChange={handleImageUpload}
-          style={{ display: "none" }}
-        />
 
+            {/* Upload gambar */}
+            <button
+              type="button"
+              title="Upload Gambar"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              style={{
+                width: "28px",
+                height: "28px",
+                borderRadius: "6px",
+                border: "none",
+                background: "none",
+                cursor: uploading ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: uploading ? "#b4b2a9" : "#6b6860",
+                transition: "background .15s",
+              }}
+              onMouseEnter={(e) => {
+                if (!uploading) e.currentTarget.style.background = "#e2ddd5";
+              }}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+            >
+              {uploading ? (
+                <span
+                  style={{
+                    width: "12px",
+                    height: "12px",
+                    border: "2px solid #e2ddd5",
+                    borderTopColor: "#6b6860",
+                    borderRadius: "50%",
+                    animation: "spin 0.7s linear infinite",
+                    display: "block",
+                  }}
+                />
+              ) : (
+                <Image size={14} />
+              )}
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              onChange={handleImageUpload}
+              style={{ display: "none" }}
+            />
+          </>
+        )}
         <div style={{ marginLeft: "auto" }}>
           <span
             style={{

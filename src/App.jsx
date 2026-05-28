@@ -7,6 +7,7 @@ import HomePage from "./features/home/HomePage";
 import LoginPage from "./features/auth/LoginPage";
 import RegisterPage from "./features/auth/RegisterPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RequestSoalPage from "./features/request/RequestSoalPage";
 
 import BrowseJenjang from "./features/browse/BrowseJenjang";
 import BrowseSubjenjang from "./features/browse/BrowseSubjenjang";
@@ -24,6 +25,7 @@ import AdminSoalForm from "./features/admin/AdminSoalForm";
 import AdminStruktur from "./features/admin/AdminStruktur";
 import AdminUsers from "./features/admin/AdminUsers";
 import AdminReports from "./features/admin/AdminReports";
+import AdminSoalRequests from "./features/admin/AdminSoalRequests";
 
 import SearchPage from "./features/search/SearchPage";
 import ProfilePage from "./features/profile/ProfilePage";
@@ -50,6 +52,7 @@ export default function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/request-soal" element={<RequestSoalPage />} />
       </Route>
 
       <Route path="/browse" element={<BrowseJenjang />} />
@@ -83,6 +86,7 @@ export default function App() {
           <Route path="struktur" element={<AdminStruktur />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="reports" element={<AdminReports />} />
+          <Route path="soal-requests" element={<AdminSoalRequests />} />
         </Route>
       </Route>
     </Routes>

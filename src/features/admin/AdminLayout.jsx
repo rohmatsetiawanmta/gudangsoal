@@ -12,6 +12,7 @@ import {
   PanelLeftOpen,
   Users,
   Flag,
+  MessageSquarePlus,
 } from "lucide-react";
 import { useAuthStore } from "../auth/authStore";
 
@@ -21,6 +22,11 @@ const MENU = [
   { to: "/admin/struktur", label: "Kelola Struktur", icon: FolderTree },
   { to: "/admin/users", label: "Kelola User", icon: Users },
   { to: "/admin/reports", label: "Laporan Soal", icon: Flag },
+  {
+    to: "/admin/soal-requests",
+    label: "Request Soal",
+    icon: MessageSquarePlus,
+  },
 ];
 
 function SidebarLink({ to, label, icon: Icon, end, collapsed }) {
