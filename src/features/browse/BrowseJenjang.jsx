@@ -9,6 +9,7 @@ import {
   Landmark,
   Trophy,
   ChevronRight,
+  BookOpen,
 } from "lucide-react";
 import Breadcrumb from "../../components/Breadcrumb";
 import { getJenjang } from "./browseApi";

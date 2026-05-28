@@ -57,6 +57,63 @@ function DifficultyBadge({ level }) {
   );
 }
 
+// Cek apakah jawaban benar berdasarkan tipe
+const checkCorrect = (tipe, chosen, answer) => {
+  if (!chosen || answer === undefined || answer === null) return false;
+  switch (tipe) {
+    case "pilihan_ganda":
+      return chosen === answer;
+    case "isian_singkat":
+      return (
+        chosen.trim().toLowerCase() === String(answer).trim().toLowerCase()
+      );
+    case "isian_numerik":
+      return parseFloat(chosen) === parseFloat(answer);
+    case "checklist":
+      if (!Array.isArray(chosen) || !Array.isArray(answer)) return false;
+      return (
+        chosen.length === answer.length &&
+        [...chosen].sort().join(",") === [...answer].sort().join(",")
+      );
+    case "multiple_choice_table":
+      if (typeof chosen !== "object" || typeof answer !== "object")
+        return false;
+      return JSON.stringify(chosen) === JSON.stringify(answer);
+    default:
+      return chosen === answer;
+  }
+};
+
+// Format jawaban untuk ditampilkan
+const formatAnswer = (tipe, answer) => {
+  if (answer === null || answer === undefined) return "—";
+  switch (tipe) {
+    case "checklist":
+      return Array.isArray(answer) ? answer.join(", ") : String(answer);
+    case "multiple_choice_table":
+      if (typeof answer === "object" && !Array.isArray(answer)) {
+        return Object.entries(answer)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join(", ");
+      }
+      return String(answer);
+    default:
+      return String(answer);
+  }
+};
+
+// Inisialisasi chosen kosong berdasarkan tipe
+const initChosen = (tipe) => {
+  switch (tipe) {
+    case "checklist":
+      return [];
+    case "multiple_choice_table":
+      return {};
+    default:
+      return "";
+  }
+};
+
 export default function SoalDetail() {
   const { kode } = useParams();
   const { state } = useLocation();
@@ -66,11 +123,10 @@ export default function SoalDetail() {
   const [soal, setSoal] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [chosen, setChosen] = useState(null);
+  const [chosen, setChosen] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [alreadyCorrect, setAlreadyCorrect] = useState(false);
 
-  // Report state
   const [reportOpen, setReportOpen] = useState(false);
   const [reportForm, setReportForm] = useState({ kategori: "", deskripsi: "" });
   const [reportLoading, setReportLoading] = useState(false);
@@ -108,7 +164,7 @@ export default function SoalDetail() {
   };
 
   useEffect(() => {
-    setChosen(null);
+    setChosen("");
     setSubmitted(false);
     setAlreadyCorrect(false);
     setLoading(true);
@@ -118,6 +174,7 @@ export default function SoalDetail() {
         .then(([data, status]) => {
           setSoal(data);
           fillBreadcrumb(data);
+          setChosen(initChosen(data.tipe));
           if (status?.answered_correct) {
             setAlreadyCorrect(true);
             setSubmitted(true);
@@ -131,14 +188,37 @@ export default function SoalDetail() {
         .then((data) => {
           setSoal(data);
           fillBreadcrumb(data);
+          setChosen(initChosen(data.tipe));
         })
         .catch(() => setError("Gagal memuat soal"))
         .finally(() => setLoading(false));
     }
   }, [kode, user]);
 
+  const isCorrect = soal ? checkCorrect(soal.tipe, chosen, soal.answer) : false;
+
+  // Cek apakah chosen sudah terisi (valid untuk submit)
+  const isChosenValid = () => {
+    if (!soal) return false;
+    switch (soal.tipe) {
+      case "pilihan_ganda":
+      case "isian_singkat":
+      case "isian_numerik":
+        return !!chosen;
+      case "checklist":
+        return Array.isArray(chosen) && chosen.length > 0;
+      case "multiple_choice_table":
+        return (
+          typeof chosen === "object" &&
+          soal.options?.every((o) => chosen[o.label])
+        );
+      default:
+        return !!chosen;
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!chosen || alreadyCorrect) return;
+    if (!isChosenValid() || alreadyCorrect) return;
     setSubmitted(true);
 
     if (user) {
@@ -147,14 +227,14 @@ export default function SoalDetail() {
           soal_id: soal.id,
           kode: soal.kode,
           difficulty: soal.difficulty,
-          is_correct: chosen === soal.answer ? 1 : 0,
+          is_correct: isCorrect ? 1 : 0,
         });
       } catch {}
     }
   };
 
   const handleReset = () => {
-    setChosen(null);
+    setChosen(initChosen(soal?.tipe));
     setSubmitted(false);
   };
 
@@ -184,29 +264,7 @@ export default function SoalDetail() {
     }
   };
 
-  const isCorrect = chosen === soal?.answer;
   const showPembahasan = user || soal?.is_public_explanation == 1;
-
-  const getOptStyle = (label) => {
-    if (!submitted)
-      return {
-        border: chosen === label ? "2px solid #e84c2b" : "1px solid #e2ddd5",
-        background: chosen === label ? "#fff3f0" : "white",
-      };
-    if ((isCorrect || alreadyCorrect) && label === soal.answer)
-      return { border: "2px solid #1a8a6e", background: "#e4f5f0" };
-    if (!isCorrect && label === chosen)
-      return { border: "2px solid #e84c2b", background: "#fff3f0" };
-    return { border: "1px solid #e2ddd5", background: "white" };
-  };
-
-  const getOptLabelColor = (label) => {
-    if (!submitted) return chosen === label ? "#e84c2b" : "#6b6860";
-    if ((isCorrect || alreadyCorrect) && label === soal.answer)
-      return "#1a8a6e";
-    if (!isCorrect && label === chosen) return "#e84c2b";
-    return "#6b6860";
-  };
 
   const {
     jenjangNama,
@@ -222,6 +280,466 @@ export default function SoalDetail() {
   } = breadcrumb;
 
   const backUrl = `/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}/${topikSlug}/${subtopikSlug}`;
+
+  // Render input jawaban berdasarkan tipe
+  const renderJawabanInput = () => {
+    if (!soal) return null;
+    const tipe = soal.tipe || "pilihan_ganda";
+
+    // Pilihan Ganda
+    if (tipe === "pilihan_ganda") {
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          {soal.options?.map((opt) => {
+            const isChosen = chosen === opt.label;
+            const isAnswer =
+              (isCorrect || alreadyCorrect) && opt.label === soal.answer;
+            const isWrong =
+              submitted &&
+              !isCorrect &&
+              !alreadyCorrect &&
+              opt.label === chosen;
+            let border = "1px solid #e2ddd5",
+              bg = "white",
+              labelColor = "#6b6860";
+            if (!submitted) {
+              if (isChosen) {
+                border = "2px solid #e84c2b";
+                bg = "#fff3f0";
+                labelColor = "#e84c2b";
+              }
+            } else if (isAnswer) {
+              border = "2px solid #1a8a6e";
+              bg = "#e4f5f0";
+              labelColor = "#1a8a6e";
+            } else if (isWrong) {
+              border = "2px solid #e84c2b";
+              bg = "#fff3f0";
+              labelColor = "#e84c2b";
+            }
+            return (
+              <div
+                key={opt.label}
+                onClick={() =>
+                  !submitted && !alreadyCorrect && setChosen(opt.label)
+                }
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  padding: "13px 16px",
+                  borderRadius: "12px",
+                  cursor: submitted || alreadyCorrect ? "default" : "pointer",
+                  transition: "all .15s",
+                  border,
+                  background: bg,
+                }}
+              >
+                <span
+                  style={{
+                    width: "28px",
+                    height: "28px",
+                    borderRadius: "8px",
+                    border: "2px solid currentColor",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "13px",
+                    fontWeight: "700",
+                    flexShrink: 0,
+                    color: labelColor,
+                  }}
+                >
+                  {opt.label}
+                </span>
+                <span style={{ fontSize: "15px", color: "#0f0e17", flex: 1 }}>
+                  <MathRenderer text={opt.text} />
+                </span>
+                {submitted && isAnswer && (
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: "700",
+                      color: "#1a8a6e",
+                      flexShrink: 0,
+                    }}
+                  >
+                    Benar
+                  </span>
+                )}
+                {submitted && isWrong && (
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: "700",
+                      color: "#e84c2b",
+                      flexShrink: 0,
+                    }}
+                  >
+                    Salah
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // Isian Singkat & Numerik
+    if (tipe === "isian_singkat" || tipe === "isian_numerik") {
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <input
+            value={chosen || ""}
+            onChange={(e) =>
+              !submitted && !alreadyCorrect && setChosen(e.target.value)
+            }
+            disabled={submitted || alreadyCorrect}
+            type={tipe === "isian_numerik" ? "number" : "text"}
+            placeholder={
+              tipe === "isian_numerik"
+                ? "Tulis jawaban angka..."
+                : "Tulis jawabanmu..."
+            }
+            style={{
+              padding: "14px 16px",
+              borderRadius: "12px",
+              fontSize: "16px",
+              outline: "none",
+              fontFamily: "inherit",
+              color: "#0f0e17",
+              border: !submitted
+                ? "2px solid #e2ddd5"
+                : isCorrect || alreadyCorrect
+                ? "2px solid #1a8a6e"
+                : "2px solid #e84c2b",
+              background: !submitted
+                ? "white"
+                : isCorrect || alreadyCorrect
+                ? "#e4f5f0"
+                : "#fff3f0",
+            }}
+            onFocus={(e) => {
+              if (!submitted) e.target.style.borderColor = "#e84c2b";
+            }}
+            onBlur={(e) => {
+              if (!submitted) e.target.style.borderColor = "#e2ddd5";
+            }}
+          />
+          {submitted && !isCorrect && !alreadyCorrect && (
+            <div
+              style={{ fontSize: "13px", color: "#e84c2b", fontWeight: "600" }}
+            >
+              Jawaban kurang tepat, coba lagi.
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Checklist
+    if (tipe === "checklist") {
+      const chosenArr = Array.isArray(chosen) ? chosen : [];
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <div
+            style={{ fontSize: "13px", color: "#6b6860", marginBottom: "4px" }}
+          >
+            Pilih semua jawaban yang benar:
+          </div>
+          {soal.options?.map((opt) => {
+            const isChosen = chosenArr.includes(opt.label);
+            const answerArr = Array.isArray(soal.answer) ? soal.answer : [];
+            const isAnswer =
+              (isCorrect || alreadyCorrect) && answerArr.includes(opt.label);
+            const isWrong =
+              submitted &&
+              !isCorrect &&
+              !alreadyCorrect &&
+              isChosen &&
+              !answerArr.includes(opt.label);
+            let border = "1px solid #e2ddd5",
+              bg = "white",
+              checkBg = "white",
+              checkBorder = "#e2ddd5",
+              checkColor = "transparent";
+            if (!submitted) {
+              if (isChosen) {
+                border = "2px solid #e84c2b";
+                bg = "#fff3f0";
+                checkBg = "#e84c2b";
+                checkBorder = "#e84c2b";
+                checkColor = "white";
+              }
+            } else if (isAnswer) {
+              border = "2px solid #1a8a6e";
+              bg = "#e4f5f0";
+              checkBg = "#1a8a6e";
+              checkBorder = "#1a8a6e";
+              checkColor = "white";
+            } else if (isWrong) {
+              border = "2px solid #e84c2b";
+              bg = "#fff3f0";
+              checkBg = "#e84c2b";
+              checkBorder = "#e84c2b";
+              checkColor = "white";
+            } else if (isChosen) {
+              border = "1px solid #e2ddd5";
+              bg = "white";
+            }
+
+            const toggle = () => {
+              if (submitted || alreadyCorrect) return;
+              setChosen((prev) => {
+                const arr = Array.isArray(prev) ? prev : [];
+                return arr.includes(opt.label)
+                  ? arr.filter((a) => a !== opt.label)
+                  : [...arr, opt.label].sort();
+              });
+            };
+
+            return (
+              <div
+                key={opt.label}
+                onClick={toggle}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  padding: "13px 16px",
+                  borderRadius: "12px",
+                  cursor: submitted || alreadyCorrect ? "default" : "pointer",
+                  transition: "all .15s",
+                  border,
+                  background: bg,
+                }}
+              >
+                <div
+                  style={{
+                    width: "22px",
+                    height: "22px",
+                    borderRadius: "6px",
+                    border: `2px solid ${checkBorder}`,
+                    background: checkBg,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    transition: "all .15s",
+                  }}
+                >
+                  {(isChosen || isAnswer) && (
+                    <span
+                      style={{
+                        color: checkColor,
+                        fontSize: "12px",
+                        fontWeight: "800",
+                      }}
+                    >
+                      ✓
+                    </span>
+                  )}
+                </div>
+                <span
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: "700",
+                    color: "#6b6860",
+                    flexShrink: 0,
+                  }}
+                >
+                  {opt.label}
+                </span>
+                <span style={{ fontSize: "15px", color: "#0f0e17", flex: 1 }}>
+                  <MathRenderer text={opt.text} />
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // Multiple Choice Table
+    if (tipe === "multiple_choice_table") {
+      const chosenObj =
+        typeof chosen === "object" && !Array.isArray(chosen) && chosen !== null
+          ? chosen
+          : {};
+      const cols = soal.options?.[0]?.cols || [];
+      const answerObj =
+        typeof soal.answer === "object" && !Array.isArray(soal.answer)
+          ? soal.answer
+          : {};
+
+      return (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "0",
+            overflowX: "auto",
+          }}
+        >
+          {/* Header */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: `1fr ${cols.map(() => "80px").join(" ")}`,
+              gap: "8px",
+              padding: "10px 14px",
+              background: "#f2efe8",
+              borderRadius: "10px 10px 0 0",
+              marginBottom: "2px",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "12px",
+                fontWeight: "700",
+                color: "#6b6860",
+                textTransform: "uppercase",
+                letterSpacing: ".06em",
+              }}
+            >
+              Pernyataan
+            </div>
+            {cols.map((col) => (
+              <div
+                key={col}
+                style={{
+                  fontSize: "13px",
+                  fontWeight: "700",
+                  color: "#0f0e17",
+                  textAlign: "center",
+                }}
+              >
+                {col}
+              </div>
+            ))}
+          </div>
+
+          {/* Rows */}
+          {soal.options?.map((row, rowIdx) => {
+            const rowAnswer = answerObj[row.label];
+            const rowChosen = chosenObj[row.label];
+            const rowCorrect = submitted && rowChosen === rowAnswer;
+            const rowWrong =
+              submitted &&
+              !isCorrect &&
+              !alreadyCorrect &&
+              rowChosen &&
+              rowChosen !== rowAnswer;
+
+            return (
+              <div
+                key={row.label}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: `1fr ${cols
+                    .map(() => "80px")
+                    .join(" ")}`,
+                  gap: "8px",
+                  padding: "12px 14px",
+                  background: rowIdx % 2 === 0 ? "white" : "#faf9f6",
+                  borderRadius:
+                    rowIdx === soal.options.length - 1 ? "0 0 10px 10px" : "0",
+                  border: "1px solid #f2efe8",
+                  borderTop: "none",
+                  alignItems: "center",
+                }}
+              >
+                <div style={{ fontSize: "14px", color: "#0f0e17" }}>
+                  <MathRenderer text={row.text} />
+                </div>
+                {cols.map((col) => {
+                  const isSelected = rowChosen === col;
+                  const isAns =
+                    (isCorrect || alreadyCorrect) && rowAnswer === col;
+                  const isWrong =
+                    submitted &&
+                    !isCorrect &&
+                    !alreadyCorrect &&
+                    isSelected &&
+                    col !== rowAnswer;
+
+                  let bg = "white",
+                    border = "2px solid #e2ddd5",
+                    color = "#6b6860";
+                  if (!submitted) {
+                    if (isSelected) {
+                      bg = "#fff3f0";
+                      border = "2px solid #e84c2b";
+                      color = "#e84c2b";
+                    }
+                  } else if (isAns) {
+                    bg = "#e4f5f0";
+                    border = "2px solid #1a8a6e";
+                    color = "#1a8a6e";
+                  } else if (isWrong) {
+                    bg = "#fff3f0";
+                    border = "2px solid #e84c2b";
+                    color = "#e84c2b";
+                  } else if (isSelected) {
+                    bg = "white";
+                    border = "2px solid #e2ddd5";
+                    color = "#6b6860";
+                  }
+
+                  return (
+                    <div
+                      key={col}
+                      onClick={() => {
+                        if (submitted || alreadyCorrect) return;
+                        setChosen((prev) => {
+                          const obj =
+                            typeof prev === "object" &&
+                            !Array.isArray(prev) &&
+                            prev !== null
+                              ? prev
+                              : {};
+                          return { ...obj, [row.label]: col };
+                        });
+                      }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "36px",
+                          height: "36px",
+                          borderRadius: "8px",
+                          border,
+                          background: bg,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor:
+                            submitted || alreadyCorrect ? "default" : "pointer",
+                          transition: "all .15s",
+                          fontSize: "13px",
+                          fontWeight: "700",
+                          color,
+                        }}
+                      >
+                        {isSelected || isAns ? col : ""}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
@@ -368,7 +886,11 @@ export default function SoalDetail() {
                     #{kode}
                   </span>
                 </div>
-                <DifficultyBadge level={soal.difficulty} />
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                >
+                  <DifficultyBadge level={soal.difficulty} />
+                </div>
               </div>
 
               {/* Body soal */}
@@ -382,86 +904,8 @@ export default function SoalDetail() {
                 <MathRenderer text={soal.body} block />
               </div>
 
-              {/* Pilihan jawaban */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "10px",
-                }}
-              >
-                {soal.options?.map((opt) => (
-                  <div
-                    key={opt.label}
-                    onClick={() =>
-                      !submitted && !alreadyCorrect && setChosen(opt.label)
-                    }
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      padding: "13px 16px",
-                      borderRadius: "12px",
-                      cursor:
-                        submitted || alreadyCorrect ? "default" : "pointer",
-                      transition: "all .15s",
-                      ...getOptStyle(opt.label),
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: "28px",
-                        height: "28px",
-                        borderRadius: "8px",
-                        border: "2px solid currentColor",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "13px",
-                        fontWeight: "700",
-                        flexShrink: 0,
-                        color: getOptLabelColor(opt.label),
-                      }}
-                    >
-                      {opt.label}
-                    </span>
-                    <span
-                      style={{ fontSize: "15px", color: "#0f0e17", flex: 1 }}
-                    >
-                      <MathRenderer text={opt.text} />
-                    </span>
-                    {submitted &&
-                      (isCorrect || alreadyCorrect) &&
-                      opt.label === soal.answer && (
-                        <span
-                          style={{
-                            fontSize: "12px",
-                            fontWeight: "700",
-                            color: "#1a8a6e",
-                            flexShrink: 0,
-                          }}
-                        >
-                          Benar
-                        </span>
-                      )}
-                    {submitted &&
-                      !isCorrect &&
-                      !alreadyCorrect &&
-                      opt.label === chosen && (
-                        <span
-                          style={{
-                            fontSize: "12px",
-                            fontWeight: "700",
-                            color: "#e84c2b",
-                            flexShrink: 0,
-                          }}
-                        >
-                          Salah
-                        </span>
-                      )}
-                  </div>
-                ))}
-              </div>
+              {/* Input jawaban */}
+              {renderJawabanInput()}
 
               {/* Submit / Coba Lagi */}
               {!alreadyCorrect && (
@@ -469,17 +913,17 @@ export default function SoalDetail() {
                   {!submitted ? (
                     <button
                       onClick={handleSubmit}
-                      disabled={!chosen}
+                      disabled={!isChosenValid()}
                       style={{
                         flex: 1,
                         padding: "12px",
                         borderRadius: "12px",
-                        background: chosen ? "#e84c2b" : "#e2ddd5",
-                        color: chosen ? "white" : "#b4b2a9",
+                        background: isChosenValid() ? "#e84c2b" : "#e2ddd5",
+                        color: isChosenValid() ? "white" : "#b4b2a9",
                         border: "none",
                         fontWeight: "700",
                         fontSize: "15px",
-                        cursor: chosen ? "pointer" : "not-allowed",
+                        cursor: isChosenValid() ? "pointer" : "not-allowed",
                         fontFamily: "inherit",
                         transition: "all .15s",
                       }}
@@ -610,7 +1054,11 @@ export default function SoalDetail() {
                       lineHeight: "1.6",
                     }}
                   >
-                    Pilih jawaban dan klik Submit untuk melihat pembahasan.
+                    {soal.tipe === "multiple_choice_table"
+                      ? "Pilih jawaban untuk setiap pernyataan, lalu klik Submit."
+                      : soal.tipe === "checklist"
+                      ? "Pilih semua jawaban yang benar, lalu klik Submit."
+                      : "Pilih jawaban dan klik Submit untuk melihat pembahasan."}
                   </p>
                 </div>
               ) : !isCorrect && !alreadyCorrect ? (
@@ -692,7 +1140,8 @@ export default function SoalDetail() {
                           marginTop: "2px",
                         }}
                       >
-                        Jawaban yang benar: <strong>{soal.answer}</strong>
+                        Jawaban:{" "}
+                        <strong>{formatAnswer(soal.tipe, soal.answer)}</strong>
                       </div>
                     </div>
                   </div>
@@ -945,8 +1394,6 @@ export default function SoalDetail() {
                       {reportError}
                     </div>
                   )}
-
-                  {/* Soal info */}
                   <div
                     style={{
                       background: "#f2efe8",
@@ -967,8 +1414,6 @@ export default function SoalDetail() {
                       #{kode}
                     </span>
                   </div>
-
-                  {/* Kategori */}
                   <div
                     style={{
                       display: "flex",
@@ -1044,8 +1489,6 @@ export default function SoalDetail() {
                       ))}
                     </div>
                   </div>
-
-                  {/* Deskripsi */}
                   <div
                     style={{
                       display: "flex",
@@ -1090,7 +1533,6 @@ export default function SoalDetail() {
                       onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
                     />
                   </div>
-
                   <div
                     style={{
                       display: "flex",
