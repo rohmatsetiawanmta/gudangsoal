@@ -173,6 +173,8 @@ export default function ProfilePage() {
   useEffect(() => {
     getProfile()
       .then((d) => {
+        console.log("profile data:", d);
+        console.log("xp_history:", d.xp_history);
         setData(d);
         setForm((f) => ({ ...f, name: d.user.name }));
       })
@@ -875,6 +877,124 @@ export default function ProfilePage() {
                   );
                 })}
               </div>
+            </div>
+
+            {/* XP History */}
+            <div>
+              <h2
+                style={{
+                  fontSize: "17px",
+                  fontWeight: "700",
+                  color: "#0f0e17",
+                  marginBottom: "14px",
+                }}
+              >
+                Riwayat XP
+              </h2>
+              {!data?.xp_history?.length ? (
+                <div
+                  style={{
+                    background: "white",
+                    borderRadius: "14px",
+                    border: "1px solid #e2ddd5",
+                    padding: "32px",
+                    textAlign: "center",
+                    color: "#6b6860",
+                    fontSize: "14px",
+                  }}
+                >
+                  Belum ada riwayat XP.
+                </div>
+              ) : (
+                <div
+                  style={{
+                    background: "white",
+                    borderRadius: "14px",
+                    border: "1px solid #e2ddd5",
+                    overflow: "hidden",
+                  }}
+                >
+                  {data.xp_history.map((h, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "14px",
+                        padding: "14px 20px",
+                        borderBottom:
+                          i < data.xp_history.length - 1
+                            ? "1px solid #f2efe8"
+                            : "none",
+                      }}
+                    >
+                      {/* XP badge */}
+                      <div
+                        style={{
+                          width: "40px",
+                          height: "40px",
+                          borderRadius: "10px",
+                          background: "#faeeda",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: "800",
+                            color: "#854F0B",
+                          }}
+                        >
+                          +{h.xp}
+                        </span>
+                      </div>
+
+                      {/* Info */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            color: "#0f0e17",
+                          }}
+                        >
+                          {h.reason}
+                        </div>
+                        {h.soal_kode && (
+                          <div
+                            style={{
+                              fontSize: "12px",
+                              color: "#b4b2a9",
+                              marginTop: "2px",
+                              fontFamily: "monospace",
+                            }}
+                          >
+                            #{h.soal_kode}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Tanggal */}
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: "#b4b2a9",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {new Date(h.created_at).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Riwayat soal */}

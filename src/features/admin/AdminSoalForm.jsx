@@ -6,6 +6,7 @@ import api from "../../lib/api";
 import MathRenderer from "../../components/MathRenderer";
 import MarkdownEditor from "../../components/MarkdownEditor";
 import AdminSoalAI from "./AdminSoalAI";
+import ToggleSwitch from "../../components/ToggleSwitch";
 
 const LABELS = ["A", "B", "C", "D", "E"];
 const emptyOption = (label) => ({ label, text: "" });
@@ -17,6 +18,7 @@ const defaultForm = {
   explanation: "",
   difficulty: 1,
   video_url: "",
+  is_public_explanation: 0,
 };
 
 const DIFFICULTY_MAP = {
@@ -323,6 +325,7 @@ export default function AdminSoalForm() {
           explanation: data.explanation || "",
           difficulty: data.difficulty,
           video_url: data.video_url || "",
+          is_public_explanation: data.is_public_explanation ?? 0,
         });
         const subtopik = struktur.subtopik.find(
           (s) => s.id == data.subtopik_id
@@ -982,6 +985,49 @@ OUTPUT HANYA pembahasan saja dalam format teks, tanpa JSON, tanpa preamble apapu
               placeholder="Tulis pembahasan langkah per langkah... Bisa pakai LaTeX dan Markdown"
               rows={5}
             />
+          </div>
+
+          <div
+            style={{
+              background: "white",
+              borderRadius: "14px",
+              border: "1px solid #e2ddd5",
+              padding: "24px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "700",
+                    color: "#0f0e17",
+                    marginBottom: "4px",
+                  }}
+                >
+                  Pembahasan Publik
+                </div>
+                <div style={{ fontSize: "13px", color: "#6b6860" }}>
+                  User yang belum login bisa lihat pembahasan setelah jawab
+                  benar
+                </div>
+              </div>
+              <ToggleSwitch
+                checked={form.is_public_explanation == 1}
+                onChange={() =>
+                  setForm((f) => ({
+                    ...f,
+                    is_public_explanation: f.is_public_explanation == 1 ? 0 : 1,
+                  }))
+                }
+              />
+            </div>
           </div>
 
           {/* Video Pembahasan */}

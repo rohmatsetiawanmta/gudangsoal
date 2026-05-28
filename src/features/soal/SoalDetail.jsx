@@ -7,6 +7,21 @@ import Breadcrumb from "../../components/Breadcrumb";
 import Navbar from "../../components/Navbar";
 import { getSoalDetail, getSoalStatus } from "./soalApi";
 import { saveSession } from "../profile/profileApi";
+import { useAuthStore } from "../auth/authStore";
+
+const getYouTubeId = (url) => {
+  if (!url) return null;
+  const patterns = [
+    /youtube\.com\/watch\?v=([^&]+)/,
+    /youtu\.be\/([^?]+)/,
+    /youtube\.com\/embed\/([^?]+)/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+};
 
 function DifficultyBadge({ level }) {
   const map = {
@@ -31,24 +46,11 @@ function DifficultyBadge({ level }) {
   );
 }
 
-const getYouTubeId = (url) => {
-  if (!url) return null;
-  const patterns = [
-    /youtube\.com\/watch\?v=([^&]+)/,
-    /youtu\.be\/([^?]+)/,
-    /youtube\.com\/embed\/([^?]+)/,
-  ];
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match) return match[1];
-  }
-  return null;
-};
-
 export default function SoalDetail() {
   const { kode } = useParams();
   const { state } = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuthStore();
 
   const [soal, setSoal] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -70,51 +72,70 @@ export default function SoalDetail() {
     subtopikSlug: state?.subtopikSlug || "",
   });
 
+  const fillBreadcrumb = (data) => {
+    if (!state?.jenjangSlug) {
+      setBreadcrumb({
+        jenjangNama: data.jenjang_nama,
+        jenjangSlug: data.jenjang_slug,
+        subjenjangNama: data.subjenjang_nama,
+        subjenjangSlug: data.subjenjang_slug,
+        mapelNama: data.mapel_nama,
+        mapelSlug: data.mapel_slug,
+        topikNama: data.topik_nama,
+        topikSlug: data.topik_slug,
+        subtopikNama: data.subtopik_nama,
+        subtopikSlug: data.subtopik_slug,
+      });
+    }
+  };
+
   useEffect(() => {
     setChosen(null);
     setSubmitted(false);
     setAlreadyCorrect(false);
     setLoading(true);
 
-    Promise.all([getSoalDetail(kode), getSoalStatus(kode)])
-      .then(([data, status]) => {
-        setSoal(data);
-        if (!state?.jenjangSlug) {
-          setBreadcrumb({
-            jenjangNama: data.jenjang_nama,
-            jenjangSlug: data.jenjang_slug,
-            subjenjangNama: data.subjenjang_nama,
-            subjenjangSlug: data.subjenjang_slug,
-            mapelNama: data.mapel_nama,
-            mapelSlug: data.mapel_slug,
-            topikNama: data.topik_nama,
-            topikSlug: data.topik_slug,
-            subtopikNama: data.subtopik_nama,
-            subtopikSlug: data.subtopik_slug,
-          });
-        }
-        if (status?.answered_correct) {
-          setAlreadyCorrect(true);
-          setSubmitted(true);
-          setChosen(data.answer);
-        }
-      })
-      .catch(() => setError("Gagal memuat soal"))
-      .finally(() => setLoading(false));
-  }, [kode]);
+    if (user) {
+      // User login — fetch soal + status parallel
+      Promise.all([getSoalDetail(kode), getSoalStatus(kode)])
+        .then(([data, status]) => {
+          setSoal(data);
+          fillBreadcrumb(data);
+          if (status?.answered_correct) {
+            setAlreadyCorrect(true);
+            setSubmitted(true);
+            setChosen(data.answer);
+          }
+        })
+        .catch(() => setError("Gagal memuat soal"))
+        .finally(() => setLoading(false));
+    } else {
+      // User tidak login — fetch soal saja
+      getSoalDetail(kode)
+        .then((data) => {
+          setSoal(data);
+          fillBreadcrumb(data);
+        })
+        .catch(() => setError("Gagal memuat soal"))
+        .finally(() => setLoading(false));
+    }
+  }, [kode, user]);
 
   const handleSubmit = async () => {
     if (!chosen || alreadyCorrect) return;
     setSubmitted(true);
 
-    try {
-      await saveSession({
-        soal_id: soal.id,
-        kode: soal.kode,
-        difficulty: soal.difficulty,
-        is_correct: chosen === soal.answer ? 1 : 0,
-      });
-    } catch {}
+    // Save session hanya kalau login
+    if (user) {
+      try {
+        await saveSession({
+          soal_id: soal.id,
+          kode: soal.kode,
+          difficulty: soal.difficulty,
+          is_correct: chosen === soal.answer ? 1 : 0,
+        });
+      } catch {}
+    }
   };
 
   const handleReset = () => {
@@ -130,17 +151,18 @@ export default function SoalDetail() {
         border: chosen === label ? "2px solid #e84c2b" : "1px solid #e2ddd5",
         background: chosen === label ? "#fff3f0" : "white",
       };
-    if (label === soal.answer)
+    if ((isCorrect || alreadyCorrect) && label === soal.answer)
       return { border: "2px solid #1a8a6e", background: "#e4f5f0" };
-    if (label === chosen && !isCorrect)
+    if (!isCorrect && label === chosen)
       return { border: "2px solid #e84c2b", background: "#fff3f0" };
     return { border: "1px solid #e2ddd5", background: "white" };
   };
 
   const getOptLabelColor = (label) => {
     if (!submitted) return chosen === label ? "#e84c2b" : "#6b6860";
-    if (label === soal.answer) return "#1a8a6e";
-    if (label === chosen && !isCorrect) return "#e84c2b";
+    if ((isCorrect || alreadyCorrect) && label === soal.answer)
+      return "#1a8a6e";
+    if (!isCorrect && label === chosen) return "#e84c2b";
     return "#6b6860";
   };
 
@@ -158,6 +180,8 @@ export default function SoalDetail() {
   } = breadcrumb;
 
   const backUrl = `/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}/${topikSlug}/${subtopikSlug}`;
+
+  const showPembahasan = user || soal?.is_public_explanation == 1;
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
@@ -292,7 +316,7 @@ export default function SoalDetail() {
                       color: "#6b6860",
                     }}
                   >
-                    Soal
+                    {mapelNama || "Soal"}
                   </span>
                   <span
                     style={{
@@ -366,22 +390,24 @@ export default function SoalDetail() {
                     >
                       <MathRenderer text={opt.text} />
                     </span>
-                    {submitted && opt.label === soal.answer && (
-                      <span
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: "700",
-                          color: "#1a8a6e",
-                          flexShrink: 0,
-                        }}
-                      >
-                        ✓ Benar
-                      </span>
-                    )}
                     {submitted &&
-                      opt.label === chosen &&
+                      (isCorrect || alreadyCorrect) &&
+                      opt.label === soal.answer && (
+                        <span
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: "700",
+                            color: "#1a8a6e",
+                            flexShrink: 0,
+                          }}
+                        >
+                          Benar
+                        </span>
+                      )}
+                    {submitted &&
                       !isCorrect &&
-                      opt.label !== soal.answer && (
+                      !alreadyCorrect &&
+                      opt.label === chosen && (
                         <span
                           style={{
                             fontSize: "12px",
@@ -390,14 +416,14 @@ export default function SoalDetail() {
                             flexShrink: 0,
                           }}
                         >
-                          ✗ Salah
+                          Salah
                         </span>
                       )}
                   </div>
                 ))}
               </div>
 
-              {/* Submit / Reset */}
+              {/* Submit / Coba Lagi */}
               {!alreadyCorrect && (
                 <div style={{ display: "flex", gap: "10px" }}>
                   {!submitted ? (
@@ -420,7 +446,7 @@ export default function SoalDetail() {
                     >
                       Submit Jawaban
                     </button>
-                  ) : (
+                  ) : !isCorrect ? (
                     <button
                       onClick={handleReset}
                       style={{
@@ -438,7 +464,7 @@ export default function SoalDetail() {
                     >
                       Coba Lagi
                     </button>
-                  )}
+                  ) : null}
                 </div>
               )}
 
@@ -483,6 +509,7 @@ export default function SoalDetail() {
               }}
             >
               {!submitted ? (
+                // Belum jawab
                 <div
                   style={{
                     textAlign: "center",
@@ -514,11 +541,47 @@ export default function SoalDetail() {
                       lineHeight: "1.6",
                     }}
                   >
-                    Pilih jawaban dan klik Submit untuk melihat pembahasan
-                    lengkap.
+                    Pilih jawaban dan klik Submit untuk melihat pembahasan.
+                  </p>
+                </div>
+              ) : !isCorrect && !alreadyCorrect ? (
+                // Jawab salah
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "48px 24px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <XCircle
+                    size={36}
+                    color="#e84c2b"
+                    style={{ marginBottom: "16px" }}
+                  />
+                  <p
+                    style={{
+                      fontSize: "15px",
+                      fontWeight: "600",
+                      color: "#0f0e17",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    Jawaban kurang tepat
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "14px",
+                      color: "#6b6860",
+                      lineHeight: "1.6",
+                    }}
+                  >
+                    Coba lagi untuk melihat pembahasan.
                   </p>
                 </div>
               ) : (
+                // Jawab benar
                 <div
                   style={{
                     display: "flex",
@@ -531,44 +594,34 @@ export default function SoalDetail() {
                     style={{
                       padding: "16px",
                       borderRadius: "12px",
-                      background: isCorrect ? "#e4f5f0" : "#fff3f0",
-                      border: `1px solid ${isCorrect ? "#9FE1CB" : "#fca5a5"}`,
+                      background: "#e4f5f0",
+                      border: "1px solid #9FE1CB",
                       display: "flex",
                       alignItems: "center",
                       gap: "12px",
                     }}
                   >
-                    {isCorrect ? (
-                      <CheckCircle
-                        size={24}
-                        color="#1a8a6e"
-                        style={{ flexShrink: 0 }}
-                      />
-                    ) : (
-                      <XCircle
-                        size={24}
-                        color="#e84c2b"
-                        style={{ flexShrink: 0 }}
-                      />
-                    )}
+                    <CheckCircle
+                      size={24}
+                      color="#1a8a6e"
+                      style={{ flexShrink: 0 }}
+                    />
                     <div>
                       <div
                         style={{
                           fontWeight: "700",
                           fontSize: "15px",
-                          color: isCorrect ? "#0F6E56" : "#b91c1c",
+                          color: "#0F6E56",
                         }}
                       >
                         {alreadyCorrect
                           ? "Sudah pernah dijawab benar!"
-                          : isCorrect
-                          ? "Jawaban benar!"
-                          : "Jawaban kurang tepat"}
+                          : "Jawaban benar!"}
                       </div>
                       <div
                         style={{
                           fontSize: "13px",
-                          color: isCorrect ? "#1a8a6e" : "#e84c2b",
+                          color: "#1a8a6e",
                           marginTop: "2px",
                         }}
                       >
@@ -577,8 +630,8 @@ export default function SoalDetail() {
                     </div>
                   </div>
 
-                  {/* Pembahasan */}
-                  {soal.explanation ? (
+                  {/* Pembahasan — login ATAU is_public_explanation */}
+                  {showPembahasan && soal.explanation && (
                     <div>
                       <div
                         style={{
@@ -596,7 +649,9 @@ export default function SoalDetail() {
                         <MathRenderer text={soal.explanation} block />
                       </div>
                     </div>
-                  ) : (
+                  )}
+
+                  {!showPembahasan && !soal.explanation && (
                     <div
                       style={{
                         fontSize: "14px",
@@ -608,39 +663,114 @@ export default function SoalDetail() {
                     </div>
                   )}
 
-                  {/* Video Pembahasan */}
-                  {soal.video_url && getYouTubeId(soal.video_url) && (
-                    <div>
+                  {/* Video — login ATAU is_public_explanation */}
+                  {showPembahasan &&
+                    soal.video_url &&
+                    getYouTubeId(soal.video_url) && (
+                      <div>
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: "700",
+                            letterSpacing: ".08em",
+                            textTransform: "uppercase",
+                            color: "#6b6860",
+                            marginBottom: "12px",
+                          }}
+                        >
+                          Video Pembahasan
+                        </div>
+                        <div
+                          style={{
+                            borderRadius: "12px",
+                            overflow: "hidden",
+                            aspectRatio: "16/9",
+                          }}
+                        >
+                          <iframe
+                            width="100%"
+                            height="100%"
+                            src={`https://www.youtube.com/embed/${getYouTubeId(
+                              soal.video_url
+                            )}`}
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            style={{ display: "block" }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                  {/* Banner daftar — selalu muncul kalau tidak login */}
+                  {!user && (
+                    <div
+                      style={{
+                        padding: "16px",
+                        borderRadius: "12px",
+                        background: "#f2efe8",
+                        border: "1px solid #e2ddd5",
+                      }}
+                    >
                       <div
                         style={{
-                          fontSize: "12px",
-                          fontWeight: "700",
-                          letterSpacing: ".08em",
-                          textTransform: "uppercase",
+                          fontSize: "14px",
+                          fontWeight: "600",
+                          color: "#0f0e17",
+                          marginBottom: "6px",
+                        }}
+                      >
+                        {soal.is_public_explanation == 1
+                          ? "Simpan progress & dapat XP"
+                          : "Daftar untuk lihat pembahasan lengkap"}
+                      </div>
+                      <p
+                        style={{
+                          fontSize: "13px",
                           color: "#6b6860",
+                          lineHeight: "1.5",
                           marginBottom: "12px",
                         }}
                       >
-                        Video Pembahasan
-                      </div>
-                      <div
-                        style={{
-                          borderRadius: "12px",
-                          overflow: "hidden",
-                          aspectRatio: "16/9",
-                        }}
-                      >
-                        <iframe
-                          width="100%"
-                          height="100%"
-                          src={`https://www.youtube.com/embed/${getYouTubeId(
-                            soal.video_url
-                          )}`}
-                          frameBorder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          style={{ display: "block" }}
-                        />
+                        {soal.is_public_explanation == 1
+                          ? "Daftar gratis untuk menyimpan riwayat jawaban dan mendapatkan XP setiap soal yang benar."
+                          : "Daftar gratis untuk melihat pembahasan lengkap, menyimpan progress, dan mendapatkan XP."}
+                      </p>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <button
+                          onClick={() => navigate("/register")}
+                          style={{
+                            flex: 1,
+                            padding: "9px",
+                            borderRadius: "10px",
+                            border: "none",
+                            background: "#e84c2b",
+                            color: "white",
+                            fontSize: "13px",
+                            fontWeight: "600",
+                            cursor: "pointer",
+                            fontFamily: "inherit",
+                          }}
+                        >
+                          Daftar Gratis
+                        </button>
+                        <button
+                          onClick={() => navigate("/login")}
+                          style={{
+                            flex: 1,
+                            padding: "9px",
+                            borderRadius: "10px",
+                            border: "1px solid #e2ddd5",
+                            background: "white",
+                            color: "#0f0e17",
+                            fontSize: "13px",
+                            fontWeight: "600",
+                            cursor: "pointer",
+                            fontFamily: "inherit",
+                          }}
+                        >
+                          Masuk
+                        </button>
                       </div>
                     </div>
                   )}

@@ -47,29 +47,29 @@ export default function App() {
 
       <Route element={<ProtectedRoute />}>
         <Route path="/home" element={<HomePage />} />
-        <Route path="/browse" element={<BrowseJenjang />} />
-        <Route path="/browse/:jenjangSlug" element={<BrowseSubjenjang />} />
-        <Route
-          path="/browse/:jenjangSlug/:subjenjangSlug"
-          element={<BrowseMapel />}
-        />
-        <Route
-          path="/browse/:jenjangSlug/:subjenjangSlug/:mapelSlug"
-          element={<BrowseTopik />}
-        />
-        <Route
-          path="/browse/:jenjangSlug/:subjenjangSlug/:mapelSlug/:topikSlug"
-          element={<BrowseSubtopik />}
-        />
-        <Route
-          path="/browse/:jenjangSlug/:subjenjangSlug/:mapelSlug/:topikSlug/:subtopikSlug"
-          element={<BrowseSoal />}
-        />
-        <Route path="/soal/:kode" element={<SoalDetail />} />
-
         <Route path="/search" element={<SearchPage />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Route>
+
+      <Route path="/browse" element={<BrowseJenjang />} />
+      <Route path="/browse/:jenjangSlug" element={<BrowseSubjenjang />} />
+      <Route
+        path="/browse/:jenjangSlug/:subjenjangSlug"
+        element={<BrowseMapel />}
+      />
+      <Route
+        path="/browse/:jenjangSlug/:subjenjangSlug/:mapelSlug"
+        element={<BrowseTopik />}
+      />
+      <Route
+        path="/browse/:jenjangSlug/:subjenjangSlug/:mapelSlug/:topikSlug"
+        element={<BrowseSubtopik />}
+      />
+      <Route
+        path="/browse/:jenjangSlug/:subjenjangSlug/:mapelSlug/:topikSlug/:subtopikSlug"
+        element={<BrowseSoal />}
+      />
+      <Route path="/soal/:kode" element={<SoalDetail />} />
 
       <Route path="*" element={<Navigate to="/" />} />
 
