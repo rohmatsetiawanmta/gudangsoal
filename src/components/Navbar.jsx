@@ -11,17 +11,20 @@ import {
   ChevronDown,
   LayoutDashboard,
   Warehouse,
+  Flame,
 } from "lucide-react";
 import { useAuthStore } from "../features/auth/authStore";
 
-const NAV_LINKS = [
+const NAV_LINKS = [{ to: "/browse", label: "Direktori Soal", icon: BookOpen }];
+
+const NAV_LINKS_LOGGED_IN = [
   { to: "/home", label: "Beranda", icon: Home },
   { to: "/browse", label: "Direktori Soal", icon: BookOpen },
 ];
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user, isLoggedIn, logout } = useAuthStore();
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,7 +33,6 @@ export default function Navbar() {
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
 
-  // Close dropdown saat klik di luar
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -41,7 +43,6 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Focus input saat search dibuka
   useEffect(() => {
     if (searchOpen) searchRef.current?.focus();
   }, [searchOpen]);
@@ -59,6 +60,8 @@ export default function Navbar() {
     logout();
     navigate("/");
   };
+
+  const navLinks = isLoggedIn ? NAV_LINKS_LOGGED_IN : NAV_LINKS;
 
   return (
     <nav
@@ -78,7 +81,7 @@ export default function Navbar() {
       {/* Kiri — Logo + Nav links */}
       <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
         <Link
-          to="/home"
+          to={isLoggedIn ? "/home" : "/"}
           style={{
             display: "flex",
             alignItems: "center",
@@ -111,7 +114,7 @@ export default function Navbar() {
         </Link>
 
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-          {NAV_LINKS.map(({ to, label, icon: Icon }) => (
+          {navLinks.map(({ to, label, icon: Icon }) => (
             <Link
               key={to}
               to={to}
@@ -143,7 +146,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Kanan — Search + Avatar */}
+      {/* Kanan */}
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         {/* Search */}
         {searchOpen ? (
@@ -230,201 +233,257 @@ export default function Navbar() {
           </button>
         )}
 
-        {/* Avatar + Dropdown */}
-        <div ref={dropdownRef} style={{ position: "relative" }}>
-          <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "4px 8px 4px 4px",
-              borderRadius: "10px",
-              border: "1px solid #e2ddd5",
-              background: "none",
-              cursor: "pointer",
-              transition: "background .15s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#f2efe8")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
-          >
-            <div
+        {/* Kalau tidak login — tombol Masuk + Daftar */}
+        {!isLoggedIn ? (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <button
+              onClick={() => navigate("/login")}
               style={{
-                width: "28px",
-                height: "28px",
-                borderRadius: "8px",
+                padding: "7px 16px",
+                borderRadius: "10px",
+                border: "1px solid #e2ddd5",
+                background: "white",
+                fontSize: "14px",
+                fontWeight: "600",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                color: "#0f0e17",
+                transition: "all .15s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "#f2efe8")
+              }
+              onMouseLeave={(e) => (e.currentTarget.style.background = "white")}
+            >
+              Masuk
+            </button>
+            <button
+              onClick={() => navigate("/register")}
+              style={{
+                padding: "7px 16px",
+                borderRadius: "10px",
+                border: "none",
                 background: "#e84c2b",
+                fontSize: "14px",
+                fontWeight: "600",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                color: "white",
+                transition: "all .15s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "#c43d20")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "#e84c2b")
+              }
+            >
+              Daftar
+            </button>
+          </div>
+        ) : (
+          /* Avatar + Dropdown */
+          <div ref={dropdownRef} style={{ position: "relative" }}>
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              style={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontWeight: "700",
-                fontSize: "13px",
-              }}
-            >
-              {user?.name?.[0]?.toUpperCase() || "U"}
-            </div>
-            <span
-              style={{
-                fontSize: "14px",
-                fontWeight: "500",
-                color: "#0f0e17",
-                maxWidth: "100px",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {user?.name?.split(" ")[0] || "User"}
-            </span>
-            <ChevronDown
-              size={14}
-              color="#6b6860"
-              style={{
-                transform: dropdownOpen ? "rotate(180deg)" : "rotate(0)",
-                transition: "transform .2s",
-              }}
-            />
-          </button>
-
-          {/* Dropdown menu */}
-          {dropdownOpen && (
-            <div
-              style={{
-                position: "absolute",
-                top: "calc(100% + 8px)",
-                right: 0,
-                background: "white",
+                gap: "8px",
+                padding: "4px 8px 4px 4px",
+                borderRadius: "10px",
                 border: "1px solid #e2ddd5",
-                borderRadius: "14px",
-                padding: "8px",
-                minWidth: "200px",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
-                zIndex: 200,
+                background: "none",
+                cursor: "pointer",
+                transition: "background .15s",
               }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "#f2efe8")
+              }
+              onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
             >
-              {/* User info */}
               <div
                 style={{
-                  padding: "10px 12px 12px",
-                  borderBottom: "1px solid #f2efe8",
-                  marginBottom: "6px",
+                  width: "28px",
+                  height: "28px",
+                  borderRadius: "8px",
+                  background: "#e84c2b",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "white",
+                  fontWeight: "700",
+                  fontSize: "13px",
                 }}
               >
-                <div
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: "#0f0e17",
-                  }}
-                >
-                  {user?.name}
-                </div>
-                <div
-                  style={{
-                    fontSize: "12px",
-                    color: "#6b6860",
-                    marginTop: "2px",
-                  }}
-                >
-                  {user?.email}
-                </div>
-                <div
-                  style={{ display: "flex", gap: "10px", marginTop: "10px" }}
-                >
-                  <div
-                    style={{
-                      background: "#fff3f0",
-                      borderRadius: "8px",
-                      padding: "5px 10px",
-                      fontSize: "12px",
-                      fontWeight: "700",
-                      color: "#e84c2b",
-                    }}
-                  >
-                    {user?.xp || 0} XP
-                  </div>
-                  <div
-                    style={{
-                      background: "#fff3f0",
-                      borderRadius: "8px",
-                      padding: "5px 10px",
-                      fontSize: "12px",
-                      fontWeight: "700",
-                      color: "#e84c2b",
-                    }}
-                  >
-                    🔥 {user?.streak || 0} hari
-                  </div>
-                </div>
+                {user?.name?.[0]?.toUpperCase() || "U"}
               </div>
+              <span
+                style={{
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  color: "#0f0e17",
+                  maxWidth: "100px",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {user?.name?.split(" ")[0] || "User"}
+              </span>
+              <ChevronDown
+                size={14}
+                color="#6b6860"
+                style={{
+                  transform: dropdownOpen ? "rotate(180deg)" : "rotate(0)",
+                  transition: "transform .2s",
+                }}
+              />
+            </button>
 
-              {/* Menu items */}
-              {[
-                ...(user?.role === "admin"
-                  ? [
-                      {
-                        icon: LayoutDashboard,
-                        label: "Admin Panel",
-                        onClick: () => {
-                          navigate("/admin");
-                          setDropdownOpen(false);
-                        },
-                        danger: false,
-                      },
-                    ]
-                  : []),
-                {
-                  icon: User,
-                  label: "Profile",
-                  onClick: () => {
-                    navigate("/profile");
-                    setDropdownOpen(false);
-                  },
-                },
-                {
-                  icon: LogOut,
-                  label: "Keluar",
-                  onClick: handleLogout,
-                  danger: true,
-                },
-              ].map(({ icon: Icon, label, onClick, danger }) => (
-                <button
-                  key={label}
-                  onClick={onClick}
+            {dropdownOpen && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 8px)",
+                  right: 0,
+                  background: "white",
+                  border: "1px solid #e2ddd5",
+                  borderRadius: "14px",
+                  padding: "8px",
+                  minWidth: "200px",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+                  zIndex: 200,
+                }}
+              >
+                {/* User info */}
+                <div
                   style={{
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    padding: "9px 12px",
-                    borderRadius: "8px",
-                    border: "none",
-                    background: "none",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    color: danger ? "#e84c2b" : "#0f0e17",
-                    fontFamily: "inherit",
-                    textAlign: "left",
-                    transition: "background .15s",
+                    padding: "10px 12px 12px",
+                    borderBottom: "1px solid #f2efe8",
+                    marginBottom: "6px",
                   }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.background = danger
-                      ? "#fff3f0"
-                      : "#f2efe8")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.background = "none")
-                  }
                 >
-                  <Icon size={15} />
-                  {label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      color: "#0f0e17",
+                    }}
+                  >
+                    {user?.name}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#6b6860",
+                      marginTop: "2px",
+                    }}
+                  >
+                    {user?.email}
+                  </div>
+                  <div
+                    style={{ display: "flex", gap: "8px", marginTop: "10px" }}
+                  >
+                    <div
+                      style={{
+                        background: "#fff3f0",
+                        borderRadius: "8px",
+                        padding: "5px 10px",
+                        fontSize: "12px",
+                        fontWeight: "700",
+                        color: "#e84c2b",
+                      }}
+                    >
+                      {user?.xp || 0} XP
+                    </div>
+                    <div
+                      style={{
+                        background: "#fff3f0",
+                        borderRadius: "8px",
+                        padding: "5px 10px",
+                        fontSize: "12px",
+                        fontWeight: "700",
+                        color: "#e84c2b",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                    >
+                      <Flame size={12} />
+                      {user?.streak || 0} hari
+                    </div>
+                  </div>
+                </div>
+
+                {/* Menu items */}
+                {[
+                  ...(user?.role === "admin"
+                    ? [
+                        {
+                          icon: LayoutDashboard,
+                          label: "Admin Panel",
+                          onClick: () => {
+                            navigate("/admin");
+                            setDropdownOpen(false);
+                          },
+                          danger: false,
+                        },
+                      ]
+                    : []),
+                  {
+                    icon: User,
+                    label: "Profile",
+                    onClick: () => {
+                      navigate("/profile");
+                      setDropdownOpen(false);
+                    },
+                    danger: false,
+                  },
+                  {
+                    icon: LogOut,
+                    label: "Keluar",
+                    onClick: handleLogout,
+                    danger: true,
+                  },
+                ].map(({ icon: Icon, label, onClick, danger }) => (
+                  <button
+                    key={label}
+                    onClick={onClick}
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "9px 12px",
+                      borderRadius: "8px",
+                      border: "none",
+                      background: "none",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                      color: danger ? "#e84c2b" : "#0f0e17",
+                      fontFamily: "inherit",
+                      textAlign: "left",
+                      transition: "background .15s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.background = danger
+                        ? "#fff3f0"
+                        : "#f2efe8")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background = "none")
+                    }
+                  >
+                    <Icon size={15} />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </nav>
   );

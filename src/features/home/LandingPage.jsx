@@ -15,27 +15,29 @@ import {
   Users,
 } from "lucide-react";
 import api from "../../lib/api";
+import Navbar from "../../components/Navbar";
 
 const JENJANG = [
-  { slug: "sd", label: "SD", desc: "Kelas 1–6", color: "#e84c2b" },
-  { slug: "smp", label: "SMP", desc: "Kelas 7–9", color: "#2563eb" },
-  { slug: "sma", label: "SMA", desc: "Kelas 10–12", color: "#1a8a6e" },
+  //   { slug: "sd", label: "SD", desc: "Kelas 1–6", color: "#e84c2b" },
+  //   { slug: "smp", label: "SMP", desc: "Kelas 7–9", color: "#2563eb" },
+  //   { slug: "sma", label: "SMA", desc: "Kelas 10–12", color: "#1a8a6e" },
   { slug: "utbk", label: "UTBK", desc: "Persiapan PTN", color: "#f5a623" },
-  { slug: "cpns", label: "CPNS", desc: "TIU Numerik", color: "#7c3aed" },
-  { slug: "osn", label: "OSN", desc: "Olimpiade", color: "#db2777" },
+  //   { slug: "cpns", label: "CPNS", desc: "TIU Numerik", color: "#7c3aed" },
+  //   { slug: "osn", label: "OSN", desc: "Olimpiade", color: "#db2777" },
 ];
 
 const FITUR = [
   {
     icon: BookOpen,
     label: "Bank Soal Lengkap",
-    desc: "Ribuan soal matematika dari SD hingga persiapan UTBK, CPNS, dan OSN yang terus diperbarui.",
+    // desc: "Ribuan soal matematika dari SD hingga persiapan UTBK, CPNS, dan OSN yang terus diperbarui.",
+    desc: "Soal-soal persiapan UTBK yang terus diperbarui.",
     color: "#e84c2b",
   },
   {
     icon: Target,
     label: "Pembahasan Detail",
-    desc: "Setiap soal dilengkapi pembahasan langkah per langkah dengan rumus LaTeX yang mudah dipahami.",
+    desc: "Setiap soal dilengkapi pembahasan langkah per langkah yang mudah dipahami.",
     color: "#2563eb",
   },
   {
@@ -117,97 +119,7 @@ export default function LandingPage() {
       }}
     >
       {/* Navbar */}
-      <nav
-        style={{
-          background: "white",
-          borderBottom: "1px solid #e2ddd5",
-          position: "sticky",
-          top: 0,
-          zIndex: 100,
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1100px",
-            margin: "0 auto",
-            padding: "0 40px",
-            height: "64px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div
-              style={{
-                width: "34px",
-                height: "34px",
-                background: "#e84c2b",
-                borderRadius: "10px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontWeight: "800",
-                fontSize: "13px",
-              }}
-            >
-              GS
-            </div>
-            <span
-              style={{ fontWeight: "700", fontSize: "17px", color: "#0f0e17" }}
-            >
-              Gudang Soal
-            </span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <button
-              onClick={() => navigate("/login")}
-              style={{
-                padding: "8px 20px",
-                borderRadius: "10px",
-                border: "1px solid #e2ddd5",
-                background: "white",
-                fontSize: "14px",
-                fontWeight: "600",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                color: "#0f0e17",
-                transition: "all .15s",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "#f2efe8")
-              }
-              onMouseLeave={(e) => (e.currentTarget.style.background = "white")}
-            >
-              Masuk
-            </button>
-            <button
-              onClick={() => navigate("/register")}
-              style={{
-                padding: "8px 20px",
-                borderRadius: "10px",
-                border: "none",
-                background: "#e84c2b",
-                fontSize: "14px",
-                fontWeight: "600",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                color: "white",
-                transition: "all .15s",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "#c43d20")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "#e84c2b")
-              }
-            >
-              Daftar Gratis
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero */}
       <section
@@ -250,7 +162,7 @@ export default function LandingPage() {
             }}
           >
             Kuasai Matematika dengan{" "}
-            <span style={{ color: "#e84c2b" }}>Ribuan Soal</span> Berkualitas
+            <span style={{ color: "#e84c2b" }}>Soal-Soal</span> Berkualitas
           </h1>
           <p
             style={{
@@ -260,8 +172,9 @@ export default function LandingPage() {
               marginBottom: "36px",
             }}
           >
-            Latihan soal dari SD hingga UTBK, CPNS, dan OSN. Dilengkapi
-            pembahasan detail, sistem XP, dan tracking progress belajarmu.
+            Latihan soal {/*dari SD hingga*/} UTBK{/*}, CPNS, dan OSN*/}.
+            Dilengkapi pembahasan detail, sistem XP, dan tracking progress
+            belajarmu.
           </p>
           <div
             style={{
@@ -494,8 +407,8 @@ export default function LandingPage() {
                 lineHeight: "1.7",
               }}
             >
-              Dari soal dasar SD hingga persiapan seleksi nasional — semua ada
-              di sini.
+              {/* Dari soal dasar SD hingga persiapan seleksi nasional — semua ada
+              di sini. */}
             </p>
           </div>
           <div
@@ -722,7 +635,7 @@ export default function LandingPage() {
             <span
               style={{ fontSize: "13px", fontWeight: "600", color: "#e84c2b" }}
             >
-              Gratis selamanya
+              Gratis
             </span>
           </div>
           <h2
@@ -745,8 +658,8 @@ export default function LandingPage() {
               lineHeight: "1.7",
             }}
           >
-            Bergabung dengan ribuan pelajar yang sudah berlatih di Gudang Soal.
-            Gratis, tanpa syarat.
+            {/* Bergabung dengan ribuan pelajar yang sudah berlatih di Gudang Soal. */}
+            Bergabung dengan Gudang Soal. Gratis, tanpa syarat.
           </p>
           <button
             onClick={() => navigate("/register")}
@@ -768,7 +681,7 @@ export default function LandingPage() {
             onMouseEnter={(e) => (e.currentTarget.style.background = "#c43d20")}
             onMouseLeave={(e) => (e.currentTarget.style.background = "#e84c2b")}
           >
-            Daftar Sekarang — Gratis
+            Daftar Gratis Sekarang
             <ArrowRight size={18} />
           </button>
         </div>
