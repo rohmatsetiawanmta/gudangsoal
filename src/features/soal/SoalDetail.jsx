@@ -1,13 +1,14 @@
 // src/features/soal/SoalDetail.jsx
 import { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { ChevronLeft, Lock, CheckCircle, XCircle } from "lucide-react";
+import { ChevronLeft, Lock, CheckCircle, XCircle, Flag, X } from "lucide-react";
 import MathRenderer from "../../components/MathRenderer";
 import Breadcrumb from "../../components/Breadcrumb";
 import Navbar from "../../components/Navbar";
 import { getSoalDetail, getSoalStatus } from "./soalApi";
 import { saveSession } from "../profile/profileApi";
 import { useAuthStore } from "../auth/authStore";
+import api from "../../lib/api";
 
 const getYouTubeId = (url) => {
   if (!url) return null;
@@ -22,6 +23,16 @@ const getYouTubeId = (url) => {
   }
   return null;
 };
+
+const KATEGORI_REPORT = [
+  { value: "soal_salah", label: "Soal salah / ambigu" },
+  { value: "jawaban_salah", label: "Jawaban salah" },
+  { value: "pembahasan_salah", label: "Pembahasan salah" },
+  { value: "typo", label: "Typo / salah ketik" },
+  { value: "latex_error", label: "Rumus LaTeX error" },
+  { value: "duplikat", label: "Soal duplikat" },
+  { value: "lainnya", label: "Lainnya" },
+];
 
 function DifficultyBadge({ level }) {
   const map = {
@@ -58,6 +69,13 @@ export default function SoalDetail() {
   const [chosen, setChosen] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [alreadyCorrect, setAlreadyCorrect] = useState(false);
+
+  // Report state
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportForm, setReportForm] = useState({ kategori: "", deskripsi: "" });
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState("");
+  const [reportError, setReportError] = useState("");
 
   const [breadcrumb, setBreadcrumb] = useState({
     jenjangNama: state?.jenjangNama || "",
@@ -96,7 +114,6 @@ export default function SoalDetail() {
     setLoading(true);
 
     if (user) {
-      // User login — fetch soal + status parallel
       Promise.all([getSoalDetail(kode), getSoalStatus(kode)])
         .then(([data, status]) => {
           setSoal(data);
@@ -110,7 +127,6 @@ export default function SoalDetail() {
         .catch(() => setError("Gagal memuat soal"))
         .finally(() => setLoading(false));
     } else {
-      // User tidak login — fetch soal saja
       getSoalDetail(kode)
         .then((data) => {
           setSoal(data);
@@ -125,7 +141,6 @@ export default function SoalDetail() {
     if (!chosen || alreadyCorrect) return;
     setSubmitted(true);
 
-    // Save session hanya kalau login
     if (user) {
       try {
         await saveSession({
@@ -143,7 +158,34 @@ export default function SoalDetail() {
     setSubmitted(false);
   };
 
+  const handleReport = async () => {
+    if (!reportForm.kategori) {
+      setReportError("Pilih kategori laporan");
+      return;
+    }
+    setReportLoading(true);
+    setReportError("");
+    try {
+      await api.post("/report", {
+        soal_kode: kode,
+        kategori: reportForm.kategori,
+        deskripsi: reportForm.deskripsi || null,
+      });
+      setReportSuccess("Laporan berhasil dikirim, terima kasih!");
+      setReportForm({ kategori: "", deskripsi: "" });
+      setTimeout(() => {
+        setReportOpen(false);
+        setReportSuccess("");
+      }, 2000);
+    } catch (err) {
+      setReportError(err.error || "Gagal mengirim laporan");
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
   const isCorrect = chosen === soal?.answer;
+  const showPembahasan = user || soal?.is_public_explanation == 1;
 
   const getOptStyle = (label) => {
     if (!submitted)
@@ -180,8 +222,6 @@ export default function SoalDetail() {
   } = breadcrumb;
 
   const backUrl = `/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}/${topikSlug}/${subtopikSlug}`;
-
-  const showPembahasan = user || soal?.is_public_explanation == 1;
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
@@ -473,6 +513,7 @@ export default function SoalDetail() {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
+                  alignItems: "center",
                   paddingTop: "8px",
                   borderTop: "1px solid #f2efe8",
                 }}
@@ -494,6 +535,35 @@ export default function SoalDetail() {
                 >
                   <ChevronLeft size={16} /> Kembali
                 </button>
+                <button
+                  onClick={() => {
+                    setReportOpen(true);
+                    setReportError("");
+                    setReportSuccess("");
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#b4b2a9",
+                    fontSize: "13px",
+                    fontFamily: "inherit",
+                    padding: 0,
+                    transition: "color .15s",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.color = "#e84c2b")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.color = "#b4b2a9")
+                  }
+                >
+                  <Flag size={13} />
+                  Laporkan soal
+                </button>
               </div>
             </div>
 
@@ -509,7 +579,6 @@ export default function SoalDetail() {
               }}
             >
               {!submitted ? (
-                // Belum jawab
                 <div
                   style={{
                     textAlign: "center",
@@ -545,7 +614,6 @@ export default function SoalDetail() {
                   </p>
                 </div>
               ) : !isCorrect && !alreadyCorrect ? (
-                // Jawab salah
                 <div
                   style={{
                     textAlign: "center",
@@ -581,7 +649,6 @@ export default function SoalDetail() {
                   </p>
                 </div>
               ) : (
-                // Jawab benar
                 <div
                   style={{
                     display: "flex",
@@ -630,7 +697,7 @@ export default function SoalDetail() {
                     </div>
                   </div>
 
-                  {/* Pembahasan — login ATAU is_public_explanation */}
+                  {/* Pembahasan */}
                   {showPembahasan && soal.explanation && (
                     <div>
                       <div
@@ -663,7 +730,7 @@ export default function SoalDetail() {
                     </div>
                   )}
 
-                  {/* Video — login ATAU is_public_explanation */}
+                  {/* Video */}
                   {showPembahasan &&
                     soal.video_url &&
                     getYouTubeId(soal.video_url) && (
@@ -702,7 +769,7 @@ export default function SoalDetail() {
                       </div>
                     )}
 
-                  {/* Banner daftar — selalu muncul kalau tidak login */}
+                  {/* Banner daftar — kalau tidak login */}
                   {!user && (
                     <div
                       style={{
@@ -774,6 +841,306 @@ export default function SoalDetail() {
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Modal Report */}
+        {reportOpen && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.5)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 300,
+              padding: "24px",
+            }}
+          >
+            <div
+              style={{
+                background: "white",
+                borderRadius: "16px",
+                padding: "28px",
+                maxWidth: "440px",
+                width: "100%",
+                maxHeight: "90vh",
+                overflowY: "auto",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: "20px",
+                }}
+              >
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                >
+                  <Flag size={18} color="#e84c2b" />
+                  <h3
+                    style={{
+                      fontSize: "17px",
+                      fontWeight: "800",
+                      color: "#0f0e17",
+                    }}
+                  >
+                    Laporkan Soal
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setReportOpen(false)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#6b6860",
+                    display: "flex",
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {reportSuccess ? (
+                <div
+                  style={{
+                    background: "#e4f5f0",
+                    border: "1px solid #9FE1CB",
+                    color: "#0F6E56",
+                    fontSize: "14px",
+                    borderRadius: "12px",
+                    padding: "16px",
+                    textAlign: "center",
+                    fontWeight: "500",
+                  }}
+                >
+                  {reportSuccess}
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "14px",
+                  }}
+                >
+                  {reportError && (
+                    <div
+                      style={{
+                        background: "#fff3f0",
+                        border: "1px solid #fca5a5",
+                        color: "#b91c1c",
+                        fontSize: "13px",
+                        borderRadius: "10px",
+                        padding: "10px 14px",
+                      }}
+                    >
+                      {reportError}
+                    </div>
+                  )}
+
+                  {/* Soal info */}
+                  <div
+                    style={{
+                      background: "#f2efe8",
+                      borderRadius: "10px",
+                      padding: "12px 14px",
+                      fontSize: "13px",
+                      color: "#6b6860",
+                    }}
+                  >
+                    Soal{" "}
+                    <span
+                      style={{
+                        fontFamily: "monospace",
+                        fontWeight: "700",
+                        color: "#0f0e17",
+                      }}
+                    >
+                      #{kode}
+                    </span>
+                  </div>
+
+                  {/* Kategori */}
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "6px",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontSize: "13px",
+                        fontWeight: "600",
+                        color: "#0f0e17",
+                      }}
+                    >
+                      Kategori Laporan
+                    </label>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "6px",
+                      }}
+                    >
+                      {KATEGORI_REPORT.map((k) => (
+                        <label
+                          key={k.value}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            padding: "10px 14px",
+                            borderRadius: "10px",
+                            border: `1.5px solid ${
+                              reportForm.kategori === k.value
+                                ? "#e84c2b"
+                                : "#e2ddd5"
+                            }`,
+                            background:
+                              reportForm.kategori === k.value
+                                ? "#fff3f0"
+                                : "white",
+                            cursor: "pointer",
+                            transition: "all .15s",
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="kategori"
+                            value={k.value}
+                            checked={reportForm.kategori === k.value}
+                            onChange={() =>
+                              setReportForm((f) => ({
+                                ...f,
+                                kategori: k.value,
+                              }))
+                            }
+                            style={{ accentColor: "#e84c2b", flexShrink: 0 }}
+                          />
+                          <span
+                            style={{
+                              fontSize: "14px",
+                              color:
+                                reportForm.kategori === k.value
+                                  ? "#e84c2b"
+                                  : "#0f0e17",
+                              fontWeight:
+                                reportForm.kategori === k.value ? "600" : "400",
+                            }}
+                          >
+                            {k.label}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Deskripsi */}
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "6px",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontSize: "13px",
+                        fontWeight: "600",
+                        color: "#0f0e17",
+                      }}
+                    >
+                      Deskripsi{" "}
+                      <span style={{ fontWeight: "400", color: "#6b6860" }}>
+                        (opsional)
+                      </span>
+                    </label>
+                    <textarea
+                      value={reportForm.deskripsi}
+                      onChange={(e) =>
+                        setReportForm((f) => ({
+                          ...f,
+                          deskripsi: e.target.value,
+                        }))
+                      }
+                      placeholder="Jelaskan masalah yang kamu temukan..."
+                      rows={3}
+                      style={{
+                        padding: "10px 14px",
+                        borderRadius: "10px",
+                        border: "1px solid #e2ddd5",
+                        fontSize: "14px",
+                        outline: "none",
+                        fontFamily: "inherit",
+                        color: "#0f0e17",
+                        resize: "none",
+                        lineHeight: "1.6",
+                      }}
+                      onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
+                      onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
+                    />
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <button
+                      onClick={() => setReportOpen(false)}
+                      style={{
+                        padding: "9px 20px",
+                        borderRadius: "10px",
+                        border: "1px solid #e2ddd5",
+                        background: "white",
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                        color: "#0f0e17",
+                      }}
+                    >
+                      Batal
+                    </button>
+                    <button
+                      onClick={handleReport}
+                      disabled={reportLoading || !reportForm.kategori}
+                      style={{
+                        padding: "9px 20px",
+                        borderRadius: "10px",
+                        border: "none",
+                        background:
+                          reportLoading || !reportForm.kategori
+                            ? "#e2ddd5"
+                            : "#e84c2b",
+                        color:
+                          reportLoading || !reportForm.kategori
+                            ? "#b4b2a9"
+                            : "white",
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        cursor:
+                          reportLoading || !reportForm.kategori
+                            ? "not-allowed"
+                            : "pointer",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      {reportLoading ? "Mengirim..." : "Kirim Laporan"}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

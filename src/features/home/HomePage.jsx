@@ -2,10 +2,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../auth/authStore";
-import { ChevronRight, CheckCircle, XCircle, BookOpen } from "lucide-react";
+import {
+  ChevronRight,
+  CheckCircle,
+  XCircle,
+  BookOpen,
+  Shuffle,
+} from "lucide-react";
 import Navbar from "../../components/Navbar";
 import api from "../../lib/api";
 import { getProfile } from "../profile/profileApi";
+import RandomSoal from "../../components/RandomSoal";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -15,6 +22,7 @@ export default function HomePage() {
   const [riwayat, setRiwayat] = useState([]);
   const [loadingJenjang, setLoadingJenjang] = useState(true);
   const [loadingRiwayat, setLoadingRiwayat] = useState(true);
+  const [randomOpen, setRandomOpen] = useState(false);
 
   useEffect(() => {
     // Fetch jenjang published
@@ -81,7 +89,39 @@ export default function HomePage() {
           <p style={{ fontSize: "15px", color: "#6b6860", marginTop: "8px" }}>
             Mau latihan apa hari ini?
           </p>
+          <button
+            onClick={() => setRandomOpen(true)}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              marginTop: "16px",
+              padding: "10px 20px",
+              borderRadius: "10px",
+              border: "1px solid #e2ddd5",
+              background: "white",
+              fontSize: "14px",
+              fontWeight: "600",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              color: "#0f0e17",
+              transition: "all .15s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#f2efe8";
+              e.currentTarget.style.borderColor = "#0f0e17";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "white";
+              e.currentTarget.style.borderColor = "#e2ddd5";
+            }}
+          >
+            <Shuffle size={16} color="#e84c2b" />
+            Acak Soal
+          </button>
         </div>
+
+        {randomOpen && <RandomSoal onClose={() => setRandomOpen(false)} />}
 
         {/* Jenjang Grid */}
         <div

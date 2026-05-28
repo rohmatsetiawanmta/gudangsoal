@@ -11,6 +11,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Users,
+  Flag,
 } from "lucide-react";
 import { useAuthStore } from "../auth/authStore";
 
@@ -19,6 +20,7 @@ const MENU = [
   { to: "/admin/soal", label: "Kelola Soal", icon: BookOpen },
   { to: "/admin/struktur", label: "Kelola Struktur", icon: FolderTree },
   { to: "/admin/users", label: "Kelola User", icon: Users },
+  { to: "/admin/reports", label: "Laporan Soal", icon: Flag },
 ];
 
 function SidebarLink({ to, label, icon: Icon, end, collapsed }) {

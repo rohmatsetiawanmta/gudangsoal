@@ -23,6 +23,7 @@ import AdminSoal from "./features/admin/AdminSoal";
 import AdminSoalForm from "./features/admin/AdminSoalForm";
 import AdminStruktur from "./features/admin/AdminStruktur";
 import AdminUsers from "./features/admin/AdminUsers";
+import AdminReports from "./features/admin/AdminReports";
 
 import SearchPage from "./features/search/SearchPage";
 import ProfilePage from "./features/profile/ProfilePage";
@@ -81,6 +82,7 @@ export default function App() {
           <Route path="soal/edit/:id" element={<AdminSoalForm />} />
           <Route path="struktur" element={<AdminStruktur />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="reports" element={<AdminReports />} />
         </Route>
       </Route>
     </Routes>

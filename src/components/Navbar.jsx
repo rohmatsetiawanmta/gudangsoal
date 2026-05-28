@@ -12,8 +12,10 @@ import {
   LayoutDashboard,
   Warehouse,
   Flame,
+  Shuffle,
 } from "lucide-react";
 import { useAuthStore } from "../features/auth/authStore";
+import RandomSoal from "./RandomSoal";
 
 const NAV_LINKS = [{ to: "/browse", label: "Direktori Soal", icon: BookOpen }];
 
@@ -29,6 +31,7 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [randomOpen, setRandomOpen] = useState(false);
 
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -148,6 +151,27 @@ export default function Navbar() {
 
       {/* Kanan */}
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <button
+          onClick={() => setRandomOpen(true)}
+          title="Soal Random"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "36px",
+            height: "36px",
+            borderRadius: "10px",
+            border: "1px solid #e2ddd5",
+            background: "none",
+            cursor: "pointer",
+            color: "#6b6860",
+            transition: "background .15s",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "#f2efe8")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+        >
+          <Shuffle size={16} />
+        </button>
         {/* Search */}
         {searchOpen ? (
           <form
@@ -484,6 +508,8 @@ export default function Navbar() {
             )}
           </div>
         )}
+
+        {randomOpen && <RandomSoal onClose={() => setRandomOpen(false)} />}
       </div>
     </nav>
   );
