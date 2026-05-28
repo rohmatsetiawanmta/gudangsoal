@@ -1,7 +1,17 @@
 // src/features/soal/SoalDetail.jsx
 import { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { ChevronLeft, Lock, CheckCircle, XCircle, Flag, X } from "lucide-react";
+import {
+  ChevronLeft,
+  Lock,
+  CheckCircle,
+  XCircle,
+  Flag,
+  X,
+  Share2,
+  Copy,
+  Check,
+} from "lucide-react";
 import MathRenderer from "../../components/MathRenderer";
 import Breadcrumb from "../../components/Breadcrumb";
 import Navbar from "../../components/Navbar";
@@ -126,6 +136,7 @@ export default function SoalDetail() {
   const [chosen, setChosen] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [alreadyCorrect, setAlreadyCorrect] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const [reportOpen, setReportOpen] = useState(false);
   const [reportForm, setReportForm] = useState({ kategori: "", deskripsi: "" });
@@ -741,6 +752,19 @@ export default function SoalDetail() {
     return null;
   };
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(`https://gudangsoal.com/soal/${kode}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShareWA = () => {
+    const text = encodeURIComponent(
+      `Coba kerjakan soal ini di Gudang Soal!\nhttps://gudangsoal.com/soal/${kode}`
+    );
+    window.open(`https://wa.me/?text=${text}`, "_blank");
+  };
+
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
       <Navbar />
@@ -979,35 +1003,95 @@ export default function SoalDetail() {
                 >
                   <ChevronLeft size={16} /> Kembali
                 </button>
-                <button
-                  onClick={() => {
-                    setReportOpen(true);
-                    setReportError("");
-                    setReportSuccess("");
-                  }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "#b4b2a9",
-                    fontSize: "13px",
-                    fontFamily: "inherit",
-                    padding: 0,
-                    transition: "color .15s",
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#e84c2b")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = "#b4b2a9")
-                  }
+
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "12px" }}
                 >
-                  <Flag size={13} />
-                  Laporkan soal
-                </button>
+                  {/* Share */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <button
+                      onClick={handleCopy}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: copied ? "#1a8a6e" : "#6b6860",
+                        fontSize: "13px",
+                        fontFamily: "inherit",
+                        padding: 0,
+                        transition: "color .15s",
+                      }}
+                    >
+                      {copied ? <Check size={13} /> : <Copy size={13} />}
+                      {copied ? "Tersalin!" : "Salin link"}
+                    </button>
+                    {/* <button
+                      onClick={handleShareWA}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "#6b6860",
+                        fontSize: "13px",
+                        fontFamily: "inherit",
+                        padding: 0,
+                        transition: "color .15s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.color = "#25D366")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.color = "#6b6860")
+                      }
+                    >
+                      <Share2 size={13} />
+                      WhatsApp
+                    </button> */}
+                  </div>
+
+                  {/* Flag */}
+                  <button
+                    onClick={() => {
+                      setReportOpen(true);
+                      setReportError("");
+                      setReportSuccess("");
+                    }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#b4b2a9",
+                      fontSize: "13px",
+                      fontFamily: "inherit",
+                      padding: 0,
+                      transition: "color .15s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.color = "#e84c2b")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.color = "#b4b2a9")
+                    }
+                  >
+                    <Flag size={13} />
+                    Laporkan
+                  </button>
+                </div>
               </div>
             </div>
 
