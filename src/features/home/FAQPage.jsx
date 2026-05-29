@@ -1,10 +1,11 @@
 // src/features/home/FAQPage.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, ChevronUp, Warehouse } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
 import SEO from "../../components/SEO";
+import useWindowWidth from "../../hooks/useWindowWidth";
 
 const FAQ_DATA = [
   {
@@ -136,9 +137,8 @@ const FAQ_DATA = [
 
 function FAQItem({ q, a }) {
   const [open, setOpen] = useState(false);
-
   return (
-    <div style={{ borderBottom: "1px solid #f2efe8", transition: "all .15s" }}>
+    <div style={{ borderBottom: "1px solid #f2efe8" }}>
       <button
         onClick={() => setOpen(!open)}
         style={{
@@ -193,10 +193,11 @@ function FAQItem({ q, a }) {
 
 export default function FAQPage() {
   const navigate = useNavigate();
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
   const [activeKategori, setActiveKategori] = useState("Semua");
 
   const kategoriList = ["Semua", ...FAQ_DATA.map((f) => f.kategori)];
-
   const filtered =
     activeKategori === "Semua"
       ? FAQ_DATA
@@ -209,17 +210,25 @@ export default function FAQPage() {
         description="Pertanyaan yang sering ditanyakan seputar Gudang Soal — platform latihan soal matematika gratis."
         url="/faq"
       />
-      {/* Navbar simple */}
       <Navbar />
 
       <main
-        style={{ maxWidth: "800px", margin: "0 auto", padding: "60px 40px" }}
+        style={{
+          maxWidth: "800px",
+          margin: "0 auto",
+          padding: isMobile ? "40px 20px" : "60px 40px",
+        }}
       >
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "48px" }}>
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: isMobile ? "32px" : "48px",
+          }}
+        >
           <h1
             style={{
-              fontSize: "clamp(28px, 4vw, 40px)",
+              fontSize: isMobile ? "26px" : "clamp(28px, 4vw, 40px)",
               fontWeight: "800",
               color: "#0f0e17",
               letterSpacing: "-0.5px",
@@ -228,7 +237,13 @@ export default function FAQPage() {
           >
             Pertanyaan yang Sering Ditanyakan
           </h1>
-          <p style={{ fontSize: "16px", color: "#6b6860", lineHeight: "1.7" }}>
+          <p
+            style={{
+              fontSize: isMobile ? "14px" : "16px",
+              color: "#6b6860",
+              lineHeight: "1.7",
+            }}
+          >
             Tidak menemukan jawaban yang kamu cari? Gunakan fitur{" "}
             <button
               onClick={() => navigate("/request-soal")}
@@ -239,7 +254,7 @@ export default function FAQPage() {
                 fontWeight: "600",
                 cursor: "pointer",
                 fontFamily: "inherit",
-                fontSize: "16px",
+                fontSize: isMobile ? "14px" : "16px",
                 padding: 0,
               }}
             >
@@ -256,7 +271,7 @@ export default function FAQPage() {
             gap: "8px",
             flexWrap: "wrap",
             marginBottom: "32px",
-            justifyContent: "center",
+            justifyContent: isMobile ? "flex-start" : "center",
           }}
         >
           {kategoriList.map((k) => (
@@ -264,7 +279,7 @@ export default function FAQPage() {
               key={k}
               onClick={() => setActiveKategori(k)}
               style={{
-                padding: "7px 16px",
+                padding: isMobile ? "6px 12px" : "7px 16px",
                 borderRadius: "100px",
                 border: `1.5px solid ${
                   activeKategori === k ? "#e84c2b" : "#e2ddd5"
@@ -284,7 +299,7 @@ export default function FAQPage() {
         </div>
 
         {/* FAQ list */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           {filtered.map((section) => (
             <div key={section.kategori}>
               <h2
@@ -305,7 +320,7 @@ export default function FAQPage() {
                   background: "white",
                   borderRadius: "14px",
                   border: "1px solid #e2ddd5",
-                  padding: "0 24px",
+                  padding: isMobile ? "0 16px" : "0 24px",
                   marginTop: "16px",
                 }}
               >
@@ -320,16 +335,16 @@ export default function FAQPage() {
         {/* CTA bottom */}
         <div
           style={{
-            marginTop: "64px",
+            marginTop: "48px",
             background: "#0f0e17",
             borderRadius: "16px",
-            padding: "40px",
+            padding: isMobile ? "32px 20px" : "40px",
             textAlign: "center",
           }}
         >
           <h3
             style={{
-              fontSize: "20px",
+              fontSize: isMobile ? "18px" : "20px",
               fontWeight: "800",
               color: "white",
               marginBottom: "8px",
@@ -341,7 +356,7 @@ export default function FAQPage() {
             style={{
               fontSize: "14px",
               color: "rgba(255,255,255,0.6)",
-              marginBottom: "24px",
+              marginBottom: "20px",
             }}
           >
             Bergabung gratis dan mulai kerjakan ribuan soal matematika.
@@ -365,7 +380,6 @@ export default function FAQPage() {
         </div>
       </main>
 
-      {/* Footer */}
       <Footer />
     </div>
   );

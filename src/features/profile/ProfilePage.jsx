@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   User,
-  Mail,
   Lock,
   Flame,
   Star,
@@ -14,28 +13,29 @@ import {
   Zap,
 } from "lucide-react";
 import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 import { useAuthStore } from "../auth/authStore";
 import { getProfile, updateProfile } from "./profileApi";
-import { BADGES } from "../../lib/constants";
 import SEO from "../../components/SEO";
+import useWindowWidth from "../../hooks/useWindowWidth";
 
-function StatCard({ icon: Icon, label, value, color }) {
+function StatCard({ icon: Icon, label, value, color, isMobile }) {
   return (
     <div
       style={{
         background: "white",
         borderRadius: "14px",
         border: "1px solid #e2ddd5",
-        padding: "20px 24px",
+        padding: isMobile ? "14px 16px" : "20px 24px",
         display: "flex",
         alignItems: "center",
-        gap: "14px",
+        gap: "12px",
       }}
     >
       <div
         style={{
-          width: "44px",
-          height: "44px",
+          width: isMobile ? "36px" : "44px",
+          height: isMobile ? "36px" : "44px",
           borderRadius: "12px",
           background: color + "18",
           display: "flex",
@@ -44,17 +44,17 @@ function StatCard({ icon: Icon, label, value, color }) {
           flexShrink: 0,
         }}
       >
-        <Icon size={22} color={color} />
+        <Icon size={isMobile ? 18 : 22} color={color} />
       </div>
       <div>
         <div
-          style={{ fontSize: "13px", color: "#6b6860", marginBottom: "4px" }}
+          style={{ fontSize: "12px", color: "#6b6860", marginBottom: "3px" }}
         >
           {label}
         </div>
         <div
           style={{
-            fontSize: "24px",
+            fontSize: isMobile ? "18px" : "22px",
             fontWeight: "800",
             color: "#0f0e17",
             lineHeight: 1,
@@ -67,7 +67,7 @@ function StatCard({ icon: Icon, label, value, color }) {
   );
 }
 
-function XPBar({ xp }) {
+function XPBar({ xp, isMobile }) {
   const level = Math.floor(Math.sqrt(xp / 100)) + 1;
   const prevXP = Math.pow(level - 1, 2) * 100;
   const nextXP = Math.pow(level, 2) * 100;
@@ -79,7 +79,7 @@ function XPBar({ xp }) {
         background: "white",
         borderRadius: "14px",
         border: "1px solid #e2ddd5",
-        padding: "20px 24px",
+        padding: isMobile ? "16px" : "20px 24px",
       }}
     >
       <div
@@ -154,11 +154,11 @@ function XPBar({ xp }) {
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { user, updateUser } = useAuthStore();
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // Edit form
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -174,8 +174,6 @@ export default function ProfilePage() {
   useEffect(() => {
     getProfile()
       .then((d) => {
-        console.log("profile data:", d);
-        console.log("xp_history:", d.xp_history);
         setData(d);
         setForm((f) => ({ ...f, name: d.user.name }));
       })
@@ -187,7 +185,6 @@ export default function ProfilePage() {
     e.preventDefault();
     setError("");
     setSuccess("");
-
     if (!form.name.trim()) {
       setError("Nama wajib diisi");
       return;
@@ -196,7 +193,6 @@ export default function ProfilePage() {
       setError("Password baru tidak cocok");
       return;
     }
-
     setSaving(true);
     try {
       await updateProfile({
@@ -221,7 +217,20 @@ export default function ProfilePage() {
     }
   };
 
-  const earnedBadgeIds = data?.badges?.map((b) => b.badge_id) || [];
+  const inputStyle = {
+    width: "100%",
+    paddingLeft: "36px",
+    paddingRight: "14px",
+    paddingTop: "10px",
+    paddingBottom: "10px",
+    borderRadius: "10px",
+    border: "1px solid #e2ddd5",
+    fontSize: "14px",
+    outline: "none",
+    fontFamily: "inherit",
+    color: "#0f0e17",
+    boxSizing: "border-box",
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
@@ -232,12 +241,18 @@ export default function ProfilePage() {
       />
       <Navbar />
 
-      <main style={{ maxWidth: "800px", margin: "0 auto", padding: "40px" }}>
+      <main
+        style={{
+          maxWidth: "800px",
+          margin: "0 auto",
+          padding: isMobile ? "24px 20px" : "40px",
+        }}
+      >
         {/* Header */}
-        <div style={{ marginBottom: "32px" }}>
+        <div style={{ marginBottom: "24px" }}>
           <h1
             style={{
-              fontSize: "26px",
+              fontSize: isMobile ? "22px" : "26px",
               fontWeight: "800",
               color: "#0f0e17",
               letterSpacing: "-0.5px",
@@ -270,7 +285,7 @@ export default function ProfilePage() {
           </div>
         ) : (
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "24px" }}
+            style={{ display: "flex", flexDirection: "column", gap: "20px" }}
           >
             {/* Info user */}
             <div
@@ -278,7 +293,7 @@ export default function ProfilePage() {
                 background: "white",
                 borderRadius: "14px",
                 border: "1px solid #e2ddd5",
-                padding: "24px",
+                padding: isMobile ? "16px" : "24px",
               }}
             >
               <div
@@ -286,7 +301,7 @@ export default function ProfilePage() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  marginBottom: "20px",
+                  marginBottom: editMode ? "20px" : "0",
                 }}
               >
                 <div
@@ -294,16 +309,17 @@ export default function ProfilePage() {
                 >
                   <div
                     style={{
-                      width: "52px",
-                      height: "52px",
-                      borderRadius: "16px",
+                      width: "48px",
+                      height: "48px",
+                      borderRadius: "14px",
                       background: "#e84c2b",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       color: "white",
                       fontWeight: "800",
-                      fontSize: "20px",
+                      fontSize: "18px",
+                      flexShrink: 0,
                     }}
                   >
                     {data?.user?.name?.[0]?.toUpperCase()}
@@ -311,7 +327,7 @@ export default function ProfilePage() {
                   <div>
                     <div
                       style={{
-                        fontSize: "18px",
+                        fontSize: isMobile ? "16px" : "18px",
                         fontWeight: "800",
                         color: "#0f0e17",
                       }}
@@ -320,9 +336,13 @@ export default function ProfilePage() {
                     </div>
                     <div
                       style={{
-                        fontSize: "14px",
+                        fontSize: "13px",
                         color: "#6b6860",
                         marginTop: "2px",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        maxWidth: isMobile ? "160px" : "300px",
                       }}
                     >
                       {data?.user?.email}
@@ -336,7 +356,7 @@ export default function ProfilePage() {
                     setSuccess("");
                   }}
                   style={{
-                    padding: "8px 16px",
+                    padding: "7px 14px",
                     borderRadius: "10px",
                     border: "1px solid #e2ddd5",
                     background: editMode ? "#f2efe8" : "white",
@@ -345,9 +365,10 @@ export default function ProfilePage() {
                     cursor: "pointer",
                     fontFamily: "inherit",
                     color: "#0f0e17",
+                    flexShrink: 0,
                   }}
                 >
-                  {editMode ? "Batal" : "Edit Profil"}
+                  {editMode ? "Batal" : "Edit"}
                 </button>
               </div>
 
@@ -426,20 +447,7 @@ export default function ProfilePage() {
                         onChange={(e) =>
                           setForm((f) => ({ ...f, name: e.target.value }))
                         }
-                        style={{
-                          width: "100%",
-                          paddingLeft: "36px",
-                          paddingRight: "14px",
-                          paddingTop: "10px",
-                          paddingBottom: "10px",
-                          borderRadius: "10px",
-                          border: "1px solid #e2ddd5",
-                          fontSize: "14px",
-                          outline: "none",
-                          fontFamily: "inherit",
-                          color: "#0f0e17",
-                          boxSizing: "border-box",
-                        }}
+                        style={inputStyle}
                         onFocus={(e) =>
                           (e.target.style.borderColor = "#e84c2b")
                         }
@@ -490,20 +498,7 @@ export default function ProfilePage() {
                           }))
                         }
                         placeholder="Password lama"
-                        style={{
-                          width: "100%",
-                          paddingLeft: "36px",
-                          paddingRight: "40px",
-                          paddingTop: "10px",
-                          paddingBottom: "10px",
-                          borderRadius: "10px",
-                          border: "1px solid #e2ddd5",
-                          fontSize: "14px",
-                          outline: "none",
-                          fontFamily: "inherit",
-                          color: "#0f0e17",
-                          boxSizing: "border-box",
-                        }}
+                        style={{ ...inputStyle, paddingRight: "40px" }}
                         onFocus={(e) =>
                           (e.target.style.borderColor = "#e84c2b")
                         }
@@ -533,7 +528,7 @@ export default function ProfilePage() {
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
+                      gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
                       gap: "12px",
                     }}
                   >
@@ -575,20 +570,7 @@ export default function ProfilePage() {
                             }))
                           }
                           placeholder="Minimal 8 karakter"
-                          style={{
-                            width: "100%",
-                            paddingLeft: "36px",
-                            paddingRight: "14px",
-                            paddingTop: "10px",
-                            paddingBottom: "10px",
-                            borderRadius: "10px",
-                            border: "1px solid #e2ddd5",
-                            fontSize: "14px",
-                            outline: "none",
-                            fontFamily: "inherit",
-                            color: "#0f0e17",
-                            boxSizing: "border-box",
-                          }}
+                          style={inputStyle}
                           onFocus={(e) =>
                             (e.target.style.borderColor = "#e84c2b")
                           }
@@ -636,20 +618,7 @@ export default function ProfilePage() {
                             }))
                           }
                           placeholder="Ulangi password baru"
-                          style={{
-                            width: "100%",
-                            paddingLeft: "36px",
-                            paddingRight: "14px",
-                            paddingTop: "10px",
-                            paddingBottom: "10px",
-                            borderRadius: "10px",
-                            border: "1px solid #e2ddd5",
-                            fontSize: "14px",
-                            outline: "none",
-                            fontFamily: "inherit",
-                            color: "#0f0e17",
-                            boxSizing: "border-box",
-                          }}
+                          style={inputStyle}
                           onFocus={(e) =>
                             (e.target.style.borderColor = "#e84c2b")
                           }
@@ -685,14 +654,14 @@ export default function ProfilePage() {
             </div>
 
             {/* XP Bar */}
-            <XPBar xp={data?.user?.xp || 0} />
+            <XPBar xp={data?.user?.xp || 0} isMobile={isMobile} />
 
             {/* Stats */}
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr 1fr 1fr",
-                gap: "14px",
+                gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)",
+                gap: "12px",
               }}
             >
               <StatCard
@@ -700,24 +669,28 @@ export default function ProfilePage() {
                 label="Total XP"
                 value={(data?.user?.xp || 0).toLocaleString()}
                 color="#f5a623"
+                isMobile={isMobile}
               />
               <StatCard
                 icon={Flame}
                 label="Streak Hari"
-                value={`${data?.user?.streak || 0} hari`}
+                value={`${data?.user?.streak || 0}d`}
                 color="#e84c2b"
+                isMobile={isMobile}
               />
               <StatCard
                 icon={Zap}
                 label="Streak Soal"
                 value={data?.user?.soal_streak || 0}
                 color="#2563eb"
+                isMobile={isMobile}
               />
               <StatCard
                 icon={CheckCircle}
                 label="Soal Dikerjakan"
                 value={data?.stats?.total || 0}
                 color="#1a8a6e"
+                isMobile={isMobile}
               />
             </div>
 
@@ -728,7 +701,7 @@ export default function ProfilePage() {
                   background: "white",
                   borderRadius: "14px",
                   border: "1px solid #e2ddd5",
-                  padding: "20px 24px",
+                  padding: isMobile ? "16px" : "20px 24px",
                 }}
               >
                 <div
@@ -780,110 +753,11 @@ export default function ProfilePage() {
                       flexShrink: 0,
                     }}
                   >
-                    {data.stats.benar}/{data.stats.total} benar
+                    {data.stats.benar}/{data.stats.total}
                   </div>
                 </div>
               </div>
             )}
-
-            {/* Badge */}
-            <div>
-              <h2
-                style={{
-                  fontSize: "17px",
-                  fontWeight: "700",
-                  color: "#0f0e17",
-                  marginBottom: "14px",
-                }}
-              >
-                Badge
-              </h2>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
-                  gap: "12px",
-                }}
-              >
-                {BADGES.map((badge) => {
-                  const earned = earnedBadgeIds.includes(badge.id);
-                  const earnedAt = data?.badges?.find(
-                    (b) => b.badge_id === badge.id
-                  )?.earned_at;
-                  return (
-                    <div
-                      key={badge.id}
-                      style={{
-                        background: earned ? "white" : "#f2efe8",
-                        borderRadius: "14px",
-                        border: `1px solid ${
-                          earned ? "#e2ddd5" : "transparent"
-                        }`,
-                        padding: "18px 16px",
-                        textAlign: "center",
-                        opacity: earned ? 1 : 0.5,
-                        transition: "all .15s",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: "44px",
-                          height: "44px",
-                          borderRadius: "12px",
-                          background: earned ? "#faeeda" : "#f2efe8",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          margin: "0 auto 10px",
-                          transition: "all .15s",
-                        }}
-                      >
-                        {badge.icon && (
-                          <badge.icon
-                            size={22}
-                            color={earned ? "#854F0B" : "#b4b2a9"}
-                          />
-                        )}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          fontWeight: "700",
-                          color: "#0f0e17",
-                          marginBottom: "4px",
-                        }}
-                      >
-                        {badge.label}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          color: "#6b6860",
-                          lineHeight: "1.4",
-                        }}
-                      >
-                        {badge.desc}
-                      </div>
-                      {earned && earnedAt && (
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color: "#b4b2a9",
-                            marginTop: "8px",
-                          }}
-                        >
-                          {new Date(earnedAt).toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
 
             {/* XP History */}
             <div>
@@ -926,19 +800,18 @@ export default function ProfilePage() {
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "14px",
-                        padding: "14px 20px",
+                        gap: "12px",
+                        padding: isMobile ? "12px 16px" : "14px 20px",
                         borderBottom:
                           i < data.xp_history.length - 1
                             ? "1px solid #f2efe8"
                             : "none",
                       }}
                     >
-                      {/* XP badge */}
                       <div
                         style={{
-                          width: "40px",
-                          height: "40px",
+                          width: "38px",
+                          height: "38px",
                           borderRadius: "10px",
                           background: "#faeeda",
                           display: "flex",
@@ -949,7 +822,7 @@ export default function ProfilePage() {
                       >
                         <span
                           style={{
-                            fontSize: "12px",
+                            fontSize: "11px",
                             fontWeight: "800",
                             color: "#854F0B",
                           }}
@@ -957,14 +830,15 @@ export default function ProfilePage() {
                           +{h.xp}
                         </span>
                       </div>
-
-                      {/* Info */}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div
                           style={{
                             fontSize: "14px",
                             fontWeight: "500",
                             color: "#0f0e17",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           {h.reason}
@@ -982,8 +856,6 @@ export default function ProfilePage() {
                           </div>
                         )}
                       </div>
-
-                      {/* Tanggal */}
                       <div
                         style={{
                           fontSize: "12px",
@@ -1045,10 +917,10 @@ export default function ProfilePage() {
                         background: "white",
                         borderRadius: "14px",
                         border: "1px solid #e2ddd5",
-                        padding: "14px 20px",
+                        padding: isMobile ? "12px 14px" : "14px 20px",
                         display: "flex",
                         alignItems: "center",
-                        gap: "14px",
+                        gap: "12px",
                         cursor: "pointer",
                         transition: "transform .15s, box-shadow .15s",
                       }}
@@ -1094,37 +966,44 @@ export default function ProfilePage() {
                             fontSize: "12px",
                             color: "#b4b2a9",
                             marginTop: "3px",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
                           }}
                         >
-                          {r.jenjang} — {r.mapel} — {r.subtopik}
+                          {isMobile
+                            ? `${r.mapel} — ${r.subtopik}`
+                            : `${r.jenjang} — ${r.mapel} — ${r.subtopik}`}
                         </div>
                       </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "flex-end",
-                          gap: "4px",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <span
+                      {!isMobile && (
+                        <div
                           style={{
-                            fontSize: "11px",
-                            fontWeight: "700",
-                            color: "#b4b2a9",
-                            fontFamily: "monospace",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "flex-end",
+                            gap: "4px",
+                            flexShrink: 0,
                           }}
                         >
-                          {r.kode}
-                        </span>
-                        <span style={{ fontSize: "11px", color: "#b4b2a9" }}>
-                          {new Date(r.created_at).toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "short",
-                          })}
-                        </span>
-                      </div>
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: "700",
+                              color: "#b4b2a9",
+                              fontFamily: "monospace",
+                            }}
+                          >
+                            {r.kode}
+                          </span>
+                          <span style={{ fontSize: "11px", color: "#b4b2a9" }}>
+                            {new Date(r.created_at).toLocaleDateString(
+                              "id-ID",
+                              { day: "numeric", month: "short" }
+                            )}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -1134,6 +1013,7 @@ export default function ProfilePage() {
         )}
       </main>
 
+      <Footer />
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>
     </div>
   );

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shuffle, X, ChevronDown } from "lucide-react";
 import api from "../lib/api";
+import useWindowWidth from "../hooks/useWindowWidth";
 
 const DIFFICULTY_OPTIONS = [
   { value: "", label: "Semua tingkat" },
@@ -61,6 +62,8 @@ function Select({ label, value, onChange, options, disabled }) {
 
 export default function RandomSoal({ onClose }) {
   const navigate = useNavigate();
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
 
   const [struktur, setStruktur] = useState({
     jenjang: [],
@@ -127,7 +130,6 @@ export default function RandomSoal({ onClose }) {
         params.append("subjenjang_slug", selected.subjenjang_slug);
       if (selected.mapel_slug) params.append("mapel_slug", selected.mapel_slug);
       if (selected.difficulty) params.append("difficulty", selected.difficulty);
-
       const data = await api.get(`/browse/random?${params.toString()}`);
       onClose();
       navigate(`/soal/${data.kode}`);
@@ -150,16 +152,18 @@ export default function RandomSoal({ onClose }) {
         alignItems: "center",
         justifyContent: "center",
         zIndex: 300,
-        padding: "24px",
+        padding: isMobile ? "16px" : "24px",
       }}
     >
       <div
         style={{
           background: "white",
           borderRadius: "16px",
-          padding: "28px",
+          padding: isMobile ? "20px" : "28px",
           maxWidth: "420px",
           width: "100%",
+          maxHeight: "90vh",
+          overflowY: "auto",
         }}
       >
         {/* Header */}
@@ -168,7 +172,7 @@ export default function RandomSoal({ onClose }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            marginBottom: "20px",
+            marginBottom: "16px",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -209,7 +213,7 @@ export default function RandomSoal({ onClose }) {
           style={{
             fontSize: "14px",
             color: "#6b6860",
-            marginBottom: "20px",
+            marginBottom: "16px",
             lineHeight: "1.6",
           }}
         >
@@ -222,8 +226,8 @@ export default function RandomSoal({ onClose }) {
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: "12px",
-            marginBottom: "20px",
+            gap: "10px",
+            marginBottom: "16px",
           }}
         >
           <Select
@@ -289,7 +293,7 @@ export default function RandomSoal({ onClose }) {
               fontSize: "13px",
               borderRadius: "10px",
               padding: "10px 14px",
-              marginBottom: "16px",
+              marginBottom: "14px",
             }}
           >
             {error}
@@ -347,13 +351,12 @@ export default function RandomSoal({ onClose }) {
                     animation: "spin 0.7s linear infinite",
                     display: "block",
                   }}
-                />
+                />{" "}
                 Mencari...
               </>
             ) : (
               <>
-                <Shuffle size={16} />
-                Acak Soal
+                <Shuffle size={16} /> Acak Soal
               </>
             )}
           </button>

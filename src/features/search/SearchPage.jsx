@@ -3,9 +3,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Search, BookOpen, FolderTree, FileText } from "lucide-react";
 import Navbar from "../../components/Navbar";
-import MathRenderer from "../../components/MathRenderer";
 import { search } from "./searchApi";
 import SEO from "../../components/SEO";
+import useWindowWidth from "../../hooks/useWindowWidth";
 
 function DifficultyBadge({ level }) {
   const map = {
@@ -61,6 +61,8 @@ function SectionLabel({ icon: Icon, label, count }) {
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
   const q = searchParams.get("q") || "";
 
   const [query, setQuery] = useState(q);
@@ -86,7 +88,6 @@ export default function SearchPage() {
     }
   }, []);
 
-  // Debounce
   useEffect(() => {
     const timer = setTimeout(() => {
       doSearch(query);
@@ -96,7 +97,6 @@ export default function SearchPage() {
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Search saat pertama load kalau ada query di URL
   useEffect(() => {
     if (q) doSearch(q);
   }, []);
@@ -120,12 +120,18 @@ export default function SearchPage() {
       />
       <Navbar />
 
-      <main style={{ maxWidth: "720px", margin: "0 auto", padding: "40px" }}>
+      <main
+        style={{
+          maxWidth: "720px",
+          margin: "0 auto",
+          padding: isMobile ? "24px 20px" : "40px",
+        }}
+      >
         {/* Search input */}
         <div style={{ marginBottom: "32px" }}>
           <h1
             style={{
-              fontSize: "24px",
+              fontSize: isMobile ? "22px" : "24px",
               fontWeight: "800",
               color: "#0f0e17",
               letterSpacing: "-0.5px",
@@ -159,7 +165,7 @@ export default function SearchPage() {
                 paddingBottom: "14px",
                 borderRadius: "14px",
                 border: "1px solid #e2ddd5",
-                fontSize: "16px",
+                fontSize: isMobile ? "14px" : "16px",
                 outline: "none",
                 fontFamily: "inherit",
                 color: "#0f0e17",
@@ -285,7 +291,7 @@ export default function SearchPage() {
                         background: "white",
                         borderRadius: "14px",
                         border: "1px solid #e2ddd5",
-                        padding: "16px 20px",
+                        padding: isMobile ? "14px 16px" : "16px 20px",
                         cursor: "pointer",
                         transition: "transform .15s, box-shadow .15s",
                       }}
@@ -303,8 +309,9 @@ export default function SearchPage() {
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          gap: "10px",
+                          gap: "8px",
                           marginBottom: "8px",
+                          flexWrap: "wrap",
                         }}
                       >
                         <span
@@ -319,15 +326,17 @@ export default function SearchPage() {
                           {s.kode}
                         </span>
                         <DifficultyBadge level={s.difficulty} />
-                        <span
-                          style={{
-                            fontSize: "12px",
-                            color: "#b4b2a9",
-                            marginLeft: "auto",
-                          }}
-                        >
-                          {s.jenjang} — {s.mapel}
-                        </span>
+                        {!isMobile && (
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              color: "#b4b2a9",
+                              marginLeft: "auto",
+                            }}
+                          >
+                            {s.jenjang} — {s.mapel}
+                          </span>
+                        )}
                       </div>
                       <div
                         style={{
@@ -347,9 +356,14 @@ export default function SearchPage() {
                           fontSize: "12px",
                           color: "#b4b2a9",
                           marginTop: "6px",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
                         }}
                       >
-                        {s.subjenjang} › {s.topik} › {s.subtopik}
+                        {isMobile
+                          ? `${s.mapel} — ${s.subtopik}`
+                          : `${s.subjenjang} › ${s.topik} › ${s.subtopik}`}
                       </div>
                     </div>
                   ))}
@@ -385,7 +399,7 @@ export default function SearchPage() {
                           background: "white",
                           borderRadius: "14px",
                           border: "1px solid #e2ddd5",
-                          padding: "14px 20px",
+                          padding: isMobile ? "12px 14px" : "14px 20px",
                           cursor: "pointer",
                           display: "flex",
                           alignItems: "center",
@@ -416,12 +430,15 @@ export default function SearchPage() {
                         >
                           <FolderTree size={15} color="#6b6860" />
                         </div>
-                        <div style={{ flex: 1 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
                           <div
                             style={{
                               fontSize: "14px",
                               fontWeight: "600",
                               color: "#0f0e17",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
                             }}
                           >
                             {t.topik}
@@ -431,9 +448,14 @@ export default function SearchPage() {
                               fontSize: "12px",
                               color: "#b4b2a9",
                               marginTop: "2px",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
                             }}
                           >
-                            {t.jenjang} — {t.subjenjang} — {t.mapel}
+                            {isMobile
+                              ? `${t.mapel}`
+                              : `${t.jenjang} — ${t.subjenjang} — ${t.mapel}`}
                           </div>
                         </div>
                         <span
@@ -486,7 +508,7 @@ export default function SearchPage() {
                           background: "white",
                           borderRadius: "14px",
                           border: "1px solid #e2ddd5",
-                          padding: "14px 20px",
+                          padding: isMobile ? "12px 14px" : "14px 20px",
                           cursor: "pointer",
                           display: "flex",
                           alignItems: "center",
@@ -517,7 +539,7 @@ export default function SearchPage() {
                         >
                           <BookOpen size={15} color="#6b6860" />
                         </div>
-                        <div style={{ flex: 1 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
                           <div
                             style={{
                               fontSize: "14px",
@@ -551,9 +573,7 @@ export default function SearchPage() {
         )}
       </main>
 
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

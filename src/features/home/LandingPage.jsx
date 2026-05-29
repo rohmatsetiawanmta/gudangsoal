@@ -18,21 +18,16 @@ import api from "../../lib/api";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
+import useWindowWidth from "../../hooks/useWindowWidth";
 
 const JENJANG = [
-  //   { slug: "sd", label: "SD", desc: "Kelas 1–6", color: "#e84c2b" },
-  //   { slug: "smp", label: "SMP", desc: "Kelas 7–9", color: "#2563eb" },
-  //   { slug: "sma", label: "SMA", desc: "Kelas 10–12", color: "#1a8a6e" },
   { slug: "utbk", label: "UTBK", desc: "Persiapan PTN", color: "#f5a623" },
-  //   { slug: "cpns", label: "CPNS", desc: "TIU Numerik", color: "#7c3aed" },
-  //   { slug: "osn", label: "OSN", desc: "Olimpiade", color: "#db2777" },
 ];
 
 const FITUR = [
   {
     icon: BookOpen,
     label: "Bank Soal Lengkap",
-    // desc: "Ribuan soal matematika dari SD hingga persiapan UTBK, CPNS, dan OSN yang terus diperbarui.",
     desc: "Soal-soal persiapan UTBK yang terus diperbarui.",
     color: "#e84c2b",
   },
@@ -64,24 +59,24 @@ const FITUR = [
 
 function StatCard({ icon: Icon, value, label, color, loading }) {
   return (
-    <div style={{ textAlign: "center", padding: "32px 24px" }}>
+    <div style={{ textAlign: "center", padding: "24px 16px" }}>
       <div
         style={{
-          width: "52px",
-          height: "52px",
+          width: "48px",
+          height: "48px",
           borderRadius: "14px",
           background: color + "18",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          margin: "0 auto 12px",
+          margin: "0 auto 10px",
         }}
       >
-        <Icon size={24} color={color} />
+        <Icon size={22} color={color} />
       </div>
       <div
         style={{
-          fontSize: "32px",
+          fontSize: "28px",
           fontWeight: "800",
           color: "#0f0e17",
           lineHeight: 1,
@@ -94,13 +89,16 @@ function StatCard({ icon: Icon, value, label, color, loading }) {
           ? value.toLocaleString() + "+"
           : value}
       </div>
-      <div style={{ fontSize: "14px", color: "#6b6860" }}>{label}</div>
+      <div style={{ fontSize: "13px", color: "#6b6860" }}>{label}</div>
     </div>
   );
 }
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
+
   const [stats, setStats] = useState(null);
   const [loadingStats, setLoadingStats] = useState(true);
 
@@ -112,6 +110,9 @@ export default function LandingPage() {
       .finally(() => setLoadingStats(false));
   }, []);
 
+  const px = isMobile ? "20px" : "40px";
+  const sectionPy = isMobile ? "48px" : "80px";
+
   return (
     <div
       style={{
@@ -121,8 +122,6 @@ export default function LandingPage() {
       }}
     >
       <SEO url="/" />
-
-      {/* Navbar */}
       <Navbar />
 
       {/* Hero */}
@@ -130,7 +129,9 @@ export default function LandingPage() {
         style={{
           maxWidth: "1100px",
           margin: "0 auto",
-          padding: "80px 40px 60px",
+          padding: `${isMobile ? "48px" : "80px"} ${px} ${
+            isMobile ? "40px" : "60px"
+          }`,
         }}
       >
         <div
@@ -145,7 +146,7 @@ export default function LandingPage() {
               border: "1px solid #fca5a5",
               borderRadius: "100px",
               padding: "6px 14px",
-              marginBottom: "24px",
+              marginBottom: "20px",
             }}
           >
             <Zap size={13} color="#e84c2b" />
@@ -157,12 +158,12 @@ export default function LandingPage() {
           </div>
           <h1
             style={{
-              fontSize: "clamp(32px, 5vw, 56px)",
+              fontSize: isMobile ? "32px" : "clamp(32px, 5vw, 56px)",
               fontWeight: "800",
               color: "#0f0e17",
               letterSpacing: "-1px",
               lineHeight: 1.15,
-              marginBottom: "20px",
+              marginBottom: "16px",
             }}
           >
             Kuasai Matematika dengan{" "}
@@ -170,22 +171,22 @@ export default function LandingPage() {
           </h1>
           <p
             style={{
-              fontSize: "18px",
+              fontSize: isMobile ? "15px" : "18px",
               color: "#6b6860",
               lineHeight: "1.7",
-              marginBottom: "36px",
+              marginBottom: "28px",
             }}
           >
-            Latihan soal {/*dari SD hingga*/} UTBK{/*}, CPNS, dan OSN*/}.
-            Dilengkapi pembahasan detail, sistem XP, dan tracking progress
-            belajarmu.
+            Latihan soal UTBK. Dilengkapi pembahasan detail, sistem XP, dan
+            tracking progress belajarmu.
           </p>
           <div
             style={{
               display: "flex",
-              gap: "12px",
+              flexDirection: isMobile ? "column" : "row",
+              gap: "10px",
               justifyContent: "center",
-              flexWrap: "wrap",
+              alignItems: "center",
             }}
           >
             <button
@@ -193,17 +194,19 @@ export default function LandingPage() {
               style={{
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "center",
                 gap: "8px",
-                padding: "14px 28px",
+                padding: "13px 24px",
                 borderRadius: "12px",
                 border: "none",
                 background: "#e84c2b",
                 color: "white",
-                fontSize: "16px",
+                fontSize: "15px",
                 fontWeight: "700",
                 cursor: "pointer",
                 fontFamily: "inherit",
                 transition: "all .15s",
+                width: isMobile ? "100%" : "auto",
               }}
               onMouseEnter={(e) =>
                 (e.currentTarget.style.background = "#c43d20")
@@ -212,22 +215,22 @@ export default function LandingPage() {
                 (e.currentTarget.style.background = "#e84c2b")
               }
             >
-              Mulai Belajar Gratis
-              <ArrowRight size={18} />
+              Mulai Belajar Gratis <ArrowRight size={17} />
             </button>
             <button
               onClick={() => navigate("/login")}
               style={{
-                padding: "14px 28px",
+                padding: "13px 24px",
                 borderRadius: "12px",
                 border: "1px solid #e2ddd5",
                 background: "white",
                 color: "#0f0e17",
-                fontSize: "16px",
+                fontSize: "15px",
                 fontWeight: "600",
                 cursor: "pointer",
                 fontFamily: "inherit",
                 transition: "all .15s",
+                width: isMobile ? "100%" : "auto",
               }}
               onMouseEnter={(e) =>
                 (e.currentTarget.style.background = "#f2efe8")
@@ -249,7 +252,7 @@ export default function LandingPage() {
         }}
       >
         <div
-          style={{ maxWidth: "1100px", margin: "0 auto", padding: "0 40px" }}
+          style={{ maxWidth: "1100px", margin: "0 auto", padding: `0 ${px}` }}
         >
           <div
             style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}
@@ -287,12 +290,21 @@ export default function LandingPage() {
 
       {/* Fitur */}
       <section
-        style={{ maxWidth: "1100px", margin: "0 auto", padding: "80px 40px" }}
+        style={{
+          maxWidth: "1100px",
+          margin: "0 auto",
+          padding: `${sectionPy} ${px}`,
+        }}
       >
-        <div style={{ textAlign: "center", marginBottom: "48px" }}>
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: isMobile ? "32px" : "48px",
+          }}
+        >
           <h2
             style={{
-              fontSize: "clamp(24px, 3vw, 36px)",
+              fontSize: isMobile ? "22px" : "clamp(24px, 3vw, 36px)",
               fontWeight: "800",
               color: "#0f0e17",
               letterSpacing: "-0.5px",
@@ -303,7 +315,7 @@ export default function LandingPage() {
           </h2>
           <p
             style={{
-              fontSize: "16px",
+              fontSize: "15px",
               color: "#6b6860",
               maxWidth: "500px",
               margin: "0 auto",
@@ -317,8 +329,8 @@ export default function LandingPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "20px",
+            gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
+            gap: "16px",
           }}
         >
           {FITUR.map(({ icon: Icon, label, desc, color }) => (
@@ -328,7 +340,7 @@ export default function LandingPage() {
                 background: "white",
                 borderRadius: "16px",
                 border: "1px solid #e2ddd5",
-                padding: "28px",
+                padding: isMobile ? "20px" : "28px",
                 transition: "transform .15s, box-shadow .15s",
               }}
               onMouseEnter={(e) => {
@@ -341,39 +353,83 @@ export default function LandingPage() {
                 e.currentTarget.style.boxShadow = "none";
               }}
             >
-              <div
-                style={{
-                  width: "46px",
-                  height: "46px",
-                  borderRadius: "12px",
-                  background: color + "18",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginBottom: "16px",
-                }}
-              >
-                <Icon size={22} color={color} />
-              </div>
-              <div
-                style={{
-                  fontSize: "16px",
-                  fontWeight: "700",
-                  color: "#0f0e17",
-                  marginBottom: "8px",
-                }}
-              >
-                {label}
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  color: "#6b6860",
-                  lineHeight: "1.7",
-                }}
-              >
-                {desc}
-              </div>
+              {isMobile ? (
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "14px" }}
+                >
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "10px",
+                      background: color + "18",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Icon size={20} color={color} />
+                  </div>
+                  <div>
+                    <div
+                      style={{
+                        fontSize: "15px",
+                        fontWeight: "700",
+                        color: "#0f0e17",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      {label}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "13px",
+                        color: "#6b6860",
+                        lineHeight: "1.6",
+                      }}
+                    >
+                      {desc}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div
+                    style={{
+                      width: "46px",
+                      height: "46px",
+                      borderRadius: "12px",
+                      background: color + "18",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    <Icon size={22} color={color} />
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: "700",
+                      color: "#0f0e17",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    {label}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      color: "#6b6860",
+                      lineHeight: "1.7",
+                    }}
+                  >
+                    {desc}
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>
@@ -388,12 +444,21 @@ export default function LandingPage() {
         }}
       >
         <div
-          style={{ maxWidth: "1100px", margin: "0 auto", padding: "80px 40px" }}
+          style={{
+            maxWidth: "1100px",
+            margin: "0 auto",
+            padding: `${sectionPy} ${px}`,
+          }}
         >
-          <div style={{ textAlign: "center", marginBottom: "48px" }}>
+          <div
+            style={{
+              textAlign: "center",
+              marginBottom: isMobile ? "32px" : "48px",
+            }}
+          >
             <h2
               style={{
-                fontSize: "clamp(24px, 3vw, 36px)",
+                fontSize: isMobile ? "22px" : "clamp(24px, 3vw, 36px)",
                 fontWeight: "800",
                 color: "#0f0e17",
                 letterSpacing: "-0.5px",
@@ -402,23 +467,11 @@ export default function LandingPage() {
             >
               Untuk semua jenjang pendidikan
             </h2>
-            <p
-              style={{
-                fontSize: "16px",
-                color: "#6b6860",
-                maxWidth: "500px",
-                margin: "0 auto",
-                lineHeight: "1.7",
-              }}
-            >
-              {/* Dari soal dasar SD hingga persiapan seleksi nasional — semua ada
-              di sini. */}
-            </p>
           </div>
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
+              gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
               gap: "14px",
             }}
           >
@@ -500,12 +553,21 @@ export default function LandingPage() {
 
       {/* Cara kerja */}
       <section
-        style={{ maxWidth: "1100px", margin: "0 auto", padding: "80px 40px" }}
+        style={{
+          maxWidth: "1100px",
+          margin: "0 auto",
+          padding: `${sectionPy} ${px}`,
+        }}
       >
-        <div style={{ textAlign: "center", marginBottom: "48px" }}>
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: isMobile ? "32px" : "48px",
+          }}
+        >
           <h2
             style={{
-              fontSize: "clamp(24px, 3vw, 36px)",
+              fontSize: isMobile ? "22px" : "clamp(24px, 3vw, 36px)",
               fontWeight: "800",
               color: "#0f0e17",
               letterSpacing: "-0.5px",
@@ -518,8 +580,8 @@ export default function LandingPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "32px",
+            gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
+            gap: isMobile ? "24px" : "32px",
           }}
         >
           {[
@@ -544,82 +606,153 @@ export default function LandingPage() {
               icon: Trophy,
               color: "#1a8a6e",
             },
-          ].map(({ step, label, desc, icon: Icon, color }) => (
-            <div key={step} style={{ textAlign: "center" }}>
+          ].map(({ step, label, desc, icon: Icon, color }) =>
+            isMobile ? (
               <div
+                key={step}
                 style={{
-                  position: "relative",
-                  width: "64px",
-                  height: "64px",
-                  margin: "0 auto 20px",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "16px",
                 }}
               >
+                <div style={{ position: "relative", flexShrink: 0 }}>
+                  <div
+                    style={{
+                      width: "52px",
+                      height: "52px",
+                      borderRadius: "50%",
+                      background: color + "18",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Icon size={24} color={color} />
+                  </div>
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "-4px",
+                      right: "-4px",
+                      width: "20px",
+                      height: "20px",
+                      borderRadius: "50%",
+                      background: color,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "10px",
+                      fontWeight: "800",
+                      color: "white",
+                    }}
+                  >
+                    {step}
+                  </div>
+                </div>
+                <div style={{ paddingTop: "6px" }}>
+                  <div
+                    style={{
+                      fontSize: "15px",
+                      fontWeight: "700",
+                      color: "#0f0e17",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    {label}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      color: "#6b6860",
+                      lineHeight: "1.6",
+                    }}
+                  >
+                    {desc}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div key={step} style={{ textAlign: "center" }}>
                 <div
                   style={{
+                    position: "relative",
                     width: "64px",
                     height: "64px",
-                    borderRadius: "50%",
-                    background: color + "18",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    margin: "0 auto 20px",
                   }}
                 >
-                  <Icon size={28} color={color} />
+                  <div
+                    style={{
+                      width: "64px",
+                      height: "64px",
+                      borderRadius: "50%",
+                      background: color + "18",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Icon size={28} color={color} />
+                  </div>
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "-4px",
+                      right: "-4px",
+                      width: "22px",
+                      height: "22px",
+                      borderRadius: "50%",
+                      background: color,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "11px",
+                      fontWeight: "800",
+                      color: "white",
+                    }}
+                  >
+                    {step}
+                  </div>
                 </div>
                 <div
                   style={{
-                    position: "absolute",
-                    top: "-4px",
-                    right: "-4px",
-                    width: "22px",
-                    height: "22px",
-                    borderRadius: "50%",
-                    background: color,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "11px",
-                    fontWeight: "800",
-                    color: "white",
+                    fontSize: "16px",
+                    fontWeight: "700",
+                    color: "#0f0e17",
+                    marginBottom: "8px",
                   }}
                 >
-                  {step}
+                  {label}
+                </div>
+                <div
+                  style={{
+                    fontSize: "14px",
+                    color: "#6b6860",
+                    lineHeight: "1.7",
+                  }}
+                >
+                  {desc}
                 </div>
               </div>
-              <div
-                style={{
-                  fontSize: "16px",
-                  fontWeight: "700",
-                  color: "#0f0e17",
-                  marginBottom: "8px",
-                }}
-              >
-                {label}
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  color: "#6b6860",
-                  lineHeight: "1.7",
-                }}
-              >
-                {desc}
-              </div>
-            </div>
-          ))}
+            )
+          )}
         </div>
       </section>
 
       {/* CTA */}
       <section
-        style={{ maxWidth: "1100px", margin: "0 auto", padding: "0 40px 80px" }}
+        style={{
+          maxWidth: "1100px",
+          margin: "0 auto",
+          padding: `0 ${px} ${sectionPy}`,
+        }}
       >
         <div
           style={{
             background: "#0f0e17",
-            borderRadius: "24px",
-            padding: "64px 48px",
+            borderRadius: isMobile ? "16px" : "24px",
+            padding: isMobile ? "40px 24px" : "64px 48px",
             textAlign: "center",
           }}
         >
@@ -632,7 +765,7 @@ export default function LandingPage() {
               border: "1px solid rgba(232,76,43,0.3)",
               borderRadius: "100px",
               padding: "6px 14px",
-              marginBottom: "24px",
+              marginBottom: "20px",
             }}
           >
             <CheckCircle size={13} color="#e84c2b" />
@@ -644,7 +777,7 @@ export default function LandingPage() {
           </div>
           <h2
             style={{
-              fontSize: "clamp(24px, 3vw, 40px)",
+              fontSize: isMobile ? "22px" : "clamp(24px, 3vw, 40px)",
               fontWeight: "800",
               color: "white",
               letterSpacing: "-0.5px",
@@ -656,13 +789,12 @@ export default function LandingPage() {
           </h2>
           <p
             style={{
-              fontSize: "16px",
+              fontSize: isMobile ? "14px" : "16px",
               color: "rgba(255,255,255,0.6)",
-              marginBottom: "36px",
+              marginBottom: "28px",
               lineHeight: "1.7",
             }}
           >
-            {/* Bergabung dengan ribuan pelajar yang sudah berlatih di Gudang Soal. */}
             Bergabung dengan Gudang Soal. Gratis, tanpa syarat.
           </p>
           <button
@@ -671,12 +803,12 @@ export default function LandingPage() {
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              padding: "14px 32px",
+              padding: isMobile ? "12px 24px" : "14px 32px",
               borderRadius: "12px",
               border: "none",
               background: "#e84c2b",
               color: "white",
-              fontSize: "16px",
+              fontSize: isMobile ? "14px" : "16px",
               fontWeight: "700",
               cursor: "pointer",
               fontFamily: "inherit",
@@ -685,13 +817,11 @@ export default function LandingPage() {
             onMouseEnter={(e) => (e.currentTarget.style.background = "#c43d20")}
             onMouseLeave={(e) => (e.currentTarget.style.background = "#e84c2b")}
           >
-            Daftar Gratis Sekarang
-            <ArrowRight size={18} />
+            Daftar Gratis Sekarang <ArrowRight size={17} />
           </button>
         </div>
       </section>
 
-      {/* Footer */}
       <Footer />
     </div>
   );

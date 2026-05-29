@@ -3,10 +3,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, ChevronDown, ChevronUp, ExternalLink, X } from "lucide-react";
 import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 import MarkdownEditor from "../../components/MarkdownEditor";
 import MathRenderer from "../../components/MathRenderer";
 import api from "../../lib/api";
 import SEO from "../../components/SEO";
+import useWindowWidth from "../../hooks/useWindowWidth";
 
 const STATUS_CONFIG = {
   pending: { label: "Menunggu Review", color: "#854F0B", bg: "#faeeda" },
@@ -25,6 +27,7 @@ function StatusBadge({ status }) {
         borderRadius: "6px",
         background: s.bg,
         color: s.color,
+        flexShrink: 0,
       }}
     >
       {s.label}
@@ -34,6 +37,8 @@ function StatusBadge({ status }) {
 
 export default function RequestSoalPage() {
   const navigate = useNavigate();
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
 
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -65,13 +70,11 @@ export default function RequestSoalPage() {
       setSubmitError("Ukuran foto maksimal 2MB");
       return;
     }
-
     setUploadingFoto(true);
     setSubmitError("");
     try {
       const formData = new FormData();
       formData.append("image", file);
-
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/upload/image?folder=uploads/request`,
         {
@@ -122,20 +125,29 @@ export default function RequestSoalPage() {
         url="/request-soal"
       />
       <Navbar />
-      <main style={{ maxWidth: "800px", margin: "0 auto", padding: "40px" }}>
+
+      <main
+        style={{
+          maxWidth: "800px",
+          margin: "0 auto",
+          padding: isMobile ? "24px 20px" : "40px",
+        }}
+      >
         {/* Header */}
         <div
           style={{
             display: "flex",
-            alignItems: "center",
+            alignItems: isMobile ? "flex-start" : "center",
             justifyContent: "space-between",
+            flexDirection: isMobile ? "column" : "row",
+            gap: isMobile ? "16px" : "0",
             marginBottom: "32px",
           }}
         >
           <div>
             <h1
               style={{
-                fontSize: "24px",
+                fontSize: isMobile ? "22px" : "24px",
                 fontWeight: "800",
                 color: "#0f0e17",
                 letterSpacing: "-0.5px",
@@ -167,6 +179,7 @@ export default function RequestSoalPage() {
               fontWeight: "600",
               cursor: "pointer",
               fontFamily: "inherit",
+              flexShrink: 0,
             }}
           >
             <Plus size={16} /> Kirim Soal
@@ -202,14 +215,14 @@ export default function RequestSoalPage() {
               alignItems: "center",
               justifyContent: "center",
               zIndex: 300,
-              padding: "24px",
+              padding: isMobile ? "16px" : "24px",
             }}
           >
             <div
               style={{
                 background: "white",
                 borderRadius: "16px",
-                padding: "28px",
+                padding: isMobile ? "20px" : "28px",
                 maxWidth: "600px",
                 width: "100%",
                 maxHeight: "90vh",
@@ -548,8 +561,8 @@ export default function RequestSoalPage() {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "14px",
-                    padding: "16px 20px",
+                    gap: "12px",
+                    padding: isMobile ? "14px 16px" : "16px 20px",
                     cursor: "pointer",
                   }}
                 >
@@ -590,7 +603,7 @@ export default function RequestSoalPage() {
                 {expanded === r.id && (
                   <div
                     style={{
-                      padding: "0 20px 20px",
+                      padding: isMobile ? "0 16px 16px" : "0 20px 20px",
                       borderTop: "1px solid #f2efe8",
                     }}
                   >
@@ -732,6 +745,8 @@ export default function RequestSoalPage() {
           </div>
         )}
       </main>
+
+      <Footer />
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>
     </div>
   );

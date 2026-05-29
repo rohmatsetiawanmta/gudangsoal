@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TrendingUp, Users, Target, Eye } from "lucide-react";
 import Navbar from "../../components/Navbar";
-import MathRenderer from "../../components/MathRenderer";
+import Footer from "../../components/Footer";
 import api from "../../lib/api";
 import SEO from "../../components/SEO";
+import useWindowWidth from "../../hooks/useWindowWidth";
 
 function DifficultyBadge({ level }) {
   const map = {
@@ -32,6 +33,9 @@ function DifficultyBadge({ level }) {
 
 export default function PopulerPage() {
   const navigate = useNavigate();
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
+
   const [soal, setSoal] = useState([]);
   const [loading, setLoading] = useState(true);
   const [limit, setLimit] = useState(10);
@@ -57,13 +61,22 @@ export default function PopulerPage() {
         url="/populer"
       />
       <Navbar />
-      <main style={{ maxWidth: "800px", margin: "0 auto", padding: "40px" }}>
+
+      <main
+        style={{
+          maxWidth: "800px",
+          margin: "0 auto",
+          padding: isMobile ? "24px 20px" : "40px",
+        }}
+      >
         {/* Header */}
         <div
           style={{
             display: "flex",
-            alignItems: "center",
+            alignItems: isMobile ? "flex-start" : "center",
             justifyContent: "space-between",
+            flexDirection: isMobile ? "column" : "row",
+            gap: isMobile ? "16px" : "0",
             marginBottom: "32px",
           }}
         >
@@ -79,7 +92,7 @@ export default function PopulerPage() {
               <TrendingUp size={22} color="#e84c2b" />
               <h1
                 style={{
-                  fontSize: "24px",
+                  fontSize: isMobile ? "22px" : "24px",
                   fontWeight: "800",
                   color: "#0f0e17",
                   letterSpacing: "-0.5px",
@@ -138,7 +151,7 @@ export default function PopulerPage() {
           </div>
         )}
 
-        {/* List */}
+        {/* Empty */}
         {!loading && soal.length === 0 && (
           <div
             style={{
@@ -155,9 +168,10 @@ export default function PopulerPage() {
           </div>
         )}
 
+        {/* List */}
         {!loading && soal.length > 0 && (
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
             {soal.map((s, i) => {
               const akurasi =
@@ -171,11 +185,11 @@ export default function PopulerPage() {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "16px",
+                    gap: isMobile ? "12px" : "16px",
                     background: "white",
                     borderRadius: "14px",
                     border: "1px solid #e2ddd5",
-                    padding: "18px 20px",
+                    padding: isMobile ? "14px 16px" : "18px 20px",
                     cursor: "pointer",
                     transition: "all .15s",
                   }}
@@ -194,15 +208,15 @@ export default function PopulerPage() {
                   {/* Rank */}
                   <div
                     style={{
-                      width: "36px",
-                      height: "36px",
+                      width: "32px",
+                      height: "32px",
                       borderRadius: "10px",
                       background: i < 3 ? "#e84c2b" : "#f2efe8",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontWeight: "800",
-                      fontSize: "15px",
+                      fontSize: "14px",
                       color: i < 3 ? "white" : "#6b6860",
                       flexShrink: 0,
                     }}
@@ -219,7 +233,7 @@ export default function PopulerPage() {
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
-                        marginBottom: "6px",
+                        marginBottom: "5px",
                         fontWeight: "500",
                       }}
                     >
@@ -233,11 +247,13 @@ export default function PopulerPage() {
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "10px",
+                        gap: "8px",
+                        flexWrap: "wrap",
                       }}
                     >
                       <span style={{ fontSize: "12px", color: "#b4b2a9" }}>
-                        {s.mapel} — {s.subtopik}
+                        {s.mapel}
+                        {!isMobile && ` — ${s.subtopik}`}
                       </span>
                       <DifficultyBadge level={s.difficulty} />
                     </div>
@@ -257,39 +273,39 @@ export default function PopulerPage() {
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "5px",
-                        fontSize: "13px",
+                        gap: "4px",
+                        fontSize: "12px",
                         fontWeight: "600",
                         color: "#0f0e17",
                       }}
                     >
-                      <Eye size={13} color="#6b6860" />
-                      {parseInt(s.views || 0).toLocaleString()} views
+                      <Eye size={12} color="#6b6860" />
+                      {parseInt(s.views || 0).toLocaleString()}
                     </div>
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "5px",
+                        gap: "4px",
                         fontSize: "12px",
                         color: "#6b6860",
                       }}
                     >
-                      <Users size={12} />
-                      {parseInt(s.total_dikerjakan).toLocaleString()} user
+                      <Users size={11} />
+                      {parseInt(s.total_dikerjakan).toLocaleString()}
                     </div>
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "5px",
+                        gap: "4px",
                         fontSize: "12px",
                         color: akurasi >= 50 ? "#1a8a6e" : "#e84c2b",
                         fontWeight: "600",
                       }}
                     >
-                      <Target size={12} />
-                      {akurasi}% akurasi
+                      <Target size={11} />
+                      {akurasi}%
                     </div>
                   </div>
                 </div>
@@ -298,6 +314,8 @@ export default function PopulerPage() {
           </div>
         )}
       </main>
+
+      <Footer />
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>
     </div>
   );

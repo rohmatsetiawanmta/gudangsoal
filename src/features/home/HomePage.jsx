@@ -10,14 +10,18 @@ import {
   Shuffle,
 } from "lucide-react";
 import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 import api from "../../lib/api";
 import { getProfile } from "../profile/profileApi";
 import RandomSoal from "../../components/RandomSoal";
 import SEO from "../../components/SEO";
+import useWindowWidth from "../../hooks/useWindowWidth";
 
 export default function HomePage() {
   const navigate = useNavigate();
   const { user, updateUser } = useAuthStore();
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
 
   const [jenjang, setJenjang] = useState([]);
   const [riwayat, setRiwayat] = useState([]);
@@ -26,14 +30,12 @@ export default function HomePage() {
   const [randomOpen, setRandomOpen] = useState(false);
 
   useEffect(() => {
-    // Fetch jenjang published
     api
       .get("/browse/jenjang")
       .then((data) => setJenjang(data))
       .catch(() => {})
       .finally(() => setLoadingJenjang(false));
 
-    // Fetch profile + riwayat
     getProfile()
       .then((data) => {
         updateUser(data.user);
@@ -51,7 +53,6 @@ export default function HomePage() {
     return "Selamat malam";
   };
 
-  // Warna per jenjang — fallback ke default kalau tidak ada
   const JENJANG_COLORS = {
     sd: "#e84c2b",
     smp: "#2563eb",
@@ -60,7 +61,6 @@ export default function HomePage() {
     cpns: "#7c3aed",
     osn: "#db2777",
   };
-
   const getColor = (slug) => JENJANG_COLORS[slug?.toLowerCase()] || "#6b6860";
 
   return (
@@ -73,10 +73,14 @@ export default function HomePage() {
       <Navbar />
 
       <main
-        style={{ maxWidth: "1000px", margin: "0 auto", padding: "48px 40px" }}
+        style={{
+          maxWidth: "1000px",
+          margin: "0 auto",
+          padding: isMobile ? "32px 20px" : "48px 40px",
+        }}
       >
         {/* Greeting */}
-        <div style={{ marginBottom: "48px" }}>
+        <div style={{ marginBottom: isMobile ? "36px" : "48px" }}>
           <p
             style={{ fontSize: "15px", color: "#6b6860", marginBottom: "4px" }}
           >
@@ -84,7 +88,7 @@ export default function HomePage() {
           </p>
           <h1
             style={{
-              fontSize: "clamp(26px, 4vw, 36px)",
+              fontSize: isMobile ? "26px" : "clamp(26px, 4vw, 36px)",
               fontWeight: "800",
               color: "#0f0e17",
               letterSpacing: "-0.5px",
@@ -101,7 +105,7 @@ export default function HomePage() {
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              marginTop: "16px",
+              marginTop: "14px",
               padding: "10px 20px",
               borderRadius: "10px",
               border: "1px solid #e2ddd5",
@@ -147,16 +151,18 @@ export default function HomePage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-              gap: "14px",
-              marginBottom: "52px",
+              gridTemplateColumns: isMobile
+                ? "repeat(2, 1fr)"
+                : "repeat(auto-fill, minmax(180px, 1fr))",
+              gap: "12px",
+              marginBottom: "48px",
             }}
           >
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
                 style={{
-                  height: "110px",
+                  height: "100px",
                   borderRadius: "14px",
                   background: "#e2ddd5",
                   opacity: 0.5,
@@ -169,9 +175,11 @@ export default function HomePage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-              gap: "14px",
-              marginBottom: "52px",
+              gridTemplateColumns: isMobile
+                ? "repeat(2, 1fr)"
+                : "repeat(auto-fill, minmax(180px, 1fr))",
+              gap: "12px",
+              marginBottom: "48px",
             }}
           >
             {jenjang.length === 0 && (
@@ -200,7 +208,7 @@ export default function HomePage() {
                   style={{
                     background: "white",
                     borderRadius: "14px",
-                    padding: "22px 18px",
+                    padding: isMobile ? "16px 14px" : "22px 18px",
                     border: "1px solid #e2ddd5",
                     cursor: "pointer",
                     position: "relative",
@@ -229,41 +237,43 @@ export default function HomePage() {
                   />
                   <div
                     style={{
-                      width: "42px",
-                      height: "42px",
+                      width: isMobile ? "36px" : "42px",
+                      height: isMobile ? "36px" : "42px",
                       borderRadius: "12px",
                       background: color + "18",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      marginBottom: "14px",
+                      marginBottom: "12px",
                     }}
                   >
-                    <BookOpen size={22} color={color} />
+                    <BookOpen size={isMobile ? 18 : 22} color={color} />
                   </div>
                   <div
                     style={{
                       fontWeight: "700",
-                      fontSize: "17px",
+                      fontSize: isMobile ? "15px" : "17px",
                       color: "#0f0e17",
-                      marginBottom: "3px",
+                      marginBottom: "2px",
                     }}
                   >
                     {j.nama}
                   </div>
-                  <div style={{ fontSize: "13px", color: "#6b6860" }}>
+                  <div style={{ fontSize: "12px", color: "#6b6860" }}>
                     {j.slug?.toUpperCase()}
                   </div>
-                  <ChevronRight
-                    size={16}
-                    color="#b4b2a9"
-                    style={{
-                      position: "absolute",
-                      right: "16px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                    }}
-                  />
+                  {!isMobile && (
+                    <ChevronRight
+                      size={16}
+                      color="#b4b2a9"
+                      style={{
+                        position: "absolute",
+                        right: "16px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                      }}
+                    />
+                  )}
                 </div>
               );
             })}
@@ -367,10 +377,10 @@ export default function HomePage() {
                   background: "white",
                   borderRadius: "14px",
                   border: "1px solid #e2ddd5",
-                  padding: "14px 20px",
+                  padding: isMobile ? "12px 14px" : "14px 20px",
                   display: "flex",
                   alignItems: "center",
-                  gap: "14px",
+                  gap: "12px",
                   cursor: "pointer",
                   transition: "transform .15s, box-shadow .15s",
                 }}
@@ -416,43 +426,49 @@ export default function HomePage() {
                       fontSize: "12px",
                       color: "#b4b2a9",
                       marginTop: "3px",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
                     }}
                   >
                     {r.jenjang} — {r.mapel} — {r.subtopik}
                   </div>
                 </div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-end",
-                    gap: "4px",
-                    flexShrink: 0,
-                  }}
-                >
-                  <span
+                {!isMobile && (
+                  <div
                     style={{
-                      fontSize: "11px",
-                      fontWeight: "700",
-                      color: "#b4b2a9",
-                      fontFamily: "monospace",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-end",
+                      gap: "4px",
+                      flexShrink: 0,
                     }}
                   >
-                    {r.kode}
-                  </span>
-                  <span style={{ fontSize: "11px", color: "#b4b2a9" }}>
-                    {new Date(r.created_at).toLocaleDateString("id-ID", {
-                      day: "numeric",
-                      month: "short",
-                    })}
-                  </span>
-                </div>
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: "700",
+                        color: "#b4b2a9",
+                        fontFamily: "monospace",
+                      }}
+                    >
+                      {r.kode}
+                    </span>
+                    <span style={{ fontSize: "11px", color: "#b4b2a9" }}>
+                      {new Date(r.created_at).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "short",
+                      })}
+                    </span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
         )}
       </main>
 
+      <Footer />
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>
     </div>
   );

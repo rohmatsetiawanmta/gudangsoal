@@ -6,6 +6,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
 import api from "../../lib/api";
+import useWindowWidth from "../../hooks/useWindowWidth";
 
 const TIPE_CONFIG = {
   feature: { label: "Fitur Baru", color: "#1a8a6e", bg: "#e4f5f0", icon: Zap },
@@ -49,6 +50,9 @@ function TipeBadge({ tipe }) {
 
 export default function ChangelogPage() {
   const navigate = useNavigate();
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
+
   const [changelogs, setChangelogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterTipe, setFilterTipe] = useState("all");
@@ -61,13 +65,10 @@ export default function ChangelogPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Filter berdasarkan tipe
   const filtered =
     filterTipe === "all"
       ? changelogs
       : changelogs.filter((c) => c.tipe === filterTipe);
-
-  // Group by versi
   const grouped = filtered.reduce((acc, item) => {
     if (!acc[item.versi])
       acc[item.versi] = {
@@ -78,7 +79,6 @@ export default function ChangelogPage() {
     acc[item.versi].items.push(item);
     return acc;
   }, {});
-
   const versions = Object.values(grouped);
 
   return (
@@ -91,13 +91,17 @@ export default function ChangelogPage() {
       <Navbar />
 
       <main
-        style={{ maxWidth: "800px", margin: "0 auto", padding: "60px 40px" }}
+        style={{
+          maxWidth: "800px",
+          margin: "0 auto",
+          padding: isMobile ? "40px 20px" : "60px 40px",
+        }}
       >
         {/* Header */}
-        <div style={{ marginBottom: "40px" }}>
+        <div style={{ marginBottom: "32px" }}>
           <h1
             style={{
-              fontSize: "clamp(28px, 4vw, 40px)",
+              fontSize: isMobile ? "26px" : "clamp(28px, 4vw, 40px)",
               fontWeight: "800",
               color: "#0f0e17",
               letterSpacing: "-0.5px",
@@ -108,10 +112,10 @@ export default function ChangelogPage() {
           </h1>
           <p
             style={{
-              fontSize: "16px",
+              fontSize: isMobile ? "14px" : "16px",
               color: "#6b6860",
               lineHeight: "1.7",
-              marginBottom: "24px",
+              marginBottom: "20px",
             }}
           >
             Semua pembaruan, fitur baru, dan perbaikan yang dirilis di Gudang
@@ -191,7 +195,7 @@ export default function ChangelogPage() {
         {/* Versions */}
         {!loading && (
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "48px" }}
+            style={{ display: "flex", flexDirection: "column", gap: "40px" }}
           >
             {versions.map((v, vi) => (
               <div key={v.versi}>
@@ -200,8 +204,9 @@ export default function ChangelogPage() {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "12px",
-                    marginBottom: "20px",
+                    gap: "10px",
+                    marginBottom: "16px",
+                    flexWrap: "wrap",
                   }}
                 >
                   <span
@@ -227,9 +232,11 @@ export default function ChangelogPage() {
                       Latest
                     </span>
                   )}
-                  <div
-                    style={{ flex: 1, height: "1px", background: "#e2ddd5" }}
-                  />
+                  {!isMobile && (
+                    <div
+                      style={{ flex: 1, height: "1px", background: "#e2ddd5" }}
+                    />
+                  )}
                   <span style={{ fontSize: "13px", color: "#b4b2a9" }}>
                     {new Date(v.released_at).toLocaleDateString("id-ID", {
                       day: "numeric",
@@ -239,12 +246,12 @@ export default function ChangelogPage() {
                   </span>
                 </div>
 
-                {/* Card grid */}
+                {/* Card grid — 1 kolom di mobile, 2 kolom di desktop */}
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "12px",
+                    gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                    gap: "10px",
                   }}
                 >
                   {v.items.map((item) => {
@@ -257,10 +264,10 @@ export default function ChangelogPage() {
                           background: "white",
                           borderRadius: "12px",
                           border: "1px solid #e2ddd5",
-                          padding: "16px",
+                          padding: "14px",
                           display: "flex",
                           flexDirection: "column",
-                          gap: "8px",
+                          gap: "6px",
                         }}
                       >
                         <div
@@ -272,9 +279,9 @@ export default function ChangelogPage() {
                         >
                           <div
                             style={{
-                              width: "28px",
-                              height: "28px",
-                              borderRadius: "8px",
+                              width: "26px",
+                              height: "26px",
+                              borderRadius: "7px",
                               background: t.bg,
                               display: "flex",
                               alignItems: "center",
@@ -282,11 +289,11 @@ export default function ChangelogPage() {
                               flexShrink: 0,
                             }}
                           >
-                            <Icon size={13} color={t.color} />
+                            <Icon size={12} color={t.color} />
                           </div>
                           <span
                             style={{
-                              fontSize: "13px",
+                              fontSize: "12px",
                               fontWeight: "700",
                               color: t.color,
                             }}
@@ -296,7 +303,7 @@ export default function ChangelogPage() {
                         </div>
                         <div
                           style={{
-                            fontSize: "14px",
+                            fontSize: "13px",
                             fontWeight: "600",
                             color: "#0f0e17",
                             lineHeight: "1.4",
@@ -327,16 +334,16 @@ export default function ChangelogPage() {
         {/* CTA bottom */}
         <div
           style={{
-            marginTop: "64px",
+            marginTop: "48px",
             background: "#0f0e17",
             borderRadius: "16px",
-            padding: "40px",
+            padding: isMobile ? "32px 20px" : "40px",
             textAlign: "center",
           }}
         >
           <h3
             style={{
-              fontSize: "20px",
+              fontSize: isMobile ? "18px" : "20px",
               fontWeight: "800",
               color: "white",
               marginBottom: "8px",
@@ -348,7 +355,7 @@ export default function ChangelogPage() {
             style={{
               fontSize: "14px",
               color: "rgba(255,255,255,0.6)",
-              marginBottom: "24px",
+              marginBottom: "20px",
             }}
           >
             Bergabung gratis dan mulai kerjakan soal matematika.

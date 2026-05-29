@@ -6,6 +6,7 @@ import { useAuthStore } from "./authStore";
 import { login } from "./authApi";
 import Navbar from "../../components/Navbar";
 import SEO from "../../components/SEO";
+import useWindowWidth from "../../hooks/useWindowWidth";
 
 function InputField({
   label,
@@ -79,6 +80,8 @@ function InputField({
 export default function LoginPage() {
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -94,7 +97,6 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-
     try {
       const res = await login(form.email, form.password);
       setAuth(res.user, res.token);
@@ -130,8 +132,9 @@ export default function LoginPage() {
         url="/login"
       />
       <Navbar />
+
       <div style={{ minHeight: "90vh", display: "flex" }}>
-        {/* Kiri — Branding */}
+        {/* Kiri — Branding (desktop only) */}
         <div
           style={{
             display: "none",
@@ -143,10 +146,7 @@ export default function LoginPage() {
           }}
           className="lg-left"
         >
-          <div
-            style={{ display: "flex", alignItems: "center", gap: "12px" }}
-          ></div>
-
+          <div />
           <div>
             <h1
               style={{
@@ -171,7 +171,6 @@ export default function LoginPage() {
               Latihan terstruktur dari SD hingga persiapan UTBK, CPNS, dan OSN.
             </p>
           </div>
-
           <div style={{ display: "flex", gap: "40px" }}>
             {[
               { num: "10K+", label: "Bank Soal" },
@@ -209,7 +208,7 @@ export default function LoginPage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "48px 32px",
+            padding: isMobile ? "32px 20px" : "48px 32px",
             background: "#faf9f6",
           }}
         >
@@ -322,17 +321,33 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
+
+            {/* Browse tanpa login */}
+            <div style={{ marginTop: "20px", textAlign: "center" }}>
+              <button
+                onClick={() => navigate("/browse")}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  color: "#6b6860",
+                  fontFamily: "inherit",
+                  textDecoration: "underline",
+                }}
+              >
+                Lanjut tanpa akun
+              </button>
+            </div>
           </div>
         </div>
+      </div>
 
-        <style>{`
-        @media (min-width: 1024px) {
-          .lg-left { display: flex !important; }
-        }
+      <style>{`
+        @media (min-width: 1024px) { .lg-left { display: flex !important; } }
         @keyframes spin { to { transform: rotate(360deg); } }
         input::placeholder { color: #b4b2a9; }
       `}</style>
-      </div>
     </div>
   );
 }
