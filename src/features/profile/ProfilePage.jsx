@@ -17,6 +17,7 @@ import Navbar from "../../components/Navbar";
 import { useAuthStore } from "../auth/authStore";
 import { getProfile, updateProfile } from "./profileApi";
 import { BADGES } from "../../lib/constants";
+import SEO from "../../components/SEO";
 
 function StatCard({ icon: Icon, label, value, color }) {
   return (
@@ -224,6 +225,11 @@ export default function ProfilePage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+      <SEO
+        title="Profil"
+        description="Lihat progress belajar, riwayat soal, XP, dan streak harianmu di Gudang Soal."
+        url="/profile"
+      />
       <Navbar />
 
       <main style={{ maxWidth: "800px", margin: "0 auto", padding: "40px" }}>

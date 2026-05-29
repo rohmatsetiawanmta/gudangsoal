@@ -23,6 +23,7 @@ import { getSoalDetail, getSoalStatus } from "./soalApi";
 import { saveSession } from "../profile/profileApi";
 import { useAuthStore } from "../auth/authStore";
 import api from "../../lib/api";
+import SEO from "../../components/SEO";
 
 const getYouTubeId = (url) => {
   if (!url) return null;
@@ -771,6 +772,17 @@ export default function SoalDetail() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+      {soal && (
+        <SEO
+          title={`Soal ${soal.mapel_nama} (#${soal.kode})`}
+          description={soal.body
+            .replace(/\$\$?[^$]+\$\$?/g, "")
+            .replace(/[*_~`#]/g, "")
+            .trim()
+            .slice(0, 150)}
+          url={`/soal/${kode}`}
+        />
+      )}
       <Navbar />
 
       <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px" }}>

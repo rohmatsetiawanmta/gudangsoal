@@ -5,6 +5,7 @@ import { Search, BookOpen, FolderTree, FileText } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import MathRenderer from "../../components/MathRenderer";
 import { search } from "./searchApi";
+import SEO from "../../components/SEO";
 
 function DifficultyBadge({ level }) {
   const map = {
@@ -108,6 +109,15 @@ export default function SearchPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+      <SEO
+        title={q ? `Hasil pencarian "${q}"` : "Cari Soal"}
+        description={
+          q
+            ? `Hasil pencarian soal matematika untuk "${q}" di Gudang Soal.`
+            : "Cari soal, topik, dan jenjang di Gudang Soal."
+        }
+        url={q ? `/search?q=${encodeURIComponent(q)}` : "/search"}
+      />
       <Navbar />
 
       <main style={{ maxWidth: "720px", margin: "0 auto", padding: "40px" }}>

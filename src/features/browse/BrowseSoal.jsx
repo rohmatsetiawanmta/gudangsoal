@@ -6,6 +6,7 @@ import Breadcrumb from "../../components/Breadcrumb";
 import MathRenderer from "../../components/MathRenderer";
 import { getSoal } from "./browseApi";
 import Navbar from "../../components/Navbar";
+import SEO from "../../components/SEO";
 
 function DifficultyBadge({ level }) {
   const map = {
@@ -56,6 +57,13 @@ export default function BrowseSoal() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+      {!loading && (
+        <SEO
+          title={`${subtopikNama} — ${mapelNama}`}
+          description={`${soal.length} soal latihan ${subtopikNama} — ${mapelNama} jenjang ${jenjangNama}. Lengkap dengan pembahasan detail.`}
+          url={`/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}/${topikSlug}/${subtopikSlug}`}
+        />
+      )}
       <Navbar />
 
       <main style={{ maxWidth: "720px", margin: "0 auto", padding: "40px" }}>

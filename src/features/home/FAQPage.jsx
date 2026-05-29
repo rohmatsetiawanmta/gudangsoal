@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ChevronDown, ChevronUp, Warehouse } from "lucide-react";
 import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
+import SEO from "../../components/SEO";
 
 const FAQ_DATA = [
   {
@@ -203,6 +204,11 @@ export default function FAQPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+      <SEO
+        title="FAQ"
+        description="Pertanyaan yang sering ditanyakan seputar Gudang Soal — platform latihan soal matematika gratis."
+        url="/faq"
+      />
       {/* Navbar simple */}
       <Navbar />
 

@@ -17,6 +17,7 @@ import {
 import api from "../../lib/api";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import SEO from "../../components/SEO";
 
 const JENJANG = [
   //   { slug: "sd", label: "SD", desc: "Kelas 1–6", color: "#e84c2b" },
@@ -119,6 +120,8 @@ export default function LandingPage() {
         fontFamily: "inherit",
       }}
     >
+      <SEO url="/" />
+
       {/* Navbar */}
       <Navbar />
 

@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 import Breadcrumb from "../../components/Breadcrumb";
 import { getTopik } from "./browseApi";
 import Navbar from "../../components/Navbar";
+import SEO from "../../components/SEO";
 
 export default function BrowseTopik() {
   const navigate = useNavigate();
@@ -28,6 +29,11 @@ export default function BrowseTopik() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+      <SEO
+        title={`${mapelNama} — ${subjenjangNama}`}
+        description={`Pilih topik ${mapelNama} untuk latihan soal matematika jenjang ${jenjangNama}.`}
+        url={`/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}`}
+      />
       <Navbar />
 
       <main style={{ maxWidth: "720px", margin: "0 auto", padding: "40px" }}>

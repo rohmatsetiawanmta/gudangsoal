@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 import Breadcrumb from "../../components/Breadcrumb";
 import { getMapel } from "./browseApi";
 import Navbar from "../../components/Navbar";
+import SEO from "../../components/SEO";
 
 export default function BrowseMapel() {
   const navigate = useNavigate();
@@ -27,6 +28,11 @@ export default function BrowseMapel() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+      <SEO
+        title={`${subjenjangNama} — ${jenjangNama}`}
+        description={`Latihan soal ${subjenjangNama} jenjang ${jenjangNama}. Pilih mata pelajaran untuk mulai berlatih.`}
+        url={`/browse/${jenjangSlug}/${subjenjangSlug}`}
+      />
       <Navbar />
 
       <main style={{ maxWidth: "720px", margin: "0 auto", padding: "40px" }}>

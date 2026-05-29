@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 import Breadcrumb from "../../components/Breadcrumb";
 import { getSubtopik } from "./browseApi";
 import Navbar from "../../components/Navbar";
+import SEO from "../../components/SEO";
 
 export default function BrowseSubtopik() {
   const navigate = useNavigate();
@@ -29,6 +30,11 @@ export default function BrowseSubtopik() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+      <SEO
+        title={`${topikNama} — ${mapelNama}`}
+        description={`Pilih subtopik ${topikNama} untuk latihan soal ${mapelNama} jenjang ${jenjangNama}.`}
+        url={`/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}/${topikSlug}`}
+      />
       <Navbar />
 
       <main style={{ maxWidth: "720px", margin: "0 auto", padding: "40px" }}>

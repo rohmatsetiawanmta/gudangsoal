@@ -6,6 +6,7 @@ import Navbar from "../../components/Navbar";
 import MarkdownEditor from "../../components/MarkdownEditor";
 import MathRenderer from "../../components/MathRenderer";
 import api from "../../lib/api";
+import SEO from "../../components/SEO";
 
 const STATUS_CONFIG = {
   pending: { label: "Menunggu Review", color: "#854F0B", bg: "#faeeda" },
@@ -115,6 +116,11 @@ export default function RequestSoalPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+      <SEO
+        title="Request Soal"
+        description="Kirim soal yang ingin kamu tanyakan. Admin akan mereview dan menjawab."
+        url="/request-soal"
+      />
       <Navbar />
       <main style={{ maxWidth: "800px", margin: "0 auto", padding: "40px" }}>
         {/* Header */}

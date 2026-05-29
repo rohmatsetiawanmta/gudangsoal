@@ -64,6 +64,11 @@ export default function HomePage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+      <SEO
+        title="Beranda"
+        description="Selamat datang di Gudang Soal. Lanjutkan belajar, kerjakan soal baru, dan pantau progress XP-mu."
+        url="/home"
+      />
       <Navbar />
 
       <main

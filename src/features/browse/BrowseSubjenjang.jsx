@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 import Breadcrumb from "../../components/Breadcrumb";
 import { getSubjenjang } from "./browseApi";
 import Navbar from "../../components/Navbar";
+import SEO from "../../components/SEO";
 
 export default function BrowseSubjenjang() {
   const navigate = useNavigate();
@@ -26,6 +27,11 @@ export default function BrowseSubjenjang() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+      <SEO
+        title={jenjangNama}
+        description={`Latihan soal matematika jenjang ${jenjangNama} — pilih subjenjang untuk mulai berlatih.`}
+        url={`/browse/${jenjangSlug}`}
+      />
       <Navbar />
 
       <main style={{ maxWidth: "720px", margin: "0 auto", padding: "40px" }}>

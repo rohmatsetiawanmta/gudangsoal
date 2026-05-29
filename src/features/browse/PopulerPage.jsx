@@ -5,6 +5,7 @@ import { TrendingUp, Users, Target, Eye } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import MathRenderer from "../../components/MathRenderer";
 import api from "../../lib/api";
+import SEO from "../../components/SEO";
 
 function DifficultyBadge({ level }) {
   const map = {
@@ -50,6 +51,11 @@ export default function PopulerPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+      <SEO
+        title="Soal Populer"
+        description="Soal matematika yang paling banyak dikerjakan di Gudang Soal."
+        url="/populer"
+      />
       <Navbar />
       <main style={{ maxWidth: "800px", margin: "0 auto", padding: "40px" }}>
         {/* Header */}

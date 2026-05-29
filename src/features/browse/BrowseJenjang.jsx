@@ -14,6 +14,7 @@ import {
 import Breadcrumb from "../../components/Breadcrumb";
 import { getJenjang } from "./browseApi";
 import Navbar from "../../components/Navbar";
+import SEO from "../../components/SEO";
 
 const ICON_MAP = {
   sd: { icon: School, color: "#e84c2b" },
@@ -39,6 +40,11 @@ export default function BrowseJenjang() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+      <SEO
+        title="Direktori Soal"
+        description="Browse semua soal matematika berdasarkan jenjang — SD, SMP, SMA, UTBK, CPNS, dan OSN."
+        url="/browse"
+      />
       <Navbar />
 
       <main style={{ maxWidth: "720px", margin: "0 auto", padding: "40px" }}>

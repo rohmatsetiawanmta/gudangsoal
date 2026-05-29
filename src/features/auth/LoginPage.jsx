@@ -5,6 +5,7 @@ import { LogIn, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useAuthStore } from "./authStore";
 import { login } from "./authApi";
 import Navbar from "../../components/Navbar";
+import SEO from "../../components/SEO";
 
 function InputField({
   label,
@@ -123,6 +124,11 @@ export default function LoginPage() {
 
   return (
     <div>
+      <SEO
+        title="Masuk"
+        description="Masuk ke akun Gudang Soal untuk melanjutkan belajar, melihat progress, dan mendapatkan XP."
+        url="/login"
+      />
       <Navbar />
       <div style={{ minHeight: "90vh", display: "flex" }}>
         {/* Kiri — Branding */}

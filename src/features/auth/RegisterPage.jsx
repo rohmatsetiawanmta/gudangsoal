@@ -5,6 +5,7 @@ import { UserPlus, Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 import { useAuthStore } from "./authStore";
 import { register } from "./authApi";
 import Navbar from "../../components/Navbar";
+import SEO from "../../components/SEO";
 
 function InputField({
   label,
@@ -137,6 +138,11 @@ export default function RegisterPage() {
 
   return (
     <div>
+      <SEO
+        title="Daftar"
+        description="Buat akun Gudang Soal gratis dan mulai latihan soal matematika dengan sistem XP dan tracking progress."
+        url="/register"
+      />
       <Navbar />
       <div style={{ minHeight: "90vh", display: "flex" }}>
         {/* Kiri — Branding */}
