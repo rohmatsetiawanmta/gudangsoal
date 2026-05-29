@@ -4,6 +4,8 @@ import { useAuthStore } from "./features/auth/authStore";
 
 import LandingPage from "./features/home/LandingPage";
 import HomePage from "./features/home/HomePage";
+import FAQPage from "./features/home/FAQPage";
+
 import LoginPage from "./features/auth/LoginPage";
 import RegisterPage from "./features/auth/RegisterPage";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -48,6 +50,7 @@ export default function App() {
         path="/register"
         element={isLoggedIn ? <Navigate to="/home" /> : <RegisterPage />}
       />
+      <Route path="/faq" element={<FAQPage />} />
 
       <Route element={<ProtectedRoute />}>
         <Route path="/home" element={<HomePage />} />
