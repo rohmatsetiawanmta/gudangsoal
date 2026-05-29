@@ -11,6 +11,10 @@ import {
   Share2,
   Copy,
   Check,
+  Eye,
+  Users,
+  BarChart2,
+  RefreshCw,
 } from "lucide-react";
 import MathRenderer from "../../components/MathRenderer";
 import Breadcrumb from "../../components/Breadcrumb";
@@ -911,8 +915,21 @@ export default function SoalDetail() {
                   </span>
                 </div>
                 <div
-                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
                 >
+                  {/* Views */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      color: "#b4b2a9",
+                      fontSize: "12px",
+                    }}
+                  >
+                    <Eye size={13} />
+                    {parseInt(soal.views || 0).toLocaleString()}
+                  </div>
                   <DifficultyBadge level={soal.difficulty} />
                 </div>
               </div>
@@ -1230,6 +1247,87 @@ export default function SoalDetail() {
                     </div>
                   </div>
 
+                  {/* Stats soal — selalu tampil kalau sudah submit benar */}
+                  {(isCorrect || alreadyCorrect) && soal.stats && (
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr 1fr",
+                        gap: "8px",
+                      }}
+                    >
+                      {[
+                        {
+                          icon: Users,
+                          label: "Dikerjakan",
+                          value: soal.stats.total_user.toLocaleString(),
+                          color: "#2563eb",
+                        },
+                        {
+                          icon: RefreshCw,
+                          label: "Attempt",
+                          value: soal.stats.total_attempt.toLocaleString(),
+                          color: "#f5a623",
+                        },
+                        {
+                          icon: BarChart2,
+                          label: "Akurasi",
+                          value: `${soal.stats.akurasi}%`,
+                          color:
+                            soal.stats.akurasi >= 50 ? "#1a8a6e" : "#e84c2b",
+                        },
+                      ].map(({ icon: Icon, label, value, color }) => (
+                        <div
+                          key={label}
+                          style={{
+                            background: "#faf9f6",
+                            borderRadius: "10px",
+                            padding: "12px 14px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: "32px",
+                              height: "32px",
+                              borderRadius: "8px",
+                              background: color + "18",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <Icon size={15} color={color} />
+                          </div>
+                          <div>
+                            <div
+                              style={{
+                                fontSize: "16px",
+                                fontWeight: "800",
+                                color: "#0f0e17",
+                                lineHeight: 1,
+                              }}
+                            >
+                              {value}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: "11px",
+                                color: "#6b6860",
+                                marginTop: "2px",
+                              }}
+                            >
+                              {label}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   {/* Pembahasan */}
                   {showPembahasan && soal.explanation && (
                     <div>
@@ -1250,7 +1348,6 @@ export default function SoalDetail() {
                       </div>
                     </div>
                   )}
-
                   {!showPembahasan && !soal.explanation && (
                     <div
                       style={{
@@ -1262,7 +1359,6 @@ export default function SoalDetail() {
                       Pembahasan belum tersedia untuk soal ini.
                     </div>
                   )}
-
                   {/* Video */}
                   {showPembahasan &&
                     soal.video_url &&
@@ -1301,7 +1397,6 @@ export default function SoalDetail() {
                         </div>
                       </div>
                     )}
-
                   {/* Banner daftar — kalau tidak login */}
                   {!user && (
                     <div

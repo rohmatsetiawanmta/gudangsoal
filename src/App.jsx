@@ -16,6 +16,7 @@ import BrowseTopik from "./features/browse/BrowseTopik";
 import BrowseSubtopik from "./features/browse/BrowseSubtopik";
 import BrowseSoal from "./features/browse/BrowseSoal";
 import SoalDetail from "./features/soal/SoalDetail";
+import PopulerPage from "./features/browse/PopulerPage";
 
 import AdminRoute from "./components/AdminRoute";
 import AdminLayout from "./features/admin/AdminLayout";
@@ -74,6 +75,7 @@ export default function App() {
         element={<BrowseSoal />}
       />
       <Route path="/soal/:kode" element={<SoalDetail />} />
+      <Route path="/populer" element={<PopulerPage />} />
 
       <Route path="*" element={<Navigate to="/" />} />
 
