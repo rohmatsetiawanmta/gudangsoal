@@ -1063,7 +1063,7 @@ export default function SoalDetail() {
                       {copied ? <Check size={13} /> : <Copy size={13} />}
                       {copied ? "Tersalin!" : "Salin link"}
                     </button>
-                    {/* <button
+                    <button
                       onClick={handleShareWA}
                       style={{
                         display: "flex",
@@ -1087,7 +1087,7 @@ export default function SoalDetail() {
                     >
                       <Share2 size={13} />
                       WhatsApp
-                    </button> */}
+                    </button>
                   </div>
 
                   {/* Flag */}

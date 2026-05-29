@@ -5,6 +5,7 @@ import { useAuthStore } from "./features/auth/authStore";
 import LandingPage from "./features/home/LandingPage";
 import HomePage from "./features/home/HomePage";
 import FAQPage from "./features/home/FAQPage";
+import ChangelogPage from "./features/home/ChangelogPage";
 
 import LoginPage from "./features/auth/LoginPage";
 import RegisterPage from "./features/auth/RegisterPage";
@@ -29,6 +30,7 @@ import AdminStruktur from "./features/admin/AdminStruktur";
 import AdminUsers from "./features/admin/AdminUsers";
 import AdminReports from "./features/admin/AdminReports";
 import AdminSoalRequests from "./features/admin/AdminSoalRequests";
+import AdminChangelog from "./features/admin/AdminChangelog";
 
 import SearchPage from "./features/search/SearchPage";
 import ProfilePage from "./features/profile/ProfilePage";
@@ -51,6 +53,7 @@ export default function App() {
         element={isLoggedIn ? <Navigate to="/home" /> : <RegisterPage />}
       />
       <Route path="/faq" element={<FAQPage />} />
+      <Route path="/changelog" element={<ChangelogPage />} />
 
       <Route element={<ProtectedRoute />}>
         <Route path="/home" element={<HomePage />} />
@@ -92,6 +95,7 @@ export default function App() {
           <Route path="users" element={<AdminUsers />} />
           <Route path="reports" element={<AdminReports />} />
           <Route path="soal-requests" element={<AdminSoalRequests />} />
+          <Route path="changelog" element={<AdminChangelog />} />
         </Route>
       </Route>
     </Routes>

@@ -13,6 +13,7 @@ import Navbar from "../../components/Navbar";
 import api from "../../lib/api";
 import { getProfile } from "../profile/profileApi";
 import RandomSoal from "../../components/RandomSoal";
+import SEO from "../../components/SEO";
 
 export default function HomePage() {
   const navigate = useNavigate();

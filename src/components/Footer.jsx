@@ -11,6 +11,7 @@ export default function Footer() {
     { label: "FAQ", path: "/faq" },
     { label: "Direktori Soal", path: "/browse" },
     { label: "Soal Populer", path: "/populer" },
+    { label: "Changelog", path: "/changelog" },
   ];
 
   return (

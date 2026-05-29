@@ -13,6 +13,7 @@ import {
   Users,
   Flag,
   MessageSquarePlus,
+  ScrollText,
 } from "lucide-react";
 import { useAuthStore } from "../auth/authStore";
 
@@ -27,6 +28,7 @@ const MENU = [
     label: "Request Soal",
     icon: MessageSquarePlus,
   },
+  { to: "/admin/changelog", label: "Changelog", icon: ScrollText },
 ];
 
 function SidebarLink({ to, label, icon: Icon, end, collapsed }) {
