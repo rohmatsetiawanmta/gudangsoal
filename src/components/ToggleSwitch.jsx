@@ -1,5 +1,10 @@
 // src/components/ToggleSwitch.jsx
-export default function ToggleSwitch({ checked, onChange, loading }) {
+export default function ToggleSwitch({
+  checked,
+  onChange,
+  loading,
+  hideLabel = false,
+}) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
       <div
@@ -29,16 +34,18 @@ export default function ToggleSwitch({ checked, onChange, loading }) {
           }}
         />
       </div>
-      <span
-        style={{
-          fontSize: "12px",
-          fontWeight: "600",
-          color: checked ? "#1a8a6e" : "#6b6860",
-          minWidth: "56px",
-        }}
-      >
-        {loading ? "..." : checked ? "Published" : "Draft"}
-      </span>
+      {!hideLabel && (
+        <span
+          style={{
+            fontSize: "12px",
+            fontWeight: "600",
+            color: checked ? "#1a8a6e" : "#6b6860",
+            minWidth: "56px",
+          }}
+        >
+          {loading ? "..." : checked ? "Published" : "Draft"}
+        </span>
+      )}
     </div>
   );
 }

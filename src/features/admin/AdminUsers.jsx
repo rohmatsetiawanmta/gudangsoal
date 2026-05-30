@@ -10,7 +10,9 @@ import {
   Eye,
   Crown,
 } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import api from "../../lib/api";
+import useWindowWidth from "../../hooks/useWindowWidth";
 
 function RoleBadge({ role }) {
   return (
@@ -40,7 +42,7 @@ function Modal({ title, onClose, children }) {
         alignItems: "center",
         justifyContent: "center",
         zIndex: 300,
-        padding: "24px",
+        padding: "16px",
       }}
     >
       <div
@@ -85,6 +87,9 @@ function Modal({ title, onClose, children }) {
 }
 
 export default function AdminUsers() {
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -208,33 +213,87 @@ export default function AdminUsers() {
 
   const totalPages = Math.ceil(total / limit);
 
-  return (
-    <div>
-      {/* Header */}
-      <div
+  const ActionButtons = ({ u }) => (
+    <div style={{ display: "flex", gap: "6px" }}>
+      <button
+        onClick={() => openDetail(u)}
+        title="Detail"
         style={{
+          width: "28px",
+          height: "28px",
+          borderRadius: "7px",
+          border: "1px solid #e2ddd5",
+          background: "white",
+          cursor: "pointer",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: "28px",
+          justifyContent: "center",
+          color: "#6b6860",
         }}
       >
-        <div>
-          <h1
-            style={{
-              fontSize: "24px",
-              fontWeight: "800",
-              color: "#0f0e17",
-              letterSpacing: "-0.5px",
-              marginBottom: "4px",
-            }}
-          >
-            Kelola User
-          </h1>
-          <p style={{ fontSize: "14px", color: "#6b6860" }}>
-            {total} user terdaftar
-          </p>
-        </div>
+        <Eye size={12} />
+      </button>
+      <button
+        onClick={() => openEdit(u)}
+        title="Edit"
+        style={{
+          width: "28px",
+          height: "28px",
+          borderRadius: "7px",
+          border: "1px solid #e2ddd5",
+          background: "white",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#6b6860",
+        }}
+      >
+        <User size={12} />
+      </button>
+      <button
+        onClick={() => openReset(u)}
+        title="Reset Password"
+        style={{
+          width: "28px",
+          height: "28px",
+          borderRadius: "7px",
+          border: "1px solid #fca5a5",
+          background: "#fff3f0",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#e84c2b",
+        }}
+      >
+        <Shield size={12} />
+      </button>
+    </div>
+  );
+
+  return (
+    <div>
+      <Helmet>
+        <title>Kelola User | Admin Gudang Soal</title>
+      </Helmet>
+
+      {/* Header */}
+      <div style={{ marginBottom: "28px" }}>
+        <h1
+          style={{
+            fontSize: isMobile ? "22px" : "24px",
+            fontWeight: "800",
+            color: "#0f0e17",
+            letterSpacing: "-0.5px",
+            marginBottom: "4px",
+          }}
+        >
+          Kelola User
+        </h1>
+        <p style={{ fontSize: "14px", color: "#6b6860" }}>
+          {total} user terdaftar
+        </p>
       </div>
 
       {/* Search */}
@@ -271,6 +330,7 @@ export default function AdminUsers() {
               fontFamily: "inherit",
               color: "#0f0e17",
               background: "white",
+              boxSizing: "border-box",
             }}
             onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
             onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
@@ -288,220 +348,289 @@ export default function AdminUsers() {
             fontWeight: "600",
             cursor: "pointer",
             fontFamily: "inherit",
+            flexShrink: 0,
           }}
         >
           Cari
         </button>
       </form>
 
-      {/* Table */}
-      <div
-        style={{
-          background: "white",
-          borderRadius: "14px",
-          border: "1px solid #e2ddd5",
-          overflow: "hidden",
-        }}
-      >
-        {/* Header */}
+      {/* ── DESKTOP: Table ── */}
+      {!isMobile && (
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "40px 1fr 1fr 80px 80px 80px 100px",
-            gap: "16px",
-            padding: "12px 20px",
-            background: "#f2efe8",
-            borderBottom: "1px solid #e2ddd5",
+            background: "white",
+            borderRadius: "14px",
+            border: "1px solid #e2ddd5",
+            overflow: "hidden",
           }}
         >
-          {["#", "Nama", "Email", "Role", "XP", "Streak", "Aksi"].map((h) => (
-            <div
-              key={h}
-              style={{
-                fontSize: "12px",
-                fontWeight: "700",
-                color: "#6b6860",
-                textTransform: "uppercase",
-                letterSpacing: ".06em",
-              }}
-            >
-              {h}
-            </div>
-          ))}
-        </div>
-
-        {/* Loading */}
-        {loading &&
-          Array.from({ length: 5 }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                height: "60px",
-                borderBottom: "1px solid #f2efe8",
-                background: i % 2 === 0 ? "white" : "#faf9f6",
-                animation: "pulse 1.5s infinite",
-              }}
-            />
-          ))}
-
-        {/* Rows */}
-        {!loading &&
-          users.map((u, i) => (
-            <div
-              key={u.id}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "40px 1fr 1fr 80px 80px 80px 100px",
-                gap: "16px",
-                padding: "14px 20px",
-                borderBottom: "1px solid #f2efe8",
-                alignItems: "center",
-              }}
-            >
-              <div style={{ fontSize: "13px", color: "#6b6860" }}>
-                {(page - 1) * limit + i + 1}
-              </div>
-
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "40px 1fr 1fr 80px 80px 80px 100px",
+              gap: "16px",
+              padding: "12px 20px",
+              background: "#f2efe8",
+              borderBottom: "1px solid #e2ddd5",
+            }}
+          >
+            {["#", "Nama", "Email", "Role", "XP", "Streak", "Aksi"].map((h) => (
               <div
+                key={h}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  minWidth: 0,
+                  fontSize: "12px",
+                  fontWeight: "700",
+                  color: "#6b6860",
+                  textTransform: "uppercase",
+                  letterSpacing: ".06em",
                 }}
               >
+                {h}
+              </div>
+            ))}
+          </div>
+
+          {loading &&
+            Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  height: "60px",
+                  borderBottom: "1px solid #f2efe8",
+                  background: i % 2 === 0 ? "white" : "#faf9f6",
+                  animation: "pulse 1.5s infinite",
+                }}
+              />
+            ))}
+
+          {!loading &&
+            users.map((u, i) => (
+              <div
+                key={u.id}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "40px 1fr 1fr 80px 80px 80px 100px",
+                  gap: "16px",
+                  padding: "14px 20px",
+                  borderBottom: "1px solid #f2efe8",
+                  alignItems: "center",
+                }}
+              >
+                <div style={{ fontSize: "13px", color: "#6b6860" }}>
+                  {(page - 1) * limit + i + 1}
+                </div>
                 <div
                   style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "8px",
-                    background: u.role === "admin" ? "#e84c2b" : "#f2efe8",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    color: u.role === "admin" ? "white" : "#6b6860",
-                    fontWeight: "700",
-                    fontSize: "13px",
-                    flexShrink: 0,
+                    gap: "10px",
+                    minWidth: 0,
                   }}
                 >
-                  {u.name?.[0]?.toUpperCase()}
+                  <div
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      borderRadius: "8px",
+                      background: u.role === "admin" ? "#e84c2b" : "#f2efe8",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: u.role === "admin" ? "white" : "#6b6860",
+                      fontWeight: "700",
+                      fontSize: "13px",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {u.name?.[0]?.toUpperCase()}
+                  </div>
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "500",
+                      color: "#0f0e17",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {u.name}
+                  </span>
                 </div>
-                <span
+                <div
                   style={{
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    color: "#0f0e17",
+                    fontSize: "13px",
+                    color: "#6b6860",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
                   }}
                 >
-                  {u.name}
-                </span>
-              </div>
-
-              <div
-                style={{
-                  fontSize: "13px",
-                  color: "#6b6860",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {u.email}
-              </div>
-
-              <RoleBadge role={u.role} />
-
-              <div
-                style={{
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  color: "#f5a623",
-                }}
-              >
-                {parseInt(u.xp || 0).toLocaleString()}
-              </div>
-
-              <div style={{ fontSize: "13px", color: "#6b6860" }}>
-                {u.streak || 0} hari
-              </div>
-
-              <div style={{ display: "flex", gap: "6px" }}>
-                <button
-                  onClick={() => openDetail(u)}
-                  title="Detail"
+                  {u.email}
+                </div>
+                <RoleBadge role={u.role} />
+                <div
                   style={{
-                    width: "28px",
-                    height: "28px",
-                    borderRadius: "7px",
-                    border: "1px solid #e2ddd5",
-                    background: "white",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#6b6860",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    color: "#f5a623",
                   }}
                 >
-                  <Eye size={12} />
-                </button>
-                <button
-                  onClick={() => openEdit(u)}
-                  title="Edit"
-                  style={{
-                    width: "28px",
-                    height: "28px",
-                    borderRadius: "7px",
-                    border: "1px solid #e2ddd5",
-                    background: "white",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#6b6860",
-                  }}
-                >
-                  <User size={12} />
-                </button>
-                <button
-                  onClick={() => openReset(u)}
-                  title="Reset Password"
-                  style={{
-                    width: "28px",
-                    height: "28px",
-                    borderRadius: "7px",
-                    border: "1px solid #fca5a5",
-                    background: "#fff3f0",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#e84c2b",
-                  }}
-                >
-                  <Shield size={12} />
-                </button>
+                  {parseInt(u.xp || 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: "13px", color: "#6b6860" }}>
+                  {u.streak || 0} hari
+                </div>
+                <ActionButtons u={u} />
               </div>
+            ))}
+
+          {!loading && users.length === 0 && (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "48px",
+                color: "#6b6860",
+                fontSize: "14px",
+              }}
+            >
+              Tidak ada user ditemukan.
             </div>
-          ))}
+          )}
+        </div>
+      )}
 
-        {/* Empty */}
-        {!loading && users.length === 0 && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "48px",
-              color: "#6b6860",
-              fontSize: "14px",
-            }}
-          >
-            Tidak ada user ditemukan.
-          </div>
-        )}
-      </div>
+      {/* ── MOBILE: Card list ── */}
+      {isMobile && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          {loading &&
+            Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  height: "80px",
+                  borderRadius: "14px",
+                  background: "#e2ddd5",
+                  opacity: 0.5,
+                  animation: "pulse 1.5s infinite",
+                }}
+              />
+            ))}
+
+          {!loading && users.length === 0 && (
+            <div
+              style={{
+                background: "white",
+                borderRadius: "14px",
+                border: "1px solid #e2ddd5",
+                padding: "48px",
+                textAlign: "center",
+                color: "#6b6860",
+                fontSize: "14px",
+              }}
+            >
+              Tidak ada user ditemukan.
+            </div>
+          )}
+
+          {!loading &&
+            users.map((u, i) => (
+              <div
+                key={u.id}
+                style={{
+                  background: "white",
+                  borderRadius: "14px",
+                  border: "1px solid #e2ddd5",
+                  padding: "14px 16px",
+                  display: "flex",
+                  gap: "12px",
+                  alignItems: "center",
+                }}
+              >
+                {/* Avatar */}
+                <div
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "12px",
+                    background: u.role === "admin" ? "#e84c2b" : "#f2efe8",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: u.role === "admin" ? "white" : "#6b6860",
+                    fontWeight: "800",
+                    fontSize: "16px",
+                    flexShrink: 0,
+                  }}
+                >
+                  {u.name?.[0]?.toUpperCase()}
+                </div>
+
+                {/* Info */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      marginBottom: "2px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        color: "#0f0e17",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {u.name}
+                    </div>
+                    <RoleBadge role={u.role} />
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#b4b2a9",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    {u.email}
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        color: "#f5a623",
+                      }}
+                    >
+                      {parseInt(u.xp || 0).toLocaleString()} XP
+                    </span>
+                    <span style={{ fontSize: "12px", color: "#b4b2a9" }}>
+                      {u.streak || 0} hari streak
+                    </span>
+                  </div>
+                </div>
+
+                {/* Aksi */}
+                <ActionButtons u={u} />
+              </div>
+            ))}
+        </div>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -514,7 +643,9 @@ export default function AdminUsers() {
           }}
         >
           <span style={{ fontSize: "13px", color: "#6b6860" }}>
-            Halaman {page} dari {totalPages}
+            {isMobile
+              ? `${page} / ${totalPages}`
+              : `Halaman ${page} dari ${totalPages}`}
           </span>
           <div style={{ display: "flex", gap: "8px" }}>
             <button
@@ -524,7 +655,7 @@ export default function AdminUsers() {
                 display: "flex",
                 alignItems: "center",
                 gap: "4px",
-                padding: "8px 14px",
+                padding: isMobile ? "8px 12px" : "8px 14px",
                 borderRadius: "8px",
                 border: "1px solid #e2ddd5",
                 background: "white",
@@ -535,7 +666,8 @@ export default function AdminUsers() {
                 fontFamily: "inherit",
               }}
             >
-              <ChevronLeft size={14} /> Sebelumnya
+              <ChevronLeft size={14} />
+              {!isMobile && "Sebelumnya"}
             </button>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
@@ -544,7 +676,7 @@ export default function AdminUsers() {
                 display: "flex",
                 alignItems: "center",
                 gap: "4px",
-                padding: "8px 14px",
+                padding: isMobile ? "8px 12px" : "8px 14px",
                 borderRadius: "8px",
                 border: "1px solid #e2ddd5",
                 background: "white",
@@ -555,7 +687,8 @@ export default function AdminUsers() {
                 fontFamily: "inherit",
               }}
             >
-              Berikutnya <ChevronRight size={14} />
+              {!isMobile && "Berikutnya"}
+              <ChevronRight size={14} />
             </button>
           </div>
         </div>
@@ -595,7 +728,6 @@ export default function AdminUsers() {
                 {success}
               </div>
             )}
-
             <div
               style={{ display: "flex", flexDirection: "column", gap: "6px" }}
             >
@@ -627,7 +759,6 @@ export default function AdminUsers() {
                 onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
               />
             </div>
-
             <div
               style={{ display: "flex", flexDirection: "column", gap: "6px" }}
             >
@@ -672,7 +803,6 @@ export default function AdminUsers() {
                 ))}
               </div>
             </div>
-
             <div
               style={{
                 display: "flex",
@@ -756,7 +886,6 @@ export default function AdminUsers() {
                 {success}
               </div>
             )}
-
             <div
               style={{
                 background: "#fff3f0",
@@ -768,7 +897,6 @@ export default function AdminUsers() {
             >
               Password baru akan langsung aktif. User perlu login ulang.
             </div>
-
             <div
               style={{ display: "flex", flexDirection: "column", gap: "6px" }}
             >
@@ -802,7 +930,6 @@ export default function AdminUsers() {
                 onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
               />
             </div>
-
             <div
               style={{ display: "flex", flexDirection: "column", gap: "6px" }}
             >
@@ -835,7 +962,6 @@ export default function AdminUsers() {
                 onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
               />
             </div>
-
             <div
               style={{
                 display: "flex",
@@ -905,7 +1031,6 @@ export default function AdminUsers() {
             <div
               style={{ display: "flex", flexDirection: "column", gap: "16px" }}
             >
-              {/* Avatar + info */}
               <div
                 style={{
                   display: "flex",
@@ -959,7 +1084,6 @@ export default function AdminUsers() {
                 </div>
               </div>
 
-              {/* Stats */}
               <div
                 style={{
                   display: "grid",
@@ -1030,7 +1154,6 @@ export default function AdminUsers() {
                 ))}
               </div>
 
-              {/* Bergabung sejak */}
               <div
                 style={{
                   fontSize: "13px",

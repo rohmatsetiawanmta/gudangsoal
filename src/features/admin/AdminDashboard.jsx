@@ -11,68 +11,97 @@ import {
   CheckCircle,
   Activity,
   TrendingUp,
-  Clock,
 } from "lucide-react";
 import api from "../../lib/api";
+import useWindowWidth from "../../hooks/useWindowWidth";
+import { Helmet } from "react-helmet-async";
 
-function StatCard({ icon: Icon, label, value, sub, color, loading }) {
+function StatCard({ icon: Icon, label, value, sub, color, loading, isMobile }) {
   return (
     <div
       style={{
         background: "white",
-        borderRadius: "14px",
+        borderRadius: "16px",
         border: "1px solid #e2ddd5",
-        padding: "24px",
+        padding: isMobile ? "16px" : "20px",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
+      <Helmet>
+        <title>Dashboard | Admin Gudang Soal</title>
+      </Helmet>
+      {/* Accent strip atas */}
       <div
         style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "3px",
+          background: color,
+          borderRadius: "16px 16px 0 0",
+        }}
+      />
+
+      {/* Icon */}
+      <div
+        style={{
+          width: isMobile ? "36px" : "42px",
+          height: isMobile ? "36px" : "42px",
+          borderRadius: "12px",
+          background: color + "15",
           display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          marginBottom: "16px",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: isMobile ? "12px" : "16px",
         }}
       >
-        <div
-          style={{
-            width: "44px",
-            height: "44px",
-            borderRadius: "12px",
-            background: color + "18",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Icon size={20} color={color} />
-        </div>
+        <Icon size={isMobile ? 18 : 20} color={color} />
       </div>
+
+      {/* Value */}
       <div
         style={{
-          fontSize: "28px",
+          fontSize: isMobile ? "24px" : "30px",
           fontWeight: "800",
           color: "#0f0e17",
           lineHeight: 1,
+          letterSpacing: "-0.5px",
           marginBottom: "4px",
         }}
       >
         {loading
-          ? "..."
+          ? "—"
           : typeof value === "number"
           ? value.toLocaleString()
           : value}
       </div>
-      <div style={{ fontSize: "13px", color: "#6b6860" }}>{label}</div>
+
+      {/* Label */}
+      <div
+        style={{
+          fontSize: "12px",
+          fontWeight: "600",
+          color: "#6b6860",
+          textTransform: "uppercase",
+          letterSpacing: ".06em",
+          marginBottom: sub && !loading ? "6px" : "0",
+        }}
+      >
+        {label}
+      </div>
+
+      {/* Sub */}
       {sub && !loading && (
-        <div style={{ fontSize: "12px", color: "#b4b2a9", marginTop: "6px" }}>
-          {sub}
-        </div>
+        <div style={{ fontSize: "11px", color: "#b4b2a9" }}>{sub}</div>
       )}
     </div>
   );
 }
 
-function QuickAction({ icon: Icon, label, desc, onClick, color }) {
+function QuickAction({ icon: Icon, label, desc, onClick, color, isMobile }) {
   const [hovered, setHovered] = useState(false);
   return (
     <div
@@ -83,7 +112,7 @@ function QuickAction({ icon: Icon, label, desc, onClick, color }) {
         background: "white",
         borderRadius: "14px",
         border: `1px solid ${hovered ? color : "#e2ddd5"}`,
-        padding: "20px",
+        padding: isMobile ? "14px 16px" : "20px",
         cursor: "pointer",
         transition: "all .15s",
         display: "flex",
@@ -93,8 +122,8 @@ function QuickAction({ icon: Icon, label, desc, onClick, color }) {
     >
       <div
         style={{
-          width: "40px",
-          height: "40px",
+          width: isMobile ? "36px" : "40px",
+          height: isMobile ? "36px" : "40px",
           borderRadius: "10px",
           background: color + "18",
           display: "flex",
@@ -103,20 +132,22 @@ function QuickAction({ icon: Icon, label, desc, onClick, color }) {
           flexShrink: 0,
         }}
       >
-        <Icon size={20} color={color} />
+        <Icon size={isMobile ? 17 : 20} color={color} />
       </div>
-      <div style={{ flex: 1 }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
             fontSize: "14px",
             fontWeight: "600",
             color: "#0f0e17",
-            marginBottom: "2px",
+            marginBottom: isMobile ? "0" : "2px",
           }}
         >
           {label}
         </div>
-        <div style={{ fontSize: "13px", color: "#6b6860" }}>{desc}</div>
+        {!isMobile && (
+          <div style={{ fontSize: "13px", color: "#6b6860" }}>{desc}</div>
+        )}
       </div>
       <ArrowRight size={16} color={hovered ? color : "#b4b2a9"} />
     </div>
@@ -149,6 +180,9 @@ function DifficultyBadge({ level }) {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
+
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -173,13 +207,13 @@ export default function AdminDashboard() {
   return (
     <div>
       {/* Header */}
-      <div style={{ marginBottom: "32px" }}>
+      <div style={{ marginBottom: isMobile ? "24px" : "32px" }}>
         <p style={{ fontSize: "14px", color: "#6b6860", marginBottom: "4px" }}>
-          {greeting} 👋
+          {greeting}
         </p>
         <h1
           style={{
-            fontSize: "24px",
+            fontSize: isMobile ? "22px" : "24px",
             fontWeight: "800",
             color: "#0f0e17",
             letterSpacing: "-0.5px",
@@ -202,9 +236,11 @@ export default function AdminDashboard() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-          gap: "14px",
-          marginBottom: "32px",
+          gridTemplateColumns: isMobile
+            ? "1fr 1fr"
+            : "repeat(auto-fill, minmax(200px, 1fr))",
+          gap: isMobile ? "10px" : "14px",
+          marginBottom: isMobile ? "24px" : "32px",
         }}
       >
         <StatCard
@@ -220,6 +256,7 @@ export default function AdminDashboard() {
           }
           color="#e84c2b"
           loading={loading}
+          isMobile={isMobile}
         />
         <StatCard
           icon={Users}
@@ -227,6 +264,7 @@ export default function AdminDashboard() {
           value={stats?.total_user || 0}
           color="#2563eb"
           loading={loading}
+          isMobile={isMobile}
         />
         <StatCard
           icon={Activity}
@@ -235,6 +273,7 @@ export default function AdminDashboard() {
           sub={loading ? null : `Akurasi rata-rata ${stats?.akurasi || 0}%`}
           color="#1a8a6e"
           loading={loading}
+          isMobile={isMobile}
         />
         <StatCard
           icon={FolderTree}
@@ -242,6 +281,7 @@ export default function AdminDashboard() {
           value={stats?.total_jenjang || 0}
           color="#f5a623"
           loading={loading}
+          isMobile={isMobile}
         />
         <StatCard
           icon={Layers}
@@ -249,6 +289,7 @@ export default function AdminDashboard() {
           value={stats?.total_subtopik || 0}
           color="#7c3aed"
           loading={loading}
+          isMobile={isMobile}
         />
         <StatCard
           icon={CheckCircle}
@@ -257,20 +298,27 @@ export default function AdminDashboard() {
           sub={loading ? null : `dari ${stats?.total_sesi || 0} attempt`}
           color="#db2777"
           loading={loading}
+          isMobile={isMobile}
         />
       </div>
 
-      {/* Bottom grid — soal terbaru + user terbaru + quick actions */}
+      {/* Bottom grid */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "24px",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+          gap: isMobile ? "20px" : "24px",
           alignItems: "start",
         }}
       >
         {/* Kiri — Soal terbaru + User terbaru */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: isMobile ? "20px" : "24px",
+          }}
+        >
           {/* Soal terbaru */}
           <div>
             <div
@@ -369,7 +417,6 @@ export default function AdminDashboard() {
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
-                          maxWidth: "100%",
                         }}
                       >
                         {s.body
@@ -397,19 +444,21 @@ export default function AdminDashboard() {
                       }}
                     >
                       <DifficultyBadge level={s.difficulty} />
-                      <span
-                        style={{
-                          fontSize: "11px",
-                          fontWeight: "700",
-                          padding: "2px 7px",
-                          borderRadius: "6px",
-                          background:
-                            s.is_published == 1 ? "#e4f5f0" : "#f2efe8",
-                          color: s.is_published == 1 ? "#1a8a6e" : "#6b6860",
-                        }}
-                      >
-                        {s.is_published == 1 ? "Published" : "Draft"}
-                      </span>
+                      {!isMobile && (
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            fontWeight: "700",
+                            padding: "2px 7px",
+                            borderRadius: "6px",
+                            background:
+                              s.is_published == 1 ? "#e4f5f0" : "#f2efe8",
+                            color: s.is_published == 1 ? "#1a8a6e" : "#6b6860",
+                          }}
+                        >
+                          {s.is_published == 1 ? "Published" : "Draft"}
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -418,14 +467,7 @@ export default function AdminDashboard() {
 
           {/* User terbaru */}
           <div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: "14px",
-              }}
-            >
+            <div style={{ marginBottom: "14px" }}>
               <h2
                 style={{
                   fontSize: "15px",
@@ -575,6 +617,7 @@ export default function AdminDashboard() {
               desc="Input soal beserta pilihan jawaban dan pembahasan"
               color="#e84c2b"
               onClick={() => navigate("/admin/soal/tambah")}
+              isMobile={isMobile}
             />
             <QuickAction
               icon={BookOpen}
@@ -582,6 +625,7 @@ export default function AdminDashboard() {
               desc="Lihat, edit, atau hapus soal yang sudah ada"
               color="#2563eb"
               onClick={() => navigate("/admin/soal")}
+              isMobile={isMobile}
             />
             <QuickAction
               icon={FolderTree}
@@ -589,6 +633,7 @@ export default function AdminDashboard() {
               desc="Atur jenjang, subjenjang, mapel, topik, dan subtopik"
               color="#1a8a6e"
               onClick={() => navigate("/admin/struktur")}
+              isMobile={isMobile}
             />
             <QuickAction
               icon={TrendingUp}
@@ -596,17 +641,18 @@ export default function AdminDashboard() {
               desc="Statistik penggunaan dan performa"
               color="#7c3aed"
               onClick={() => navigate("/home")}
+              isMobile={isMobile}
             />
           </div>
 
-          {/* Soal published vs draft bar */}
+          {/* Progress bar publikasi */}
           {!loading && stats?.total_soal > 0 && (
             <div
               style={{
                 background: "white",
                 borderRadius: "14px",
                 border: "1px solid #e2ddd5",
-                padding: "20px",
+                padding: isMobile ? "16px" : "20px",
                 marginTop: "10px",
               }}
             >

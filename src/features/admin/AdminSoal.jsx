@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import api from "../../lib/api";
 import ToggleSwitch from "../../components/ToggleSwitch";
+import useWindowWidth from "../../hooks/useWindowWidth";
+import { Helmet } from "react-helmet-async";
 
 function DifficultyBadge({ level }) {
   const map = {
@@ -28,6 +30,7 @@ function DifficultyBadge({ level }) {
         borderRadius: "6px",
         background: d.bg,
         color: d.color,
+        flexShrink: 0,
       }}
     >
       {d.label}
@@ -37,6 +40,8 @@ function DifficultyBadge({ level }) {
 
 export default function AdminSoal() {
   const navigate = useNavigate();
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
 
   const [soal, setSoal] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -107,19 +112,24 @@ export default function AdminSoal() {
 
   return (
     <div>
+      <Helmet>
+        <title>Kelola Soal | Admin Gudang Soal</title>
+      </Helmet>
       {/* Header */}
       <div
         style={{
           display: "flex",
-          alignItems: "center",
+          alignItems: isMobile ? "flex-start" : "center",
           justifyContent: "space-between",
-          marginBottom: "28px",
+          flexDirection: isMobile ? "column" : "row",
+          gap: isMobile ? "14px" : "0",
+          marginBottom: "24px",
         }}
       >
         <div>
           <h1
             style={{
-              fontSize: "24px",
+              fontSize: isMobile ? "22px" : "24px",
               fontWeight: "800",
               color: "#0f0e17",
               letterSpacing: "-0.5px",
@@ -147,6 +157,9 @@ export default function AdminSoal() {
             fontWeight: "600",
             cursor: "pointer",
             fontFamily: "inherit",
+            flexShrink: 0,
+            width: isMobile ? "100%" : "auto",
+            justifyContent: isMobile ? "center" : "flex-start",
           }}
         >
           <Plus size={16} />
@@ -188,6 +201,7 @@ export default function AdminSoal() {
               fontFamily: "inherit",
               color: "#0f0e17",
               background: "white",
+              boxSizing: "border-box",
             }}
             onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
             onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
@@ -205,34 +219,43 @@ export default function AdminSoal() {
             fontWeight: "600",
             cursor: "pointer",
             fontFamily: "inherit",
+            flexShrink: 0,
           }}
         >
           Cari
         </button>
       </form>
 
-      {/* Table */}
-      <div
-        style={{
-          background: "white",
-          borderRadius: "14px",
-          border: "1px solid #e2ddd5",
-          overflow: "hidden",
-        }}
-      >
-        {/* Table header */}
+      {/* ── DESKTOP: Table ── */}
+      {!isMobile && (
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "40px 70px 1fr 160px 80px 120px 70px",
-            gap: "16px",
-            padding: "12px 20px",
-            background: "#f2efe8",
-            borderBottom: "1px solid #e2ddd5",
+            background: "white",
+            borderRadius: "14px",
+            border: "1px solid #e2ddd5",
+            overflow: "hidden",
           }}
         >
-          {["#", "Kode", "Soal", "Lokasi", "Sulit", "Published", "Aksi"].map(
-            (h) => (
+          {/* Table header */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "40px 70px 1fr 160px 80px 120px 70px",
+              gap: "16px",
+              padding: "12px 20px",
+              background: "#f2efe8",
+              borderBottom: "1px solid #e2ddd5",
+            }}
+          >
+            {[
+              "#",
+              "Kode",
+              "Soal",
+              "Subtopik",
+              "Sulit",
+              "Published",
+              "Aksi",
+            ].map((h) => (
               <div
                 key={h}
                 style={{
@@ -245,146 +268,336 @@ export default function AdminSoal() {
               >
                 {h}
               </div>
-            )
+            ))}
+          </div>
+
+          {/* Loading */}
+          {loading && (
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid #f2efe8",
+                    background: i % 2 === 0 ? "white" : "#faf9f6",
+                    animation: "pulse 1.5s infinite",
+                  }}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Rows */}
+          {!loading &&
+            soal.map((s, i) => (
+              <div
+                key={s.id}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "40px 70px 1fr 160px 80px 120px 70px",
+                  gap: "16px",
+                  padding: "14px 20px",
+                  borderBottom: "1px solid #f2efe8",
+                  alignItems: "center",
+                }}
+              >
+                <div style={{ fontSize: "13px", color: "#6b6860" }}>
+                  {(page - 1) * limit + i + 1}
+                </div>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: "700",
+                    color: "#6b6860",
+                    fontFamily: "monospace",
+                    letterSpacing: ".05em",
+                  }}
+                >
+                  {s.kode || "—"}
+                </div>
+                <div
+                  style={{
+                    fontSize: "14px",
+                    color: "#0f0e17",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {s.body
+                    .replace(/\$[^$]+\$/g, "[math]")
+                    .replace(/[*_~`#]/g, "")}
+                </div>
+                <div style={{ fontSize: "12px", color: "#6b6860" }}>
+                  <div
+                    style={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {s.subtopik}
+                  </div>
+                  <div
+                    style={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      marginTop: "2px",
+                      color: "#b4b2a9",
+                    }}
+                  >
+                    {s.mapel}
+                  </div>
+                </div>
+                <DifficultyBadge level={s.difficulty} />
+                <ToggleSwitch
+                  checked={s.is_published == 1}
+                  onChange={() => handleTogglePublish(s.id, s.is_published)}
+                  loading={publishLoading[s.id]}
+                />
+                <div style={{ display: "flex", gap: "6px" }}>
+                  <button
+                    onClick={() => navigate(`/admin/soal/edit/${s.id}`)}
+                    style={{
+                      width: "30px",
+                      height: "30px",
+                      borderRadius: "8px",
+                      border: "1px solid #e2ddd5",
+                      background: "white",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#6b6860",
+                    }}
+                  >
+                    <Pencil size={13} />
+                  </button>
+                  <button
+                    onClick={() => setDeleteId(s.id)}
+                    style={{
+                      width: "30px",
+                      height: "30px",
+                      borderRadius: "8px",
+                      border: "1px solid #fca5a5",
+                      background: "#fff3f0",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#e84c2b",
+                    }}
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+            ))}
+
+          {/* Empty */}
+          {!loading && soal.length === 0 && (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "48px",
+                color: "#6b6860",
+                fontSize: "14px",
+              }}
+            >
+              Tidak ada soal ditemukan.
+            </div>
           )}
         </div>
+      )}
 
-        {/* Loading */}
-        {loading && (
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            {Array.from({ length: 5 }).map((_, i) => (
+      {/* ── MOBILE: Card list ── */}
+      {isMobile && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          {loading &&
+            Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
                 style={{
-                  height: "60px",
-                  borderBottom: "1px solid #f2efe8",
-                  background: i % 2 === 0 ? "white" : "#faf9f6",
+                  height: "88px",
+                  borderRadius: "14px",
+                  background: "#e2ddd5",
+                  opacity: 0.5,
                   animation: "pulse 1.5s infinite",
                 }}
               />
             ))}
-          </div>
-        )}
 
-        {/* Rows */}
-        {!loading &&
-          soal.map((s, i) => (
+          {!loading && soal.length === 0 && (
             <div
-              key={s.id}
               style={{
-                display: "grid",
-                gridTemplateColumns: "40px 70px 1fr 160px 80px 120px 70px",
-                gap: "16px",
-                padding: "14px 20px",
-                borderBottom: "1px solid #f2efe8",
-                alignItems: "center",
+                background: "white",
+                borderRadius: "14px",
+                border: "1px solid #e2ddd5",
+                padding: "48px",
+                textAlign: "center",
+                color: "#6b6860",
+                fontSize: "14px",
               }}
             >
-              <div style={{ fontSize: "13px", color: "#6b6860" }}>
-                {(page - 1) * limit + i + 1}
-              </div>
-              <div
-                style={{
-                  fontSize: "12px",
-                  fontWeight: "700",
-                  color: "#6b6860",
-                  fontFamily: "monospace",
-                  letterSpacing: ".05em",
-                }}
-              >
-                {s.kode || "—"}
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  color: "#0f0e17",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {s.body.replace(/\$[^$]+\$/g, "[math]")}
-              </div>
-              <div style={{ fontSize: "12px", color: "#6b6860" }}>
-                <div
-                  style={{
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {s.jenjang} — {s.subjenjang}
-                </div>
-                <div
-                  style={{
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    marginTop: "2px",
-                  }}
-                >
-                  {s.mapel} — {s.subtopik}
-                </div>
-              </div>
-              <DifficultyBadge level={s.difficulty} />
-              <ToggleSwitch
-                checked={s.is_published == 1}
-                onChange={() => handleTogglePublish(s.id, s.is_published)}
-                loading={publishLoading[s.id]}
-              />
-              <div style={{ display: "flex", gap: "6px" }}>
-                <button
-                  onClick={() => navigate(`/admin/soal/edit/${s.id}`)}
-                  style={{
-                    width: "30px",
-                    height: "30px",
-                    borderRadius: "8px",
-                    border: "1px solid #e2ddd5",
-                    background: "white",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#6b6860",
-                  }}
-                >
-                  <Pencil size={13} />
-                </button>
-                <button
-                  onClick={() => setDeleteId(s.id)}
-                  style={{
-                    width: "30px",
-                    height: "30px",
-                    borderRadius: "8px",
-                    border: "1px solid #fca5a5",
-                    background: "#fff3f0",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#e84c2b",
-                  }}
-                >
-                  <Trash2 size={13} />
-                </button>
-              </div>
+              Tidak ada soal ditemukan.
             </div>
-          ))}
+          )}
 
-        {/* Empty */}
-        {!loading && soal.length === 0 && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "48px",
-              color: "#6b6860",
-              fontSize: "14px",
-            }}
-          >
-            Tidak ada soal ditemukan.
-          </div>
-        )}
-      </div>
+          {!loading &&
+            soal.map((s, i) => (
+              <div
+                key={s.id}
+                style={{
+                  background: "white",
+                  borderRadius: "14px",
+                  border: "1px solid #e2ddd5",
+                  padding: "14px 16px",
+                  display: "flex",
+                  gap: "12px",
+                  alignItems: "flex-start",
+                }}
+              >
+                {/* Nomor avatar + kode */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "4px",
+                    flexShrink: 0,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "36px",
+                      height: "36px",
+                      borderRadius: "10px",
+                      background: "#f2efe8",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "13px",
+                      fontWeight: "800",
+                      color: "#6b6860",
+                    }}
+                  >
+                    {(page - 1) * limit + i + 1}
+                  </div>
+                  <span
+                    style={{
+                      fontSize: "10px",
+                      fontWeight: "700",
+                      color: "#b4b2a9",
+                      fontFamily: "monospace",
+                      letterSpacing: ".04em",
+                    }}
+                  >
+                    {s.kode || "—"}
+                  </span>
+                </div>
+
+                {/* Konten */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  {/* Body soal */}
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      color: "#0f0e17",
+                      fontWeight: "500",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    {s.body
+                      .replace(/\$[^$]+\$/g, "[math]")
+                      .replace(/[*_~`#]/g, "")}
+                  </div>
+
+                  {/* Subtopik */}
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#b4b2a9",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    {s.mapel} — {s.subtopik}
+                  </div>
+
+                  {/* Badges + aksi */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <DifficultyBadge level={s.difficulty} />
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: "700",
+                        padding: "3px 8px",
+                        borderRadius: "6px",
+                        background: s.is_published == 1 ? "#e4f5f0" : "#f2efe8",
+                        color: s.is_published == 1 ? "#1a8a6e" : "#6b6860",
+                      }}
+                    >
+                      {s.is_published == 1 ? "Published" : "Draft"}
+                    </span>
+                    <div style={{ flex: 1 }} />
+                    <ToggleSwitch
+                      checked={s.is_published == 1}
+                      onChange={() => handleTogglePublish(s.id, s.is_published)}
+                      loading={publishLoading[s.id]}
+                    />
+                    <button
+                      onClick={() => navigate(`/admin/soal/edit/${s.id}`)}
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "8px",
+                        border: "1px solid #e2ddd5",
+                        background: "white",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#6b6860",
+                      }}
+                    >
+                      <Pencil size={13} />
+                    </button>
+                    <button
+                      onClick={() => setDeleteId(s.id)}
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "8px",
+                        border: "1px solid #fca5a5",
+                        background: "#fff3f0",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#e84c2b",
+                      }}
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+        </div>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -397,7 +610,9 @@ export default function AdminSoal() {
           }}
         >
           <span style={{ fontSize: "13px", color: "#6b6860" }}>
-            Halaman {page} dari {totalPages}
+            {isMobile
+              ? `${page} / ${totalPages}`
+              : `Halaman ${page} dari ${totalPages}`}
           </span>
           <div style={{ display: "flex", gap: "8px" }}>
             <button
@@ -407,7 +622,7 @@ export default function AdminSoal() {
                 display: "flex",
                 alignItems: "center",
                 gap: "4px",
-                padding: "8px 14px",
+                padding: isMobile ? "8px 12px" : "8px 14px",
                 borderRadius: "8px",
                 border: "1px solid #e2ddd5",
                 background: "white",
@@ -418,7 +633,8 @@ export default function AdminSoal() {
                 fontFamily: "inherit",
               }}
             >
-              <ChevronLeft size={14} /> Sebelumnya
+              <ChevronLeft size={14} />
+              {!isMobile && "Sebelumnya"}
             </button>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
@@ -427,7 +643,7 @@ export default function AdminSoal() {
                 display: "flex",
                 alignItems: "center",
                 gap: "4px",
-                padding: "8px 14px",
+                padding: isMobile ? "8px 12px" : "8px 14px",
                 borderRadius: "8px",
                 border: "1px solid #e2ddd5",
                 background: "white",
@@ -438,7 +654,8 @@ export default function AdminSoal() {
                 fontFamily: "inherit",
               }}
             >
-              Berikutnya <ChevronRight size={14} />
+              {!isMobile && "Berikutnya"}
+              <ChevronRight size={14} />
             </button>
           </div>
         </div>
@@ -455,15 +672,16 @@ export default function AdminSoal() {
             alignItems: "center",
             justifyContent: "center",
             zIndex: 300,
+            padding: "16px",
           }}
         >
           <div
             style={{
               background: "white",
               borderRadius: "16px",
-              padding: "32px",
+              padding: "28px",
               maxWidth: "400px",
-              width: "90%",
+              width: "100%",
             }}
           >
             <h3

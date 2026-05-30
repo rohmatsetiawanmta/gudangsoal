@@ -10,8 +10,10 @@ import {
   Bug,
   AlertTriangle,
 } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import api from "../../lib/api";
 import ToggleSwitch from "../../components/ToggleSwitch";
+import useWindowWidth from "../../hooks/useWindowWidth";
 
 const TIPE_OPTIONS = [
   { value: "feature", label: "Fitur Baru", icon: Zap, color: "#1a8a6e" },
@@ -71,7 +73,20 @@ const defaultForm = {
   audience: "all",
 };
 
+const inputStyle = {
+  padding: "10px 14px",
+  borderRadius: "10px",
+  border: "1px solid #e2ddd5",
+  fontSize: "14px",
+  outline: "none",
+  fontFamily: "inherit",
+  color: "#0f0e17",
+};
+
 export default function AdminChangelog() {
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
+
   const [changelogs, setChangelogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
@@ -97,7 +112,6 @@ export default function AdminChangelog() {
     setModal("tambah");
     setError("");
   };
-
   const openEdit = (item) => {
     setForm({
       versi: item.versi,
@@ -111,7 +125,6 @@ export default function AdminChangelog() {
     setModal({ type: "edit", id: item.id });
     setError("");
   };
-
   const closeModal = () => {
     setModal(null);
     setError("");
@@ -171,19 +184,25 @@ export default function AdminChangelog() {
 
   return (
     <div>
+      <Helmet>
+        <title>Changelog | Admin Gudang Soal</title>
+      </Helmet>
+
       {/* Header */}
       <div
         style={{
           display: "flex",
-          alignItems: "center",
+          alignItems: isMobile ? "flex-start" : "center",
+          flexDirection: isMobile ? "column" : "row",
           justifyContent: "space-between",
+          gap: isMobile ? "14px" : "0",
           marginBottom: "28px",
         }}
       >
         <div>
           <h1
             style={{
-              fontSize: "24px",
+              fontSize: isMobile ? "22px" : "24px",
               fontWeight: "800",
               color: "#0f0e17",
               letterSpacing: "-0.5px",
@@ -201,6 +220,7 @@ export default function AdminChangelog() {
           style={{
             display: "flex",
             alignItems: "center",
+            justifyContent: "center",
             gap: "8px",
             padding: "10px 18px",
             borderRadius: "10px",
@@ -211,207 +231,378 @@ export default function AdminChangelog() {
             fontWeight: "600",
             cursor: "pointer",
             fontFamily: "inherit",
+            width: isMobile ? "100%" : "auto",
           }}
         >
           <Plus size={16} /> Tambah
         </button>
       </div>
 
-      {/* Table */}
-      <div
-        style={{
-          background: "white",
-          borderRadius: "14px",
-          border: "1px solid #e2ddd5",
-          overflow: "hidden",
-        }}
-      >
-        {/* Header */}
+      {/* ── DESKTOP: Table ── */}
+      {!isMobile && (
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: GRID,
-            gap: "16px",
-            padding: "12px 20px",
-            background: "#f2efe8",
-            borderBottom: "1px solid #e2ddd5",
+            background: "white",
+            borderRadius: "14px",
+            border: "1px solid #e2ddd5",
+            overflow: "hidden",
           }}
         >
-          {[
-            "Versi",
-            "Tipe",
-            "Judul",
-            "Audience",
-            "Tanggal",
-            "Status",
-            "Aksi",
-          ].map((h) => (
-            <div
-              key={h}
-              style={{
-                fontSize: "12px",
-                fontWeight: "700",
-                color: "#6b6860",
-                textTransform: "uppercase",
-                letterSpacing: ".06em",
-              }}
-            >
-              {h}
-            </div>
-          ))}
-        </div>
-
-        {/* Loading */}
-        {loading &&
-          Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                height: "56px",
-                borderBottom: "1px solid #f2efe8",
-                background: i % 2 === 0 ? "white" : "#faf9f6",
-                animation: "pulse 1.5s infinite",
-              }}
-            />
-          ))}
-
-        {/* Rows */}
-        {!loading &&
-          changelogs.map((item, i) => {
-            const audience =
-              AUDIENCE_CONFIG[item.audience] || AUDIENCE_CONFIG.all;
-            return (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: GRID,
+              gap: "16px",
+              padding: "12px 20px",
+              background: "#f2efe8",
+              borderBottom: "1px solid #e2ddd5",
+            }}
+          >
+            {[
+              "Versi",
+              "Tipe",
+              "Judul",
+              "Audience",
+              "Tanggal",
+              "Status",
+              "Aksi",
+            ].map((h) => (
               <div
-                key={item.id}
+                key={h}
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: GRID,
-                  gap: "16px",
-                  padding: "14px 20px",
-                  borderBottom:
-                    i < changelogs.length - 1 ? "1px solid #f2efe8" : "none",
-                  alignItems: "start",
+                  fontSize: "12px",
+                  fontWeight: "700",
+                  color: "#6b6860",
+                  textTransform: "uppercase",
+                  letterSpacing: ".06em",
                 }}
               >
+                {h}
+              </div>
+            ))}
+          </div>
+
+          {loading &&
+            Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  height: "56px",
+                  borderBottom: "1px solid #f2efe8",
+                  background: i % 2 === 0 ? "white" : "#faf9f6",
+                  animation: "pulse 1.5s infinite",
+                }}
+              />
+            ))}
+
+          {!loading &&
+            changelogs.map((item, i) => {
+              const audience =
+                AUDIENCE_CONFIG[item.audience] || AUDIENCE_CONFIG.all;
+              return (
                 <div
+                  key={item.id}
                   style={{
-                    fontSize: "13px",
-                    fontWeight: "700",
-                    color: "#0f0e17",
-                    fontFamily: "monospace",
-                    paddingTop: "2px",
+                    display: "grid",
+                    gridTemplateColumns: GRID,
+                    gap: "16px",
+                    padding: "14px 20px",
+                    borderBottom:
+                      i < changelogs.length - 1 ? "1px solid #f2efe8" : "none",
+                    alignItems: "start",
                   }}
                 >
-                  v{item.versi}
-                </div>
-                <div style={{ paddingTop: "2px" }}>
-                  <TipeBadge tipe={item.tipe} />
-                </div>
-                <div>
                   <div
                     style={{
                       fontSize: "13px",
-                      fontWeight: "500",
+                      fontWeight: "700",
                       color: "#0f0e17",
+                      fontFamily: "monospace",
+                      paddingTop: "2px",
                     }}
                   >
-                    {item.judul}
+                    v{item.versi}
                   </div>
-                  {item.deskripsi && (
+                  <div style={{ paddingTop: "2px" }}>
+                    <TipeBadge tipe={item.tipe} />
+                  </div>
+                  <div>
                     <div
                       style={{
-                        fontSize: "12px",
-                        color: "#b4b2a9",
-                        marginTop: "3px",
-                        lineHeight: "1.5",
+                        fontSize: "13px",
+                        fontWeight: "500",
+                        color: "#0f0e17",
                       }}
                     >
-                      {item.deskripsi}
+                      {item.judul}
                     </div>
-                  )}
-                </div>
-                <div
-                  style={{
-                    fontSize: "12px",
-                    fontWeight: "600",
-                    color: audience.color,
-                    paddingTop: "2px",
-                  }}
-                >
-                  {audience.label}
-                </div>
-                <div
-                  style={{
-                    fontSize: "12px",
-                    color: "#6b6860",
-                    paddingTop: "2px",
-                  }}
-                >
-                  {new Date(item.released_at).toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </div>
-                <div style={{ paddingTop: "2px" }}>
-                  <ToggleSwitch
-                    checked={item.is_published == 1}
-                    onChange={() => handleToggle(item)}
-                  />
-                </div>
-                <div style={{ display: "flex", gap: "6px", paddingTop: "2px" }}>
-                  <button
-                    onClick={() => openEdit(item)}
+                    {item.deskripsi && (
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: "#b4b2a9",
+                          marginTop: "3px",
+                          lineHeight: "1.5",
+                        }}
+                      >
+                        {item.deskripsi}
+                      </div>
+                    )}
+                  </div>
+                  <div
                     style={{
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "7px",
-                      border: "1px solid #e2ddd5",
-                      background: "white",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      color: audience.color,
+                      paddingTop: "2px",
+                    }}
+                  >
+                    {audience.label}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "12px",
                       color: "#6b6860",
+                      paddingTop: "2px",
                     }}
                   >
-                    <Pencil size={12} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item.id)}
+                    {new Date(item.released_at).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </div>
+                  <div style={{ paddingTop: "2px" }}>
+                    <ToggleSwitch
+                      checked={item.is_published == 1}
+                      onChange={() => handleToggle(item)}
+                      hideLabel
+                    />
+                  </div>
+                  <div
+                    style={{ display: "flex", gap: "6px", paddingTop: "2px" }}
+                  >
+                    <button
+                      onClick={() => openEdit(item)}
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "7px",
+                        border: "1px solid #e2ddd5",
+                        background: "white",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#6b6860",
+                      }}
+                    >
+                      <Pencil size={12} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "7px",
+                        border: "1px solid #fca5a5",
+                        background: "#fff3f0",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#e84c2b",
+                      }}
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+
+          {!loading && changelogs.length === 0 && (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "48px",
+                color: "#6b6860",
+                fontSize: "14px",
+              }}
+            >
+              Belum ada changelog.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── MOBILE: Card list ── */}
+      {isMobile && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          {loading &&
+            Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  height: "80px",
+                  borderRadius: "14px",
+                  background: "#e2ddd5",
+                  opacity: 0.5,
+                  animation: "pulse 1.5s infinite",
+                }}
+              />
+            ))}
+
+          {!loading && changelogs.length === 0 && (
+            <div
+              style={{
+                background: "white",
+                borderRadius: "14px",
+                border: "1px solid #e2ddd5",
+                padding: "48px",
+                textAlign: "center",
+                color: "#6b6860",
+                fontSize: "14px",
+              }}
+            >
+              Belum ada changelog.
+            </div>
+          )}
+
+          {!loading &&
+            changelogs.map((item) => {
+              const audience =
+                AUDIENCE_CONFIG[item.audience] || AUDIENCE_CONFIG.all;
+              return (
+                <div
+                  key={item.id}
+                  style={{
+                    background: "white",
+                    borderRadius: "14px",
+                    border: "1px solid #e2ddd5",
+                    padding: "14px 16px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
+                  {/* Baris 1: versi + tipe + audience */}
+                  <div
                     style={{
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "7px",
-                      border: "1px solid #fca5a5",
-                      background: "#fff3f0",
-                      cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center",
-                      color: "#e84c2b",
+                      gap: "8px",
                     }}
                   >
-                    <Trash2 size={12} />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+                    <span
+                      style={{
+                        fontSize: "13px",
+                        fontWeight: "700",
+                        color: "#0f0e17",
+                        fontFamily: "monospace",
+                      }}
+                    >
+                      v{item.versi}
+                    </span>
+                    <TipeBadge tipe={item.tipe} />
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: "600",
+                        color: audience.color,
+                      }}
+                    >
+                      {audience.label}
+                    </span>
+                    <div style={{ flex: 1 }} />
+                    <span style={{ fontSize: "11px", color: "#b4b2a9" }}>
+                      {new Date(item.released_at).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
 
-        {!loading && changelogs.length === 0 && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "48px",
-              color: "#6b6860",
-              fontSize: "14px",
-            }}
-          >
-            Belum ada changelog.
-          </div>
-        )}
-      </div>
+                  {/* Baris 2: judul + deskripsi */}
+                  <div>
+                    <div
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        color: "#0f0e17",
+                      }}
+                    >
+                      {item.judul}
+                    </div>
+                    {item.deskripsi && (
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: "#b4b2a9",
+                          marginTop: "3px",
+                          lineHeight: "1.5",
+                        }}
+                      >
+                        {item.deskripsi}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Baris 3: toggle + aksi */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <ToggleSwitch
+                      checked={item.is_published == 1}
+                      onChange={() => handleToggle(item)}
+                      hideLabel
+                    />
+                    <div style={{ flex: 1 }} />
+                    <button
+                      onClick={() => openEdit(item)}
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "7px",
+                        border: "1px solid #e2ddd5",
+                        background: "white",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#6b6860",
+                      }}
+                    >
+                      <Pencil size={12} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "7px",
+                        border: "1px solid #fca5a5",
+                        background: "#fff3f0",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#e84c2b",
+                      }}
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      )}
 
       {/* Modal Tambah/Edit */}
       {modal && (
@@ -424,7 +615,7 @@ export default function AdminChangelog() {
             alignItems: "center",
             justifyContent: "center",
             zIndex: 300,
-            padding: "24px",
+            padding: "16px",
           }}
         >
           <div
@@ -518,15 +709,7 @@ export default function AdminChangelog() {
                       setForm((f) => ({ ...f, versi: e.target.value }))
                     }
                     placeholder="1.0.0"
-                    style={{
-                      padding: "10px 14px",
-                      borderRadius: "10px",
-                      border: "1px solid #e2ddd5",
-                      fontSize: "14px",
-                      outline: "none",
-                      fontFamily: "monospace",
-                      color: "#0f0e17",
-                    }}
+                    style={{ ...inputStyle, fontFamily: "monospace" }}
                     onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
                     onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
                   />
@@ -553,15 +736,7 @@ export default function AdminChangelog() {
                     onChange={(e) =>
                       setForm((f) => ({ ...f, released_at: e.target.value }))
                     }
-                    style={{
-                      padding: "10px 14px",
-                      borderRadius: "10px",
-                      border: "1px solid #e2ddd5",
-                      fontSize: "14px",
-                      outline: "none",
-                      fontFamily: "inherit",
-                      color: "#0f0e17",
-                    }}
+                    style={inputStyle}
                     onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
                     onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
                   />
@@ -686,15 +861,7 @@ export default function AdminChangelog() {
                   }
                   placeholder="Contoh: Tambah fitur soal random"
                   autoFocus
-                  style={{
-                    padding: "10px 14px",
-                    borderRadius: "10px",
-                    border: "1px solid #e2ddd5",
-                    fontSize: "14px",
-                    outline: "none",
-                    fontFamily: "inherit",
-                    color: "#0f0e17",
-                  }}
+                  style={inputStyle}
                   onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
                   onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
                 />
@@ -723,17 +890,7 @@ export default function AdminChangelog() {
                   }
                   placeholder="Jelaskan lebih detail perubahan ini..."
                   rows={3}
-                  style={{
-                    padding: "10px 14px",
-                    borderRadius: "10px",
-                    border: "1px solid #e2ddd5",
-                    fontSize: "14px",
-                    outline: "none",
-                    fontFamily: "inherit",
-                    color: "#0f0e17",
-                    resize: "none",
-                    lineHeight: "1.6",
-                  }}
+                  style={{ ...inputStyle, resize: "none", lineHeight: "1.6" }}
                   onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
                   onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
                 />
