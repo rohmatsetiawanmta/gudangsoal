@@ -25,7 +25,6 @@ import AdminRoute from "./components/AdminRoute";
 import AdminLayout from "./features/admin/AdminLayout";
 import AdminDashboard from "./features/admin/AdminDashboard";
 import AdminSoal from "./features/admin/AdminSoal";
-import AdminSoalForm from "./features/admin/AdminSoalForm";
 import AdminStruktur from "./features/admin/AdminStruktur";
 import AdminUsers from "./features/admin/AdminUsers";
 import AdminReports from "./features/admin/AdminReports";
@@ -34,6 +33,7 @@ import AdminChangelog from "./features/admin/AdminChangelog";
 
 import SearchPage from "./features/search/SearchPage";
 import ProfilePage from "./features/profile/ProfilePage";
+import AdminSoalForm from "./features/admin/soal-form";
 
 export default function App() {
   const { isLoggedIn } = useAuthStore();
