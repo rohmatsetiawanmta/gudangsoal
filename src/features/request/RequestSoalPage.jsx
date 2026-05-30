@@ -118,7 +118,14 @@ export default function RequestSoalPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        background: "#faf9f6",
+      }}
+    >
       <SEO
         title="Request Soal"
         description="Kirim soal yang ingin kamu tanyakan. Admin akan mereview dan menjawab."
@@ -128,7 +135,9 @@ export default function RequestSoalPage() {
 
       <main
         style={{
+          flex: 1,
           maxWidth: "800px",
+          width: "100%",
           margin: "0 auto",
           padding: isMobile ? "24px 20px" : "40px",
         }}

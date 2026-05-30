@@ -3,10 +3,11 @@ import { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import Breadcrumb from "../../components/Breadcrumb";
-import MathRenderer from "../../components/MathRenderer";
 import { getSoal } from "./browseApi";
 import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
+import useWindowWidth from "../../hooks/useWindowWidth";
 
 function DifficultyBadge({ level }) {
   const map = {
@@ -37,6 +38,8 @@ export default function BrowseSoal() {
   const { jenjangSlug, subjenjangSlug, mapelSlug, topikSlug, subtopikSlug } =
     useParams();
   const { state } = useLocation();
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
 
   const jenjangNama = state?.jenjangNama || jenjangSlug;
   const subjenjangNama = state?.subjenjangNama || subjenjangSlug;
@@ -56,7 +59,14 @@ export default function BrowseSoal() {
   }, [jenjangSlug, subjenjangSlug, mapelSlug, topikSlug, subtopikSlug]);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        background: "#faf9f6",
+      }}
+    >
       {!loading && (
         <SEO
           title={`${subtopikNama} — ${mapelNama}`}
@@ -66,7 +76,15 @@ export default function BrowseSoal() {
       )}
       <Navbar />
 
-      <main style={{ maxWidth: "720px", margin: "0 auto", padding: "40px" }}>
+      <main
+        style={{
+          flex: 1,
+          maxWidth: "720px",
+          width: "100%",
+          margin: "0 auto",
+          padding: isMobile ? "24px 16px" : "40px",
+        }}
+      >
         <div style={{ marginBottom: "32px" }}>
           <Breadcrumb
             items={[
@@ -117,21 +135,26 @@ export default function BrowseSoal() {
           />
         </div>
 
+        {/* Header */}
         <div
           style={{
             marginBottom: "28px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            gap: "12px",
           }}
         >
           <h1
             style={{
-              fontSize: "26px",
+              fontSize: isMobile ? "20px" : "26px",
               fontWeight: "800",
               color: "#0f0e17",
               letterSpacing: "-0.5px",
-              marginBottom: "6px",
+              margin: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: isMobile ? "nowrap" : "normal",
             }}
           >
             {subtopikNama}
@@ -212,10 +235,10 @@ export default function BrowseSoal() {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "14px",
+                  gap: isMobile ? "10px" : "14px",
                   background: "white",
                   borderRadius: "14px",
-                  padding: "16px 20px",
+                  padding: isMobile ? "12px 14px" : "16px 20px",
                   border: "1px solid #e2ddd5",
                   cursor: "pointer",
                   transition: "transform .15s, box-shadow .15s",
@@ -233,14 +256,14 @@ export default function BrowseSoal() {
                 {/* Nomor */}
                 <div
                   style={{
-                    width: "30px",
-                    height: "30px",
+                    width: "28px",
+                    height: "28px",
                     borderRadius: "8px",
                     background: "#f2efe8",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: "13px",
+                    fontSize: "12px",
                     fontWeight: "700",
                     color: "#6b6860",
                     flexShrink: 0,
@@ -249,21 +272,23 @@ export default function BrowseSoal() {
                   {i + 1}
                 </div>
 
-                {/* Kode */}
-                <div
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: "700",
-                    color: "#b4b2a9",
-                    fontFamily: "monospace",
-                    letterSpacing: ".05em",
-                    flexShrink: 0,
-                  }}
-                >
-                  {s.kode}
-                </div>
+                {/* Kode — disembunyikan di mobile */}
+                {!isMobile && (
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: "700",
+                      color: "#b4b2a9",
+                      fontFamily: "monospace",
+                      letterSpacing: ".05em",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {s.kode}
+                  </div>
+                )}
 
-                {/* Body soal — strip markdown & latex untuk preview */}
+                {/* Body soal */}
                 <div
                   style={{
                     flex: 1,
@@ -272,6 +297,7 @@ export default function BrowseSoal() {
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
+                    minWidth: 0,
                   }}
                 >
                   {s.body
@@ -279,12 +305,12 @@ export default function BrowseSoal() {
                     .replace(/[*_~`#]/g, "")}
                 </div>
 
-                {/* Difficulty + arrow */}
+                {/* Badge + arrow */}
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "10px",
+                    gap: isMobile ? "6px" : "10px",
                     flexShrink: 0,
                   }}
                 >
@@ -296,6 +322,8 @@ export default function BrowseSoal() {
           </div>
         )}
       </main>
+
+      <Footer />
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>
     </div>
   );

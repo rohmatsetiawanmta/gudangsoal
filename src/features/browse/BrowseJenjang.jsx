@@ -14,7 +14,9 @@ import {
 import Breadcrumb from "../../components/Breadcrumb";
 import { getJenjang } from "./browseApi";
 import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
+import useWindowWidth from "../../hooks/useWindowWidth";
 
 const ICON_MAP = {
   sd: { icon: School, color: "#e84c2b" },
@@ -27,6 +29,9 @@ const ICON_MAP = {
 
 export default function BrowseJenjang() {
   const navigate = useNavigate();
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
+
   const [jenjang, setJenjang] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -39,7 +44,14 @@ export default function BrowseJenjang() {
   }, []);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        background: "#faf9f6",
+      }}
+    >
       <SEO
         title="Direktori Soal"
         description="Browse semua soal matematika berdasarkan jenjang — SD, SMP, SMA, UTBK, CPNS, dan OSN."
@@ -47,14 +59,23 @@ export default function BrowseJenjang() {
       />
       <Navbar />
 
-      <main style={{ maxWidth: "720px", margin: "0 auto", padding: "40px" }}>
+      <main
+        style={{
+          flex: 1,
+          maxWidth: "720px",
+          width: "100%",
+          margin: "0 auto",
+          padding: isMobile ? "24px 16px" : "40px",
+        }}
+      >
         <div style={{ marginBottom: "32px" }}>
           <Breadcrumb items={[{ label: "Direktori Soal" }]} />
         </div>
+
         <div style={{ marginBottom: "28px" }}>
           <h1
             style={{
-              fontSize: "26px",
+              fontSize: isMobile ? "22px" : "26px",
               fontWeight: "800",
               color: "#0f0e17",
               letterSpacing: "-0.5px",
@@ -126,7 +147,7 @@ export default function BrowseJenjang() {
                     gap: "16px",
                     background: "white",
                     borderRadius: "14px",
-                    padding: "18px 20px",
+                    padding: isMobile ? "14px 16px" : "18px 20px",
                     border: "1px solid #e2ddd5",
                     cursor: "pointer",
                     transition: "transform .15s, box-shadow .15s",
@@ -143,8 +164,8 @@ export default function BrowseJenjang() {
                 >
                   <div
                     style={{
-                      width: "44px",
-                      height: "44px",
+                      width: isMobile ? "38px" : "44px",
+                      height: isMobile ? "38px" : "44px",
                       borderRadius: "12px",
                       background: color + "18",
                       display: "flex",
@@ -153,13 +174,13 @@ export default function BrowseJenjang() {
                       flexShrink: 0,
                     }}
                   >
-                    <Icon size={22} color={color} />
+                    <Icon size={isMobile ? 19 : 22} color={color} />
                   </div>
                   <div style={{ flex: 1 }}>
                     <div
                       style={{
                         fontWeight: "700",
-                        fontSize: "16px",
+                        fontSize: isMobile ? "15px" : "16px",
                         color: "#0f0e17",
                       }}
                     >
@@ -173,6 +194,8 @@ export default function BrowseJenjang() {
           </div>
         )}
       </main>
+
+      <Footer />
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>
     </div>
   );

@@ -5,12 +5,16 @@ import { ChevronRight } from "lucide-react";
 import Breadcrumb from "../../components/Breadcrumb";
 import { getMapel } from "./browseApi";
 import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
+import useWindowWidth from "../../hooks/useWindowWidth";
 
 export default function BrowseMapel() {
   const navigate = useNavigate();
   const { jenjangSlug, subjenjangSlug } = useParams();
   const { state } = useLocation();
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
 
   const jenjangNama = state?.jenjangNama || jenjangSlug;
   const subjenjangNama = state?.subjenjangNama || subjenjangSlug;
@@ -26,8 +30,19 @@ export default function BrowseMapel() {
       .finally(() => setLoading(false));
   }, [jenjangSlug, subjenjangSlug]);
 
+  const labelMapel = ["utbk", "cpns", "osn"].includes(jenjangSlug)
+    ? "Subtes"
+    : "Mata Pelajaran";
+
   return (
-    <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        background: "#faf9f6",
+      }}
+    >
       <SEO
         title={`${subjenjangNama} — ${jenjangNama}`}
         description={`Latihan soal ${subjenjangNama} jenjang ${jenjangNama}. Pilih mata pelajaran untuk mulai berlatih.`}
@@ -35,7 +50,15 @@ export default function BrowseMapel() {
       />
       <Navbar />
 
-      <main style={{ maxWidth: "720px", margin: "0 auto", padding: "40px" }}>
+      <main
+        style={{
+          flex: 1,
+          maxWidth: "720px",
+          width: "100%",
+          margin: "0 auto",
+          padding: isMobile ? "24px 16px" : "40px",
+        }}
+      >
         <div style={{ marginBottom: "32px" }}>
           <Breadcrumb
             items={[
@@ -49,21 +72,22 @@ export default function BrowseMapel() {
             ]}
           />
         </div>
+
         <div style={{ marginBottom: "28px" }}>
           <h1
             style={{
-              fontSize: "26px",
+              fontSize: isMobile ? "22px" : "26px",
               fontWeight: "800",
               color: "#0f0e17",
               letterSpacing: "-0.5px",
               marginBottom: "6px",
             }}
           >
-            Pilih{" "}
-            {["utbk", "cpns", "osn"].includes(jenjangSlug)
-              ? "Subtes"
-              : "Mata Pelajaran"}
+            Pilih {labelMapel}
           </h1>
+          <p style={{ fontSize: "14px", color: "#6b6860" }}>
+            Pilih {labelMapel.toLowerCase()} yang ingin kamu pelajari.
+          </p>
         </div>
 
         {error && (
@@ -114,7 +138,7 @@ export default function BrowseMapel() {
                   fontSize: "14px",
                 }}
               >
-                Belum ada mata pelajaran untuk {subjenjangNama}.
+                Belum ada {labelMapel.toLowerCase()} untuk {subjenjangNama}.
               </div>
             )}
             {mapel.map((m) => (
@@ -141,7 +165,7 @@ export default function BrowseMapel() {
                   justifyContent: "space-between",
                   background: "white",
                   borderRadius: "14px",
-                  padding: "18px 20px",
+                  padding: isMobile ? "14px 16px" : "18px 20px",
                   border: "1px solid #e2ddd5",
                   cursor: "pointer",
                   transition: "transform .15s, box-shadow .15s",
@@ -159,7 +183,7 @@ export default function BrowseMapel() {
                 <span
                   style={{
                     fontWeight: "600",
-                    fontSize: "15px",
+                    fontSize: isMobile ? "14px" : "15px",
                     color: "#0f0e17",
                   }}
                 >
@@ -171,6 +195,8 @@ export default function BrowseMapel() {
           </div>
         )}
       </main>
+
+      <Footer />
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>
     </div>
   );

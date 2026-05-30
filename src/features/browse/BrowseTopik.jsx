@@ -5,12 +5,16 @@ import { ChevronRight } from "lucide-react";
 import Breadcrumb from "../../components/Breadcrumb";
 import { getTopik } from "./browseApi";
 import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
+import useWindowWidth from "../../hooks/useWindowWidth";
 
 export default function BrowseTopik() {
   const navigate = useNavigate();
   const { jenjangSlug, subjenjangSlug, mapelSlug } = useParams();
   const { state } = useLocation();
+  const width = useWindowWidth();
+  const isMobile = width <= 480;
 
   const jenjangNama = state?.jenjangNama || jenjangSlug;
   const subjenjangNama = state?.subjenjangNama || subjenjangSlug;
@@ -28,7 +32,14 @@ export default function BrowseTopik() {
   }, [jenjangSlug, subjenjangSlug, mapelSlug]);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        background: "#faf9f6",
+      }}
+    >
       <SEO
         title={`${mapelNama} — ${subjenjangNama}`}
         description={`Pilih topik ${mapelNama} untuk latihan soal matematika jenjang ${jenjangNama}.`}
@@ -36,7 +47,15 @@ export default function BrowseTopik() {
       />
       <Navbar />
 
-      <main style={{ maxWidth: "720px", margin: "0 auto", padding: "40px" }}>
+      <main
+        style={{
+          flex: 1,
+          maxWidth: "720px",
+          width: "100%",
+          margin: "0 auto",
+          padding: isMobile ? "24px 16px" : "40px",
+        }}
+      >
         <div style={{ marginBottom: "32px" }}>
           <Breadcrumb
             items={[
@@ -60,10 +79,11 @@ export default function BrowseTopik() {
             ]}
           />
         </div>
+
         <div style={{ marginBottom: "28px" }}>
           <h1
             style={{
-              fontSize: "26px",
+              fontSize: isMobile ? "22px" : "26px",
               fontWeight: "800",
               color: "#0f0e17",
               letterSpacing: "-0.5px",
@@ -72,6 +92,9 @@ export default function BrowseTopik() {
           >
             Pilih Topik
           </h1>
+          <p style={{ fontSize: "14px", color: "#6b6860" }}>
+            Pilih topik {mapelNama} yang ingin kamu pelajari.
+          </p>
         </div>
 
         {error && (
@@ -151,7 +174,7 @@ export default function BrowseTopik() {
                   justifyContent: "space-between",
                   background: "white",
                   borderRadius: "14px",
-                  padding: "18px 20px",
+                  padding: isMobile ? "14px 16px" : "18px 20px",
                   border: "1px solid #e2ddd5",
                   cursor: "pointer",
                   transition: "transform .15s, box-shadow .15s",
@@ -169,7 +192,7 @@ export default function BrowseTopik() {
                 <span
                   style={{
                     fontWeight: "600",
-                    fontSize: "15px",
+                    fontSize: isMobile ? "14px" : "15px",
                     color: "#0f0e17",
                   }}
                 >
@@ -181,6 +204,8 @@ export default function BrowseTopik() {
           </div>
         )}
       </main>
+
+      <Footer />
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>
     </div>
   );
