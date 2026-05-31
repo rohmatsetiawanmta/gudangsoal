@@ -1,6 +1,16 @@
+// src/features/soal/SoalDetail.jsx
 import { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { ChevronLeft, Flag, Share2, Copy, Check, Eye } from "lucide-react";
+import {
+  ChevronLeft,
+  Flag,
+  Share2,
+  Copy,
+  Check,
+  Eye,
+  Bookmark,
+  BookmarkCheck,
+} from "lucide-react";
 import MathRenderer from "../../components/MathRenderer";
 import Breadcrumb from "../../components/Breadcrumb";
 import Navbar from "../../components/Navbar";
@@ -14,6 +24,11 @@ import { checkCorrect, initChosen, DifficultyBadge } from "./soalUtils";
 import JawabanInput from "./components/JawabanInput";
 import PembahasanPanel from "./components/PembahasanPanel";
 import ReportModal from "./components/ReportModal";
+import {
+  checkBookmark,
+  addBookmark,
+  removeBookmark,
+} from "../bookmark/bookmarkApi";
 
 export default function SoalDetail() {
   const { kode } = useParams();
@@ -31,6 +46,8 @@ export default function SoalDetail() {
   const [alreadyCorrect, setAlreadyCorrect] = useState(false);
   const [copied, setCopied] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
 
   const [breadcrumb, setBreadcrumb] = useState({
     jenjangNama: state?.jenjangNama || "",
@@ -66,13 +83,20 @@ export default function SoalDetail() {
     setChosen("");
     setSubmitted(false);
     setAlreadyCorrect(false);
+    setBookmarked(false);
     setLoading(true);
+
     if (user) {
-      Promise.all([getSoalDetail(kode), getSoalStatus(kode)])
-        .then(([data, status]) => {
+      Promise.all([
+        getSoalDetail(kode),
+        getSoalStatus(kode),
+        checkBookmark(kode),
+      ])
+        .then(([data, status, bm]) => {
           setSoal(data);
           fillBreadcrumb(data);
           setChosen(initChosen(data.tipe));
+          setBookmarked(bm?.bookmarked || false);
           if (status?.answered_correct) {
             setAlreadyCorrect(true);
             setSubmitted(true);
@@ -146,6 +170,23 @@ export default function SoalDetail() {
     window.open(`https://wa.me/?text=${text}`, "_blank");
   };
 
+  const handleBookmark = async () => {
+    if (!user || bookmarkLoading) return;
+    setBookmarkLoading(true);
+    try {
+      if (bookmarked) {
+        await removeBookmark(soal.id);
+        setBookmarked(false);
+      } else {
+        await addBookmark(soal.id);
+        setBookmarked(true);
+      }
+    } catch {
+    } finally {
+      setBookmarkLoading(false);
+    }
+  };
+
   const {
     jenjangNama,
     jenjangSlug,
@@ -160,8 +201,103 @@ export default function SoalDetail() {
   } = breadcrumb;
   const backUrl = `/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}/${topikSlug}/${subtopikSlug}`;
 
+  function IconButton({
+    onClick,
+    icon: Icon,
+    title,
+    color,
+    hoverColor,
+    hoverBorder,
+    active,
+    activeColor,
+    activeBg,
+    activeBorder,
+    disabled,
+    children,
+  }) {
+    const [hovered, setHovered] = useState(false);
+
+    return (
+      <div style={{ position: "relative" }}>
+        <button
+          onClick={onClick}
+          disabled={disabled}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "32px",
+            height: "32px",
+            borderRadius: "8px",
+            border: `1px solid ${
+              active ? activeBorder : hovered ? hoverBorder : "#e2ddd5"
+            }`,
+            background: active ? activeBg : "white",
+            cursor: disabled ? "not-allowed" : "pointer",
+            color: active
+              ? activeColor
+              : hovered
+              ? hoverColor
+              : color || "#6b6860",
+            transition: "all .15s",
+            opacity: disabled ? 0.5 : 1,
+            flexShrink: 0,
+          }}
+        >
+          {children || <Icon size={14} />}
+        </button>
+
+        {/* Tooltip */}
+        {hovered && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "calc(100% + 6px)",
+              left: "50%",
+              transform: "translateX(-50%)",
+              background: "#0f0e17",
+              color: "white",
+              fontSize: "11px",
+              fontWeight: "500",
+              padding: "4px 8px",
+              borderRadius: "6px",
+              whiteSpace: "nowrap",
+              pointerEvents: "none",
+              zIndex: 10,
+            }}
+          >
+            {title}
+            {/* Arrow */}
+            <div
+              style={{
+                position: "absolute",
+                top: "100%",
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: 0,
+                height: 0,
+                borderLeft: "4px solid transparent",
+                borderRight: "4px solid transparent",
+                borderTop: "4px solid #0f0e17",
+              }}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        background: "#faf9f6",
+      }}
+    >
       {soal && (
         <SEO
           title={`Soal ${soal.mapel_nama} (#${soal.kode})`}
@@ -177,9 +313,11 @@ export default function SoalDetail() {
 
       <main
         style={{
+          flex: 1,
           maxWidth: "1100px",
           margin: "0 auto",
           padding: isMobile ? "24px 16px" : "40px",
+          width: "100%",
         }}
       >
         {/* Breadcrumb */}
@@ -416,16 +554,17 @@ export default function SoalDetail() {
                 </div>
               )}
 
-              {/* Navigasi */}
+              {/* Navigasi bawah */}
               <div
                 style={{
                   display: "flex",
-                  justifyContent: "space-between",
                   alignItems: "center",
-                  paddingTop: "8px",
+                  justifyContent: "space-between",
+                  paddingTop: "12px",
                   borderTop: "1px solid #f2efe8",
                 }}
               >
+                {/* Kiri: Kembali */}
                 <button
                   onClick={() => navigate(-1)}
                   style={{
@@ -436,93 +575,66 @@ export default function SoalDetail() {
                     border: "none",
                     cursor: "pointer",
                     color: "#6b6860",
-                    fontSize: "14px",
+                    fontSize: "13px",
                     fontFamily: "inherit",
                     padding: 0,
                   }}
                 >
-                  <ChevronLeft size={16} /> Kembali
+                  <ChevronLeft size={15} /> Kembali
                 </button>
+
+                {/* Kanan: aksi sebagai pill buttons */}
                 <div
-                  style={{ display: "flex", alignItems: "center", gap: "12px" }}
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}
+                  {user && (
+                    <IconButton
+                      onClick={handleBookmark}
+                      disabled={bookmarkLoading}
+                      title={bookmarked ? "Hapus bookmark" : "Simpan soal"}
+                      active={bookmarked}
+                      activeColor="#e84c2b"
+                      activeBg="#fff3f0"
+                      activeBorder="#e84c2b"
+                      hoverColor="#e84c2b"
+                      hoverBorder="#e84c2b"
+                    >
+                      {bookmarked ? (
+                        <BookmarkCheck size={14} />
+                      ) : (
+                        <Bookmark size={14} />
+                      )}
+                    </IconButton>
+                  )}
+                  <IconButton
+                    onClick={handleCopy}
+                    title={copied ? "Tersalin!" : "Salin link"}
+                    active={copied}
+                    activeColor="#1a8a6e"
+                    activeBg="#e4f5f0"
+                    activeBorder="#9FE1CB"
+                    hoverColor="#1a8a6e"
+                    hoverBorder="#9FE1CB"
                   >
-                    <button
-                      onClick={handleCopy}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        color: copied ? "#1a8a6e" : "#6b6860",
-                        fontSize: "13px",
-                        fontFamily: "inherit",
-                        padding: 0,
-                        transition: "color .15s",
-                      }}
-                    >
-                      {copied ? <Check size={13} /> : <Copy size={13} />}
-                      {copied ? "Tersalin!" : "Salin link"}
-                    </button>
-                    <button
-                      onClick={handleShareWA}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        color: "#6b6860",
-                        fontSize: "13px",
-                        fontFamily: "inherit",
-                        padding: 0,
-                        transition: "color .15s",
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.color = "#25D366")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.color = "#6b6860")
-                      }
-                    >
-                      <Share2 size={13} />
-                      {!isMobile && "WhatsApp"}
-                    </button>
-                  </div>
-                  <button
+                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                  </IconButton>
+                  <IconButton
+                    onClick={handleShareWA}
+                    title="Bagikan ke WhatsApp"
+                    hoverColor="#25D366"
+                    hoverBorder="#25D366"
+                  >
+                    <Share2 size={14} />
+                  </IconButton>
+                  <IconButton
                     onClick={() => setReportOpen(true)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      color: "#b4b2a9",
-                      fontSize: "13px",
-                      fontFamily: "inherit",
-                      padding: 0,
-                      transition: "color .15s",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.color = "#e84c2b")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.color = "#b4b2a9")
-                    }
+                    title="Laporkan soal"
+                    color="#b4b2a9"
+                    hoverColor="#e84c2b"
+                    hoverBorder="#fca5a5"
                   >
-                    <Flag size={13} />
-                    {!isMobile && "Laporkan"}
-                  </button>
+                    <Flag size={14} />
+                  </IconButton>
                 </div>
               </div>
             </div>
