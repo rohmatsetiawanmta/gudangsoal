@@ -20,6 +20,7 @@ import {
 import { useAuthStore } from "../features/auth/authStore";
 import RandomSoal from "./RandomSoal";
 import FeedbackModal from "../features/feedback/FeedbackModal";
+import NotificationBell from "../features/notifications/NotificationBell";
 import useWindowWidth from "../hooks/useWindowWidth";
 
 const NAV_LINKS = [
@@ -295,11 +296,13 @@ export default function Navbar() {
               </button>
             ))}
 
+          {/* Desktop: Notifikasi — hanya user login */}
+          {!isMobile && isLoggedIn && <NotificationBell isMobile={false} />}
+
           {/* Desktop: Tombol Masukan */}
           {!isMobile && (
             <button
               onClick={() => setFeedbackOpen(true)}
-              title="Kirim Masukan"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -573,159 +576,183 @@ export default function Navbar() {
               </div>
             ))}
 
-          {/* Mobile: Hamburger */}
+          {/* Mobile: Bell + Hamburger */}
           {isMobile && (
-            <div ref={menuRef} style={{ position: "relative" }}>
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "36px",
-                  height: "36px",
-                  borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
-                  background: "none",
-                  cursor: "pointer",
-                  color: "#6b6860",
-                }}
-              >
-                {menuOpen ? <X size={18} /> : <Menu size={18} />}
-              </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              {/* Bell hanya untuk user login */}
+              {isLoggedIn && <NotificationBell isMobile={true} />}
 
-              {menuOpen && (
-                <div
+              {/* Hamburger */}
+              <div ref={menuRef} style={{ position: "relative" }}>
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
                   style={{
-                    position: "absolute",
-                    top: "calc(100% + 8px)",
-                    right: 0,
-                    background: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "10px",
                     border: "1px solid #e2ddd5",
-                    borderRadius: "14px",
-                    padding: "8px",
-                    minWidth: "220px",
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-                    zIndex: 200,
+                    background: "none",
+                    cursor: "pointer",
+                    color: "#6b6860",
                   }}
                 >
-                  {/* User info */}
-                  {isLoggedIn && (
+                  {menuOpen ? <X size={18} /> : <Menu size={18} />}
+                </button>
+
+                {menuOpen && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 8px)",
+                      right: 0,
+                      background: "white",
+                      border: "1px solid #e2ddd5",
+                      borderRadius: "14px",
+                      padding: "8px",
+                      minWidth: "220px",
+                      boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
+                      zIndex: 200,
+                    }}
+                  >
+                    {/* User info */}
+                    {isLoggedIn && (
+                      <div
+                        style={{
+                          padding: "10px 12px 12px",
+                          borderBottom: "1px solid #f2efe8",
+                          marginBottom: "6px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: "14px",
+                            fontWeight: "600",
+                            color: "#0f0e17",
+                          }}
+                        >
+                          {user?.name}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            color: "#6b6860",
+                            marginTop: "2px",
+                          }}
+                        >
+                          {user?.email}
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                            marginTop: "8px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              background: "#fff3f0",
+                              borderRadius: "8px",
+                              padding: "4px 8px",
+                              fontSize: "12px",
+                              fontWeight: "700",
+                              color: "#e84c2b",
+                            }}
+                          >
+                            {user?.xp || 0} XP
+                          </div>
+                          <div
+                            style={{
+                              background: "#fff3f0",
+                              borderRadius: "8px",
+                              padding: "4px 8px",
+                              fontSize: "12px",
+                              fontWeight: "700",
+                              color: "#e84c2b",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            <Flame size={11} />
+                            {user?.streak || 0} hari
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Search */}
                     <div
                       style={{
-                        padding: "10px 12px 12px",
+                        padding: "8px 4px",
                         borderBottom: "1px solid #f2efe8",
                         marginBottom: "6px",
                       }}
                     >
-                      <div
-                        style={{
-                          fontSize: "14px",
-                          fontWeight: "600",
-                          color: "#0f0e17",
-                        }}
-                      >
-                        {user?.name}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          color: "#6b6860",
-                          marginTop: "2px",
-                        }}
-                      >
-                        {user?.email}
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "8px",
-                          marginTop: "8px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            background: "#fff3f0",
-                            borderRadius: "8px",
-                            padding: "4px 8px",
-                            fontSize: "12px",
-                            fontWeight: "700",
-                            color: "#e84c2b",
-                          }}
-                        >
-                          {user?.xp || 0} XP
+                      <form onSubmit={handleSearch}>
+                        <div style={{ position: "relative" }}>
+                          <Search
+                            size={14}
+                            style={{
+                              position: "absolute",
+                              left: "10px",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              color: "#6b6860",
+                              pointerEvents: "none",
+                            }}
+                          />
+                          <input
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Cari soal, topik..."
+                            style={{
+                              width: "100%",
+                              paddingLeft: "32px",
+                              paddingRight: "12px",
+                              paddingTop: "8px",
+                              paddingBottom: "8px",
+                              borderRadius: "8px",
+                              border: "1px solid #e2ddd5",
+                              fontSize: "13px",
+                              outline: "none",
+                              fontFamily: "inherit",
+                              color: "#0f0e17",
+                              boxSizing: "border-box",
+                            }}
+                          />
                         </div>
-                        <div
-                          style={{
-                            background: "#fff3f0",
-                            borderRadius: "8px",
-                            padding: "4px 8px",
-                            fontSize: "12px",
-                            fontWeight: "700",
-                            color: "#e84c2b",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                          }}
-                        >
-                          <Flame size={11} />
-                          {user?.streak || 0} hari
-                        </div>
-                      </div>
+                      </form>
                     </div>
-                  )}
 
-                  {/* Search */}
-                  <div
-                    style={{
-                      padding: "8px 4px",
-                      borderBottom: "1px solid #f2efe8",
-                      marginBottom: "6px",
-                    }}
-                  >
-                    <form onSubmit={handleSearch}>
-                      <div style={{ position: "relative" }}>
-                        <Search
-                          size={14}
-                          style={{
-                            position: "absolute",
-                            left: "10px",
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                            color: "#6b6860",
-                            pointerEvents: "none",
-                          }}
-                        />
-                        <input
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Cari soal, topik..."
-                          style={{
-                            width: "100%",
-                            paddingLeft: "32px",
-                            paddingRight: "12px",
-                            paddingTop: "8px",
-                            paddingBottom: "8px",
-                            borderRadius: "8px",
-                            border: "1px solid #e2ddd5",
-                            fontSize: "13px",
-                            outline: "none",
-                            fontFamily: "inherit",
-                            color: "#0f0e17",
-                            boxSizing: "border-box",
-                          }}
-                        />
-                      </div>
-                    </form>
-                  </div>
+                    {/* Nav links */}
+                    {navLinks.map(({ to, label, icon: Icon }) => (
+                      <button
+                        key={to}
+                        onClick={() => {
+                          navigate(to);
+                          setMenuOpen(false);
+                        }}
+                        style={menuItemStyle}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background = "#f2efe8")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background = "none")
+                        }
+                      >
+                        <Icon size={15} color="#6b6860" />
+                        {label}
+                      </button>
+                    ))}
 
-                  {/* Nav links */}
-                  {navLinks.map(({ to, label, icon: Icon }) => (
+                    {/* Soal random */}
                     <button
-                      key={to}
                       onClick={() => {
-                        navigate(to);
                         setMenuOpen(false);
+                        setRandomOpen(true);
                       }}
                       style={menuItemStyle}
                       onMouseEnter={(e) =>
@@ -735,109 +762,107 @@ export default function Navbar() {
                         (e.currentTarget.style.background = "none")
                       }
                     >
-                      <Icon size={15} color="#6b6860" />
-                      {label}
+                      <Shuffle size={15} color="#6b6860" /> Soal Random
                     </button>
-                  ))}
 
-                  {/* Soal random */}
-                  <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                      setRandomOpen(true);
-                    }}
-                    style={menuItemStyle}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.background = "#f2efe8")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.background = "none")
-                    }
-                  >
-                    <Shuffle size={15} color="#6b6860" /> Soal Random
-                  </button>
+                    {/* Kirim Masukan */}
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setFeedbackOpen(true);
+                      }}
+                      style={menuItemStyle}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = "#f2efe8")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "none")
+                      }
+                    >
+                      <MessageSquarePlus size={15} color="#6b6860" /> Kirim
+                      Masukan
+                    </button>
 
-                  {/* Kirim Masukan */}
-                  <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                      setFeedbackOpen(true);
-                    }}
-                    style={menuItemStyle}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.background = "#f2efe8")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.background = "none")
-                    }
-                  >
-                    <MessageSquarePlus size={15} color="#6b6860" /> Kirim
-                    Masukan
-                  </button>
-
-                  <div
-                    style={{
-                      borderTop: "1px solid #f2efe8",
-                      marginTop: "6px",
-                      paddingTop: "6px",
-                    }}
-                  >
-                    {!isLoggedIn ? (
-                      <>
-                        <button
-                          onClick={() => {
-                            navigate("/login");
-                            setMenuOpen(false);
-                          }}
-                          style={{
-                            width: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            padding: "9px 12px",
-                            borderRadius: "8px",
-                            border: "1px solid #e2ddd5",
-                            background: "white",
-                            cursor: "pointer",
-                            fontSize: "14px",
-                            fontWeight: "600",
-                            color: "#0f0e17",
-                            fontFamily: "inherit",
-                            marginBottom: "6px",
-                          }}
-                        >
-                          Masuk
-                        </button>
-                        <button
-                          onClick={() => {
-                            navigate("/register");
-                            setMenuOpen(false);
-                          }}
-                          style={{
-                            width: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            padding: "9px 12px",
-                            borderRadius: "8px",
-                            border: "none",
-                            background: "#e84c2b",
-                            cursor: "pointer",
-                            fontSize: "14px",
-                            fontWeight: "600",
-                            color: "white",
-                            fontFamily: "inherit",
-                          }}
-                        >
-                          Daftar Gratis
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        {user?.role === "admin" && (
+                    <div
+                      style={{
+                        borderTop: "1px solid #f2efe8",
+                        marginTop: "6px",
+                        paddingTop: "6px",
+                      }}
+                    >
+                      {!isLoggedIn ? (
+                        <>
                           <button
                             onClick={() => {
-                              navigate("/admin");
+                              navigate("/login");
+                              setMenuOpen(false);
+                            }}
+                            style={{
+                              width: "100%",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              padding: "9px 12px",
+                              borderRadius: "8px",
+                              border: "1px solid #e2ddd5",
+                              background: "white",
+                              cursor: "pointer",
+                              fontSize: "14px",
+                              fontWeight: "600",
+                              color: "#0f0e17",
+                              fontFamily: "inherit",
+                              marginBottom: "6px",
+                            }}
+                          >
+                            Masuk
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate("/register");
+                              setMenuOpen(false);
+                            }}
+                            style={{
+                              width: "100%",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              padding: "9px 12px",
+                              borderRadius: "8px",
+                              border: "none",
+                              background: "#e84c2b",
+                              cursor: "pointer",
+                              fontSize: "14px",
+                              fontWeight: "600",
+                              color: "white",
+                              fontFamily: "inherit",
+                            }}
+                          >
+                            Daftar Gratis
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {user?.role === "admin" && (
+                            <button
+                              onClick={() => {
+                                navigate("/admin");
+                                setMenuOpen(false);
+                              }}
+                              style={menuItemStyle}
+                              onMouseEnter={(e) =>
+                                (e.currentTarget.style.background = "#f2efe8")
+                              }
+                              onMouseLeave={(e) =>
+                                (e.currentTarget.style.background = "none")
+                              }
+                            >
+                              <LayoutDashboard size={15} color="#6b6860" />{" "}
+                              Admin Panel
+                            </button>
+                          )}
+                          <button
+                            onClick={() => {
+                              navigate("/profile");
                               setMenuOpen(false);
                             }}
                             style={menuItemStyle}
@@ -848,42 +873,26 @@ export default function Navbar() {
                               (e.currentTarget.style.background = "none")
                             }
                           >
-                            <LayoutDashboard size={15} color="#6b6860" /> Admin
-                            Panel
+                            <User size={15} color="#6b6860" /> Profile
                           </button>
-                        )}
-                        <button
-                          onClick={() => {
-                            navigate("/profile");
-                            setMenuOpen(false);
-                          }}
-                          style={menuItemStyle}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.background = "#f2efe8")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.background = "none")
-                          }
-                        >
-                          <User size={15} color="#6b6860" /> Profile
-                        </button>
-                        <button
-                          onClick={handleLogout}
-                          style={{ ...menuItemStyle, color: "#e84c2b" }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.background = "#fff3f0")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.background = "none")
-                          }
-                        >
-                          <LogOut size={15} /> Keluar
-                        </button>
-                      </>
-                    )}
+                          <button
+                            onClick={handleLogout}
+                            style={{ ...menuItemStyle, color: "#e84c2b" }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.background = "#fff3f0")
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.background = "none")
+                            }
+                          >
+                            <LogOut size={15} /> Keluar
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
         </div>
