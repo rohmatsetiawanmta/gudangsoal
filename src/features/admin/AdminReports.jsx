@@ -1,14 +1,7 @@
 // src/features/admin/AdminReports.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Flag,
-  ChevronLeft,
-  ChevronRight,
-  ExternalLink,
-  Check,
-  X,
-} from "lucide-react";
+import { Flag, ChevronLeft, ChevronRight, ExternalLink, X } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import api from "../../lib/api";
 import useWindowWidth from "../../hooks/useWindowWidth";
@@ -48,6 +41,248 @@ function StatusBadge({ status }) {
   );
 }
 
+function UpdateModal({ report, onClose, onUpdate }) {
+  const [status, setStatus] = useState(report.status);
+  const [adminNotes, setAdminNotes] = useState(report.admin_notes || "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError("");
+    try {
+      await api.put(`/admin/reports?id=${report.id}`, {
+        status,
+        admin_notes: adminNotes || null,
+      });
+      onUpdate({ ...report, status, admin_notes: adminNotes });
+      onClose();
+    } catch {
+      setError("Gagal menyimpan");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.5)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 300,
+        padding: "16px",
+      }}
+    >
+      <div
+        style={{
+          background: "white",
+          borderRadius: "16px",
+          padding: "28px",
+          maxWidth: "460px",
+          width: "100%",
+          maxHeight: "90vh",
+          overflowY: "auto",
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: "20px",
+          }}
+        >
+          <h3 style={{ fontSize: "17px", fontWeight: "800", color: "#0f0e17" }}>
+            Update Laporan
+          </h3>
+          <button
+            onClick={onClose}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "#6b6860",
+              display: "flex",
+            }}
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {/* Info laporan */}
+          <div
+            style={{
+              background: "#f2efe8",
+              borderRadius: "10px",
+              padding: "12px 14px",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "12px",
+                fontWeight: "700",
+                color: "#6b6860",
+                textTransform: "uppercase",
+                letterSpacing: ".06em",
+                marginBottom: "6px",
+              }}
+            >
+              Laporan
+            </div>
+            <div
+              style={{
+                fontSize: "13px",
+                fontWeight: "600",
+                color: "#0f0e17",
+                marginBottom: "2px",
+              }}
+            >
+              Soal #{report.soal_kode} —{" "}
+              {KATEGORI_LABEL[report.kategori] || report.kategori}
+            </div>
+            {report.deskripsi && (
+              <div style={{ fontSize: "13px", color: "#6b6860" }}>
+                "{report.deskripsi}"
+              </div>
+            )}
+            <div
+              style={{ fontSize: "12px", color: "#b4b2a9", marginTop: "4px" }}
+            >
+              {report.user_name || "Anonymous"}
+            </div>
+          </div>
+
+          {/* Status */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <label
+              style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}
+            >
+              Status
+            </label>
+            <div style={{ display: "flex", gap: "8px" }}>
+              {Object.entries(STATUS_CONFIG).map(([key, val]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setStatus(key)}
+                  style={{
+                    flex: 1,
+                    padding: "8px",
+                    borderRadius: "8px",
+                    border: `1.5px solid ${
+                      status === key ? val.color : "#e2ddd5"
+                    }`,
+                    background: status === key ? val.bg : "white",
+                    color: status === key ? val.color : "#6b6860",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                    transition: "all .15s",
+                  }}
+                >
+                  {val.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Catatan admin */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <label
+              style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}
+            >
+              Catatan{" "}
+              <span style={{ fontWeight: "400", color: "#6b6860" }}>
+                (opsional — dikirim ke user sebagai notifikasi)
+              </span>
+            </label>
+            <textarea
+              value={adminNotes}
+              onChange={(e) => setAdminNotes(e.target.value)}
+              placeholder="Misal: Terima kasih, soal sudah diperbaiki."
+              rows={3}
+              style={{
+                padding: "10px 14px",
+                borderRadius: "10px",
+                border: "1px solid #e2ddd5",
+                fontSize: "14px",
+                outline: "none",
+                fontFamily: "inherit",
+                color: "#0f0e17",
+                resize: "none",
+                lineHeight: "1.6",
+              }}
+              onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
+              onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
+            />
+          </div>
+
+          {error && (
+            <div
+              style={{
+                background: "#fff3f0",
+                border: "1px solid #fca5a5",
+                color: "#b91c1c",
+                fontSize: "13px",
+                borderRadius: "10px",
+                padding: "10px 14px",
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          {/* Actions */}
+          <div
+            style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}
+          >
+            <button
+              onClick={onClose}
+              style={{
+                padding: "9px 20px",
+                borderRadius: "10px",
+                border: "1px solid #e2ddd5",
+                background: "white",
+                fontSize: "14px",
+                fontWeight: "600",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                color: "#0f0e17",
+              }}
+            >
+              Batal
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              style={{
+                padding: "9px 20px",
+                borderRadius: "10px",
+                border: "none",
+                background: saving ? "#f5a07a" : "#e84c2b",
+                color: "white",
+                fontSize: "14px",
+                fontWeight: "600",
+                cursor: saving ? "not-allowed" : "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              {saving ? "Menyimpan..." : "Simpan"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminReports() {
   const navigate = useNavigate();
   const width = useWindowWidth();
@@ -58,7 +293,7 @@ export default function AdminReports() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [filterStatus, setFilterStatus] = useState("");
-  const [updating, setUpdating] = useState({});
+  const [modal, setModal] = useState(null);
 
   const limit = 20;
 
@@ -82,88 +317,33 @@ export default function AdminReports() {
     fetchReports();
   }, [page, filterStatus]);
 
-  const handleUpdateStatus = async (id, status) => {
-    setUpdating((u) => ({ ...u, [id]: true }));
-    try {
-      await api.put(`/admin/reports?id=${id}`, { status });
-      setReports((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status } : r))
-      );
-    } catch {
-      alert("Gagal mengupdate status");
-    } finally {
-      setUpdating((u) => ({ ...u, [id]: false }));
-    }
+  const handleUpdate = (updated) => {
+    setReports((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
   };
 
   const totalPages = Math.ceil(total / limit);
   const pendingCount = reports.filter((r) => r.status === "pending").length;
 
-  const ActionButtons = ({ r }) => (
-    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-      <button
-        onClick={() => navigate(`/soal/${r.soal_kode}`)}
-        title="Lihat soal"
-        style={{
-          width: "28px",
-          height: "28px",
-          borderRadius: "7px",
-          border: "1px solid #e2ddd5",
-          background: "white",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#6b6860",
-        }}
-      >
-        <ExternalLink size={12} />
-      </button>
-      {r.status !== "resolved" && (
-        <button
-          onClick={() => handleUpdateStatus(r.id, "resolved")}
-          disabled={updating[r.id]}
-          title="Mark resolved"
-          style={{
-            width: "28px",
-            height: "28px",
-            borderRadius: "7px",
-            border: "1px solid #9FE1CB",
-            background: "#e4f5f0",
-            cursor: updating[r.id] ? "not-allowed" : "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#1a8a6e",
-            opacity: updating[r.id] ? 0.5 : 1,
-          }}
-        >
-          <Check size={12} />
-        </button>
-      )}
-      {r.status !== "dismissed" && (
-        <button
-          onClick={() => handleUpdateStatus(r.id, "dismissed")}
-          disabled={updating[r.id]}
-          title="Dismiss"
-          style={{
-            width: "28px",
-            height: "28px",
-            borderRadius: "7px",
-            border: "1px solid #e2ddd5",
-            background: "#f2efe8",
-            cursor: updating[r.id] ? "not-allowed" : "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#6b6860",
-            opacity: updating[r.id] ? 0.5 : 1,
-          }}
-        >
-          <X size={12} />
-        </button>
-      )}
-    </div>
+  const ActionButton = ({ r }) => (
+    <button
+      onClick={() => setModal(r)}
+      style={{
+        padding: "6px 12px",
+        borderRadius: "8px",
+        border: "1px solid #e2ddd5",
+        background: "white",
+        fontSize: "12px",
+        fontWeight: "600",
+        cursor: "pointer",
+        fontFamily: "inherit",
+        color: "#0f0e17",
+        transition: "all .15s",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = "#f2efe8")}
+      onMouseLeave={(e) => (e.currentTarget.style.background = "white")}
+    >
+      Update
+    </button>
   );
 
   return (
@@ -222,7 +402,7 @@ export default function AdminReports() {
         )}
       </div>
 
-      {/* Filter status */}
+      {/* Filter */}
       <div
         style={{
           display: "flex",
@@ -260,7 +440,7 @@ export default function AdminReports() {
         ))}
       </div>
 
-      {/* ── DESKTOP: Table ── */}
+      {/* Desktop: Table */}
       {!isMobile && (
         <div
           style={{
@@ -273,14 +453,14 @@ export default function AdminReports() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "80px 1fr 160px 120px 100px 110px",
+              gridTemplateColumns: "80px 1fr 160px 120px 100px 100px",
               gap: "16px",
               padding: "12px 20px",
               background: "#f2efe8",
               borderBottom: "1px solid #e2ddd5",
             }}
           >
-            {["Soal", "Report", "Kategori", "Pelapor", "Status", "Aksi"].map(
+            {["Soal", "Deskripsi", "Kategori", "Pelapor", "Status", "Aksi"].map(
               (h) => (
                 <div
                   key={h}
@@ -317,7 +497,7 @@ export default function AdminReports() {
                 key={r.id}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "80px 1fr 160px 120px 100px 110px",
+                  gridTemplateColumns: "80px 1fr 160px 120px 100px 100px",
                   gap: "16px",
                   padding: "14px 20px",
                   borderBottom:
@@ -326,23 +506,30 @@ export default function AdminReports() {
                   background: r.status === "pending" ? "#fffdf9" : "white",
                 }}
               >
-                <div
+                <button
+                  onClick={() => navigate(`/soal/${r.soal_kode}`)}
                   style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
                     fontSize: "12px",
                     fontWeight: "700",
-                    color: "#0f0e17",
+                    color: "#e84c2b",
                     fontFamily: "monospace",
+                    padding: 0,
                   }}
                 >
-                  #{r.soal_kode}
-                </div>
+                  #{r.soal_kode} <ExternalLink size={10} />
+                </button>
                 <div>
                   {r.deskripsi && (
                     <div
                       style={{
                         fontSize: "12px",
                         color: "#6b6860",
-                        marginTop: "3px",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
@@ -351,11 +538,25 @@ export default function AdminReports() {
                       "{r.deskripsi}"
                     </div>
                   )}
+                  {r.admin_notes && (
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color: "#1a8a6e",
+                        marginTop: "2px",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      Catatan: {r.admin_notes}
+                    </div>
+                  )}
                   <div
                     style={{
                       fontSize: "11px",
                       color: "#b4b2a9",
-                      marginTop: "3px",
+                      marginTop: "2px",
                     }}
                   >
                     {new Date(r.created_at).toLocaleDateString("id-ID", {
@@ -378,7 +579,7 @@ export default function AdminReports() {
                   {r.user_name || "Anonymous"}
                 </div>
                 <StatusBadge status={r.status} />
-                <ActionButtons r={r} />
+                <ActionButton r={r} />
               </div>
             ))}
 
@@ -398,7 +599,7 @@ export default function AdminReports() {
         </div>
       )}
 
-      {/* ── MOBILE: Card list ── */}
+      {/* Mobile: Card list */}
       {isMobile && (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {loading &&
@@ -448,20 +649,28 @@ export default function AdminReports() {
                   gap: "10px",
                 }}
               >
-                {/* Baris 1: kode + kategori + status */}
+                {/* Baris 1 */}
                 <div
                   style={{ display: "flex", alignItems: "center", gap: "8px" }}
                 >
-                  <span
+                  <button
+                    onClick={() => navigate(`/soal/${r.soal_kode}`)}
                     style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
                       fontSize: "12px",
                       fontWeight: "700",
-                      color: "#0f0e17",
+                      color: "#e84c2b",
                       fontFamily: "monospace",
+                      padding: 0,
                     }}
                   >
-                    #{r.soal_kode}
-                  </span>
+                    #{r.soal_kode} <ExternalLink size={10} />
+                  </button>
                   <StatusBadge status={r.status} />
                   <div style={{ flex: 1 }} />
                   <span style={{ fontSize: "11px", color: "#b4b2a9" }}>
@@ -472,7 +681,7 @@ export default function AdminReports() {
                   </span>
                 </div>
 
-                {/* Baris 2: kategori + pelapor */}
+                {/* Baris 2 */}
                 <div>
                   <div
                     style={{
@@ -497,6 +706,17 @@ export default function AdminReports() {
                       "{r.deskripsi}"
                     </div>
                   )}
+                  {r.admin_notes && (
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        color: "#1a8a6e",
+                        marginTop: "2px",
+                      }}
+                    >
+                      Catatan: {r.admin_notes}
+                    </div>
+                  )}
                   <div
                     style={{
                       fontSize: "12px",
@@ -510,7 +730,7 @@ export default function AdminReports() {
 
                 {/* Baris 3: aksi */}
                 <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                  <ActionButtons r={r} />
+                  <ActionButton r={r} />
                 </div>
               </div>
             ))}
@@ -577,6 +797,18 @@ export default function AdminReports() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Modal */}
+      {modal && (
+        <UpdateModal
+          report={modal}
+          onClose={() => setModal(null)}
+          onUpdate={(updated) => {
+            handleUpdate(updated);
+            setModal(null);
+          }}
+        />
       )}
 
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>

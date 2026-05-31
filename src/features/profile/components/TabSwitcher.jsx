@@ -4,6 +4,7 @@ export const TABS = [
   { key: "riwayat", label: "Riwayat Soal" },
   { key: "bookmark", label: "Bookmark" },
   { key: "masukan", label: "Masukan" },
+  { key: "laporan", label: "Laporan" },
 ];
 
 export default function TabSwitcher({ activeTab, onChange, isMobile }) {

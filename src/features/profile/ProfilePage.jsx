@@ -4,7 +4,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
 import { useAuthStore } from "../auth/authStore";
-import { getProfile, updateProfile } from "./profileApi";
+import { getProfile, updateProfile, getMyReports } from "./profileApi";
 import { getBookmarks } from "../bookmark/bookmarkApi";
 import useWindowWidth from "../../hooks/useWindowWidth";
 
@@ -18,6 +18,7 @@ import TabBookmark from "./components/TabBookmark";
 import { getMyFeedback } from "../feedback/feedbackApi";
 import FeedbackModal from "../feedback/FeedbackModal";
 import TabMasukan from "./components/TabMasukan";
+import TabLaporan from "./components/TabLaporan";
 
 export default function ProfilePage() {
   const { updateUser } = useAuthStore();
@@ -32,6 +33,8 @@ export default function ProfilePage() {
   const [masukan, setMasukan] = useState([]);
   const [loadingMasukan, setLoadingMasukan] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [laporan, setLaporan] = useState([]);
+  const [loadingLaporan, setLoadingLaporan] = useState(false);
 
   useEffect(() => {
     getProfile()
@@ -75,6 +78,15 @@ export default function ProfilePage() {
         .finally(() => setLoadingMasukan(false));
     }
   };
+
+  useEffect(() => {
+    if (activeTab !== "laporan") return;
+    setLoadingLaporan(true);
+    getMyReports()
+      .then((d) => setLaporan(Array.isArray(d) ? d : []))
+      .catch(() => setLaporan([]))
+      .finally(() => setLoadingLaporan(false));
+  }, [activeTab]);
 
   return (
     <div
@@ -180,6 +192,13 @@ export default function ProfilePage() {
                   masukan={masukan}
                   loading={loadingMasukan}
                   onKirim={() => setFeedbackOpen(true)}
+                  isMobile={isMobile}
+                />
+              )}
+              {activeTab === "laporan" && (
+                <TabLaporan
+                  laporan={laporan}
+                  loading={loadingLaporan}
                   isMobile={isMobile}
                 />
               )}
