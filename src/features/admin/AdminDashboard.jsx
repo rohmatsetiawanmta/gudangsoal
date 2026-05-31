@@ -12,9 +12,23 @@ import {
   Activity,
   TrendingUp,
 } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
+import { Helmet } from "react-helmet-async";
 import api from "../../lib/api";
 import useWindowWidth from "../../hooks/useWindowWidth";
-import { Helmet } from "react-helmet-async";
 
 function StatCard({ icon: Icon, label, value, sub, color, loading, isMobile }) {
   return (
@@ -29,10 +43,6 @@ function StatCard({ icon: Icon, label, value, sub, color, loading, isMobile }) {
         overflow: "hidden",
       }}
     >
-      <Helmet>
-        <title>Dashboard | Admin Gudang Soal</title>
-      </Helmet>
-      {/* Accent strip atas */}
       <div
         style={{
           position: "absolute",
@@ -44,8 +54,6 @@ function StatCard({ icon: Icon, label, value, sub, color, loading, isMobile }) {
           borderRadius: "16px 16px 0 0",
         }}
       />
-
-      {/* Icon */}
       <div
         style={{
           width: isMobile ? "36px" : "42px",
@@ -60,8 +68,6 @@ function StatCard({ icon: Icon, label, value, sub, color, loading, isMobile }) {
       >
         <Icon size={isMobile ? 18 : 20} color={color} />
       </div>
-
-      {/* Value */}
       <div
         style={{
           fontSize: isMobile ? "24px" : "30px",
@@ -78,8 +84,6 @@ function StatCard({ icon: Icon, label, value, sub, color, loading, isMobile }) {
           ? value.toLocaleString()
           : value}
       </div>
-
-      {/* Label */}
       <div
         style={{
           fontSize: "12px",
@@ -92,8 +96,6 @@ function StatCard({ icon: Icon, label, value, sub, color, loading, isMobile }) {
       >
         {label}
       </div>
-
-      {/* Sub */}
       {sub && !loading && (
         <div style={{ fontSize: "11px", color: "#b4b2a9" }}>{sub}</div>
       )}
@@ -178,6 +180,57 @@ function DifficultyBadge({ level }) {
   );
 }
 
+function SectionTitle({ children }) {
+  return (
+    <h2
+      style={{
+        fontSize: "15px",
+        fontWeight: "700",
+        color: "#0f0e17",
+        marginBottom: "14px",
+      }}
+    >
+      {children}
+    </h2>
+  );
+}
+
+const DIFFICULTY_LABELS = { 1: "Easy", 2: "Medium", 3: "Hard" };
+const DIFFICULTY_COLORS = { 1: "#1a8a6e", 2: "#f5a623", 3: "#e84c2b" };
+const CHART_COLORS = [
+  "#e84c2b",
+  "#2563eb",
+  "#1a8a6e",
+  "#f5a623",
+  "#7c3aed",
+  "#db2777",
+];
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div
+      style={{
+        background: "white",
+        border: "1px solid #e2ddd5",
+        borderRadius: "10px",
+        padding: "10px 14px",
+        fontSize: "13px",
+        boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+      }}
+    >
+      <div style={{ fontWeight: "600", color: "#0f0e17", marginBottom: "4px" }}>
+        {label}
+      </div>
+      {payload.map((p, i) => (
+        <div key={i} style={{ color: p.color || "#6b6860" }}>
+          {p.name}: <strong>{p.value}</strong>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const width = useWindowWidth();
@@ -185,6 +238,7 @@ export default function AdminDashboard() {
 
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [registrasiMode, setRegistrasiMode] = useState("harian");
 
   useEffect(() => {
     api
@@ -204,8 +258,72 @@ export default function AdminDashboard() {
       ? "Selamat sore"
       : "Selamat malam";
 
+  // Format data chart
+  const userAktifData = (stats?.user_aktif || []).map((d) => ({
+    tanggal: new Date(d.tanggal).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+    }),
+    aktif: parseInt(d.aktif),
+  }));
+
+  const soalPerHariData = (stats?.soal_per_hari || []).map((d) => ({
+    tanggal: new Date(d.tanggal).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+    }),
+    total: parseInt(d.total),
+  }));
+
+  const soalPerJenjangData = (stats?.soal_per_jenjang || []).map((d) => ({
+    nama: d.nama,
+    total: parseInt(d.total),
+  }));
+
+  const akurasiData = (stats?.akurasi_per_difficulty || []).map((d) => ({
+    name: DIFFICULTY_LABELS[d.difficulty] || d.difficulty,
+    value: parseInt(d.total),
+    color: DIFFICULTY_COLORS[d.difficulty] || "#6b6860",
+    akurasi: d.total > 0 ? Math.round((d.benar / d.total) * 100) : 0,
+  }));
+
+  const registrasiData = stats?.registrasi_harian?.length
+    ? stats.registrasi_harian.map((d) => ({
+        tanggal: new Date(d.tanggal).toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "short",
+        }),
+        total: parseInt(d.total),
+      }))
+    : [];
+
+  const registrasiMingguanData = stats?.registrasi_mingguan?.length
+    ? stats.registrasi_mingguan.map((d) => ({
+        tanggal: new Date(d.tanggal_mulai).toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "short",
+        }),
+        total: parseInt(d.total),
+      }))
+    : [];
+
+  const xpPerHariData = stats?.xp_per_hari?.length
+    ? stats.xp_per_hari.map((d) => ({
+        tanggal: new Date(d.tanggal).toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "short",
+        }),
+        total_xp: parseInt(d.total_xp),
+        transaksi: parseInt(d.total_transaksi),
+      }))
+    : [];
+
   return (
     <div>
+      <Helmet>
+        <title>Dashboard | Admin Gudang Soal</title>
+      </Helmet>
+
       {/* Header */}
       <div style={{ marginBottom: isMobile ? "24px" : "32px" }}>
         <p style={{ fontSize: "14px", color: "#6b6860", marginBottom: "4px" }}>
@@ -302,7 +420,811 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* Bottom grid */}
+      {/* Charts row 1 — User aktif + Soal per hari */}
+      {!loading && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+            gap: "20px",
+            marginBottom: "20px",
+          }}
+        >
+          {/* User aktif 7 hari */}
+          <div
+            style={{
+              background: "white",
+              borderRadius: "14px",
+              border: "1px solid #e2ddd5",
+              padding: isMobile ? "16px" : "20px",
+            }}
+          >
+            <SectionTitle>User Aktif 7 Hari Terakhir</SectionTitle>
+            {userAktifData.length === 0 ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "32px",
+                  color: "#b4b2a9",
+                  fontSize: "13px",
+                }}
+              >
+                Belum ada data.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={180}>
+                <LineChart
+                  data={userAktifData}
+                  margin={{ top: 4, right: 8, left: -20, bottom: 0 }}
+                >
+                  <XAxis
+                    dataKey="tanggal"
+                    tick={{ fontSize: 11, fill: "#b4b2a9" }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: "#b4b2a9" }}
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Line
+                    type="monotone"
+                    dataKey="aktif"
+                    name="User aktif"
+                    stroke="#2563eb"
+                    strokeWidth={2}
+                    dot={{ r: 3, fill: "#2563eb" }}
+                    activeDot={{ r: 5 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+
+          {/* Soal dibuat 30 hari */}
+          <div
+            style={{
+              background: "white",
+              borderRadius: "14px",
+              border: "1px solid #e2ddd5",
+              padding: isMobile ? "16px" : "20px",
+            }}
+          >
+            <SectionTitle>Soal Ditambahkan 30 Hari Terakhir</SectionTitle>
+            {soalPerHariData.length === 0 ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "32px",
+                  color: "#b4b2a9",
+                  fontSize: "13px",
+                }}
+              >
+                Belum ada data.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart
+                  data={soalPerHariData}
+                  margin={{ top: 4, right: 8, left: -20, bottom: 0 }}
+                >
+                  <XAxis
+                    dataKey="tanggal"
+                    tick={{ fontSize: 11, fill: "#b4b2a9" }}
+                    tickLine={false}
+                    axisLine={false}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: "#b4b2a9" }}
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar
+                    dataKey="total"
+                    name="Soal baru"
+                    fill="#e84c2b"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Charts row 2 — Soal per jenjang + Akurasi per difficulty */}
+      {!loading && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+            gap: "20px",
+            marginBottom: "20px",
+          }}
+        >
+          {/* Soal per jenjang */}
+          <div
+            style={{
+              background: "white",
+              borderRadius: "14px",
+              border: "1px solid #e2ddd5",
+              padding: isMobile ? "16px" : "20px",
+            }}
+          >
+            <SectionTitle>Soal per Jenjang</SectionTitle>
+            {soalPerJenjangData.length === 0 ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "32px",
+                  color: "#b4b2a9",
+                  fontSize: "13px",
+                }}
+              >
+                Belum ada data.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart
+                  data={soalPerJenjangData}
+                  layout="vertical"
+                  margin={{ top: 4, right: 16, left: 0, bottom: 0 }}
+                >
+                  <XAxis
+                    type="number"
+                    tick={{ fontSize: 11, fill: "#b4b2a9" }}
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="nama"
+                    tick={{ fontSize: 11, fill: "#6b6860" }}
+                    tickLine={false}
+                    axisLine={false}
+                    width={60}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="total" name="Soal" radius={[0, 4, 4, 0]}>
+                    {soalPerJenjangData.map((_, i) => (
+                      <Cell
+                        key={i}
+                        fill={CHART_COLORS[i % CHART_COLORS.length]}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+
+          {/* Akurasi per difficulty */}
+          <div
+            style={{
+              background: "white",
+              borderRadius: "14px",
+              border: "1px solid #e2ddd5",
+              padding: isMobile ? "16px" : "20px",
+            }}
+          >
+            <SectionTitle>Distribusi Attempt per Kesulitan</SectionTitle>
+            {akurasiData.length === 0 ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "32px",
+                  color: "#b4b2a9",
+                  fontSize: "13px",
+                }}
+              >
+                Belum ada data.
+              </div>
+            ) : (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "20px" }}
+              >
+                <ResponsiveContainer width="50%" height={180}>
+                  <PieChart>
+                    <Pie
+                      data={akurasiData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={45}
+                      outerRadius={70}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {akurasiData.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (!active || !payload?.length) return null;
+                        const d = payload[0].payload;
+                        return (
+                          <div
+                            style={{
+                              background: "white",
+                              border: "1px solid #e2ddd5",
+                              borderRadius: "10px",
+                              padding: "10px 14px",
+                              fontSize: "13px",
+                              boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+                            }}
+                          >
+                            <div style={{ fontWeight: "600", color: d.color }}>
+                              {d.name}
+                            </div>
+                            <div style={{ color: "#6b6860" }}>
+                              Total: <strong>{d.value}</strong>
+                            </div>
+                            <div style={{ color: "#6b6860" }}>
+                              Akurasi: <strong>{d.akurasi}%</strong>
+                            </div>
+                          </div>
+                        );
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px",
+                  }}
+                >
+                  {akurasiData.map((d, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "2px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "10px",
+                            height: "10px",
+                            borderRadius: "50%",
+                            background: d.color,
+                            flexShrink: 0,
+                          }}
+                        />
+                        <span
+                          style={{
+                            fontSize: "13px",
+                            fontWeight: "600",
+                            color: "#0f0e17",
+                          }}
+                        >
+                          {d.name}
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: "#6b6860",
+                          paddingLeft: "16px",
+                        }}
+                      >
+                        {d.value} attempt · {d.akurasi}% akurasi
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Charts row 3 — Registrasi user + XP per hari */}
+      {!loading && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+            gap: "20px",
+            marginBottom: "20px",
+          }}
+        >
+          {/* Registrasi user */}
+          <div
+            style={{
+              background: "white",
+              borderRadius: "14px",
+              border: "1px solid #e2ddd5",
+              padding: isMobile ? "16px" : "20px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "14px",
+              }}
+            >
+              <SectionTitle>Registrasi User Baru</SectionTitle>
+              <div style={{ display: "flex", gap: "6px" }}>
+                {["harian", "mingguan"].map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setRegistrasiMode(mode)}
+                    style={{
+                      padding: "4px 10px",
+                      borderRadius: "6px",
+                      border: "none",
+                      background:
+                        registrasiMode === mode ? "#0f0e17" : "#f2efe8",
+                      color: registrasiMode === mode ? "white" : "#6b6860",
+                      fontSize: "11px",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      transition: "all .15s",
+                      textTransform: "capitalize",
+                    }}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {(registrasiMode === "harian"
+              ? registrasiData
+              : registrasiMingguanData
+            ).length === 0 ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "32px",
+                  color: "#b4b2a9",
+                  fontSize: "13px",
+                }}
+              >
+                Belum ada data.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart
+                  data={
+                    registrasiMode === "harian"
+                      ? registrasiData
+                      : registrasiMingguanData
+                  }
+                  margin={{ top: 4, right: 8, left: -20, bottom: 0 }}
+                >
+                  <XAxis
+                    dataKey="tanggal"
+                    tick={{ fontSize: 11, fill: "#b4b2a9" }}
+                    tickLine={false}
+                    axisLine={false}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: "#b4b2a9" }}
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar
+                    dataKey="total"
+                    name="User baru"
+                    fill="#2563eb"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+
+          {/* XP per hari */}
+          <div
+            style={{
+              background: "white",
+              borderRadius: "14px",
+              border: "1px solid #e2ddd5",
+              padding: isMobile ? "16px" : "20px",
+            }}
+          >
+            <SectionTitle>XP Didistribusikan per Hari</SectionTitle>
+            {xpPerHariData.length === 0 ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "32px",
+                  color: "#b4b2a9",
+                  fontSize: "13px",
+                }}
+              >
+                Belum ada data.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={180}>
+                <LineChart
+                  data={xpPerHariData}
+                  margin={{ top: 4, right: 8, left: -10, bottom: 0 }}
+                >
+                  <XAxis
+                    dataKey="tanggal"
+                    tick={{ fontSize: 11, fill: "#b4b2a9" }}
+                    tickLine={false}
+                    axisLine={false}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: "#b4b2a9" }}
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload?.length) return null;
+                      return (
+                        <div
+                          style={{
+                            background: "white",
+                            border: "1px solid #e2ddd5",
+                            borderRadius: "10px",
+                            padding: "10px 14px",
+                            fontSize: "13px",
+                            boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontWeight: "600",
+                              color: "#0f0e17",
+                              marginBottom: "4px",
+                            }}
+                          >
+                            {label}
+                          </div>
+                          <div style={{ color: "#f5a623" }}>
+                            Total XP:{" "}
+                            <strong>
+                              {parseInt(
+                                payload[0]?.value || 0
+                              ).toLocaleString()}
+                            </strong>
+                          </div>
+                          <div style={{ color: "#6b6860" }}>
+                            Transaksi: <strong>{payload[1]?.value || 0}</strong>
+                          </div>
+                        </div>
+                      );
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="total_xp"
+                    name="Total XP"
+                    stroke="#f5a623"
+                    strokeWidth={2}
+                    dot={{ r: 3, fill: "#f5a623" }}
+                    activeDot={{ r: 5 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="transaksi"
+                    name="Transaksi"
+                    stroke="#b4b2a9"
+                    strokeWidth={1.5}
+                    strokeDasharray="4 4"
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+            {xpPerHariData.length > 0 && (
+              <div style={{ display: "flex", gap: "16px", marginTop: "8px" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "6px" }}
+                >
+                  <div
+                    style={{
+                      width: "20px",
+                      height: "2px",
+                      background: "#f5a623",
+                    }}
+                  />
+                  <span style={{ fontSize: "11px", color: "#6b6860" }}>
+                    Total XP
+                  </span>
+                </div>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "6px" }}
+                >
+                  <div
+                    style={{
+                      width: "20px",
+                      height: "2px",
+                      background: "#b4b2a9",
+                      backgroundImage:
+                        "repeating-linear-gradient(90deg, #b4b2a9 0, #b4b2a9 4px, transparent 0, transparent 8px)",
+                    }}
+                  />
+                  <span style={{ fontSize: "11px", color: "#6b6860" }}>
+                    Transaksi
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Charts row 4 — Soal paling sering salah + Soal terpopuler */}
+      {!loading && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+            gap: "20px",
+            marginBottom: "20px",
+          }}
+        >
+          {/* Soal paling sering salah */}
+          <div
+            style={{
+              background: "white",
+              borderRadius: "14px",
+              border: "1px solid #e2ddd5",
+              padding: isMobile ? "16px" : "20px",
+            }}
+          >
+            <SectionTitle>Soal Paling Sering Salah</SectionTitle>
+            {!stats?.soal_paling_salah?.length ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "32px",
+                  color: "#b4b2a9",
+                  fontSize: "13px",
+                }}
+              >
+                Belum ada data (min. 5 attempt per soal).
+              </div>
+            ) : (
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+              >
+                {stats.soal_paling_salah.map((s, i) => (
+                  <div
+                    key={s.kode}
+                    onClick={() => navigate(`/soal/${s.kode}`)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "10px 12px",
+                      borderRadius: "10px",
+                      border: "1px solid #f2efe8",
+                      background: i === 0 ? "#fff3f0" : "white",
+                      cursor: "pointer",
+                      transition: "background .15s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.background = "#faf9f6")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background =
+                        i === 0 ? "#fff3f0" : "white")
+                    }
+                  >
+                    {/* Rank */}
+                    <div
+                      style={{
+                        width: "24px",
+                        height: "24px",
+                        borderRadius: "6px",
+                        flexShrink: 0,
+                        background:
+                          i === 0 ? "#e84c2b" : i === 1 ? "#f5a623" : "#f2efe8",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "11px",
+                        fontWeight: "800",
+                        color: i < 2 ? "white" : "#6b6860",
+                      }}
+                    >
+                      {i + 1}
+                    </div>
+
+                    {/* Info */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: "13px",
+                          color: "#0f0e17",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {s.body
+                          .replace(/\$\$?[^$]+\$\$?/g, "[math]")
+                          .replace(/[*_~`#]/g, "")
+                          .slice(0, 35)}
+                        ...
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "11px",
+                          color: "#b4b2a9",
+                          marginTop: "2px",
+                        }}
+                      >
+                        {s.mapel} · {s.total_attempt} attempt
+                      </div>
+                    </div>
+
+                    {/* Error rate */}
+                    <div style={{ flexShrink: 0, textAlign: "right" }}>
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          fontWeight: "800",
+                          color:
+                            parseInt(s.error_rate) >= 70
+                              ? "#e84c2b"
+                              : "#f5a623",
+                        }}
+                      >
+                        {s.error_rate}%
+                      </div>
+                      <div style={{ fontSize: "10px", color: "#b4b2a9" }}>
+                        salah
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Soal terpopuler */}
+          <div
+            style={{
+              background: "white",
+              borderRadius: "14px",
+              border: "1px solid #e2ddd5",
+              padding: isMobile ? "16px" : "20px",
+            }}
+          >
+            <SectionTitle>Soal Terpopuler</SectionTitle>
+            {!stats?.soal_terpopuler?.length ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "32px",
+                  color: "#b4b2a9",
+                  fontSize: "13px",
+                }}
+              >
+                Belum ada data (min. 3 attempt per soal).
+              </div>
+            ) : (
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+              >
+                {stats.soal_terpopuler.map((s, i) => (
+                  <div
+                    key={s.kode}
+                    onClick={() => navigate(`/soal/${s.kode}`)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "10px 12px",
+                      borderRadius: "10px",
+                      border: "1px solid #f2efe8",
+                      background: i === 0 ? "#eff6ff" : "white",
+                      cursor: "pointer",
+                      transition: "background .15s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.background = "#faf9f6")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background =
+                        i === 0 ? "#eff6ff" : "white")
+                    }
+                  >
+                    {/* Rank */}
+                    <div
+                      style={{
+                        width: "24px",
+                        height: "24px",
+                        borderRadius: "6px",
+                        flexShrink: 0,
+                        background:
+                          i === 0 ? "#2563eb" : i === 1 ? "#7c3aed" : "#f2efe8",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "11px",
+                        fontWeight: "800",
+                        color: i < 2 ? "white" : "#6b6860",
+                      }}
+                    >
+                      {i + 1}
+                    </div>
+
+                    {/* Info */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: "13px",
+                          color: "#0f0e17",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {s.body
+                          .replace(/\$\$?[^$]+\$\$?/g, "[math]")
+                          .replace(/[*_~`#]/g, "")
+                          .slice(0, 35)}
+                        ...
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "11px",
+                          color: "#b4b2a9",
+                          marginTop: "2px",
+                        }}
+                      >
+                        {s.mapel} · {s.total_user} user · {s.views} views
+                      </div>
+                    </div>
+
+                    {/* Akurasi */}
+                    <div style={{ flexShrink: 0, textAlign: "right" }}>
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          fontWeight: "800",
+                          color:
+                            parseInt(s.akurasi) >= 50 ? "#1a8a6e" : "#e84c2b",
+                        }}
+                      >
+                        {s.akurasi}%
+                      </div>
+                      <div style={{ fontSize: "10px", color: "#b4b2a9" }}>
+                        akurasi
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Bottom grid — Soal terbaru + User terbaru + Quick actions */}
       <div
         style={{
           display: "grid",
@@ -329,15 +1251,7 @@ export default function AdminDashboard() {
                 marginBottom: "14px",
               }}
             >
-              <h2
-                style={{
-                  fontSize: "15px",
-                  fontWeight: "700",
-                  color: "#0f0e17",
-                }}
-              >
-                Soal Terbaru
-              </h2>
+              <SectionTitle>Soal Terbaru</SectionTitle>
               <button
                 onClick={() => navigate("/admin/soal")}
                 style={{
@@ -423,7 +1337,7 @@ export default function AdminDashboard() {
                           .replace(/\$\$?[^$]+\$\$?/g, "[math]")
                           .replace(/[*_~`#]/g, "")
                           .slice(0, 40)}
-                        {s.body.length > 40 ? "..." : ""}
+                        ...
                       </div>
                       <div
                         style={{
@@ -467,17 +1381,7 @@ export default function AdminDashboard() {
 
           {/* User terbaru */}
           <div>
-            <div style={{ marginBottom: "14px" }}>
-              <h2
-                style={{
-                  fontSize: "15px",
-                  fontWeight: "700",
-                  color: "#0f0e17",
-                }}
-              >
-                User Terbaru
-              </h2>
-            </div>
+            <SectionTitle>User Terbaru</SectionTitle>
             <div
               style={{
                 background: "white",
@@ -599,15 +1503,9 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Kanan — Quick actions */}
+        {/* Kanan — Quick actions + Progress publikasi */}
         <div>
-          <div style={{ marginBottom: "14px" }}>
-            <h2
-              style={{ fontSize: "15px", fontWeight: "700", color: "#0f0e17" }}
-            >
-              Aksi Cepat
-            </h2>
-          </div>
+          <SectionTitle>Aksi Cepat</SectionTitle>
           <div
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
@@ -645,7 +1543,7 @@ export default function AdminDashboard() {
             />
           </div>
 
-          {/* Progress bar publikasi */}
+          {/* Progress publikasi */}
           {!loading && stats?.total_soal > 0 && (
             <div
               style={{
