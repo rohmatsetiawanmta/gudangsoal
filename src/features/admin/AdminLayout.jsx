@@ -31,6 +31,7 @@ const MENU = [
     icon: MessageSquarePlus,
   },
   { to: "/admin/changelog", label: "Changelog", icon: ScrollText },
+  { to: "/admin/feedback", label: "Masukan User", icon: MessageSquarePlus },
 ];
 
 function SidebarLink({ to, label, icon: Icon, end, collapsed, onClick }) {
@@ -113,6 +114,7 @@ export default function AdminLayout() {
     if (location.pathname.startsWith("/admin/soal-requests"))
       return "Request Soal";
     if (location.pathname.startsWith("/admin/changelog")) return "Changelog";
+    if (location.pathname.startsWith("/admin/feedback")) return "Masukan User";
     return "Panel";
   };
 

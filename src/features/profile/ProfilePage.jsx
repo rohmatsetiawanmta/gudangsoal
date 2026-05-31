@@ -15,6 +15,9 @@ import TabSwitcher from "./components/TabSwitcher";
 import TabXP from "./components/TabXP";
 import TabRiwayat from "./components/TabRiwayat";
 import TabBookmark from "./components/TabBookmark";
+import { getMyFeedback } from "../feedback/feedbackApi";
+import FeedbackModal from "../feedback/FeedbackModal";
+import TabMasukan from "./components/TabMasukan";
 
 export default function ProfilePage() {
   const { updateUser } = useAuthStore();
@@ -26,6 +29,9 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("xp");
   const [bookmarks, setBookmarks] = useState([]);
   const [loadingBookmarks, setLoadingBookmarks] = useState(false);
+  const [masukan, setMasukan] = useState([]);
+  const [loadingMasukan, setLoadingMasukan] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   useEffect(() => {
     getProfile()
@@ -44,10 +50,30 @@ export default function ProfilePage() {
       .finally(() => setLoadingBookmarks(false));
   }, [activeTab]);
 
+  useEffect(() => {
+    if (activeTab !== "masukan") return;
+    setLoadingMasukan(true);
+    getMyFeedback()
+      .then((d) => setMasukan(Array.isArray(d) ? d : []))
+      .catch(() => setMasukan([]))
+      .finally(() => setLoadingMasukan(false));
+  }, [activeTab]);
+
   const handleUpdate = async (payload) => {
     await updateProfile(payload);
     updateUser({ name: payload.name });
     setData((d) => ({ ...d, user: { ...d.user, name: payload.name } }));
+  };
+
+  const handleFeedbackClose = () => {
+    setFeedbackOpen(false);
+    if (activeTab === "masukan") {
+      setLoadingMasukan(true);
+      getMyFeedback()
+        .then((d) => setMasukan(Array.isArray(d) ? d : []))
+        .catch(() => setMasukan([]))
+        .finally(() => setLoadingMasukan(false));
+    }
   };
 
   return (
@@ -149,10 +175,19 @@ export default function ProfilePage() {
                   isMobile={isMobile}
                 />
               )}
+              {activeTab === "masukan" && (
+                <TabMasukan
+                  masukan={masukan}
+                  loading={loadingMasukan}
+                  onKirim={() => setFeedbackOpen(true)}
+                  isMobile={isMobile}
+                />
+              )}
             </div>
           </div>
         )}
       </main>
+      {feedbackOpen && <FeedbackModal onClose={handleFeedbackClose} />}
 
       <Footer />
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>

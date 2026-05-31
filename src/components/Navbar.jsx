@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "../features/auth/authStore";
 import RandomSoal from "./RandomSoal";
+import FeedbackModal from "../features/feedback/FeedbackModal";
 import useWindowWidth from "../hooks/useWindowWidth";
 
 const NAV_LINKS = [
@@ -44,6 +45,7 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [randomOpen, setRandomOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -82,6 +84,37 @@ export default function Navbar() {
 
   const navLinks = isLoggedIn ? NAV_LINKS_LOGGED_IN : NAV_LINKS;
 
+  const navBtnStyle = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "36px",
+    height: "36px",
+    borderRadius: "10px",
+    border: "1px solid #e2ddd5",
+    background: "none",
+    cursor: "pointer",
+    color: "#6b6860",
+    transition: "background .15s",
+  };
+
+  const menuItemStyle = {
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    padding: "9px 12px",
+    borderRadius: "8px",
+    border: "none",
+    background: "none",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "500",
+    color: "#0f0e17",
+    fontFamily: "inherit",
+    textAlign: "left",
+  };
+
   return (
     <>
       <nav
@@ -98,7 +131,7 @@ export default function Navbar() {
           zIndex: 100,
         }}
       >
-        {/* Kiri — Logo */}
+        {/* Logo */}
         <Link
           to={isLoggedIn ? "/home" : "/"}
           style={{
@@ -132,7 +165,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop — Nav links */}
+        {/* Desktop nav links */}
         {!isMobile && (
           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             {navLinks.map(({ to, label, icon: Icon }) => (
@@ -169,24 +202,12 @@ export default function Navbar() {
 
         {/* Kanan */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {/* Shuffle — desktop only */}
+          {/* Desktop: Shuffle */}
           {!isMobile && (
             <button
               onClick={() => setRandomOpen(true)}
               title="Soal Random"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "36px",
-                height: "36px",
-                borderRadius: "10px",
-                border: "1px solid #e2ddd5",
-                background: "none",
-                cursor: "pointer",
-                color: "#6b6860",
-                transition: "background .15s",
-              }}
+              style={navBtnStyle}
               onMouseEnter={(e) =>
                 (e.currentTarget.style.background = "#f2efe8")
               }
@@ -196,7 +217,7 @@ export default function Navbar() {
             </button>
           )}
 
-          {/* Search — desktop only */}
+          {/* Desktop: Search */}
           {!isMobile &&
             (searchOpen ? (
               <form
@@ -262,19 +283,7 @@ export default function Navbar() {
             ) : (
               <button
                 onClick={() => setSearchOpen(true)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "36px",
-                  height: "36px",
-                  borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
-                  background: "none",
-                  cursor: "pointer",
-                  color: "#6b6860",
-                  transition: "background .15s",
-                }}
+                style={navBtnStyle}
                 onMouseEnter={(e) =>
                   (e.currentTarget.style.background = "#f2efe8")
                 }
@@ -286,7 +295,41 @@ export default function Navbar() {
               </button>
             ))}
 
-          {/* Desktop — Login/Avatar */}
+          {/* Desktop: Tombol Masukan */}
+          {!isMobile && (
+            <button
+              onClick={() => setFeedbackOpen(true)}
+              title="Kirim Masukan"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "7px 12px",
+                borderRadius: "8px",
+                border: "1px solid #e2ddd5",
+                background: "white",
+                cursor: "pointer",
+                color: "#6b6860",
+                fontSize: "13px",
+                fontWeight: "600",
+                fontFamily: "inherit",
+                transition: "all .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#f2efe8";
+                e.currentTarget.style.color = "#0f0e17";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "white";
+                e.currentTarget.style.color = "#6b6860";
+              }}
+            >
+              <MessageSquarePlus size={15} />
+              Masukan
+            </button>
+          )}
+
+          {/* Desktop: Login / Avatar */}
           {!isMobile &&
             (!isLoggedIn ? (
               <div
@@ -509,21 +552,8 @@ export default function Navbar() {
                         key={label}
                         onClick={onClick}
                         style={{
-                          width: "100%",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
-                          padding: "9px 12px",
-                          borderRadius: "8px",
-                          border: "none",
-                          background: "none",
-                          cursor: "pointer",
-                          fontSize: "14px",
-                          fontWeight: "500",
+                          ...menuItemStyle,
                           color: danger ? "#e84c2b" : "#0f0e17",
-                          fontFamily: "inherit",
-                          textAlign: "left",
-                          transition: "background .15s",
                         }}
                         onMouseEnter={(e) =>
                           (e.currentTarget.style.background = danger
@@ -543,7 +573,7 @@ export default function Navbar() {
               </div>
             ))}
 
-          {/* Mobile — Hamburger */}
+          {/* Mobile: Hamburger */}
           {isMobile && (
             <div ref={menuRef} style={{ position: "relative" }}>
               <button
@@ -564,7 +594,6 @@ export default function Navbar() {
                 {menuOpen ? <X size={18} /> : <Menu size={18} />}
               </button>
 
-              {/* Mobile dropdown menu */}
               {menuOpen && (
                 <div
                   style={{
@@ -580,7 +609,7 @@ export default function Navbar() {
                     zIndex: 200,
                   }}
                 >
-                  {/* User info kalau login */}
+                  {/* User info */}
                   {isLoggedIn && (
                     <div
                       style={{
@@ -698,22 +727,7 @@ export default function Navbar() {
                         navigate(to);
                         setMenuOpen(false);
                       }}
-                      style={{
-                        width: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                        padding: "9px 12px",
-                        borderRadius: "8px",
-                        border: "none",
-                        background: "none",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        color: "#0f0e17",
-                        fontFamily: "inherit",
-                        textAlign: "left",
-                      }}
+                      style={menuItemStyle}
                       onMouseEnter={(e) =>
                         (e.currentTarget.style.background = "#f2efe8")
                       }
@@ -732,22 +746,7 @@ export default function Navbar() {
                       setMenuOpen(false);
                       setRandomOpen(true);
                     }}
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      padding: "9px 12px",
-                      borderRadius: "8px",
-                      border: "none",
-                      background: "none",
-                      cursor: "pointer",
-                      fontSize: "14px",
-                      fontWeight: "500",
-                      color: "#0f0e17",
-                      fontFamily: "inherit",
-                      textAlign: "left",
-                    }}
+                    style={menuItemStyle}
                     onMouseEnter={(e) =>
                       (e.currentTarget.style.background = "#f2efe8")
                     }
@@ -756,6 +755,24 @@ export default function Navbar() {
                     }
                   >
                     <Shuffle size={15} color="#6b6860" /> Soal Random
+                  </button>
+
+                  {/* Kirim Masukan */}
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setFeedbackOpen(true);
+                    }}
+                    style={menuItemStyle}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.background = "#f2efe8")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background = "none")
+                    }
+                  >
+                    <MessageSquarePlus size={15} color="#6b6860" /> Kirim
+                    Masukan
                   </button>
 
                   <div
@@ -823,22 +840,7 @@ export default function Navbar() {
                               navigate("/admin");
                               setMenuOpen(false);
                             }}
-                            style={{
-                              width: "100%",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "10px",
-                              padding: "9px 12px",
-                              borderRadius: "8px",
-                              border: "none",
-                              background: "none",
-                              cursor: "pointer",
-                              fontSize: "14px",
-                              fontWeight: "500",
-                              color: "#0f0e17",
-                              fontFamily: "inherit",
-                              textAlign: "left",
-                            }}
+                            style={menuItemStyle}
                             onMouseEnter={(e) =>
                               (e.currentTarget.style.background = "#f2efe8")
                             }
@@ -855,22 +857,7 @@ export default function Navbar() {
                             navigate("/profile");
                             setMenuOpen(false);
                           }}
-                          style={{
-                            width: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "10px",
-                            padding: "9px 12px",
-                            borderRadius: "8px",
-                            border: "none",
-                            background: "none",
-                            cursor: "pointer",
-                            fontSize: "14px",
-                            fontWeight: "500",
-                            color: "#0f0e17",
-                            fontFamily: "inherit",
-                            textAlign: "left",
-                          }}
+                          style={menuItemStyle}
                           onMouseEnter={(e) =>
                             (e.currentTarget.style.background = "#f2efe8")
                           }
@@ -882,22 +869,7 @@ export default function Navbar() {
                         </button>
                         <button
                           onClick={handleLogout}
-                          style={{
-                            width: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "10px",
-                            padding: "9px 12px",
-                            borderRadius: "8px",
-                            border: "none",
-                            background: "none",
-                            cursor: "pointer",
-                            fontSize: "14px",
-                            fontWeight: "500",
-                            color: "#e84c2b",
-                            fontFamily: "inherit",
-                            textAlign: "left",
-                          }}
+                          style={{ ...menuItemStyle, color: "#e84c2b" }}
                           onMouseEnter={(e) =>
                             (e.currentTarget.style.background = "#fff3f0")
                           }
@@ -918,6 +890,7 @@ export default function Navbar() {
       </nav>
 
       {randomOpen && <RandomSoal onClose={() => setRandomOpen(false)} />}
+      {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
     </>
   );
 }

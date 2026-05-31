@@ -30,6 +30,7 @@ import AdminUsers from "./features/admin/AdminUsers";
 import AdminReports from "./features/admin/AdminReports";
 import AdminSoalRequests from "./features/admin/AdminSoalRequests";
 import AdminChangelog from "./features/admin/AdminChangelog";
+import AdminFeedback from "./features/admin/AdminFeedback";
 
 import SearchPage from "./features/search/SearchPage";
 import ProfilePage from "./features/profile/ProfilePage";
@@ -96,6 +97,7 @@ export default function App() {
           <Route path="reports" element={<AdminReports />} />
           <Route path="soal-requests" element={<AdminSoalRequests />} />
           <Route path="changelog" element={<AdminChangelog />} />
+          <Route path="feedback" element={<AdminFeedback />} />
         </Route>
       </Route>
     </Routes>
