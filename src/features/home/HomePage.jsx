@@ -16,6 +16,7 @@ import { getProfile } from "../profile/profileApi";
 import RandomSoal from "../../components/RandomSoal";
 import SEO from "../../components/SEO";
 import useWindowWidth from "../../hooks/useWindowWidth";
+import SoalHariIni from "./components/SoalHariIni";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -96,44 +97,14 @@ export default function HomePage() {
           >
             {user?.name || "..."}
           </h1>
-          <p style={{ fontSize: "15px", color: "#6b6860", marginTop: "8px" }}>
-            Mau latihan apa hari ini?
-          </p>
-          <button
-            onClick={() => setRandomOpen(true)}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              marginTop: "14px",
-              padding: "10px 20px",
-              borderRadius: "10px",
-              border: "1px solid #e2ddd5",
-              background: "white",
-              fontSize: "14px",
-              fontWeight: "600",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              color: "#0f0e17",
-              transition: "all .15s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#f2efe8";
-              e.currentTarget.style.borderColor = "#0f0e17";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "white";
-              e.currentTarget.style.borderColor = "#e2ddd5";
-            }}
-          >
-            <Shuffle size={16} color="#e84c2b" />
-            Acak Soal
-          </button>
         </div>
 
         {randomOpen && <RandomSoal onClose={() => setRandomOpen(false)} />}
 
-        {/* Jenjang Grid */}
+        {/* Soal Hari Ini — di atas Pilih Jenjang */}
+        <SoalHariIni isMobile={isMobile} />
+
+        {/* Pilih Jenjang */}
         <div
           style={{
             marginBottom: "16px",
