@@ -8,11 +8,13 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
+  Eye,
 } from "lucide-react";
 import api from "../../lib/api";
 import ToggleSwitch from "../../components/ToggleSwitch";
 import useWindowWidth from "../../hooks/useWindowWidth";
 import { Helmet } from "react-helmet-async";
+import SoalPreviewModal from "./SoalPreviewModal";
 
 function DifficultyBadge({ level }) {
   const map = {
@@ -52,6 +54,7 @@ export default function AdminSoal() {
   const [deleteId, setDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [publishLoading, setPublishLoading] = useState({});
+  const [previewId, setPreviewId] = useState(null);
 
   const limit = 20;
 
@@ -240,7 +243,7 @@ export default function AdminSoal() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "40px 70px 1fr 160px 80px 120px 70px",
+              gridTemplateColumns: "40px 70px 1fr 160px 80px 120px 100px",
               gap: "16px",
               padding: "12px 20px",
               background: "#f2efe8",
@@ -295,7 +298,7 @@ export default function AdminSoal() {
                 key={s.id}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "40px 70px 1fr 160px 80px 120px 70px",
+                  gridTemplateColumns: "40px 70px 1fr 160px 80px 120px 100px",
                   gap: "16px",
                   padding: "14px 20px",
                   borderBottom: "1px solid #f2efe8",
@@ -358,6 +361,23 @@ export default function AdminSoal() {
                   loading={publishLoading[s.id]}
                 />
                 <div style={{ display: "flex", gap: "6px" }}>
+                  <button
+                    onClick={() => setPreviewId(s.id)}
+                    style={{
+                      width: "30px",
+                      height: "30px",
+                      borderRadius: "8px",
+                      border: "1px solid #e2ddd5",
+                      background: "white",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#6b6860",
+                    }}
+                  >
+                    <Eye size={13} />
+                  </button>
                   <button
                     onClick={() => navigate(`/admin/soal/edit/${s.id}`)}
                     style={{
@@ -559,6 +579,23 @@ export default function AdminSoal() {
                       loading={publishLoading[s.id]}
                     />
                     <button
+                      onClick={() => setPreviewId(s.id)}
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "8px",
+                        border: "1px solid #e2ddd5",
+                        background: "white",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#6b6860",
+                      }}
+                    >
+                      <Eye size={13} />
+                    </button>
+                    <button
                       onClick={() => navigate(`/admin/soal/edit/${s.id}`)}
                       style={{
                         width: "28px",
@@ -749,7 +786,12 @@ export default function AdminSoal() {
           </div>
         </div>
       )}
-
+      {previewId && (
+        <SoalPreviewModal
+          soalId={previewId}
+          onClose={() => setPreviewId(null)}
+        />
+      )}
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>
     </div>
   );
