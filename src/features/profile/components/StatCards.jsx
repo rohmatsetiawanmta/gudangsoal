@@ -1,24 +1,23 @@
-// src/features/profile/components/StatCards.jsx
-import { Star, Flame, Zap, CheckCircle } from "lucide-react";
+import { CheckCircle, Flame, Star, Zap } from "lucide-react";
 
-function StatCard({ icon: Icon, label, value, color, isMobile }) {
+function StatCard({ icon: Icon, label, value, unit, color, isMobile }) {
   return (
     <div
       style={{
         background: "white",
         borderRadius: "14px",
         border: "1px solid #e2ddd5",
-        padding: isMobile ? "14px 16px" : "20px 24px",
+        padding: isMobile ? "14px 16px" : "16px 20px",
         display: "flex",
         alignItems: "center",
-        gap: "12px",
+        gap: "10px",
       }}
     >
       <div
         style={{
-          width: isMobile ? "36px" : "44px",
-          height: isMobile ? "36px" : "44px",
-          borderRadius: "12px",
+          width: isMobile ? "34px" : "38px",
+          height: isMobile ? "34px" : "38px",
+          borderRadius: "10px",
           background: color + "18",
           display: "flex",
           alignItems: "center",
@@ -26,23 +25,37 @@ function StatCard({ icon: Icon, label, value, color, isMobile }) {
           flexShrink: 0,
         }}
       >
-        <Icon size={isMobile ? 18 : 22} color={color} />
+        <Icon size={isMobile ? 16 : 18} color={color} />
       </div>
-      <div>
+      <div style={{ minWidth: 0 }}>
         <div
-          style={{ fontSize: "12px", color: "#6b6860", marginBottom: "3px" }}
+          style={{
+            fontSize: "11px",
+            color: "#6b6860",
+            marginBottom: "2px",
+            whiteSpace: "nowrap",
+          }}
         >
           {label}
         </div>
-        <div
-          style={{
-            fontSize: isMobile ? "18px" : "22px",
-            fontWeight: "800",
-            color: "#0f0e17",
-            lineHeight: 1,
-          }}
-        >
-          {value}
+        <div style={{ display: "flex", alignItems: "baseline", gap: "3px" }}>
+          <span
+            style={{
+              fontSize: isMobile ? "18px" : "22px",
+              fontWeight: "800",
+              color: "#0f0e17",
+              lineHeight: 1,
+            }}
+          >
+            {value}
+          </span>
+          {unit && (
+            <span
+              style={{ fontSize: "11px", fontWeight: "600", color: "#6b6860" }}
+            >
+              {unit}
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -52,7 +65,6 @@ function StatCard({ icon: Icon, label, value, color, isMobile }) {
 export default function StatCards({ user, stats, isMobile }) {
   return (
     <>
-      {/* 4 stat cards */}
       <div
         style={{
           display: "grid",
@@ -64,13 +76,15 @@ export default function StatCards({ user, stats, isMobile }) {
           icon={Star}
           label="Total XP"
           value={(user?.xp || 0).toLocaleString()}
+          unit="XP"
           color="#f5a623"
           isMobile={isMobile}
         />
         <StatCard
           icon={Flame}
           label="Streak Hari"
-          value={`${user?.streak || 0}d`}
+          value={user?.streak || 0}
+          unit="hari"
           color="#e84c2b"
           isMobile={isMobile}
         />
@@ -78,6 +92,7 @@ export default function StatCards({ user, stats, isMobile }) {
           icon={Zap}
           label="Streak Soal"
           value={user?.soal_streak || 0}
+          unit="soal"
           color="#2563eb"
           isMobile={isMobile}
         />
@@ -85,12 +100,12 @@ export default function StatCards({ user, stats, isMobile }) {
           icon={CheckCircle}
           label="Soal Dikerjakan"
           value={stats?.total || 0}
+          unit="soal"
           color="#1a8a6e"
           isMobile={isMobile}
         />
       </div>
 
-      {/* Akurasi */}
       {stats?.total > 0 && (
         <div
           style={{
