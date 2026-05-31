@@ -110,11 +110,14 @@ export default function TeksSoal({ form, setForm, isMobile }) {
                   padding: "8px 16px",
                   borderRadius: "10px",
                   border: `2px solid ${
-                    form.difficulty === d.value ? d.color : "#e2ddd5"
+                    parseInt(form.difficulty) === d.value ? d.color : "#e2ddd5"
                   }`,
                   background:
-                    form.difficulty === d.value ? d.color + "18" : "white",
-                  color: form.difficulty === d.value ? d.color : "#6b6860",
+                    parseInt(form.difficulty) === d.value
+                      ? d.color + "18"
+                      : "white",
+                  color:
+                    parseInt(form.difficulty) === d.value ? d.color : "#6b6860",
                   fontWeight: "700",
                   fontSize: "13px",
                   cursor: "pointer",

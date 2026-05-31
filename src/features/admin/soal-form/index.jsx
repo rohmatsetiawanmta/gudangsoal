@@ -17,6 +17,7 @@ import PilihanGanda from "./AnswerInput/PilihanGanda";
 import IsianInput from "./AnswerInput/IsianInput";
 import ChecklistInput from "./AnswerInput/ChecklistInput";
 import MCTInput from "./AnswerInput/MCTInput";
+import MenjodohkanInput from "./AnswerInput/MenjodohkanInput";
 import AdminSoalAI from "../AdminSoalAI";
 import AdminSoalImport from "../AdminSoalImport";
 
@@ -323,6 +324,32 @@ export default function AdminSoalForm() {
                 Tabel Pernyataan
               </div>
               <MCTInput form={form} setForm={setForm} />
+            </div>
+          )}
+          {form.tipe === "menjodohkan" && (
+            <div
+              style={{
+                background: "white",
+                borderRadius: "14px",
+                border: "1px solid #e2ddd5",
+                padding: isMobile ? "20px 16px" : "24px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  color: "#0f0e17",
+                  marginBottom: "16px",
+                }}
+              >
+                Pasangan Jawaban
+              </div>
+              <MenjodohkanInput
+                form={form}
+                setForm={setForm}
+                isMobile={isMobile}
+              />
             </div>
           )}
 

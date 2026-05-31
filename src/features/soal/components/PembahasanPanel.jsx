@@ -1,3 +1,4 @@
+// src/features/soal/components/PembahasanPanel.jsx
 import { useNavigate } from "react-router-dom";
 import {
   Lock,
@@ -8,7 +9,7 @@ import {
   BarChart2,
 } from "lucide-react";
 import MathRenderer from "../../../components/MathRenderer";
-import { formatAnswer, getYouTubeId } from "../soalUtils";
+import { formatAnswer, getYouTubeId, normalizeMenjodohkan } from "../soalUtils";
 
 export default function PembahasanPanel({
   soal,
@@ -20,6 +21,18 @@ export default function PembahasanPanel({
 }) {
   const navigate = useNavigate();
   const showPembahasan = user || soal?.is_public_explanation == 1;
+
+  // Normalize options menjodohkan
+  const menjodohkanOptions =
+    soal.tipe === "menjodohkan"
+      ? normalizeMenjodohkan(soal.options)
+      : { left: [], right: [] };
+  const answerObj =
+    soal.tipe === "menjodohkan" &&
+    typeof soal.answer === "object" &&
+    soal.answer !== null
+      ? soal.answer
+      : {};
 
   if (!submitted) {
     return (
@@ -48,6 +61,8 @@ export default function PembahasanPanel({
             ? "Pilih jawaban untuk setiap pernyataan, lalu klik Submit."
             : soal.tipe === "checklist"
             ? "Pilih semua jawaban yang benar, lalu klik Submit."
+            : soal.tipe === "menjodohkan"
+            ? "Pasangkan semua item, lalu klik Submit."
             : "Pilih jawaban dan klik Submit untuk melihat pembahasan."}
         </p>
       </div>
@@ -93,20 +108,76 @@ export default function PembahasanPanel({
           background: "#e4f5f0",
           border: "1px solid #9FE1CB",
           display: "flex",
-          alignItems: "center",
+          alignItems: "flex-start",
           gap: "12px",
         }}
       >
-        <CheckCircle size={24} color="#1a8a6e" style={{ flexShrink: 0 }} />
-        <div>
+        <CheckCircle
+          size={24}
+          color="#1a8a6e"
+          style={{ flexShrink: 0, marginTop: "2px" }}
+        />
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div
-            style={{ fontWeight: "700", fontSize: "15px", color: "#0F6E56" }}
+            style={{
+              fontWeight: "700",
+              fontSize: "15px",
+              color: "#0F6E56",
+              marginBottom: "6px",
+            }}
           >
             {alreadyCorrect ? "Sudah pernah dijawab benar!" : "Jawaban benar!"}
           </div>
-          <div style={{ fontSize: "13px", color: "#1a8a6e", marginTop: "2px" }}>
-            Jawaban: <strong>{formatAnswer(soal.tipe, soal.answer)}</strong>
-          </div>
+
+          {soal.tipe === "menjodohkan" ? (
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "4px" }}
+            >
+              {menjodohkanOptions.left.map((leftText, li) => {
+                const ri =
+                  answerObj[String(li)] !== undefined
+                    ? parseInt(answerObj[String(li)])
+                    : null;
+                const rightText =
+                  ri !== null ? menjodohkanOptions.right[ri] : null;
+                return (
+                  <div
+                    key={li}
+                    style={{
+                      fontSize: "13px",
+                      color: "#1a8a6e",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <span style={{ fontWeight: "600", flexShrink: 0 }}>
+                      {li + 1}.
+                    </span>
+                    <span style={{ color: "#1a8a6e" }}>
+                      <MathRenderer text={leftText} />
+                    </span>
+                    <span style={{ color: "#9FE1CB", flexShrink: 0 }}>→</span>
+                    <span style={{ fontWeight: "700", flexShrink: 0 }}>
+                      {ri !== null && rightText ? (
+                        <>
+                          <span>{String.fromCharCode(65 + ri)}. </span>
+                          <MathRenderer text={rightText} />
+                        </>
+                      ) : (
+                        "—"
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div style={{ fontSize: "13px", color: "#1a8a6e" }}>
+              Jawaban: <strong>{formatAnswer(soal.tipe, soal.answer)}</strong>
+            </div>
+          )}
         </div>
       </div>
 

@@ -33,9 +33,29 @@ export const checkCorrect = (tipe, chosen, answer) => {
       if (typeof chosen !== "object" || typeof answer !== "object")
         return false;
       return JSON.stringify(chosen) === JSON.stringify(answer);
+
+    case "menjodohkan":
+      if (typeof chosen !== "object" || typeof answer !== "object")
+        return false;
+      const leftIds = Object.keys(answer);
+      return leftIds.every((leftId) => chosen[leftId] === answer[leftId]);
+
     default:
       return chosen === answer;
   }
+};
+
+export const normalizeMenjodohkan = (options) => {
+  if (!options) return { left: [], right: [] };
+  const raw = typeof options === "string" ? JSON.parse(options) : options;
+  return {
+    left: (raw.left || []).map((item) =>
+      typeof item === "string" ? item : item?.text || ""
+    ),
+    right: (raw.right || []).map((item) =>
+      typeof item === "string" ? item : item?.text || ""
+    ),
+  };
 };
 
 export const formatAnswer = (tipe, answer) => {
@@ -50,6 +70,14 @@ export const formatAnswer = (tipe, answer) => {
           .join(", ");
       }
       return String(answer);
+    case "menjodohkan":
+      if (typeof chosen !== "object" || typeof answer !== "object")
+        return false;
+      const leftCount = Object.keys(answer).length;
+      if (Object.keys(chosen).length !== leftCount) return false;
+      return Object.keys(answer).every(
+        (k) => String(chosen[k]) === String(answer[k])
+      );
     default:
       return String(answer);
   }
@@ -60,6 +88,8 @@ export const initChosen = (tipe) => {
     case "checklist":
       return [];
     case "multiple_choice_table":
+      return {};
+    case "menjodohkan":
       return {};
     default:
       return "";

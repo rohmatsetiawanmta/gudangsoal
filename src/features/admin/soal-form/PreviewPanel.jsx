@@ -2,6 +2,20 @@
 import MathRenderer from "../../../components/MathRenderer";
 import { TIPE_SOAL, DIFFICULTY_MAP } from "./constants";
 
+// Helper normalize menjodohkan — handle format lama {id,text} dan baru string
+const normalizeMenjodohkan = (options) => {
+  if (!options) return { left: [], right: [] };
+  const raw = typeof options === "string" ? JSON.parse(options) : options;
+  return {
+    left: (raw.left || []).map((item) =>
+      typeof item === "string" ? item : item?.text || ""
+    ),
+    right: (raw.right || []).map((item) =>
+      typeof item === "string" ? item : item?.text || ""
+    ),
+  };
+};
+
 export default function PreviewPanel({ form }) {
   const diff = DIFFICULTY_MAP[form.difficulty] || DIFFICULTY_MAP[1];
   const { answer, tipe } = form;
@@ -261,7 +275,7 @@ export default function PreviewPanel({ form }) {
           </div>
         )}
 
-        {/* Multiple Choice Table */}
+        {/* MCT */}
         {tipe === "multiple_choice_table" && form.options[0]?.cols && (
           <div style={{ overflowX: "auto" }}>
             <table
@@ -361,6 +375,108 @@ export default function PreviewPanel({ form }) {
             </table>
           </div>
         )}
+
+        {/* Menjodohkan */}
+        {tipe === "menjodohkan" &&
+          (() => {
+            const { left: leftItems, right: rightItems } = normalizeMenjodohkan(
+              form.options
+            );
+            return (
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+              >
+                {leftItems.map((leftText, li) => {
+                  const ri =
+                    answer?.[String(li)] !== undefined
+                      ? parseInt(answer[String(li)])
+                      : null;
+                  const rightText = ri !== null ? rightItems[ri] : null;
+                  return (
+                    <div
+                      key={li}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        padding: "10px 14px",
+                        borderRadius: "10px",
+                        border: rightText
+                          ? "2px solid #1a8a6e"
+                          : "1px solid #e2ddd5",
+                        background: rightText ? "#e4f5f0" : "white",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: "700",
+                          color: "#6b6860",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {li + 1}.
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "14px",
+                          color: "#0f0e17",
+                          flex: 1,
+                          minWidth: 0,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {leftText ? (
+                          <MathRenderer text={leftText} />
+                        ) : (
+                          <span
+                            style={{ color: "#b4b2a9", fontStyle: "italic" }}
+                          >
+                            Item {li + 1}...
+                          </span>
+                        )}
+                      </span>
+                      <span style={{ color: "#b4b2a9", flexShrink: 0 }}>→</span>
+                      <span
+                        style={{
+                          fontSize: "14px",
+                          flex: 1,
+                          minWidth: 0,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          color: rightText ? "#1a8a6e" : "#b4b2a9",
+                          fontWeight: rightText ? "600" : "400",
+                          fontStyle: rightText ? "normal" : "italic",
+                        }}
+                      >
+                        {rightText ? (
+                          <>
+                            <span
+                              style={{ fontWeight: "700", marginRight: "4px" }}
+                            >
+                              {String.fromCharCode(65 + ri)}.
+                            </span>
+                            <MathRenderer text={rightText} />
+                          </>
+                        ) : (
+                          "belum dipasangkan..."
+                        )}
+                      </span>
+                    </div>
+                  );
+                })}
+                {rightItems.length > leftItems.length && (
+                  <div style={{ fontSize: "12px", color: "#b4b2a9" }}>
+                    {rightItems.length - leftItems.length} opsi kanan sebagai
+                    distraktor
+                  </div>
+                )}
+              </div>
+            );
+          })()}
       </div>
 
       {/* Pembahasan */}

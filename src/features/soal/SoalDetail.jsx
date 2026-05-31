@@ -133,6 +133,11 @@ export default function SoalDetail() {
           typeof chosen === "object" &&
           soal.options?.every((o) => chosen[o.label])
         );
+      case "menjodohkan":
+        return (
+          typeof chosen === "object" &&
+          soal.options?.left?.every((item) => chosen[item.id])
+        );
       default:
         return !!chosen;
     }

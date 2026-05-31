@@ -10,6 +10,7 @@ export const TIPE_SOAL = [
   { value: "isian_numerik", label: "Isian Numerik" },
   { value: "checklist", label: "Checklist" },
   { value: "multiple_choice_table", label: "Multiple Choice Table" },
+  { value: "menjodohkan", label: "Menjodohkan" },
 ];
 
 export const DIFFICULTY_MAP = {
