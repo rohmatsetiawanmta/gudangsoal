@@ -62,12 +62,21 @@ export default function AdminSoalForm() {
     api
       .get(`/admin/soal/detail?id=${id}`)
       .then((data) => {
+        let answer = data.answer;
+        if (data.tipe === "menjodohkan" && Array.isArray(answer)) {
+          const obj = {};
+          answer.forEach((rIdx, lIdx) => {
+            obj[String(lIdx)] = String(rIdx);
+          });
+          answer = obj;
+        }
+
         setForm({
           subtopik_id: data.subtopik_id,
           tipe: data.tipe || "pilihan_ganda",
           body: data.body,
           options: data.options,
-          answer: data.answer,
+          answer: answer,
           explanation: data.explanation || "",
           difficulty: data.difficulty,
           video_url: data.video_url || "",

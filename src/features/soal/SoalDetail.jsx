@@ -20,7 +20,12 @@ import useWindowWidth from "../../hooks/useWindowWidth";
 import { getSoalDetail, getSoalStatus } from "./soalApi";
 import { saveSession } from "../profile/profileApi";
 import { useAuthStore } from "../auth/authStore";
-import { checkCorrect, initChosen, DifficultyBadge } from "./soalUtils";
+import {
+  checkCorrect,
+  initChosen,
+  DifficultyBadge,
+  normalizeAnswer,
+} from "./soalUtils";
 import JawabanInput from "./components/JawabanInput";
 import PembahasanPanel from "./components/PembahasanPanel";
 import ReportModal from "./components/ReportModal";
@@ -133,11 +138,14 @@ export default function SoalDetail() {
           typeof chosen === "object" &&
           soal.options?.every((o) => chosen[o.label])
         );
-      case "menjodohkan":
+      case "menjodohkan": {
+        const leftItems = soal.options?.left || [];
         return (
           typeof chosen === "object" &&
-          soal.options?.left?.every((item) => chosen[item.id])
+          chosen !== null &&
+          leftItems.every((_, idx) => chosen[String(idx)] !== undefined)
         );
+      }
       default:
         return !!chosen;
     }
@@ -158,7 +166,10 @@ export default function SoalDetail() {
     }
     try {
       const data = await getSoalDetail(kode);
-      setSoal(data);
+      setSoal({
+        ...data,
+        answer: normalizeAnswer(data.tipe, data.answer),
+      });
     } catch {}
   };
 

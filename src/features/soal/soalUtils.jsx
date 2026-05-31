@@ -35,10 +35,15 @@ export const checkCorrect = (tipe, chosen, answer) => {
       return JSON.stringify(chosen) === JSON.stringify(answer);
 
     case "menjodohkan":
-      if (typeof chosen !== "object" || typeof answer !== "object")
-        return false;
-      const leftIds = Object.keys(answer);
-      return leftIds.every((leftId) => chosen[leftId] === answer[leftId]);
+      if (typeof chosen !== "object" || !chosen) return false;
+      const normalizedAnswer = Array.isArray(answer)
+        ? normalizeAnswer("menjodohkan", answer)
+        : answer;
+      const leftCount = Object.keys(normalizedAnswer).length;
+      if (Object.keys(chosen).length !== leftCount) return false;
+      return Object.keys(normalizedAnswer).every(
+        (k) => String(chosen[k]) === String(normalizedAnswer[k])
+      );
 
     default:
       return chosen === answer;
@@ -56,6 +61,18 @@ export const normalizeMenjodohkan = (options) => {
       typeof item === "string" ? item : item?.text || ""
     ),
   };
+};
+
+// src/features/soal/soalUtils.jsx
+export const normalizeAnswer = (tipe, answer) => {
+  if (tipe === "menjodohkan" && Array.isArray(answer)) {
+    const obj = {};
+    answer.forEach((rIdx, lIdx) => {
+      obj[String(lIdx)] = String(rIdx);
+    });
+    return obj;
+  }
+  return answer;
 };
 
 export const formatAnswer = (tipe, answer) => {
