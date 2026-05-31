@@ -166,8 +166,8 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop nav links */}
-        {!isMobile && (
+        {/* Desktop nav links — sembunyikan saat search open */}
+        {!isMobile && !searchOpen && (
           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             {navLinks.map(({ to, label, icon: Icon }) => (
               <Link
