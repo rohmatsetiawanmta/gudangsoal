@@ -173,6 +173,35 @@ export default function PembahasanPanel({
                 );
               })}
             </div>
+          ) : soal.tipe === "isian_multi" && Array.isArray(soal.options) ? (
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "6px" }}
+            >
+              {soal.options.map((opt, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    fontSize: "13px",
+                    color: "#1a8a6e",
+                  }}
+                >
+                  <span style={{ fontWeight: "600" }}>
+                    {opt.label || `Sub-jawaban ${idx + 1}`}:
+                  </span>
+                  <span style={{ fontWeight: "700" }}>
+                    {Array.isArray(soal.answer) ? soal.answer[idx] : "—"}
+                    {opt.satuan && (
+                      <span style={{ fontWeight: "400", marginLeft: "4px" }}>
+                        {opt.satuan}
+                      </span>
+                    )}
+                  </span>
+                </div>
+              ))}
+            </div>
           ) : (
             <div style={{ fontSize: "13px", color: "#1a8a6e" }}>
               Jawaban: <strong>{formatAnswer(soal.tipe, soal.answer)}</strong>

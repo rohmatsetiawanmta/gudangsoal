@@ -18,6 +18,7 @@ import IsianInput from "./AnswerInput/IsianInput";
 import ChecklistInput from "./AnswerInput/ChecklistInput";
 import MCTInput from "./AnswerInput/MCTInput";
 import MenjodohkanInput from "./AnswerInput/MenjodohkanInput";
+import IsianMultiInput from "./AnswerInput/IsianMultiInput";
 import AdminSoalAI from "../AdminSoalAI";
 import AdminSoalImport from "../AdminSoalImport";
 
@@ -360,6 +361,9 @@ export default function AdminSoalForm() {
                 isMobile={isMobile}
               />
             </div>
+          )}
+          {form.tipe === "isian_multi" && (
+            <IsianMultiInput form={form} setForm={setForm} />
           )}
 
           <Pembahasan form={form} setForm={setForm} isMobile={isMobile} />

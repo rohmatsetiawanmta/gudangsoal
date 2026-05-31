@@ -45,6 +45,19 @@ export const checkCorrect = (tipe, chosen, answer) => {
         (k) => String(chosen[k]) === String(normalizedAnswer[k])
       );
 
+    case "isian_multi": {
+      if (typeof chosen !== "object" || !chosen) return false;
+      const answerArr = Array.isArray(answer) ? answer : [];
+      return answerArr.every((ans, idx) => {
+        const userAns = (chosen[idx] || "")
+          .trim()
+          .toLowerCase()
+          .replace(/,/g, ".");
+        const correctAns = String(ans).trim().toLowerCase().replace(/,/g, ".");
+        return userAns === correctAns;
+      });
+    }
+
     default:
       return chosen === answer;
   }

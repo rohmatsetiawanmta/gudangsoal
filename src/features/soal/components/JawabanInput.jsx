@@ -717,5 +717,88 @@ export default function JawabanInput({
     );
   }
 
+  if (tipe === "isian_multi") {
+    const opts = Array.isArray(soal.options) ? soal.options : [];
+    const chosenMulti =
+      typeof chosen === "object" && !Array.isArray(chosen) && chosen !== null
+        ? chosen
+        : {};
+
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+        {opts.map((opt, idx) => (
+          <div
+            key={idx}
+            style={{ display: "flex", flexDirection: "column", gap: "6px" }}
+          >
+            {opt.label && (
+              <label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#0f0e17",
+                }}
+              >
+                {opt.label}
+              </label>
+            )}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <input
+                type="number"
+                inputMode="decimal"
+                value={chosenMulti[idx] || ""}
+                onChange={(e) => {
+                  if (submitted || alreadyCorrect) return;
+                  setChosen({ ...chosenMulti, [idx]: e.target.value });
+                }}
+                disabled={submitted || alreadyCorrect}
+                placeholder="Tulis jawaban angka..."
+                style={{
+                  flex: 1,
+                  padding: "14px 16px",
+                  borderRadius: "12px",
+                  fontSize: "16px",
+                  outline: "none",
+                  fontFamily: "inherit",
+                  color: "#0f0e17",
+                  border: !submitted
+                    ? "2px solid #e2ddd5"
+                    : isCorrect || alreadyCorrect
+                    ? "2px solid #1a8a6e"
+                    : "2px solid #e84c2b",
+                  background: !submitted
+                    ? "white"
+                    : isCorrect || alreadyCorrect
+                    ? "#e4f5f0"
+                    : "#fff3f0",
+                }}
+                onFocus={(e) => {
+                  if (!submitted) e.target.style.borderColor = "#e84c2b";
+                }}
+                onBlur={(e) => {
+                  if (!submitted) e.target.style.borderColor = "#e2ddd5";
+                }}
+              />
+              {opt.satuan && (
+                <span
+                  style={{ fontSize: "14px", color: "#6b6860", flexShrink: 0 }}
+                >
+                  {opt.satuan}
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
+        {submitted && !isCorrect && !alreadyCorrect && (
+          <div
+            style={{ fontSize: "13px", color: "#e84c2b", fontWeight: "600" }}
+          >
+            Jawaban kurang tepat, coba lagi.
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return null;
 }

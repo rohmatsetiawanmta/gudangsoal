@@ -1,5 +1,5 @@
 // src/features/admin/AdminSoal.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus,
@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
+  Copy,
 } from "lucide-react";
 import api from "../../lib/api";
 import ToggleSwitch from "../../components/ToggleSwitch";
@@ -40,6 +41,148 @@ function DifficultyBadge({ level }) {
   );
 }
 
+// Tambah komponen ActionMenu di atas AdminSoal
+function ActionMenu({
+  soal,
+  onPreview,
+  onSalin,
+  onEdit,
+  onDelete,
+  copying,
+  isMobile,
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const size = isMobile ? "28px" : "30px";
+
+  const items = [
+    {
+      label: "Preview",
+      icon: Eye,
+      onClick: () => {
+        onPreview();
+        setOpen(false);
+      },
+      danger: false,
+    },
+    {
+      label: "Salin Soal",
+      icon: Copy,
+      onClick: () => {
+        onSalin();
+        setOpen(false);
+      },
+      danger: false,
+      disabled: copying,
+    },
+    {
+      label: "Edit",
+      icon: Pencil,
+      onClick: () => {
+        onEdit();
+        setOpen(false);
+      },
+      danger: false,
+    },
+    {
+      label: "Hapus",
+      icon: Trash2,
+      onClick: () => {
+        onDelete();
+        setOpen(false);
+      },
+      danger: true,
+    },
+  ];
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          width: size,
+          height: size,
+          borderRadius: "8px",
+          border: "1px solid #e2ddd5",
+          background: open ? "#f2efe8" : "white",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#6b6860",
+          fontSize: "16px",
+          fontWeight: "700",
+          letterSpacing: "1px",
+          lineHeight: 1,
+        }}
+      >
+        ···
+      </button>
+
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 6px)",
+            right: 0,
+            background: "white",
+            border: "1px solid #e2ddd5",
+            borderRadius: "12px",
+            padding: "6px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
+            zIndex: 50,
+            minWidth: "140px",
+          }}
+        >
+          {items.map(({ label, icon: Icon, onClick, danger, disabled }) => (
+            <button
+              key={label}
+              onClick={onClick}
+              disabled={disabled}
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "8px 10px",
+                borderRadius: "8px",
+                border: "none",
+                background: "none",
+                cursor: disabled ? "not-allowed" : "pointer",
+                fontSize: "13px",
+                fontWeight: "500",
+                color: danger ? "#e84c2b" : "#0f0e17",
+                fontFamily: "inherit",
+                textAlign: "left",
+                opacity: disabled ? 0.5 : 1,
+              }}
+              onMouseEnter={(e) => {
+                if (!disabled)
+                  e.currentTarget.style.background = danger
+                    ? "#fff3f0"
+                    : "#f2efe8";
+              }}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+            >
+              <Icon size={14} />
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminSoal() {
   const navigate = useNavigate();
   const width = useWindowWidth();
@@ -55,6 +198,7 @@ export default function AdminSoal() {
   const [deleting, setDeleting] = useState(false);
   const [publishLoading, setPublishLoading] = useState({});
   const [previewId, setPreviewId] = useState(null);
+  const [copying, setCopying] = useState({});
 
   const limit = 20;
 
@@ -108,6 +252,18 @@ export default function AdminSoal() {
     } catch {
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleSalin = async (id) => {
+    setCopying((c) => ({ ...c, [id]: true }));
+    try {
+      const res = await api.post(`/admin/soal/salin?id=${id}`);
+      navigate(`/admin/soal/edit/${res.id}`);
+    } catch {
+      alert("Gagal menyalin soal");
+    } finally {
+      setCopying((c) => ({ ...c, [id]: false }));
     }
   };
 
@@ -243,7 +399,7 @@ export default function AdminSoal() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "40px 70px 1fr 160px 80px 120px 100px",
+              gridTemplateColumns: "40px 70px 1fr 160px 80px 120px 50px",
               gap: "16px",
               padding: "12px 20px",
               background: "#f2efe8",
@@ -298,7 +454,7 @@ export default function AdminSoal() {
                 key={s.id}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "40px 70px 1fr 160px 80px 120px 100px",
+                  gridTemplateColumns: "40px 70px 1fr 160px 80px 120px 50px",
                   gap: "16px",
                   padding: "14px 20px",
                   borderBottom: "1px solid #f2efe8",
@@ -360,59 +516,15 @@ export default function AdminSoal() {
                   onChange={() => handleTogglePublish(s.id, s.is_published)}
                   loading={publishLoading[s.id]}
                 />
-                <div style={{ display: "flex", gap: "6px" }}>
-                  <button
-                    onClick={() => setPreviewId(s.id)}
-                    style={{
-                      width: "30px",
-                      height: "30px",
-                      borderRadius: "8px",
-                      border: "1px solid #e2ddd5",
-                      background: "white",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#6b6860",
-                    }}
-                  >
-                    <Eye size={13} />
-                  </button>
-                  <button
-                    onClick={() => navigate(`/admin/soal/edit/${s.id}`)}
-                    style={{
-                      width: "30px",
-                      height: "30px",
-                      borderRadius: "8px",
-                      border: "1px solid #e2ddd5",
-                      background: "white",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#6b6860",
-                    }}
-                  >
-                    <Pencil size={13} />
-                  </button>
-                  <button
-                    onClick={() => setDeleteId(s.id)}
-                    style={{
-                      width: "30px",
-                      height: "30px",
-                      borderRadius: "8px",
-                      border: "1px solid #fca5a5",
-                      background: "#fff3f0",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#e84c2b",
-                    }}
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                </div>
+                <ActionMenu
+                  soal={s}
+                  onPreview={() => setPreviewId(s.id)}
+                  onSalin={() => handleSalin(s.id)}
+                  onEdit={() => navigate(`/admin/soal/edit/${s.id}`)}
+                  onDelete={() => setDeleteId(s.id)}
+                  copying={copying[s.id]}
+                  isMobile={false}
+                />
               </div>
             ))}
 
@@ -578,57 +690,15 @@ export default function AdminSoal() {
                       onChange={() => handleTogglePublish(s.id, s.is_published)}
                       loading={publishLoading[s.id]}
                     />
-                    <button
-                      onClick={() => setPreviewId(s.id)}
-                      style={{
-                        width: "28px",
-                        height: "28px",
-                        borderRadius: "8px",
-                        border: "1px solid #e2ddd5",
-                        background: "white",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#6b6860",
-                      }}
-                    >
-                      <Eye size={13} />
-                    </button>
-                    <button
-                      onClick={() => navigate(`/admin/soal/edit/${s.id}`)}
-                      style={{
-                        width: "28px",
-                        height: "28px",
-                        borderRadius: "8px",
-                        border: "1px solid #e2ddd5",
-                        background: "white",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#6b6860",
-                      }}
-                    >
-                      <Pencil size={13} />
-                    </button>
-                    <button
-                      onClick={() => setDeleteId(s.id)}
-                      style={{
-                        width: "28px",
-                        height: "28px",
-                        borderRadius: "8px",
-                        border: "1px solid #fca5a5",
-                        background: "#fff3f0",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#e84c2b",
-                      }}
-                    >
-                      <Trash2 size={13} />
-                    </button>
+                    <ActionMenu
+                      soal={s}
+                      onPreview={() => setPreviewId(s.id)}
+                      onSalin={() => handleSalin(s.id)}
+                      onEdit={() => navigate(`/admin/soal/edit/${s.id}`)}
+                      onDelete={() => setDeleteId(s.id)}
+                      copying={copying[s.id]}
+                      isMobile={true}
+                    />
                   </div>
                 </div>
               </div>

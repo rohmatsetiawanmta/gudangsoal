@@ -11,6 +11,7 @@ export const TIPE_SOAL = [
   { value: "checklist", label: "Checklist" },
   { value: "multiple_choice_table", label: "Multiple Choice Table" },
   { value: "menjodohkan", label: "Menjodohkan" },
+  { value: "isian_multi", label: "Isian Multi" },
 ];
 
 export const DIFFICULTY_MAP = {

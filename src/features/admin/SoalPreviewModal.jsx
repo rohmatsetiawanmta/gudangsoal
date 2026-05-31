@@ -251,10 +251,20 @@ function AnswerPreview({ soal }) {
   }
 
   if (tipe === "menjodohkan") {
+    const rawOptions =
+      typeof options === "object" && !Array.isArray(options)
+        ? options // stdClass dari json_decode tanpa true
+        : options;
     const { left: leftItems, right: rightItems } =
-      normalizeMenjodohkan(options);
-    const answerObj =
-      typeof answer === "object" && !Array.isArray(answer) ? answer : {};
+      normalizeMenjodohkan(rawOptions);
+    const answerObj = Array.isArray(answer)
+      ? answer.reduce((obj, rIdx, lIdx) => {
+          obj[String(lIdx)] = String(rIdx);
+          return obj;
+        }, {})
+      : typeof answer === "object" && answer !== null
+      ? answer
+      : {};
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
         {leftItems.map((leftText, li) => {
@@ -317,6 +327,48 @@ function AnswerPreview({ soal }) {
             {rightItems.length - leftItems.length} opsi kanan sebagai distraktor
           </div>
         )}
+      </div>
+    );
+  }
+
+  if (tipe === "isian_multi") {
+    const opts = Array.isArray(options) ? options : [];
+    const ansArr = Array.isArray(answer) ? answer : [];
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        {opts.map((opt, idx) => (
+          <div
+            key={idx}
+            style={{ display: "flex", flexDirection: "column", gap: "4px" }}
+          >
+            <div
+              style={{ fontSize: "12px", fontWeight: "600", color: "#6b6860" }}
+            >
+              {opt.label || `Sub-jawaban ${idx + 1}`}
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div
+                style={{
+                  flex: 1,
+                  padding: "10px 14px",
+                  borderRadius: "8px",
+                  border: "2px solid #1a8a6e",
+                  background: "#e4f5f0",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "#0F6E56",
+                }}
+              >
+                {ansArr[idx] || "—"}
+              </div>
+              {opt.satuan && (
+                <span style={{ fontSize: "14px", color: "#6b6860" }}>
+                  {opt.satuan}
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     );
   }

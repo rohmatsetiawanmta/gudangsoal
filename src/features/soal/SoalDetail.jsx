@@ -105,7 +105,15 @@ export default function SoalDetail() {
           if (status?.answered_correct) {
             setAlreadyCorrect(true);
             setSubmitted(true);
-            setChosen(data.answer);
+            if (data.tipe === "isian_multi" && Array.isArray(data.answer)) {
+              const obj = {};
+              data.answer.forEach((val, idx) => {
+                obj[idx] = val;
+              });
+              setChosen(obj);
+            } else {
+              setChosen(data.answer);
+            }
           }
         })
         .catch(() => setError("Gagal memuat soal"))
@@ -144,6 +152,14 @@ export default function SoalDetail() {
           typeof chosen === "object" &&
           chosen !== null &&
           leftItems.every((_, idx) => chosen[String(idx)] !== undefined)
+        );
+      }
+      case "isian_multi": {
+        const opts = soal.options || [];
+        if (typeof chosen !== "object" || Array.isArray(chosen) || !chosen)
+          return false;
+        return opts.every(
+          (_, idx) => chosen[idx] !== undefined && chosen[idx].trim() !== ""
         );
       }
       default:

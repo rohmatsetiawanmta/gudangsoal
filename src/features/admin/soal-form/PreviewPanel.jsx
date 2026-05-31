@@ -479,6 +479,57 @@ export default function PreviewPanel({ form }) {
           })()}
       </div>
 
+      {/* Isian Multi */}
+      {tipe === "isian_multi" && Array.isArray(form.options) && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          {form.options.map((opt, idx) => (
+            <div
+              key={idx}
+              style={{ display: "flex", flexDirection: "column", gap: "4px" }}
+            >
+              <div
+                style={{
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  color: "#6b6860",
+                }}
+              >
+                {opt.label || `Sub-jawaban ${idx + 1}`}
+              </div>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <div
+                  style={{
+                    flex: 1,
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    border: "2px solid #1a8a6e",
+                    background: "#e4f5f0",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: "#0F6E56",
+                  }}
+                >
+                  {Array.isArray(form.answer) ? form.answer[idx] || "—" : "—"}
+                </div>
+                {opt.satuan && (
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      color: "#6b6860",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {opt.satuan}
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Pembahasan */}
       <div
         style={{
