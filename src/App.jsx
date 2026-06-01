@@ -32,6 +32,16 @@ import AdminSoalRequests from "./features/admin/AdminSoalRequests";
 import AdminChangelog from "./features/admin/AdminChangelog";
 import AdminFeedback from "./features/admin/AdminFeedback";
 
+import AdminQuiz from "./features/admin/AdminQuiz";
+import AdminQuizForm from "./features/admin/AdminQuizForm";
+import AdminQuizDetail from "./features/admin/AdminQuizDetail";
+import AdminQuizSoalForm from "./features/admin/AdminQuizSoalForm";
+
+import LatihanPage from "./features/quiz/LatihanPage";
+import LatihanDetail from "./features/quiz/LatihanDetail";
+import QuizPage from "./features/quiz/QuizPage";
+import QuizHasil from "./features/quiz/QuizHasil";
+
 import SearchPage from "./features/search/SearchPage";
 import ProfilePage from "./features/profile/ProfilePage";
 import AdminSoalForm from "./features/admin/soal-form";
@@ -98,8 +108,26 @@ export default function App() {
           <Route path="soal-requests" element={<AdminSoalRequests />} />
           <Route path="changelog" element={<AdminChangelog />} />
           <Route path="feedback" element={<AdminFeedback />} />
+
+          <Route path="latihan" element={<AdminQuiz />} />
+          <Route path="latihan/tambah" element={<AdminQuizForm />} />
+          <Route path="latihan/:id/edit" element={<AdminQuizForm />} />
+          <Route path="latihan/:id" element={<AdminQuizDetail />} />
+          <Route
+            path="latihan/:id/soal/tambah"
+            element={<AdminQuizSoalForm />}
+          />
+          <Route
+            path="latihan/:id/soal/edit/:soal_id"
+            element={<AdminQuizSoalForm />}
+          />
         </Route>
       </Route>
+
+      <Route path="/latihan" element={<LatihanPage />} />
+      <Route path="/latihan/:id" element={<LatihanDetail />} />
+      <Route path="/latihan/:id/quiz" element={<QuizPage />} />
+      <Route path="/latihan/:id/hasil/:session_id" element={<QuizHasil />} />
     </Routes>
   );
 }
