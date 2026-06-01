@@ -32,6 +32,7 @@ const MENU = [
   },
   { to: "/admin/changelog", label: "Changelog", icon: ScrollText },
   { to: "/admin/feedback", label: "Masukan User", icon: MessageSquarePlus },
+  { to: "/admin/latihan", label: "Kelola Latihan", icon: BookOpen },
 ];
 
 function SidebarLink({ to, label, icon: Icon, end, collapsed, onClick }) {
@@ -115,6 +116,7 @@ export default function AdminLayout() {
       return "Request Soal";
     if (location.pathname.startsWith("/admin/changelog")) return "Changelog";
     if (location.pathname.startsWith("/admin/feedback")) return "Masukan User";
+    if (location.pathname.startsWith("/admin/latihan")) return "Kelola Latihan";
     return "Panel";
   };
 
