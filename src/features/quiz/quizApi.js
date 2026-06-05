@@ -37,3 +37,5 @@ export const adminDeleteQuizSoal = (quizId, soalId) =>
   api.delete(`/admin/quiz/${quizId}/soal/${soalId}`);
 export const adminUpdateUrutan = (quizId, urutan) =>
   api.put(`/admin/quiz/${quizId}/soal/urutan`, { urutan });
+export const adminLinkQuizSoal = (quizId, soalId) =>
+  api.post(`/admin/quiz/${quizId}/soal/link`, { soal_id: soalId });

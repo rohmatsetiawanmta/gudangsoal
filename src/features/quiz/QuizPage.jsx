@@ -1,21 +1,30 @@
 // src/features/quiz/QuizPage.jsx
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
+  Warehouse,
+} from "lucide-react";
 import MathRenderer from "../../components/MathRenderer";
 import SEO from "../../components/SEO";
 import useWindowWidth from "../../hooks/useWindowWidth";
-import { saveQuizProgress, finishQuiz, getQuizDetail } from "./quizApi";
+import {
+  saveQuizProgress,
+  finishQuiz,
+  getQuizDetail,
+  startQuiz,
+} from "./quizApi";
 import JawabanInput from "../soal/components/JawabanInput";
 import { initChosen } from "../soal/soalUtils";
 import api from "../../lib/api";
 
-// Timer display
 function TimerDisplay({ sisaWaktu, isMobile }) {
   const menit = Math.floor(sisaWaktu / 60);
   const detik = sisaWaktu % 60;
-  const isWarning = sisaWaktu <= 300; // 5 menit terakhir
-  const isCritical = sisaWaktu <= 60; // 1 menit terakhir
+  const isWarning = sisaWaktu <= 300;
+  const isCritical = sisaWaktu <= 60;
 
   return (
     <div
@@ -45,38 +54,31 @@ function TimerDisplay({ sisaWaktu, isMobile }) {
   );
 }
 
-// Panel navigasi nomor soal
-function NavigasiPanel({ soalList, currentIdx, answers, onJump, isMobile }) {
+function NavigasiPanel({ soalList, currentIdx, answers, onJump }) {
   const [navPage, setNavPage] = useState(0);
   const perPage = 10;
   const totalPages = Math.ceil(soalList.length / perPage);
   const start = navPage * perPage;
-  const end = Math.min(start + perPage, soalList.length);
-  const pageNomor = soalList.slice(start, end);
+  const pageNomor = soalList.slice(
+    start,
+    Math.min(start + perPage, soalList.length)
+  );
 
-  // Auto pindah page kalau currentIdx keluar range
   useEffect(() => {
-    const page = Math.floor(currentIdx / perPage);
-    setNavPage(page);
+    setNavPage(Math.floor(currentIdx / perPage));
   }, [currentIdx]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-      <div
-        style={{
-          fontSize: "11px",
-          fontWeight: "700",
-          color: "#6b6860",
-          textTransform: "uppercase",
-          letterSpacing: ".06em",
-        }}
-      >
-        Navigasi Soal
-      </div>
-
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "6px",
+        alignItems: "center",
+      }}
+    >
       {/* Nomor soal */}
       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-        {/* Prev page */}
         <button
           onClick={() => setNavPage((p) => Math.max(0, p - 1))}
           disabled={navPage === 0}
@@ -97,15 +99,21 @@ function NavigasiPanel({ soalList, currentIdx, answers, onJump, isMobile }) {
           <ChevronLeft size={13} />
         </button>
 
-        {/* Nomor */}
-        <div style={{ display: "flex", gap: "4px", flexWrap: "nowrap" }}>
+        <div style={{ display: "flex", gap: "4px" }}>
           {pageNomor.map((soalId, i) => {
             const globalIdx = start + i;
             const isActive = globalIdx === currentIdx;
+            const ans = answers[soalId]?.jawaban;
             const isDijawab =
-              answers[soalId]?.jawaban !== null &&
-              answers[soalId]?.jawaban !== undefined &&
-              answers[soalId]?.jawaban !== "";
+              ans !== null &&
+              ans !== undefined &&
+              ans !== "" &&
+              !(Array.isArray(ans) && ans.length === 0) &&
+              !(
+                typeof ans === "object" &&
+                !Array.isArray(ans) &&
+                Object.keys(ans).length === 0
+              );
             return (
               <button
                 key={soalId}
@@ -136,7 +144,6 @@ function NavigasiPanel({ soalList, currentIdx, answers, onJump, isMobile }) {
           })}
         </div>
 
-        {/* Next page */}
         <button
           onClick={() => setNavPage((p) => Math.min(totalPages - 1, p + 1))}
           disabled={navPage === totalPages - 1}
@@ -175,7 +182,7 @@ function NavigasiPanel({ soalList, currentIdx, answers, onJump, isMobile }) {
               borderRadius: "3px",
               background: "#e84c2b",
             }}
-          />
+          />{" "}
           Aktif
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -187,7 +194,7 @@ function NavigasiPanel({ soalList, currentIdx, answers, onJump, isMobile }) {
               background: "#e4f5f0",
               border: "1px solid #1a8a6e",
             }}
-          />
+          />{" "}
           Dijawab
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -199,7 +206,7 @@ function NavigasiPanel({ soalList, currentIdx, answers, onJump, isMobile }) {
               background: "white",
               border: "1px solid #e2ddd5",
             }}
-          />
+          />{" "}
           Belum
         </div>
       </div>
@@ -209,15 +216,14 @@ function NavigasiPanel({ soalList, currentIdx, answers, onJump, isMobile }) {
 
 export default function QuizPage() {
   const navigate = useNavigate();
-  const { id, session_id } = useParams();
-  const { state } = useLocation();
+  const { id } = useParams();
   const width = useWindowWidth();
   const isMobile = width <= 480;
 
   const [quizSet, setQuizSet] = useState(null);
-  const [soalList, setSoalList] = useState([]); // array soal_id terurut
-  const [soalData, setSoalData] = useState({}); // {soal_id: soal detail}
-  const [answers, setAnswers] = useState({}); // {soal_id: {jawaban, waktu_detik}}
+  const [soalList, setSoalList] = useState([]);
+  const [soalData, setSoalData] = useState({});
+  const [answers, setAnswers] = useState({});
   const [currentIdx, setCurrentIdx] = useState(0);
   const [sisaWaktu, setSisaWaktu] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -228,12 +234,10 @@ export default function QuizPage() {
   const [waktuMasuk, setWaktuMasuk] = useState(Date.now());
 
   const timerRef = useRef(null);
-  const saveRef = useRef(null);
   const sessionIdRef = useRef(null);
   const answersRef = useRef({});
   const sisaWaktuRef = useRef(0);
 
-  // Sync refs
   useEffect(() => {
     answersRef.current = answers;
   }, [answers]);
@@ -244,79 +248,50 @@ export default function QuizPage() {
     sessionIdRef.current = sessionId;
   }, [sessionId]);
 
-  // Debounce save ke backend
-  const debouncedSave = useCallback(() => {
-    clearTimeout(saveRef.current);
-    saveRef.current = setTimeout(async () => {
-      if (!sessionIdRef.current) return;
-      try {
-        await saveQuizProgress(
-          sessionIdRef.current,
-          answersRef.current,
-          sisaWaktuRef.current
-        );
-        // Simpan ke localStorage juga
-        localStorage.setItem(
-          `quiz_${id}`,
-          JSON.stringify({
-            session_id: sessionIdRef.current,
-            answers: answersRef.current,
-            sisa_waktu: sisaWaktuRef.current,
-            saved_at: Date.now(),
-          })
-        );
-      } catch {}
-    }, 1000);
-  }, [id]);
+  const saveToBackend = useCallback(async () => {
+    if (!sessionIdRef.current) return;
+    try {
+      await saveQuizProgress(
+        sessionIdRef.current,
+        answersRef.current,
+        sisaWaktuRef.current
+      );
+    } catch {}
+  }, []);
 
-  // Init quiz dari state (dari startQuiz)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden) saveToBackend();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibility);
+  }, [saveToBackend]);
+
   useEffect(() => {
     const initQuiz = async () => {
       setLoading(true);
       try {
-        let session = state?.session;
+        const res = await startQuiz(id);
 
-        // Kalau tidak ada state, coba dari localStorage
-        if (!session) {
-          const local = localStorage.getItem(`quiz_${id}`);
-          if (local) {
-            const parsed = JSON.parse(local);
-            session = parsed;
-          }
-        }
-
-        if (!session) {
-          navigate(`/latihan/${id}`);
+        if (res.auto_finished) {
+          navigate(`/latihan/${id}/hasil/${res.session_id}`);
           return;
         }
 
-        // Kalau resumed, tampilkan resume dialog
-        if (session.resumed) {
-          setShowResume(true);
-        }
+        if (res.resumed) setShowResume(true);
 
-        const sid = session.session_id;
-        setSessionId(sid);
+        setSessionId(res.session_id);
+        setSoalList(res.urutan_soal || []);
+        setAnswers(res.answers || {});
+        setSisaWaktu(res.sisa_waktu || 0);
 
-        const urutan = session.urutan_soal || [];
-        setSoalList(urutan);
-
-        // Hitung sisa waktu
-        const waktu = session.sisa_waktu || 0;
-        setSisaWaktu(waktu);
-
-        // Restore answers
-        const savedAnswers = session.answers || {};
-        setAnswers(savedAnswers);
-
-        // Load quiz set info
         const qset = await getQuizDetail(id);
         setQuizSet(qset);
 
-        // Load semua soal
         const soalDetails = {};
         await Promise.all(
-          urutan.map(async (soalId) => {
+          (res.urutan_soal || []).map(async (soalId) => {
             const data = await api.get(`/quiz/soal/${soalId}`);
             soalDetails[soalId] = data;
           })
@@ -332,7 +307,6 @@ export default function QuizPage() {
     initQuiz();
   }, [id]);
 
-  // Timer countdown
   useEffect(() => {
     if (loading || sisaWaktu <= 0) return;
 
@@ -343,6 +317,7 @@ export default function QuizPage() {
           handleAutoSubmit();
           return 0;
         }
+        if (prev % 30 === 0) saveToBackend();
         return prev - 1;
       });
     }, 1000);
@@ -350,139 +325,80 @@ export default function QuizPage() {
     return () => clearInterval(timerRef.current);
   }, [loading]);
 
-  // Auto save saat visibility change
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (document.hidden && sessionIdRef.current) {
-        saveQuizProgress(
-          sessionIdRef.current,
-          answersRef.current,
-          sisaWaktuRef.current
-        );
-        localStorage.setItem(
-          `quiz_${id}`,
-          JSON.stringify({
-            session_id: sessionIdRef.current,
-            answers: answersRef.current,
-            sisa_waktu: sisaWaktuRef.current,
-            saved_at: Date.now(),
-          })
-        );
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () =>
-      document.removeEventListener("visibilitychange", handleVisibility);
-  }, [id]);
-
-  // Track waktu per soal
-  useEffect(() => {
-    setWaktuMasuk(Date.now());
-  }, [currentIdx]);
-
   const currentSoalId = soalList[currentIdx];
   const currentSoal = soalData[currentSoalId];
 
   const getChosen = (soalId) => {
     const ans = answers[soalId];
     if (ans?.jawaban !== undefined) return ans.jawaban;
-    if (currentSoal) return initChosen(currentSoal.tipe);
+    if (soalData[soalId]) return initChosen(soalData[soalId].tipe);
     return "";
   };
 
-  const setChosen = (soalId, value) => {
-    // Hitung akumulasi waktu
+  const updateWaktuSoal = useCallback(() => {
+    if (!currentSoalId) return;
     const elapsed = Math.floor((Date.now() - waktuMasuk) / 1000);
-    const prev = answers[soalId]?.waktu_detik || 0;
+    setAnswers((prev) => ({
+      ...prev,
+      [currentSoalId]: {
+        ...prev[currentSoalId],
+        jawaban: prev[currentSoalId]?.jawaban ?? null,
+        waktu_detik: (prev[currentSoalId]?.waktu_detik || 0) + elapsed,
+      },
+    }));
+  }, [currentSoalId, waktuMasuk]);
 
-    setAnswers((prev) => {
-      const newAnswers = {
-        ...prev,
-        [soalId]: {
-          jawaban: value,
-          waktu_detik: (prev[soalId]?.waktu_detik || 0) + elapsed,
-        },
-      };
-      return newAnswers;
-    });
-
-    setWaktuMasuk(Date.now()); // reset timer
-    debouncedSave();
+  const setChosen = (soalId, value) => {
+    const elapsed = Math.floor((Date.now() - waktuMasuk) / 1000);
+    setAnswers((prev) => ({
+      ...prev,
+      [soalId]: {
+        jawaban: value,
+        waktu_detik: (prev[soalId]?.waktu_detik || 0) + elapsed,
+      },
+    }));
+    setWaktuMasuk(Date.now());
   };
 
   const handlePrev = () => {
     if (currentIdx > 0) {
-      // Update waktu soal sebelum pindah
-      const elapsed = Math.floor((Date.now() - waktuMasuk) / 1000);
-      if (currentSoalId) {
-        setAnswers((prev) => ({
-          ...prev,
-          [currentSoalId]: {
-            ...prev[currentSoalId],
-            jawaban: prev[currentSoalId]?.jawaban ?? null,
-            waktu_detik: (prev[currentSoalId]?.waktu_detik || 0) + elapsed,
-          },
-        }));
-      }
+      updateWaktuSoal();
       setCurrentIdx((i) => i - 1);
-      debouncedSave();
+      setWaktuMasuk(Date.now());
+      saveToBackend();
     }
   };
 
   const handleNext = () => {
     if (currentIdx < soalList.length - 1) {
-      const elapsed = Math.floor((Date.now() - waktuMasuk) / 1000);
-      if (currentSoalId) {
-        setAnswers((prev) => ({
-          ...prev,
-          [currentSoalId]: {
-            ...prev[currentSoalId],
-            jawaban: prev[currentSoalId]?.jawaban ?? null,
-            waktu_detik: (prev[currentSoalId]?.waktu_detik || 0) + elapsed,
-          },
-        }));
-      }
+      updateWaktuSoal();
       setCurrentIdx((i) => i + 1);
-      debouncedSave();
+      setWaktuMasuk(Date.now());
+      saveToBackend();
     }
   };
 
   const handleJump = (idx) => {
-    const elapsed = Math.floor((Date.now() - waktuMasuk) / 1000);
-    if (currentSoalId) {
-      setAnswers((prev) => ({
-        ...prev,
-        [currentSoalId]: {
-          ...prev[currentSoalId],
-          jawaban: prev[currentSoalId]?.jawaban ?? null,
-          waktu_detik: (prev[currentSoalId]?.waktu_detik || 0) + elapsed,
-        },
-      }));
-    }
+    updateWaktuSoal();
     setCurrentIdx(idx);
-    debouncedSave();
+    setWaktuMasuk(Date.now());
+    saveToBackend();
   };
 
   const doSubmit = async () => {
-    console.log("sessionId:", sessionId);
-    console.log("id:", id);
-
     if (!sessionId) return;
     setSubmitting(true);
     clearInterval(timerRef.current);
     try {
-      // Save final progress dulu
       await saveQuizProgress(
         sessionId,
         answersRef.current,
         sisaWaktuRef.current
       );
       await finishQuiz(sessionId);
-      localStorage.removeItem(`quiz_${id}`);
       navigate(`/latihan/${id}/hasil/${sessionId}`);
-    } catch {
-      console.error("doSubmit error:", err);
-
+    } catch (e) {
+      console.error("submit error:", e);
       setSubmitting(false);
     }
   };
@@ -492,14 +408,21 @@ export default function QuizPage() {
     try {
       await saveQuizProgress(sessionIdRef.current, answersRef.current, 0);
       await finishQuiz(sessionIdRef.current);
-      localStorage.removeItem(`quiz_${id}`);
       navigate(`/latihan/${id}/hasil/${sessionIdRef.current}`);
     } catch {}
   };
 
   const jumlahDijawab = soalList.filter((sid) => {
     const ans = answers[sid]?.jawaban;
-    return ans !== null && ans !== undefined && ans !== "";
+    if (ans === null || ans === undefined || ans === "") return false;
+    if (Array.isArray(ans) && ans.length === 0) return false;
+    if (
+      typeof ans === "object" &&
+      !Array.isArray(ans) &&
+      Object.keys(ans).length === 0
+    )
+      return false;
+    return true;
   }).length;
 
   if (loading)
@@ -515,7 +438,6 @@ export default function QuizPage() {
         }}
       >
         <div style={{ fontSize: "14px", color: "#6b6860" }}>Memuat soal...</div>
-        <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>
       </div>
     );
 
@@ -591,7 +513,6 @@ export default function QuizPage() {
               <button
                 onClick={async () => {
                   setShowResume(false);
-                  setSubmitting(true);
                   await doSubmit();
                 }}
                 style={{
@@ -631,7 +552,7 @@ export default function QuizPage() {
         </div>
       )}
 
-      {/* Confirm submit dialog */}
+      {/* Confirm submit */}
       {showConfirm && (
         <div
           style={{
@@ -738,7 +659,7 @@ export default function QuizPage() {
         </div>
       )}
 
-      {/* Navbar quiz — sticky top */}
+      {/* Navbar */}
       <div
         style={{
           background: "white",
@@ -753,7 +674,16 @@ export default function QuizPage() {
           zIndex: 100,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        {/* Kiri — back + logo + judul */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
           <button
             onClick={() => navigate(`/latihan/${id}`)}
             style={{
@@ -763,26 +693,50 @@ export default function QuizPage() {
               color: "#6b6860",
               display: "flex",
               padding: 0,
+              flexShrink: 0,
             }}
           >
             <ChevronLeft size={20} />
           </button>
-          <span
+          <div
             style={{
-              fontSize: "14px",
-              fontWeight: "700",
-              color: "#0f0e17",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              maxWidth: isMobile ? "140px" : "300px",
+              width: "30px",
+              height: "30px",
+              background: "#e84c2b",
+              borderRadius: "8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
             }}
           >
-            {quizSet?.judul}
-          </span>
+            <Warehouse size={16} color="white" />
+          </div>
+          {!isMobile && (
+            <span
+              style={{
+                fontSize: "13px",
+                fontWeight: "700",
+                color: "#0f0e17",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {quizSet?.judul}
+            </span>
+          )}
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        {/* Kanan — timer + submit */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            flexShrink: 0,
+          }}
+        >
           <TimerDisplay sisaWaktu={sisaWaktu} isMobile={isMobile} />
           <button
             onClick={() => setShowConfirm(true)}
@@ -804,6 +758,28 @@ export default function QuizPage() {
         </div>
       </div>
 
+      {/* Panel navigasi soal — sticky di bawah navbar */}
+      <div
+        style={{
+          background: "white",
+          borderBottom: "1px solid #f2efe8",
+          padding: isMobile ? "10px 16px" : "10px 40px",
+          position: "sticky",
+          top: "56px",
+          zIndex: 99,
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <NavigasiPanel
+          soalList={soalList}
+          currentIdx={currentIdx}
+          answers={answers}
+          onJump={handleJump}
+        />
+      </div>
+
+      {/* Main */}
       <main
         style={{
           flex: 1,
@@ -813,18 +789,6 @@ export default function QuizPage() {
           width: "100%",
         }}
       >
-        {/* Navigasi soal */}
-        <div style={{ marginBottom: "20px" }}>
-          <NavigasiPanel
-            soalList={soalList}
-            currentIdx={currentIdx}
-            answers={answers}
-            onJump={handleJump}
-            isMobile={isMobile}
-          />
-        </div>
-
-        {/* Soal */}
         {currentSoal ? (
           <div
             style={{
@@ -912,7 +876,7 @@ export default function QuizPage() {
               <MathRenderer text={currentSoal.body} block />
             </div>
 
-            {/* Jawaban input */}
+            {/* Input jawaban */}
             <JawabanInput
               soal={currentSoal}
               chosen={getChosen(currentSoalId)}

@@ -41,6 +41,7 @@ import LatihanPage from "./features/quiz/LatihanPage";
 import LatihanDetail from "./features/quiz/LatihanDetail";
 import QuizPage from "./features/quiz/QuizPage";
 import QuizHasil from "./features/quiz/QuizHasil";
+import QuizReview from "./features/quiz/QuizReview";
 
 import SearchPage from "./features/search/SearchPage";
 import ProfilePage from "./features/profile/ProfilePage";
@@ -128,6 +129,10 @@ export default function App() {
       <Route path="/latihan/:id" element={<LatihanDetail />} />
       <Route path="/latihan/:id/quiz" element={<QuizPage />} />
       <Route path="/latihan/:id/hasil/:session_id" element={<QuizHasil />} />
+      <Route
+        path="/latihan/:id/hasil/:session_id/review"
+        element={<QuizReview />}
+      />
     </Routes>
   );
 }

@@ -11,6 +11,7 @@ import {
   Eye,
   ToggleLeft,
   ToggleRight,
+  Copy,
 } from "lucide-react";
 import useWindowWidth from "../../hooks/useWindowWidth";
 import {
@@ -21,6 +22,8 @@ import {
   adminTogglePublish,
 } from "../quiz/quizApi";
 import SoalPreviewModal from "./SoalPreviewModal";
+import api from "../../lib/api";
+import { adminLinkQuizSoal } from "../quiz/quizApi";
 
 function DifficultyBadge({ level }) {
   const map = {
@@ -68,6 +71,7 @@ export default function AdminQuizDetail() {
   const [toggling, setToggling] = useState(false);
   const [dragIdx, setDragIdx] = useState(null);
   const [savingUrutan, setSavingUrutan] = useState(false);
+  const [copying, setCopying] = useState({});
 
   useEffect(() => {
     Promise.all([adminGetQuizSets(), adminGetQuizSoal(id)])
@@ -108,6 +112,7 @@ export default function AdminQuizDetail() {
 
   // Drag & drop urutan
   const handleDragStart = (idx) => setDragIdx(idx);
+
   const handleDragOver = (e, idx) => {
     e.preventDefault();
     if (dragIdx === null || dragIdx === idx) return;
@@ -117,6 +122,7 @@ export default function AdminQuizDetail() {
     setSoalList(newList);
     setDragIdx(idx);
   };
+
   const handleDragEnd = async () => {
     setDragIdx(null);
     setSavingUrutan(true);
@@ -127,6 +133,21 @@ export default function AdminQuizDetail() {
       alert("Gagal menyimpan urutan");
     } finally {
       setSavingUrutan(false);
+    }
+  };
+
+  const handleSalin = async (soalId) => {
+    setCopying((c) => ({ ...c, [soalId]: true }));
+    try {
+      const res = await api.post(`/admin/soal/salin?id=${soalId}`);
+      await api.put(`/admin/publish/soal?id=${res.id}`);
+      await adminLinkQuizSoal(id, res.id);
+      const soal = await adminGetQuizSoal(id);
+      setSoalList(Array.isArray(soal) ? soal : []);
+    } catch {
+      alert("Gagal menyalin soal");
+    } finally {
+      setCopying((c) => ({ ...c, [soalId]: false }));
     }
   };
 
@@ -475,6 +496,29 @@ export default function AdminQuizDetail() {
               >
                 <Eye size={13} />
               </button>
+
+              {/* Salin — di sini, s sudah terdefinisi */}
+              <button
+                onClick={() => handleSalin(s.id)}
+                disabled={copying[s.id]}
+                title="Salin soal"
+                style={{
+                  width: "30px",
+                  height: "30px",
+                  borderRadius: "8px",
+                  border: "1px solid #e2ddd5",
+                  background: "white",
+                  cursor: copying[s.id] ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#6b6860",
+                  opacity: copying[s.id] ? 0.5 : 1,
+                }}
+              >
+                <Copy size={13} />
+              </button>
+
               <button
                 onClick={() =>
                   navigate(`/admin/latihan/${id}/soal/edit/${s.id}`)
@@ -495,6 +539,7 @@ export default function AdminQuizDetail() {
               >
                 <Pencil size={13} />
               </button>
+
               <button
                 onClick={() => setDeleteId(s.id)}
                 title="Hapus"

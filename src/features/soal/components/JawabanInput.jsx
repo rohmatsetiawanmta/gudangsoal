@@ -19,20 +19,30 @@ export default function JawabanInput({
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {soal.options?.map((opt) => {
           const isChosen = chosen === opt.label;
-          const isAnswer =
-            (isCorrect || alreadyCorrect) && opt.label === soal.answer;
+          const isAnswer = opt.label === soal.answer;
+          const isCorrectChosen = (isCorrect || alreadyCorrect) && isAnswer;
           const isWrong =
-            submitted && !isCorrect && !alreadyCorrect && opt.label === chosen;
+            submitted && !isCorrect && !alreadyCorrect && isChosen;
+          // Saat salah — tetap highlight hijau jawaban yang benar
+          const isCorrectHighlight =
+            submitted && !isCorrect && !alreadyCorrect && isAnswer;
+
           let border = "1px solid #e2ddd5",
             bg = "white",
             labelColor = "#6b6860";
+
           if (!submitted) {
             if (isChosen) {
               border = "2px solid #e84c2b";
               bg = "#fff3f0";
               labelColor = "#e84c2b";
             }
-          } else if (isAnswer) {
+          } else if (isCorrectChosen) {
+            border = "2px solid #1a8a6e";
+            bg = "#e4f5f0";
+            labelColor = "#1a8a6e";
+          } else if (isCorrectHighlight) {
+            // Jawaban benar saat user salah — highlight hijau
             border = "2px solid #1a8a6e";
             bg = "#e4f5f0";
             labelColor = "#1a8a6e";
@@ -41,6 +51,7 @@ export default function JawabanInput({
             bg = "#fff3f0";
             labelColor = "#e84c2b";
           }
+
           return (
             <div
               key={opt.label}
@@ -79,7 +90,7 @@ export default function JawabanInput({
               <span style={{ fontSize: "15px", color: "#0f0e17", flex: 1 }}>
                 <MathRenderer text={opt.text} />
               </span>
-              {submitted && isAnswer && (
+              {submitted && (isCorrectChosen || isCorrectHighlight) && (
                 <span
                   style={{
                     fontSize: "12px",
@@ -175,12 +186,18 @@ export default function JawabanInput({
           const answerArr = Array.isArray(soal.answer) ? soal.answer : [];
           const isAnswer =
             (isCorrect || alreadyCorrect) && answerArr.includes(opt.label);
+          const isCorrectHighlight =
+            submitted &&
+            !isCorrect &&
+            !alreadyCorrect &&
+            answerArr.includes(opt.label);
           const isWrong =
             submitted &&
             !isCorrect &&
             !alreadyCorrect &&
             isChosen &&
             !answerArr.includes(opt.label);
+
           let border = "1px solid #e2ddd5",
             bg = "white",
             checkBg = "white",
@@ -194,7 +211,7 @@ export default function JawabanInput({
               checkBorder = "#e84c2b";
               checkColor = "white";
             }
-          } else if (isAnswer) {
+          } else if (isAnswer || isCorrectHighlight) {
             border = "2px solid #1a8a6e";
             bg = "#e4f5f0";
             checkBg = "#1a8a6e";
@@ -207,6 +224,7 @@ export default function JawabanInput({
             checkBorder = "#e84c2b";
             checkColor = "white";
           }
+
           const toggle = () => {
             if (submitted || alreadyCorrect) return;
             setChosen((prev) => {
@@ -216,6 +234,7 @@ export default function JawabanInput({
                 : [...arr, opt.label].sort();
             });
           };
+
           return (
             <div
               key={opt.label}
@@ -246,7 +265,7 @@ export default function JawabanInput({
                   transition: "all .15s",
                 }}
               >
-                {(isChosen || isAnswer) && (
+                {(isChosen || isAnswer || isCorrectHighlight) && (
                   <span
                     style={{
                       color: checkColor,
@@ -357,8 +376,7 @@ export default function JawabanInput({
               </div>
               {cols.map((col) => {
                 const isSelected = rowChosen === col;
-                const isAns =
-                  (isCorrect || alreadyCorrect) && rowAnswer === col;
+                const isAns = submitted && rowAnswer === col;
                 const isWrong =
                   submitted &&
                   !isCorrect &&
@@ -488,7 +506,6 @@ export default function JawabanInput({
               : "Klik item kiri, lalu klik pasangannya di kanan."}
           </div>
         )}
-
         <div
           style={{
             display: "grid",
@@ -507,9 +524,12 @@ export default function JawabanInput({
                   : null;
               const isPaired = pairedRi !== null;
               const isCorrectPair =
-                (submitted || alreadyCorrect) &&
-                String(answerObj[String(li)]) === String(pairedRi);
+                submitted && String(answerObj[String(li)]) === String(pairedRi);
               const isWrongPair = submitted && isPaired && !isCorrectPair;
+              const correctRi =
+                submitted && answerObj[String(li)] !== undefined
+                  ? parseInt(answerObj[String(li)])
+                  : null;
 
               let border = "1px solid #e2ddd5",
                 bg = "white";
@@ -589,6 +609,22 @@ export default function JawabanInput({
                       {isWrongPair && " ✗"}
                     </span>
                   )}
+                  {/* Tampilkan jawaban benar saat salah */}
+                  {isWrongPair && correctRi !== null && (
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: "700",
+                        padding: "2px 7px",
+                        borderRadius: "6px",
+                        flexShrink: 0,
+                        background: "#e4f5f0",
+                        color: "#1a8a6e",
+                      }}
+                    >
+                      ✓ {String.fromCharCode(65 + correctRi)}
+                    </span>
+                  )}
                 </div>
               );
             })}
@@ -605,7 +641,7 @@ export default function JawabanInput({
                 ? parseInt(pairedByLeftIdx[0])
                 : null;
               const isCorrectPair =
-                (submitted || alreadyCorrect) &&
+                submitted &&
                 isPaired &&
                 String(answerObj[String(pairedLi)]) === String(ri);
               const isWrongPair = submitted && isPaired && !isCorrectPair;
@@ -688,14 +724,11 @@ export default function JawabanInput({
           </div>
         </div>
 
-        {/* Progress */}
         {!submitted && !alreadyCorrect && (
           <div style={{ fontSize: "12px", color: "#b4b2a9" }}>
             {Object.keys(chosenObj).length} / {leftItems.length} dipasangkan
           </div>
         )}
-
-        {/* Hasil */}
         {submitted && !alreadyCorrect && (
           <div
             style={{

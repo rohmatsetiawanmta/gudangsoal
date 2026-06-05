@@ -18,15 +18,17 @@ export default function PembahasanPanel({
   alreadyCorrect,
   user,
   isMobile,
+  forceShow = false,
+  jawabanUser = null,
 }) {
   const navigate = useNavigate();
   const showPembahasan = user || soal?.is_public_explanation == 1;
 
-  // Normalize options menjodohkan
   const menjodohkanOptions =
     soal.tipe === "menjodohkan"
       ? normalizeMenjodohkan(soal.options)
       : { left: [], right: [] };
+
   const answerObj =
     soal.tipe === "menjodohkan" &&
     typeof soal.answer === "object" &&
@@ -34,6 +36,9 @@ export default function PembahasanPanel({
       ? soal.answer
       : {};
 
+  const isBenar = isCorrect || alreadyCorrect;
+
+  // Belum submit
   if (!submitted) {
     return (
       <div
@@ -69,7 +74,8 @@ export default function PembahasanPanel({
     );
   }
 
-  if (!isCorrect && !alreadyCorrect) {
+  // Salah — tapi tidak forceShow
+  if (!isBenar && !forceShow) {
     return (
       <div
         style={{
@@ -98,6 +104,96 @@ export default function PembahasanPanel({
     );
   }
 
+  // Render kunci jawaban
+  const renderKunci = () => {
+    if (soal.tipe === "menjodohkan") {
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+          {menjodohkanOptions.left.map((leftText, li) => {
+            const ri =
+              answerObj[String(li)] !== undefined
+                ? parseInt(answerObj[String(li)])
+                : null;
+            const rightText = ri !== null ? menjodohkanOptions.right[ri] : null;
+            return (
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: "4px" }}
+              >
+                <div
+                  style={{
+                    fontSize: "13px",
+                    color: isBenar ? "#1a8a6e" : "#b91c1c",
+                  }}
+                >
+                  Jawaban:{" "}
+                  <strong>{formatAnswer(soal.tipe, soal.answer)}</strong>
+                </div>
+                {!isBenar &&
+                  jawabanUser !== null &&
+                  jawabanUser !== undefined &&
+                  jawabanUser !== "" && (
+                    <div style={{ fontSize: "13px", color: "#b91c1c" }}>
+                      Jawaban kamu:{" "}
+                      <strong>{formatAnswer(soal.tipe, jawabanUser)}</strong>
+                    </div>
+                  )}
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    if (soal.tipe === "isian_multi" && Array.isArray(soal.options)) {
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          {soal.options.map((opt, idx) => (
+            <div
+              key={idx}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                fontSize: "13px",
+                color: isBenar ? "#1a8a6e" : "#b91c1c",
+              }}
+            >
+              <span style={{ fontWeight: "600" }}>
+                {opt.label || `Sub-jawaban ${idx + 1}`}:
+              </span>
+              <span style={{ fontWeight: "700" }}>
+                {Array.isArray(soal.answer) ? soal.answer[idx] : "—"}
+                {opt.satuan && (
+                  <span style={{ fontWeight: "400", marginLeft: "4px" }}>
+                    {opt.satuan}
+                  </span>
+                )}
+              </span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+        <div
+          style={{ fontSize: "13px", color: isBenar ? "#1a8a6e" : "#b91c1c" }}
+        >
+          Jawaban: <strong>{formatAnswer(soal.tipe, soal.answer)}</strong>
+        </div>
+        {!isBenar &&
+          soal.jawaban_user !== undefined &&
+          soal.jawaban_user !== null && (
+            <div style={{ fontSize: "13px", color: "#b91c1c" }}>
+              Jawaban kamu:{" "}
+              <strong>{formatAnswer(soal.tipe, soal.jawaban_user)}</strong>
+            </div>
+          )}
+      </div>
+    );
+  };
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
       {/* Result banner */}
@@ -105,108 +201,48 @@ export default function PembahasanPanel({
         style={{
           padding: "16px",
           borderRadius: "12px",
-          background: "#e4f5f0",
-          border: "1px solid #9FE1CB",
+          background: isBenar ? "#e4f5f0" : "#fff3f0",
+          border: `1px solid ${isBenar ? "#9FE1CB" : "#fca5a5"}`,
           display: "flex",
           alignItems: "flex-start",
           gap: "12px",
         }}
       >
-        <CheckCircle
-          size={24}
-          color="#1a8a6e"
-          style={{ flexShrink: 0, marginTop: "2px" }}
-        />
+        {isBenar ? (
+          <CheckCircle
+            size={24}
+            color="#1a8a6e"
+            style={{ flexShrink: 0, marginTop: "2px" }}
+          />
+        ) : (
+          <XCircle
+            size={24}
+            color="#e84c2b"
+            style={{ flexShrink: 0, marginTop: "2px" }}
+          />
+        )}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
               fontWeight: "700",
               fontSize: "15px",
-              color: "#0F6E56",
+              color: isBenar ? "#0F6E56" : "#b91c1c",
               marginBottom: "6px",
             }}
           >
-            {alreadyCorrect ? "Sudah pernah dijawab benar!" : "Jawaban benar!"}
+            {alreadyCorrect && forceShow
+              ? "Jawaban Benar"
+              : alreadyCorrect
+              ? "Sudah Pernah Dijawab Benar"
+              : isCorrect
+              ? "Jawaban Benar"
+              : jawabanUser === null ||
+                jawabanUser === undefined ||
+                jawabanUser === ""
+              ? "Tidak Dijawab"
+              : "Jawaban Salah"}
           </div>
-
-          {soal.tipe === "menjodohkan" ? (
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "4px" }}
-            >
-              {menjodohkanOptions.left.map((leftText, li) => {
-                const ri =
-                  answerObj[String(li)] !== undefined
-                    ? parseInt(answerObj[String(li)])
-                    : null;
-                const rightText =
-                  ri !== null ? menjodohkanOptions.right[ri] : null;
-                return (
-                  <div
-                    key={li}
-                    style={{
-                      fontSize: "13px",
-                      color: "#1a8a6e",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <span style={{ fontWeight: "600", flexShrink: 0 }}>
-                      {li + 1}.
-                    </span>
-                    <span style={{ color: "#1a8a6e" }}>
-                      <MathRenderer text={leftText} />
-                    </span>
-                    <span style={{ color: "#9FE1CB", flexShrink: 0 }}>→</span>
-                    <span style={{ fontWeight: "700", flexShrink: 0 }}>
-                      {ri !== null && rightText ? (
-                        <>
-                          <span>{String.fromCharCode(65 + ri)}. </span>
-                          <MathRenderer text={rightText} />
-                        </>
-                      ) : (
-                        "—"
-                      )}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          ) : soal.tipe === "isian_multi" && Array.isArray(soal.options) ? (
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "6px" }}
-            >
-              {soal.options.map((opt, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    fontSize: "13px",
-                    color: "#1a8a6e",
-                  }}
-                >
-                  <span style={{ fontWeight: "600" }}>
-                    {opt.label || `Sub-jawaban ${idx + 1}`}:
-                  </span>
-                  <span style={{ fontWeight: "700" }}>
-                    {Array.isArray(soal.answer) ? soal.answer[idx] : "—"}
-                    {opt.satuan && (
-                      <span style={{ fontWeight: "400", marginLeft: "4px" }}>
-                        {opt.satuan}
-                      </span>
-                    )}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ fontSize: "13px", color: "#1a8a6e" }}>
-              Jawaban: <strong>{formatAnswer(soal.tipe, soal.answer)}</strong>
-            </div>
-          )}
+          {renderKunci()}
         </div>
       </div>
 
@@ -310,7 +346,7 @@ export default function PembahasanPanel({
           </div>
         </div>
       )}
-      {!showPembahasan && !soal.explanation && (
+      {showPembahasan && !soal.explanation && (
         <div
           style={{ fontSize: "14px", color: "#6b6860", fontStyle: "italic" }}
         >

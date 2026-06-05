@@ -138,12 +138,7 @@ export default function QuizHasil() {
     setFinalizing(true);
     try {
       await finalizeQuiz(session_id);
-      setResult((prev) => ({
-        ...prev,
-        session: { ...prev.session, is_final: 1 },
-      }));
-      setShowFinalConfirm(false);
-      setActiveTab("review");
+      navigate(`/latihan/${id}/hasil/${session_id}/review`);
     } catch {
       alert("Gagal memfinalisasi");
     } finally {
@@ -621,7 +616,9 @@ export default function QuizHasil() {
           )}
           {isFinal && (
             <button
-              onClick={() => setActiveTab("review")}
+              onClick={() =>
+                navigate(`/latihan/${id}/hasil/${session_id}/review`)
+              }
               style={{
                 flex: 1,
                 padding: "12px",
@@ -635,7 +632,7 @@ export default function QuizHasil() {
                 fontFamily: "inherit",
               }}
             >
-              Lihat Review Soal
+              Review Soal
             </button>
           )}
         </div>
@@ -654,7 +651,6 @@ export default function QuizHasil() {
           {[
             { key: "ringkasan", label: "Ringkasan" },
             { key: "analisis", label: "Analisis" },
-            { key: "review", label: "Review Soal" },
           ].map((t) => (
             <button
               key={t.key}
@@ -1002,93 +998,116 @@ export default function QuizHasil() {
               </div>
             </div>
 
-            {/* Soal tercepat & terlama */}
-            {(soalTercepat || soalTerlama) && (
+            {/* Soal dengan waktu terlama */}
+            <div
+              style={{
+                background: "white",
+                borderRadius: "14px",
+                border: "1px solid #e2ddd5",
+                padding: isMobile ? "16px" : "20px",
+              }}
+            >
               <div
                 style={{
-                  background: "white",
-                  borderRadius: "14px",
-                  border: "1px solid #e2ddd5",
-                  padding: isMobile ? "16px" : "20px",
+                  fontSize: "13px",
+                  fontWeight: "700",
+                  color: "#0f0e17",
+                  marginBottom: "14px",
                 }}
               >
-                <div
-                  style={{
-                    fontSize: "13px",
-                    fontWeight: "700",
-                    color: "#0f0e17",
-                    marginBottom: "14px",
-                  }}
-                >
-                  Waktu per Soal
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "10px",
-                  }}
-                >
-                  {[
-                    { label: "Terlama", soal: soalTerlama, color: "#e84c2b" },
-                    { label: "Tercepat", soal: soalTercepat, color: "#1a8a6e" },
-                  ].map(
-                    ({ label, soal: s, color }) =>
-                      s && (
-                        <div
-                          key={label}
-                          style={{
-                            display: "flex",
-                            gap: "10px",
-                            padding: "10px 14px",
-                            borderRadius: "10px",
-                            background: "#faf9f6",
-                            alignItems: "center",
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontSize: "11px",
-                              fontWeight: "700",
-                              color,
-                              minWidth: "60px",
-                            }}
-                          >
-                            {label}
-                          </span>
-                          <span
-                            style={{
-                              fontSize: "13px",
-                              color: "#0f0e17",
-                              flex: 1,
-                              minWidth: 0,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {s.body
-                              ?.replace(/\$\$?[^$]+\$\$?/g, "[math]")
-                              .replace(/[*_~`#]/g, "")
-                              .slice(0, 50)}
-                            ...
-                          </span>
-                          <span
-                            style={{
-                              fontSize: "12px",
-                              fontWeight: "700",
-                              color,
-                              flexShrink: 0,
-                            }}
-                          >
-                            {DURASI_FORMAT(s.waktu_detik)}
-                          </span>
-                        </div>
-                      )
-                  )}
-                </div>
+                Soal Paling Lama Dikerjakan
               </div>
-            )}
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+              >
+                {[...soal]
+                  .sort((a, b) => (b.waktu_detik || 0) - (a.waktu_detik || 0))
+                  .slice(0, 3)
+                  .map((s, i) => (
+                    <div
+                      key={s.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        padding: "10px 14px",
+                        borderRadius: "10px",
+                        background: "#faf9f6",
+                      }}
+                    >
+                      {/* Rank */}
+                      <div
+                        style={{
+                          width: "24px",
+                          height: "24px",
+                          borderRadius: "6px",
+                          flexShrink: 0,
+                          background:
+                            i === 0
+                              ? "#e84c2b"
+                              : i === 1
+                              ? "#f5a623"
+                              : "#f2efe8",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "11px",
+                          fontWeight: "800",
+                          color: i < 2 ? "white" : "#6b6860",
+                        }}
+                      >
+                        {i + 1}
+                      </div>
+
+                      {/* Icon benar/salah */}
+                      {s.is_correct ? (
+                        <CheckCircle
+                          size={14}
+                          color="#1a8a6e"
+                          style={{ flexShrink: 0 }}
+                        />
+                      ) : (
+                        <XCircle
+                          size={14}
+                          color="#e84c2b"
+                          style={{ flexShrink: 0 }}
+                        />
+                      )}
+
+                      {/* Body soal */}
+                      <span
+                        style={{
+                          fontSize: "13px",
+                          color: "#0f0e17",
+                          flex: 1,
+                          minWidth: 0,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {s.body
+                          ?.replace(/\$\$?[^$]+\$\$?/g, "[math]")
+                          .replace(/[*_~`#]/g, "")
+                          .slice(0, 60)}
+                        ...
+                      </span>
+
+                      {/* Waktu */}
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: "700",
+                          color: "#e84c2b",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {DURASI_FORMAT(s.waktu_detik || 0)}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            </div>
           </div>
         )}
 
