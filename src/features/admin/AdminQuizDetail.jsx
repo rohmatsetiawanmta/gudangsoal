@@ -12,6 +12,7 @@ import {
   ToggleLeft,
   ToggleRight,
   Copy,
+  CheckSquare,
 } from "lucide-react";
 import useWindowWidth from "../../hooks/useWindowWidth";
 import {
@@ -73,6 +74,12 @@ export default function AdminQuizDetail() {
   const [savingUrutan, setSavingUrutan] = useState(false);
   const [copying, setCopying] = useState({});
 
+  // Bulk subtopik
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [struktur, setStruktur] = useState({ jenjang: [], subjenjang: [], mapel: [], topik: [], subtopik: [] });
+  const [bulkSel, setBulkSel] = useState({ jenjang: "", subjenjang: "", mapel: "", topik: "", subtopik_id: "" });
+  const [bulkSaving, setBulkSaving] = useState(false);
+
   useEffect(() => {
     Promise.all([adminGetQuizSets(), adminGetQuizSoal(id)])
       .then(([sets, soal]) => {
@@ -83,6 +90,10 @@ export default function AdminQuizDetail() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    api.get("/admin/struktur").then((data) => setStruktur(data)).catch(() => {});
+  }, []);
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -133,6 +144,41 @@ export default function AdminQuizDetail() {
       alert("Gagal menyimpan urutan");
     } finally {
       setSavingUrutan(false);
+    }
+  };
+
+  const toggleSelect = (soalId) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(soalId) ? next.delete(soalId) : next.add(soalId);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === soalList.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(soalList.map((s) => s.id)));
+    }
+  };
+
+  const handleBulkUpdate = async () => {
+    if (!bulkSel.subtopik_id || selectedIds.size === 0) return;
+    setBulkSaving(true);
+    try {
+      await api.put(`/admin/quiz/${id}/soal/bulk-subtopik`, {
+        soal_ids: Array.from(selectedIds),
+        subtopik_id: bulkSel.subtopik_id,
+      });
+      const soal = await adminGetQuizSoal(id);
+      setSoalList(Array.isArray(soal) ? soal : []);
+      setSelectedIds(new Set());
+      setBulkSel({ jenjang: "", subjenjang: "", mapel: "", topik: "", subtopik_id: "" });
+    } catch {
+      alert("Gagal mengupdate subtopik");
+    } finally {
+      setBulkSaving(false);
     }
   };
 
@@ -337,6 +383,125 @@ export default function AdminQuizDetail() {
         </div>
       </div>
 
+      {/* Bulk toolbar */}
+      {selectedIds.size > 0 && (
+        <div
+          style={{
+            background: "#0f0e17",
+            borderRadius: "12px",
+            padding: "12px 16px",
+            marginBottom: "12px",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "12px",
+            flexWrap: "wrap",
+          }}
+        >
+          <span style={{ fontSize: "13px", fontWeight: "600", color: "white", paddingTop: "6px", flexShrink: 0 }}>
+            {selectedIds.size} soal dipilih
+          </span>
+
+          {/* Cascading dropdowns */}
+          {[
+            {
+              placeholder: "Jenjang",
+              value: bulkSel.jenjang,
+              options: struktur.jenjang.map((j) => ({ value: j.id, label: j.nama })),
+              onChange: (v) => setBulkSel({ jenjang: v, subjenjang: "", mapel: "", topik: "", subtopik_id: "" }),
+            },
+            {
+              placeholder: "Subjenjang",
+              value: bulkSel.subjenjang,
+              options: struktur.subjenjang.filter((s) => s.jenjang_id == bulkSel.jenjang).map((s) => ({ value: s.id, label: s.nama })),
+              onChange: (v) => setBulkSel((p) => ({ ...p, subjenjang: v, mapel: "", topik: "", subtopik_id: "" })),
+              disabled: !bulkSel.jenjang,
+            },
+            {
+              placeholder: "Mapel",
+              value: bulkSel.mapel,
+              options: struktur.mapel.filter((m) => m.subjenjang_id == bulkSel.subjenjang).map((m) => ({ value: m.id, label: m.nama })),
+              onChange: (v) => setBulkSel((p) => ({ ...p, mapel: v, topik: "", subtopik_id: "" })),
+              disabled: !bulkSel.subjenjang,
+            },
+            {
+              placeholder: "Topik",
+              value: bulkSel.topik,
+              options: struktur.topik.filter((t) => t.mapel_id == bulkSel.mapel).map((t) => ({ value: t.id, label: t.nama })),
+              onChange: (v) => setBulkSel((p) => ({ ...p, topik: v, subtopik_id: "" })),
+              disabled: !bulkSel.mapel,
+            },
+            {
+              placeholder: "Subtopik",
+              value: bulkSel.subtopik_id,
+              options: struktur.subtopik.filter((s) => s.topik_id == bulkSel.topik).map((s) => ({ value: s.id, label: s.nama })),
+              onChange: (v) => setBulkSel((p) => ({ ...p, subtopik_id: v })),
+              disabled: !bulkSel.topik,
+            },
+          ].map((sel) => (
+            <select
+              key={sel.placeholder}
+              value={sel.value}
+              onChange={(e) => sel.onChange(e.target.value)}
+              disabled={sel.disabled}
+              style={{
+                padding: "6px 10px",
+                borderRadius: "8px",
+                border: "none",
+                background: sel.disabled ? "#3a3940" : "white",
+                color: sel.disabled ? "#6b6860" : "#0f0e17",
+                fontSize: "13px",
+                fontFamily: "inherit",
+                cursor: sel.disabled ? "not-allowed" : "pointer",
+                flex: 1,
+                minWidth: "100px",
+              }}
+            >
+              <option value="">{sel.placeholder}</option>
+              {sel.options.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          ))}
+
+          <button
+            onClick={handleBulkUpdate}
+            disabled={!bulkSel.subtopik_id || bulkSaving}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "8px",
+              border: "none",
+              background: !bulkSel.subtopik_id || bulkSaving ? "#3a3940" : "#e84c2b",
+              color: !bulkSel.subtopik_id || bulkSaving ? "#6b6860" : "white",
+              fontSize: "13px",
+              fontWeight: "700",
+              cursor: !bulkSel.subtopik_id || bulkSaving ? "not-allowed" : "pointer",
+              fontFamily: "inherit",
+              flexShrink: 0,
+            }}
+          >
+            {bulkSaving ? "Menyimpan..." : "Terapkan"}
+          </button>
+
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "8px",
+              border: "1px solid #3a3940",
+              background: "transparent",
+              color: "#b4b2a9",
+              fontSize: "13px",
+              fontWeight: "600",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              flexShrink: 0,
+            }}
+          >
+            Batal
+          </button>
+        </div>
+      )}
+
       {/* Info urutan */}
       {savingUrutan && (
         <div
@@ -355,6 +520,19 @@ export default function AdminQuizDetail() {
 
       {/* List soal */}
       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        {soalList.length > 0 && (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 4px", marginBottom: "2px" }}>
+            <input
+              type="checkbox"
+              checked={selectedIds.size === soalList.length && soalList.length > 0}
+              onChange={toggleSelectAll}
+              style={{ cursor: "pointer", width: "15px", height: "15px", accentColor: "#e84c2b" }}
+            />
+            <span style={{ fontSize: "12px", color: "#b4b2a9" }}>
+              {selectedIds.size > 0 ? `${selectedIds.size} dipilih` : "Pilih semua"}
+            </span>
+          </div>
+        )}
         {soalList.length === 0 && (
           <div
             style={{
@@ -416,6 +594,15 @@ export default function AdminQuizDetail() {
               transition: "border-color .15s",
             }}
           >
+            {/* Checkbox */}
+            <input
+              type="checkbox"
+              checked={selectedIds.has(s.id)}
+              onChange={() => toggleSelect(s.id)}
+              onClick={(e) => e.stopPropagation()}
+              style={{ cursor: "pointer", width: "15px", height: "15px", flexShrink: 0, accentColor: "#e84c2b" }}
+            />
+
             {/* Drag handle — desktop only */}
             {!isMobile && (
               <div style={{ color: "#b4b2a9", flexShrink: 0, cursor: "grab" }}>

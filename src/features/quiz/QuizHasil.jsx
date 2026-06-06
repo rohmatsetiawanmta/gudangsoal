@@ -251,12 +251,17 @@ export default function QuizHasil() {
     diffBreakdown[d].total++;
     if (s.is_correct) diffBreakdown[d].benar++;
 
-    // Topik
-    const topikKey = s.subtopik || s.topik || "Lainnya";
+    // Topik grouped by topik → subtopik
+    const topikKey = s.topik || "Lainnya";
+    const subtopikKey = s.subtopik || topikKey;
     if (!topikBreakdown[topikKey])
-      topikBreakdown[topikKey] = { benar: 0, total: 0, topik: s.topik };
+      topikBreakdown[topikKey] = { benar: 0, total: 0, subtopiks: {} };
     topikBreakdown[topikKey].total++;
     if (s.is_correct) topikBreakdown[topikKey].benar++;
+    if (!topikBreakdown[topikKey].subtopiks[subtopikKey])
+      topikBreakdown[topikKey].subtopiks[subtopikKey] = { benar: 0, total: 0, urutan: s.subtopik_urutan ?? 0 };
+    topikBreakdown[topikKey].subtopiks[subtopikKey].total++;
+    if (s.is_correct) topikBreakdown[topikKey].subtopiks[subtopikKey].benar++;
 
     // Waktu
     const w = s.waktu_detik || 0;
@@ -956,84 +961,99 @@ export default function QuizHasil() {
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: "10px",
+                  gap: "16px",
                 }}
               >
                 {Object.entries(topikBreakdown)
-                  .sort(
-                    (a, b) => a[1].benar / a[1].total - b[1].benar / b[1].total
-                  )
-                  .map(([subtopik, { benar, total, topik }]) => {
+                  .sort((a, b) => a[1].benar / a[1].total - b[1].benar / b[1].total)
+                  .map(([topik, { benar, total, subtopiks }]) => {
                     const p = Math.round((benar / total) * 100);
+                    const subtopikEntries = Object.entries(subtopiks);
+                    const singleSubtopik =
+                      subtopikEntries.length === 1 && subtopikEntries[0][0] === topik;
                     return (
-                      <div
-                        key={subtopik}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
-                        }}
-                      >
-                        <div style={{ minWidth: isMobile ? "80px" : "140px" }}>
+                      <div key={topik} style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                        {/* Topik header */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                           <div
+                            title={topik}
                             style={{
-                              fontSize: "12px",
-                              fontWeight: "600",
+                              width: isMobile ? "80px" : "140px",
+                              flexShrink: 0,
+                              fontSize: "13px",
+                              fontWeight: "700",
                               color: "#0f0e17",
                               overflow: "hidden",
                               textOverflow: "ellipsis",
                               whiteSpace: "nowrap",
+                              cursor: "default",
                             }}
                           >
-                            {subtopik}
+                            {topik}
                           </div>
-                          {topik && topik !== subtopik && (
+                          <div style={{ flex: 1, height: "8px", background: "#f2efe8", borderRadius: "4px", overflow: "hidden" }}>
                             <div
                               style={{
-                                fontSize: "11px",
-                                color: "#b4b2a9",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
+                                height: "100%",
+                                width: `${p}%`,
+                                background: p >= 75 ? "#1a8a6e" : p >= 50 ? "#f5a623" : "#e84c2b",
+                                borderRadius: "4px",
+                              }}
+                            />
+                          </div>
+                          <span style={{ fontSize: "12px", color: "#6b6860", minWidth: "60px", textAlign: "right" }}>
+                            {benar}/{total} ({p}%)
+                          </span>
+                        </div>
+
+                        {/* Subtopik rows — hanya tampil kalau > 1 subtopik */}
+                        {!singleSubtopik && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", borderLeft: "2px solid #e2ddd5", paddingLeft: isMobile ? "12px" : "16px" }}>
+                          {subtopikEntries.sort((a, b) => (a[1].urutan ?? 0) - (b[1].urutan ?? 0)).map(([subtopik, sub]) => {
+                          const sp = Math.round((sub.benar / sub.total) * 100);
+                          return (
+                            <div
+                              key={subtopik}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "10px",
                               }}
                             >
-                              {topik}
+                              <div
+                                title={subtopik}
+                                style={{
+                                  width: isMobile ? "68px" : "124px",
+                                  flexShrink: 0,
+                                  fontSize: "12px",
+                                  color: "#6b6860",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                  cursor: "default",
+                                }}
+                              >
+                                {subtopik}
+                              </div>
+                              <div style={{ flex: 1, height: "6px", background: "#f2efe8", borderRadius: "4px", overflow: "hidden" }}>
+                                <div
+                                  style={{
+                                    height: "100%",
+                                    width: `${sp}%`,
+                                    background: sp >= 75 ? "#1a8a6e" : sp >= 50 ? "#f5a623" : "#e84c2b",
+                                    borderRadius: "4px",
+                                    opacity: 0.7,
+                                  }}
+                                />
+                              </div>
+                              <span style={{ fontSize: "11px", color: "#b4b2a9", minWidth: "60px", textAlign: "right" }}>
+                                {sub.benar}/{sub.total} ({sp}%)
+                              </span>
                             </div>
-                          )}
-                        </div>
-                        <div
-                          style={{
-                            flex: 1,
-                            height: "8px",
-                            background: "#f2efe8",
-                            borderRadius: "4px",
-                            overflow: "hidden",
-                          }}
-                        >
-                          <div
-                            style={{
-                              height: "100%",
-                              width: `${p}%`,
-                              background:
-                                p >= 75
-                                  ? "#1a8a6e"
-                                  : p >= 50
-                                  ? "#f5a623"
-                                  : "#e84c2b",
-                              borderRadius: "4px",
-                            }}
-                          />
-                        </div>
-                        <span
-                          style={{
-                            fontSize: "12px",
-                            color: "#6b6860",
-                            minWidth: "60px",
-                            textAlign: "right",
-                          }}
-                        >
-                          {benar}/{total} ({p}%)
-                        </span>
+                          );
+                        })}
+                          </div>
+                        )}
                       </div>
                     );
                   })}

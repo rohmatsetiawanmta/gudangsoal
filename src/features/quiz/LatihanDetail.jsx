@@ -144,7 +144,6 @@ export default function LatihanDetail() {
       </div>
     );
 
-  console.log(set);
   const isFinal = set.is_final == 1;
   const attemptHabis = set.sisa_attempt === 0;
   const sudahMulai = set.attempt_ke > 0;
