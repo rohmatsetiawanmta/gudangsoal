@@ -144,6 +144,8 @@ export default function LatihanDetail() {
       </div>
     );
 
+  console.log(set);
+  const isFinal = set.is_final == 1;
   const attemptHabis = set.sisa_attempt === 0;
   const sudahMulai = set.attempt_ke > 0;
 
@@ -563,6 +565,26 @@ export default function LatihanDetail() {
           >
             Login untuk Mulai Latihan
           </button>
+        ) : isFinal ? (
+          <button
+            onClick={() =>
+              navigate(`/latihan/${id}/hasil/${set.best_session_id}`)
+            }
+            style={{
+              width: "100%",
+              padding: "16px",
+              borderRadius: "14px",
+              border: "none",
+              background: "#e84c2b",
+              color: "white",
+              fontSize: "16px",
+              fontWeight: "700",
+              cursor: "pointer",
+              fontFamily: "inherit",
+            }}
+          >
+            Lihat Hasil Terakhir
+          </button>
         ) : attemptHabis ? (
           <div
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
@@ -597,7 +619,7 @@ export default function LatihanDetail() {
                 fontFamily: "inherit",
               }}
             >
-              Lihat Hasil Terbaik
+              Lihat Hasil Terakhir
             </button>
           </div>
         ) : (

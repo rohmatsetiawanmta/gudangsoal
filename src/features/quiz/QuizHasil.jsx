@@ -231,7 +231,7 @@ export default function QuizHasil() {
   const { session, soal, all_attempts, sisa_attempt } = result;
   const persen =
     session.total > 0 ? Math.round((session.score / session.total) * 100) : 0;
-  const isFinal = session.is_final == 1;
+  const isFinal = all_attempts.some((a) => a.is_final == 1);
   const attemptHabis = sisa_attempt === 0;
 
   // Data analisis
@@ -252,9 +252,9 @@ export default function QuizHasil() {
     if (s.is_correct) diffBreakdown[d].benar++;
 
     // Topik
-    const topikKey = s.topik || s.subtopik || "Lainnya";
+    const topikKey = s.subtopik || s.topik || "Lainnya";
     if (!topikBreakdown[topikKey])
-      topikBreakdown[topikKey] = { benar: 0, total: 0, subtopik: s.subtopik };
+      topikBreakdown[topikKey] = { benar: 0, total: 0, topik: s.topik };
     topikBreakdown[topikKey].total++;
     if (s.is_correct) topikBreakdown[topikKey].benar++;
 
@@ -572,6 +572,48 @@ export default function QuizHasil() {
             </div>
           </div>
         </div>
+
+        {/* Switcher attempt */}
+        {all_attempts.length > 1 && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              marginBottom: "16px",
+              flexWrap: "wrap",
+            }}
+          >
+            <span style={{ fontSize: "12px", color: "#b4b2a9", flexShrink: 0 }}>
+              Attempt:
+            </span>
+            {all_attempts.map((a) => {
+              const isCurrent = String(a.id) === String(session_id);
+              return (
+                <button
+                  key={a.id}
+                  onClick={() =>
+                    !isCurrent &&
+                    navigate(`/latihan/${id}/hasil/${a.id}`)
+                  }
+                  style={{
+                    padding: "5px 12px",
+                    borderRadius: "8px",
+                    border: `1.5px solid ${isCurrent ? "#e84c2b" : "#e2ddd5"}`,
+                    background: isCurrent ? "#fff3f0" : "white",
+                    color: isCurrent ? "#e84c2b" : "#6b6860",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    cursor: isCurrent ? "default" : "pointer",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  Attempt {a.attempt_ke}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* CTA — Coba Lagi & Lihat Pembahasan */}
         <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
@@ -921,11 +963,11 @@ export default function QuizHasil() {
                   .sort(
                     (a, b) => a[1].benar / a[1].total - b[1].benar / b[1].total
                   )
-                  .map(([topik, { benar, total, subtopik }]) => {
+                  .map(([subtopik, { benar, total, topik }]) => {
                     const p = Math.round((benar / total) * 100);
                     return (
                       <div
-                        key={topik}
+                        key={subtopik}
                         style={{
                           display: "flex",
                           alignItems: "center",
@@ -943,9 +985,9 @@ export default function QuizHasil() {
                               whiteSpace: "nowrap",
                             }}
                           >
-                            {topik}
+                            {subtopik}
                           </div>
-                          {subtopik && subtopik !== topik && (
+                          {topik && topik !== subtopik && (
                             <div
                               style={{
                                 fontSize: "11px",
@@ -955,7 +997,7 @@ export default function QuizHasil() {
                                 whiteSpace: "nowrap",
                               }}
                             >
-                              {subtopik}
+                              {topik}
                             </div>
                           )}
                         </div>
