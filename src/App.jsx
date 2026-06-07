@@ -46,6 +46,8 @@ import QuizReview from "./features/quiz/QuizReview";
 import SearchPage from "./features/search/SearchPage";
 import ProfilePage from "./features/profile/ProfilePage";
 import AdminSoalForm from "./features/admin/soal-form";
+import GamesPage from "./features/games/GamesPage";
+import NumberSequenceGame from "./features/games/number-sequence/NumberSequenceGame";
 
 export default function App() {
   const { isLoggedIn } = useAuthStore();
@@ -94,6 +96,8 @@ export default function App() {
       />
       <Route path="/soal/:kode" element={<SoalDetail />} />
       <Route path="/populer" element={<PopulerPage />} />
+      <Route path="/games" element={<GamesPage />} />
+      <Route path="/games/number-sequence" element={<NumberSequenceGame />} />
 
       <Route path="*" element={<Navigate to="/" />} />
 
