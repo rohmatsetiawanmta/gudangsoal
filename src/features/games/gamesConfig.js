@@ -1,7 +1,7 @@
 // Definisi semua game yang tersedia di frontend.
 // slug harus cocok dengan kolom `link` di tabel `game` di database.
 
-import { Hash } from "lucide-react";
+import { Gamepad2 } from "lucide-react";
 
 export const GAMES_CONFIG = [
   {
@@ -9,7 +9,7 @@ export const GAMES_CONFIG = [
     title: "Number Sequence",
     description: "Tebak angka berikutnya dari pola deret aritmatika atau geometri.",
     path: "/games/number-sequence",
-    icon: Hash,
+    icon: Gamepad2,
     color: "#2563eb",
     bg: "#eff6ff",
   },

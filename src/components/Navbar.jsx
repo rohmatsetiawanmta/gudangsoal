@@ -17,6 +17,8 @@ import {
   TrendingUp,
   Menu,
   Dumbbell,
+  Compass,
+  Gamepad2,
 } from "lucide-react";
 import { useAuthStore } from "../features/auth/authStore";
 import RandomSoal from "./RandomSoal";
@@ -24,17 +26,19 @@ import FeedbackModal from "../features/feedback/FeedbackModal";
 import NotificationBell from "../features/notifications/NotificationBell";
 import useWindowWidth from "../hooks/useWindowWidth";
 
+const JELAJAHI_LINKS = [
+  { to: "/browse", label: "Direktori Soal", icon: BookOpen, desc: "Jelajahi soal berdasarkan jenjang & topik" },
+  { to: "/populer", label: "Soal Populer", icon: TrendingUp, desc: "Soal yang paling banyak dikerjakan" },
+  { to: "/games", label: "Games", icon: Gamepad2, desc: "Mini-game matematika seru" },
+];
+
 const NAV_LINKS = [
-  { to: "/browse", label: "Direktori Soal", icon: BookOpen },
   { to: "/latihan", label: "Latihan", icon: Dumbbell },
-  { to: "/populer", label: "Soal Populer", icon: TrendingUp },
 ];
 
 const NAV_LINKS_LOGGED_IN = [
   { to: "/home", label: "Beranda", icon: Home },
-  { to: "/browse", label: "Direktori Soal", icon: BookOpen },
   { to: "/latihan", label: "Latihan", icon: Dumbbell },
-  { to: "/populer", label: "Soal Populer", icon: TrendingUp },
   { to: "/request-soal", label: "Request Soal", icon: MessageSquarePlus },
 ];
 
@@ -47,18 +51,22 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [jelajahiOpen, setJelajahiOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [randomOpen, setRandomOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
+  const jelajahiRef = useRef(null);
   const menuRef = useRef(null);
 
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target))
         setDropdownOpen(false);
+      if (jelajahiRef.current && !jelajahiRef.current.contains(e.target))
+        setJelajahiOpen(false);
       if (menuRef.current && !menuRef.current.contains(e.target))
         setMenuOpen(false);
     };
@@ -201,6 +209,118 @@ export default function Navbar() {
                 {label}
               </Link>
             ))}
+
+            {/* Dropdown Jelajahi */}
+            <div ref={jelajahiRef} style={{ position: "relative" }}>
+              <button
+                onClick={() => setJelajahiOpen((o) => !o)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "6px 12px",
+                  borderRadius: "8px",
+                  border: "none",
+                  background: jelajahiOpen ? "#f2efe8" : "transparent",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  color: jelajahiOpen ? "#0f0e17" : "#6b6860",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  transition: "background .15s, color .15s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#f2efe8";
+                  e.currentTarget.style.color = "#0f0e17";
+                }}
+                onMouseLeave={(e) => {
+                  if (!jelajahiOpen) {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.color = "#6b6860";
+                  }
+                }}
+              >
+                <Compass size={15} />
+                Jelajahi
+                <ChevronDown
+                  size={13}
+                  style={{
+                    transform: jelajahiOpen ? "rotate(180deg)" : "rotate(0)",
+                    transition: "transform .2s",
+                  }}
+                />
+              </button>
+
+              {jelajahiOpen && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 8px)",
+                    left: 0,
+                    background: "white",
+                    border: "1px solid #e2ddd5",
+                    borderRadius: "14px",
+                    padding: "8px",
+                    minWidth: "220px",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+                    zIndex: 200,
+                  }}
+                >
+                  {JELAJAHI_LINKS.map(({ to, label, icon: Icon, desc }) => (
+                    <Link
+                      key={to}
+                      to={to}
+                      onClick={() => setJelajahiOpen(false)}
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: "10px",
+                        padding: "9px 10px",
+                        borderRadius: "8px",
+                        textDecoration: "none",
+                        transition: "background .15s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = "#f2efe8")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "transparent")
+                      }
+                    >
+                      <div
+                        style={{
+                          width: "30px",
+                          height: "30px",
+                          borderRadius: "8px",
+                          background: "#f2efe8",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                          marginTop: "1px",
+                        }}
+                      >
+                        <Icon size={14} color="#6b6860" />
+                      </div>
+                      <div>
+                        <div
+                          style={{
+                            fontSize: "14px",
+                            fontWeight: "600",
+                            color: "#0f0e17",
+                          }}
+                        >
+                          {label}
+                        </div>
+                        <div style={{ fontSize: "12px", color: "#b4b2a9", marginTop: "1px" }}>
+                          {desc}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -732,6 +852,27 @@ export default function Navbar() {
 
                     {/* Nav links */}
                     {navLinks.map(({ to, label, icon: Icon }) => (
+                      <button
+                        key={to}
+                        onClick={() => {
+                          navigate(to);
+                          setMenuOpen(false);
+                        }}
+                        style={menuItemStyle}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background = "#f2efe8")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background = "none")
+                        }
+                      >
+                        <Icon size={15} color="#6b6860" />
+                        {label}
+                      </button>
+                    ))}
+
+                    {/* Jelajahi links */}
+                    {JELAJAHI_LINKS.map(({ to, label, icon: Icon }) => (
                       <button
                         key={to}
                         onClick={() => {

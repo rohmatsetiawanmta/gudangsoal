@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Hash } from "lucide-react";
+import { Gamepad2 } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
@@ -10,7 +10,7 @@ const GAMES = [
     slug: "number-sequence",
     title: "Number Sequence",
     description: "Tebak angka berikutnya dari pola deret aritmatika atau geometri.",
-    icon: Hash,
+    icon: Gamepad2,
     color: "#2563eb",
     bg: "#eff6ff",
   },
