@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus, Search, Pencil, Trash2,
-  ChevronLeft, ChevronRight, Eye, Copy, Loader2,
+  ChevronLeft, ChevronRight, Eye, Copy, Loader2, FileJson,
 } from "lucide-react";
 import api from "../../lib/api";
 import ToggleSwitch from "../../components/ToggleSwitch";
@@ -227,10 +227,16 @@ export default function AdminSoal() {
           <h1 style={{ fontSize: isMobile ? "22px" : "24px", fontWeight: "800", color: "#0f0e17", letterSpacing: "-0.5px", marginBottom: "4px" }}>Kelola Soal</h1>
           <p style={{ fontSize: "14px", color: "#6b6860" }}>{total} soal tersedia</p>
         </div>
-        <button onClick={() => navigate("/admin/soal/tambah")}
-          style={{ display: "flex", alignItems: "center", gap: "8px", background: "#e84c2b", color: "white", border: "none", borderRadius: "10px", padding: "10px 18px", fontSize: "14px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", flexShrink: 0, width: isMobile ? "100%" : "auto", justifyContent: isMobile ? "center" : "flex-start" }}>
-          <Plus size={16} /> Tambah Soal
-        </button>
+        <div style={{ display: "flex", gap: "10px", width: isMobile ? "100%" : "auto" }}>
+          <button onClick={() => navigate("/admin/soal/bulk-import")}
+            style={{ display: "flex", alignItems: "center", gap: "8px", background: "white", color: "#0f0e17", border: "1.5px solid #e2ddd5", borderRadius: "10px", padding: "10px 18px", fontSize: "14px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", flexShrink: 0, flex: isMobile ? 1 : "none", justifyContent: "center" }}>
+            <FileJson size={16} /> Bulk Import
+          </button>
+          <button onClick={() => navigate("/admin/soal/tambah")}
+            style={{ display: "flex", alignItems: "center", gap: "8px", background: "#e84c2b", color: "white", border: "none", borderRadius: "10px", padding: "10px 18px", fontSize: "14px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", flexShrink: 0, flex: isMobile ? 1 : "none", justifyContent: "center" }}>
+            <Plus size={16} /> Tambah Soal
+          </button>
+        </div>
       </div>
 
       {/* Search */}

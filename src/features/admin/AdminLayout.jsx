@@ -36,7 +36,6 @@ const MENU = [
   { to: "/admin/feedback", label: "Masukan User", icon: MessageSquarePlus },
   { to: "/admin/latihan", label: "Kelola Latihan", icon: BookOpen },
   { to: "/admin/soal/ai-bulk", label: "AI Bulk Soal", icon: Sparkles },
-  { to: "/admin/soal/bulk-import", label: "Bulk Import JSON", icon: FileJson },
 ];
 
 function SidebarLink({ to, label, icon: Icon, end, collapsed, onClick }) {
@@ -113,6 +112,7 @@ export default function AdminLayout() {
     if (location.pathname.startsWith("/admin/soal/edit")) return "Edit Soal";
     if (location.pathname.startsWith("/admin/soal/ai-bulk")) return "AI Bulk Soal";
     if (location.pathname.startsWith("/admin/soal/bulk-import")) return "Bulk Import JSON";
+
     if (location.pathname.startsWith("/admin/soal")) return "Kelola Soal";
     if (location.pathname.startsWith("/admin/struktur"))
       return "Kelola Struktur";
