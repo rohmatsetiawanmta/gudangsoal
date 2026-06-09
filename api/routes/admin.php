@@ -151,6 +151,73 @@ if ($uri === '/admin/soal' && $method === 'POST') {
   exit;
 }
 
+// POST /admin/soal/bulk
+if ($uri === '/admin/soal/bulk' && $method === 'POST') {
+  $soalList = $body['soal'] ?? [];
+  if (empty($soalList) || !is_array($soalList)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Array soal wajib diisi']);
+    exit;
+  }
+
+  $saved  = [];
+  $errors = [];
+  $chars  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+  foreach ($soalList as $i => $s) {
+    $required = ['subtopik_id', 'body', 'options', 'answer'];
+    $missing = false;
+    foreach ($required as $field) {
+      if (empty($s[$field])) { $missing = true; break; }
+    }
+    if ($missing) {
+      $errors[] = ['index' => $i, 'reason' => 'Field tidak lengkap'];
+      continue;
+    }
+
+    // Generate kode unik
+    $kode = '';
+    do {
+      $kode = '';
+      for ($j = 0; $j < 6; $j++) {
+        $kode .= $chars[random_int(0, strlen($chars) - 1)];
+      }
+      $cek = $pdo->prepare('SELECT id FROM soal WHERE kode = ?');
+      $cek->execute([$kode]);
+    } while ($cek->fetch());
+
+    try {
+      $stmt = $pdo->prepare('
+        INSERT INTO soal (kode, subtopik_id, tipe, body, options, answer, explanation, difficulty, video_url, is_public_explanation)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ');
+      $stmt->execute([
+        $kode,
+        $s['subtopik_id'],
+        $s['tipe']        ?? 'pilihan_ganda',
+        $s['body'],
+        json_encode($s['options']),
+        json_encode($s['answer']),
+        $s['explanation'] ?? null,
+        $s['difficulty']  ?? 1,
+        $s['video_url']   ?? null,
+        $s['is_public_explanation'] ?? 0,
+      ]);
+      $saved[] = ['index' => $i, 'id' => $pdo->lastInsertId(), 'kode' => $kode];
+    } catch (Exception $e) {
+      $errors[] = ['index' => $i, 'reason' => $e->getMessage()];
+    }
+  }
+
+  http_response_code(201);
+  echo json_encode([
+    'saved'  => $saved,
+    'errors' => $errors,
+    'total'  => count($saved),
+  ]);
+  exit;
+}
+
 // PUT /admin/soal?id=1
 if ($uri === '/admin/soal' && $method === 'PUT') {
   $id = $_GET['id'] ?? null;
@@ -184,6 +251,24 @@ if ($uri === '/admin/soal' && $method === 'PUT') {
   ]);
 
   echo json_encode(['message' => 'Soal berhasil diupdate']);
+  exit;
+}
+
+// DELETE /admin/soal/bulk  — body: { ids: [1,2,3] }
+if ($uri === '/admin/soal/bulk' && $method === 'DELETE') {
+  $body = json_decode(file_get_contents('php://input'), true) ?? [];
+  $ids  = array_filter(array_map('intval', $body['ids'] ?? []), fn($id) => $id > 0);
+  if (empty($ids)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'ids wajib']);
+    exit;
+  }
+  $placeholders = implode(',', array_fill(0, count($ids), '?'));
+  $pdo->prepare("DELETE FROM sessions   WHERE soal_id IN ($placeholders)")->execute($ids);
+  $pdo->prepare("DELETE FROM xp_history WHERE soal_kode IN (SELECT kode FROM soal WHERE id IN ($placeholders))")->execute($ids);
+  $pdo->prepare("DELETE FROM reports    WHERE soal_kode IN (SELECT kode FROM soal WHERE id IN ($placeholders))")->execute($ids);
+  $pdo->prepare("DELETE FROM soal WHERE id IN ($placeholders)")->execute($ids);
+  echo json_encode(['deleted' => count($ids)]);
   exit;
 }
 
@@ -578,71 +663,6 @@ $soalTerpopuler = $pdo->query('
 'xp_per_hari'          => $xpPerHari,
 'soal_terpopuler'      => $soalTerpopuler,
   ]);
-  exit;
-}
-
-// POST /admin/ai/generate
-if ($uri === '/admin/ai/generate' && $method === 'POST') {
-  $prompt = $body['prompt'] ?? null;
-  if (!$prompt) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Prompt wajib diisi']);
-    exit;
-  }
-
-  $apiKey = 'AIzaSyBkOYxRsi1Mp2txGSWIz-B5tJv1yCfUg4M'; // ganti dengan API key kamu
-  $model = 'gemini-2.5-flash';
-  $url   = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
-
-  $payload = json_encode([
-    'contents' => [
-      ['parts' => [['text' => $prompt]]]
-    ],
-    'generationConfig' => [
-      'temperature'     => 0.7,
-      'maxOutputTokens' => 8192,
-    ],
-  ]);
-
-  $ch = curl_init($url);
-  curl_setopt_array($ch, [
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_POST           => true,
-    CURLOPT_POSTFIELDS     => $payload,
-    CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-  ]);
-
-  $response = curl_exec($ch);
-  curl_close($ch);
-
-  if (!$response) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Gagal menghubungi AI']);
-    exit;
-  }
-
-  $data = json_decode($response, true);
-  error_log(print_r($data, true));
-
-  $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
-  
-  echo json_encode([
-    'text'  => $text,
-    'debug' => $data,
-  ], JSON_UNESCAPED_UNICODE);
-  exit;
-
-  // Bersihkan markdown code block kalau ada
-  $text = preg_replace('/```json|```/i', '', $text);
-  $text = trim($text);
-
-  // Coba parse JSON dari Gemini langsung
-  $parsed = json_decode($text, true);
-  if ($parsed) {
-    echo json_encode(['parsed' => $parsed], JSON_UNESCAPED_UNICODE);
-  } else {
-    echo json_encode(['text' => $text], JSON_UNESCAPED_UNICODE);
-  }
   exit;
 }
 

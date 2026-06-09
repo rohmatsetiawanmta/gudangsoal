@@ -2,14 +2,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Plus,
-  Search,
-  Pencil,
-  Trash2,
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-  Copy,
+  Plus, Search, Pencil, Trash2,
+  ChevronLeft, ChevronRight, Eye, Copy, Loader2,
 } from "lucide-react";
 import api from "../../lib/api";
 import ToggleSwitch from "../../components/ToggleSwitch";
@@ -17,164 +11,70 @@ import useWindowWidth from "../../hooks/useWindowWidth";
 import { Helmet } from "react-helmet-async";
 import SoalPreviewModal from "./SoalPreviewModal";
 
+// ── DifficultyBadge ──────────────────────────────────────────────────────────
+
 function DifficultyBadge({ level }) {
   const map = {
-    1: { label: "Easy", color: "#1a8a6e", bg: "#e4f5f0" },
+    1: { label: "Easy",   color: "#1a8a6e", bg: "#e4f5f0" },
     2: { label: "Medium", color: "#854F0B", bg: "#faeeda" },
-    3: { label: "Hard", color: "#e84c2b", bg: "#fff3f0" },
+    3: { label: "Hard",   color: "#e84c2b", bg: "#fff3f0" },
   };
   const d = map[level] || map[1];
   return (
-    <span
-      style={{
-        fontSize: "11px",
-        fontWeight: "700",
-        padding: "3px 8px",
-        borderRadius: "6px",
-        background: d.bg,
-        color: d.color,
-        flexShrink: 0,
-      }}
-    >
+    <span style={{ fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px", background: d.bg, color: d.color, flexShrink: 0 }}>
       {d.label}
     </span>
   );
 }
 
-// Tambah komponen ActionMenu di atas AdminSoal
-function ActionMenu({
-  soal,
-  onPreview,
-  onSalin,
-  onEdit,
-  onDelete,
-  copying,
-  isMobile,
-}) {
+// ── Checkbox ─────────────────────────────────────────────────────────────────
+
+function Checkbox({ checked, indeterminate, onChange, size = 16 }) {
+  const ref = useRef(null);
+  useEffect(() => { if (ref.current) ref.current.indeterminate = !!indeterminate; }, [indeterminate]);
+  return (
+    <input
+      ref={ref}
+      type="checkbox"
+      checked={checked}
+      onChange={e => onChange(e.target.checked)}
+      style={{ width: size, height: size, accentColor: "#e84c2b", cursor: "pointer", flexShrink: 0 }}
+    />
+  );
+}
+
+// ── ActionMenu ───────────────────────────────────────────────────────────────
+
+function ActionMenu({ soal, onPreview, onSalin, onEdit, onDelete, copying }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
-
   useEffect(() => {
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
   }, []);
 
-  const size = isMobile ? "28px" : "30px";
-
   const items = [
-    {
-      label: "Preview",
-      icon: Eye,
-      onClick: () => {
-        onPreview();
-        setOpen(false);
-      },
-      danger: false,
-    },
-    {
-      label: "Salin Soal",
-      icon: Copy,
-      onClick: () => {
-        onSalin();
-        setOpen(false);
-      },
-      danger: false,
-      disabled: copying,
-    },
-    {
-      label: "Edit",
-      icon: Pencil,
-      onClick: () => {
-        onEdit();
-        setOpen(false);
-      },
-      danger: false,
-    },
-    {
-      label: "Hapus",
-      icon: Trash2,
-      onClick: () => {
-        onDelete();
-        setOpen(false);
-      },
-      danger: true,
-    },
+    { label: "Preview",    icon: Eye,    onClick: () => { onPreview(); setOpen(false); } },
+    { label: "Salin Soal", icon: Copy,   onClick: () => { onSalin();  setOpen(false); }, disabled: copying },
+    { label: "Edit",       icon: Pencil, onClick: () => { onEdit();   setOpen(false); } },
+    { label: "Hapus",      icon: Trash2, onClick: () => { onDelete(); setOpen(false); }, danger: true },
   ];
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
-      <button
-        onClick={() => setOpen((v) => !v)}
-        style={{
-          width: size,
-          height: size,
-          borderRadius: "8px",
-          border: "1px solid #e2ddd5",
-          background: open ? "#f2efe8" : "white",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#6b6860",
-          fontSize: "16px",
-          fontWeight: "700",
-          letterSpacing: "1px",
-          lineHeight: 1,
-        }}
-      >
+      <button onClick={() => setOpen(v => !v)}
+        style={{ width: "30px", height: "30px", borderRadius: "8px", border: "1px solid #e2ddd5", background: open ? "#f2efe8" : "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b6860", fontSize: "16px", fontWeight: "700", letterSpacing: "1px", lineHeight: 1 }}>
         ···
       </button>
-
       {open && (
-        <div
-          style={{
-            position: "absolute",
-            top: "calc(100% + 6px)",
-            right: 0,
-            background: "white",
-            border: "1px solid #e2ddd5",
-            borderRadius: "12px",
-            padding: "6px",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
-            zIndex: 50,
-            minWidth: "140px",
-          }}
-        >
+        <div style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, background: "white", border: "1px solid #e2ddd5", borderRadius: "12px", padding: "6px", boxShadow: "0 8px 24px rgba(0,0,0,.10)", zIndex: 50, minWidth: "140px" }}>
           {items.map(({ label, icon: Icon, onClick, danger, disabled }) => (
-            <button
-              key={label}
-              onClick={onClick}
-              disabled={disabled}
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 10px",
-                borderRadius: "8px",
-                border: "none",
-                background: "none",
-                cursor: disabled ? "not-allowed" : "pointer",
-                fontSize: "13px",
-                fontWeight: "500",
-                color: danger ? "#e84c2b" : "#0f0e17",
-                fontFamily: "inherit",
-                textAlign: "left",
-                opacity: disabled ? 0.5 : 1,
-              }}
-              onMouseEnter={(e) => {
-                if (!disabled)
-                  e.currentTarget.style.background = danger
-                    ? "#fff3f0"
-                    : "#f2efe8";
-              }}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
-            >
-              <Icon size={14} />
-              {label}
+            <button key={label} onClick={onClick} disabled={disabled}
+              style={{ width: "100%", display: "flex", alignItems: "center", gap: "8px", padding: "8px 10px", borderRadius: "8px", border: "none", background: "none", cursor: disabled ? "not-allowed" : "pointer", fontSize: "13px", fontWeight: "500", color: danger ? "#e84c2b" : "#0f0e17", fontFamily: "inherit", textAlign: "left", opacity: disabled ? 0.5 : 1 }}
+              onMouseEnter={e => { if (!disabled) e.currentTarget.style.background = danger ? "#fff3f0" : "#f2efe8"; }}
+              onMouseLeave={e => (e.currentTarget.style.background = "none")}>
+              <Icon size={14} />{label}
             </button>
           ))}
         </div>
@@ -183,363 +83,206 @@ function ActionMenu({
   );
 }
 
-export default function AdminSoal() {
-  const navigate = useNavigate();
-  const width = useWindowWidth();
-  const isMobile = width <= 480;
+// ── BulkBar ───────────────────────────────────────────────────────────────────
 
-  const [soal, setSoal] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+function BulkBar({ count, onDelete, onClear, deleting }) {
+  return (
+    <div style={{
+      position: "fixed", bottom: "24px", left: "50%", transform: "translateX(-50%)",
+      background: "#0f0e17", borderRadius: "14px", padding: "12px 18px",
+      display: "flex", alignItems: "center", gap: "14px",
+      boxShadow: "0 8px 32px rgba(0,0,0,.25)", zIndex: 100,
+      whiteSpace: "nowrap",
+    }}>
+      <span style={{ fontSize: "14px", fontWeight: "600", color: "white" }}>
+        {count} soal dipilih
+      </span>
+      <div style={{ width: "1px", height: "20px", background: "rgba(255,255,255,.2)" }} />
+      <button onClick={onDelete} disabled={deleting}
+        style={{ display: "flex", alignItems: "center", gap: "6px", padding: "7px 14px", borderRadius: "9px", border: "none", background: "#e84c2b", color: "white", fontSize: "13px", fontWeight: "600", cursor: deleting ? "not-allowed" : "pointer", fontFamily: "inherit", opacity: deleting ? 0.7 : 1 }}>
+        {deleting ? <Loader2 size={14} style={{ animation: "spin .7s linear infinite" }} /> : <Trash2 size={14} />}
+        {deleting ? "Menghapus..." : `Hapus ${count} Soal`}
+      </button>
+      <button onClick={onClear}
+        style={{ padding: "7px 14px", borderRadius: "9px", border: "1px solid rgba(255,255,255,.2)", background: "transparent", color: "rgba(255,255,255,.7)", fontSize: "13px", fontWeight: "500", cursor: "pointer", fontFamily: "inherit" }}>
+        Batalkan
+      </button>
+    </div>
+  );
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+
+export default function AdminSoal() {
+  const navigate  = useNavigate();
+  const width     = useWindowWidth();
+  const isMobile  = width <= 480;
+
+  const [soal, setSoal]         = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [search, setSearch]     = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [deleteId, setDeleteId] = useState(null);
+  const [page, setPage]         = useState(1);
+  const [total, setTotal]       = useState(0);
+  const [deleteId, setDeleteId] = useState(null);   // single delete
   const [deleting, setDeleting] = useState(false);
   const [publishLoading, setPublishLoading] = useState({});
   const [previewId, setPreviewId] = useState(null);
-  const [copying, setCopying] = useState({});
+  const [copying, setCopying]   = useState({});
+
+  // ── selection state ──
+  const [selected, setSelected] = useState(new Set()); // Set<id>
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
 
   const limit = 20;
+  const currentIds = soal.map(s => s.id);
+  const allOnPageSelected = currentIds.length > 0 && currentIds.every(id => selected.has(id));
+  const someOnPageSelected = currentIds.some(id => selected.has(id)) && !allOnPageSelected;
 
   const fetchSoal = () => {
     setLoading(true);
-    api
-      .get(`/admin/soal?page=${page}&limit=${limit}&search=${search}`)
-      .then((data) => {
-        setSoal(data.data);
-        setTotal(data.total);
-      })
+    api.get(`/admin/soal?page=${page}&limit=${limit}&search=${search}`)
+      .then(data => { setSoal(data.data); setTotal(data.total); })
       .catch(() => {})
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => {
-    fetchSoal();
-  }, [page, search]);
+  useEffect(() => { fetchSoal(); }, [page, search]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setPage(1);
-    setSearch(searchInput);
-  };
+  // clear selection when page/search changes
+  useEffect(() => { setSelected(new Set()); }, [page, search]);
 
-  const handleTogglePublish = async (id, currentStatus) => {
-    setPublishLoading((p) => ({ ...p, [id]: true }));
-    try {
-      await api.put(`/admin/publish/soal?id=${id}`);
-      setSoal((prev) =>
-        prev.map((s) =>
-          s.id === id
-            ? { ...s, is_published: currentStatus == 1 ? "0" : "1" }
-            : s
-        )
-      );
-    } catch {
-      alert("Gagal mengubah status publish");
-    } finally {
-      setPublishLoading((p) => ({ ...p, [id]: false }));
-    }
-  };
+  const handleSearch = e => { e.preventDefault(); setPage(1); setSearch(searchInput); };
 
+  const toggleOne = id => setSelected(prev => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
+
+  const toggleAll = checked => setSelected(prev => {
+    const next = new Set(prev);
+    if (checked) currentIds.forEach(id => next.add(id));
+    else currentIds.forEach(id => next.delete(id));
+    return next;
+  });
+
+  // ── single delete ──
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleting(true);
     try {
       await api.delete(`/admin/soal?id=${deleteId}`);
       setDeleteId(null);
+      setSelected(prev => { const n = new Set(prev); n.delete(deleteId); return n; });
       fetchSoal();
-    } catch {
-    } finally {
-      setDeleting(false);
-    }
+    } catch {} finally { setDeleting(false); }
   };
 
-  const handleSalin = async (id) => {
-    setCopying((c) => ({ ...c, [id]: true }));
+  // ── bulk delete ──
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true);
+    try {
+      await api.delete("/admin/soal/bulk", { data: { ids: [...selected] } });
+      setSelected(new Set());
+      setConfirmBulkDelete(false);
+      fetchSoal();
+    } catch { alert("Gagal menghapus soal"); }
+    finally { setBulkDeleting(false); }
+  };
+
+  const handleTogglePublish = async (id, currentStatus) => {
+    setPublishLoading(p => ({ ...p, [id]: true }));
+    try {
+      await api.put(`/admin/publish/soal?id=${id}`);
+      setSoal(prev => prev.map(s => s.id === id ? { ...s, is_published: currentStatus == 1 ? "0" : "1" } : s));
+    } catch { alert("Gagal mengubah status publish"); }
+    finally { setPublishLoading(p => ({ ...p, [id]: false })); }
+  };
+
+  const handleSalin = async id => {
+    setCopying(c => ({ ...c, [id]: true }));
     try {
       const res = await api.post(`/admin/soal/salin?id=${id}`);
       navigate(`/admin/soal/edit/${res.id}`);
-    } catch {
-      alert("Gagal menyalin soal");
-    } finally {
-      setCopying((c) => ({ ...c, [id]: false }));
-    }
+    } catch { alert("Gagal menyalin soal"); }
+    finally { setCopying(c => ({ ...c, [id]: false })); }
   };
 
   const totalPages = Math.ceil(total / limit);
 
+  // ── row background ──
+  const rowBg = id => selected.has(id) ? "#fff8f7" : "white";
+  const rowBorder = id => selected.has(id) ? "1px solid #fca5a5" : "1px solid #f2efe8";
+
   return (
     <div>
-      <Helmet>
-        <title>Kelola Soal | Admin Gudang Soal</title>
-      </Helmet>
+      <Helmet><title>Kelola Soal | Admin Gudang Soal</title></Helmet>
+      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}} @keyframes spin{to{transform:rotate(360deg)}}`}</style>
+
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: isMobile ? "flex-start" : "center",
-          justifyContent: "space-between",
-          flexDirection: isMobile ? "column" : "row",
-          gap: isMobile ? "14px" : "0",
-          marginBottom: "24px",
-        }}
-      >
+      <div style={{ display: "flex", alignItems: isMobile ? "flex-start" : "center", justifyContent: "space-between", flexDirection: isMobile ? "column" : "row", gap: isMobile ? "14px" : "0", marginBottom: "24px" }}>
         <div>
-          <h1
-            style={{
-              fontSize: isMobile ? "22px" : "24px",
-              fontWeight: "800",
-              color: "#0f0e17",
-              letterSpacing: "-0.5px",
-              marginBottom: "4px",
-            }}
-          >
-            Kelola Soal
-          </h1>
-          <p style={{ fontSize: "14px", color: "#6b6860" }}>
-            {total} soal tersedia
-          </p>
+          <h1 style={{ fontSize: isMobile ? "22px" : "24px", fontWeight: "800", color: "#0f0e17", letterSpacing: "-0.5px", marginBottom: "4px" }}>Kelola Soal</h1>
+          <p style={{ fontSize: "14px", color: "#6b6860" }}>{total} soal tersedia</p>
         </div>
-        <button
-          onClick={() => navigate("/admin/soal/tambah")}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            background: "#e84c2b",
-            color: "white",
-            border: "none",
-            borderRadius: "10px",
-            padding: "10px 18px",
-            fontSize: "14px",
-            fontWeight: "600",
-            cursor: "pointer",
-            fontFamily: "inherit",
-            flexShrink: 0,
-            width: isMobile ? "100%" : "auto",
-            justifyContent: isMobile ? "center" : "flex-start",
-          }}
-        >
-          <Plus size={16} />
-          Tambah Soal
+        <button onClick={() => navigate("/admin/soal/tambah")}
+          style={{ display: "flex", alignItems: "center", gap: "8px", background: "#e84c2b", color: "white", border: "none", borderRadius: "10px", padding: "10px 18px", fontSize: "14px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", flexShrink: 0, width: isMobile ? "100%" : "auto", justifyContent: isMobile ? "center" : "flex-start" }}>
+          <Plus size={16} /> Tambah Soal
         </button>
       </div>
 
       {/* Search */}
-      <form
-        onSubmit={handleSearch}
-        style={{ marginBottom: "20px", display: "flex", gap: "10px" }}
-      >
+      <form onSubmit={handleSearch} style={{ marginBottom: "20px", display: "flex", gap: "10px" }}>
         <div style={{ position: "relative", flex: 1 }}>
-          <Search
-            size={15}
-            style={{
-              position: "absolute",
-              left: "12px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#6b6860",
-              pointerEvents: "none",
-            }}
-          />
-          <input
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Cari soal..."
-            style={{
-              width: "100%",
-              paddingLeft: "36px",
-              paddingRight: "16px",
-              paddingTop: "10px",
-              paddingBottom: "10px",
-              borderRadius: "10px",
-              border: "1px solid #e2ddd5",
-              fontSize: "14px",
-              outline: "none",
-              fontFamily: "inherit",
-              color: "#0f0e17",
-              background: "white",
-              boxSizing: "border-box",
-            }}
-            onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
-            onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
-          />
+          <Search size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#6b6860", pointerEvents: "none" }} />
+          <input value={searchInput} onChange={e => setSearchInput(e.target.value)} placeholder="Cari soal..."
+            style={{ width: "100%", paddingLeft: "36px", paddingRight: "16px", paddingTop: "10px", paddingBottom: "10px", borderRadius: "10px", border: "1px solid #e2ddd5", fontSize: "14px", outline: "none", fontFamily: "inherit", color: "#0f0e17", background: "white", boxSizing: "border-box" }}
+            onFocus={e => (e.target.style.borderColor = "#e84c2b")}
+            onBlur={e => (e.target.style.borderColor = "#e2ddd5")} />
         </div>
-        <button
-          type="submit"
-          style={{
-            padding: "10px 20px",
-            borderRadius: "10px",
-            background: "#0f0e17",
-            color: "white",
-            border: "none",
-            fontSize: "14px",
-            fontWeight: "600",
-            cursor: "pointer",
-            fontFamily: "inherit",
-            flexShrink: 0,
-          }}
-        >
-          Cari
-        </button>
+        <button type="submit" style={{ padding: "10px 20px", borderRadius: "10px", background: "#0f0e17", color: "white", border: "none", fontSize: "14px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", flexShrink: 0 }}>Cari</button>
       </form>
 
       {/* ── DESKTOP: Table ── */}
       {!isMobile && (
-        <div
-          style={{
-            background: "white",
-            borderRadius: "14px",
-            border: "1px solid #e2ddd5",
-            overflow: "hidden",
-          }}
-        >
+        <div style={{ background: "white", borderRadius: "14px", border: "1px solid #e2ddd5", overflow: "hidden" }}>
           {/* Table header */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "40px 70px 1fr 160px 80px 120px 50px",
-              gap: "16px",
-              padding: "12px 20px",
-              background: "#f2efe8",
-              borderBottom: "1px solid #e2ddd5",
-            }}
-          >
-            {[
-              "#",
-              "Kode",
-              "Soal",
-              "Subtopik",
-              "Sulit",
-              "Published",
-              "Aksi",
-            ].map((h) => (
-              <div
-                key={h}
-                style={{
-                  fontSize: "12px",
-                  fontWeight: "700",
-                  color: "#6b6860",
-                  textTransform: "uppercase",
-                  letterSpacing: ".06em",
-                }}
-              >
-                {h}
-              </div>
+          <div style={{ display: "grid", gridTemplateColumns: "36px 40px 70px 1fr 160px 80px 120px 50px", gap: "12px", padding: "12px 20px", background: "#f2efe8", borderBottom: "1px solid #e2ddd5", alignItems: "center" }}>
+            <Checkbox checked={allOnPageSelected} indeterminate={someOnPageSelected} onChange={toggleAll} />
+            {["#","Kode","Soal","Subtopik","Sulit","Published","Aksi"].map(h => (
+              <div key={h} style={{ fontSize: "12px", fontWeight: "700", color: "#6b6860", textTransform: "uppercase", letterSpacing: ".06em" }}>{h}</div>
             ))}
           </div>
 
           {/* Loading */}
-          {loading && (
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    height: "60px",
-                    borderBottom: "1px solid #f2efe8",
-                    background: i % 2 === 0 ? "white" : "#faf9f6",
-                    animation: "pulse 1.5s infinite",
-                  }}
-                />
-              ))}
-            </div>
-          )}
+          {loading && Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} style={{ height: "60px", borderBottom: "1px solid #f2efe8", background: i % 2 === 0 ? "white" : "#faf9f6", animation: "pulse 1.5s infinite" }} />
+          ))}
 
           {/* Rows */}
-          {!loading &&
-            soal.map((s, i) => (
-              <div
-                key={s.id}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "40px 70px 1fr 160px 80px 120px 50px",
-                  gap: "16px",
-                  padding: "14px 20px",
-                  borderBottom: "1px solid #f2efe8",
-                  alignItems: "center",
-                }}
-              >
-                <div style={{ fontSize: "13px", color: "#6b6860" }}>
-                  {(page - 1) * limit + i + 1}
-                </div>
-                <div
-                  style={{
-                    fontSize: "12px",
-                    fontWeight: "700",
-                    color: "#6b6860",
-                    fontFamily: "monospace",
-                    letterSpacing: ".05em",
-                  }}
-                >
-                  {s.kode || "—"}
-                </div>
-                <div
-                  style={{
-                    fontSize: "14px",
-                    color: "#0f0e17",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {s.body
-                    .replace(/\$[^$]+\$/g, "[math]")
-                    .replace(/[*_~`#]/g, "")}
-                </div>
-                <div style={{ fontSize: "12px", color: "#6b6860" }}>
-                  <div
-                    style={{
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {s.subtopik}
-                  </div>
-                  <div
-                    style={{
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      marginTop: "2px",
-                      color: "#b4b2a9",
-                    }}
-                  >
-                    {s.mapel}
-                  </div>
-                </div>
-                <DifficultyBadge level={s.difficulty} />
-                <ToggleSwitch
-                  checked={s.is_published == 1}
-                  onChange={() => handleTogglePublish(s.id, s.is_published)}
-                  loading={publishLoading[s.id]}
-                />
-                <ActionMenu
-                  soal={s}
-                  onPreview={() => setPreviewId(s.id)}
-                  onSalin={() => handleSalin(s.id)}
-                  onEdit={() => navigate(`/admin/soal/edit/${s.id}`)}
-                  onDelete={() => setDeleteId(s.id)}
-                  copying={copying[s.id]}
-                  isMobile={false}
-                />
+          {!loading && soal.map((s, i) => (
+            <div key={s.id}
+              style={{ display: "grid", gridTemplateColumns: "36px 40px 70px 1fr 160px 80px 120px 50px", gap: "12px", padding: "14px 20px", borderBottom: rowBorder(s.id), alignItems: "center", background: rowBg(s.id), transition: "background .1s" }}>
+              <Checkbox checked={selected.has(s.id)} onChange={() => toggleOne(s.id)} />
+              <div style={{ fontSize: "13px", color: "#6b6860" }}>{(page - 1) * limit + i + 1}</div>
+              <div style={{ fontSize: "12px", fontWeight: "700", color: "#6b6860", fontFamily: "monospace", letterSpacing: ".05em" }}>{s.kode || "—"}</div>
+              <div style={{ fontSize: "14px", color: "#0f0e17", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {s.body.replace(/\$[^$]+\$/g, "[math]").replace(/[*_~`#]/g, "")}
               </div>
-            ))}
-
-          {/* Empty */}
-          {!loading && soal.length === 0 && (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "48px",
-                color: "#6b6860",
-                fontSize: "14px",
-              }}
-            >
-              Tidak ada soal ditemukan.
+              <div style={{ fontSize: "12px", color: "#6b6860" }}>
+                <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.subtopik}</div>
+                <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: "2px", color: "#b4b2a9" }}>{s.mapel}</div>
+              </div>
+              <DifficultyBadge level={s.difficulty} />
+              <ToggleSwitch checked={s.is_published == 1} onChange={() => handleTogglePublish(s.id, s.is_published)} loading={publishLoading[s.id]} />
+              <ActionMenu soal={s} onPreview={() => setPreviewId(s.id)} onSalin={() => handleSalin(s.id)} onEdit={() => navigate(`/admin/soal/edit/${s.id}`)} onDelete={() => setDeleteId(s.id)} copying={copying[s.id]} />
             </div>
+          ))}
+
+          {!loading && soal.length === 0 && (
+            <div style={{ textAlign: "center", padding: "48px", color: "#6b6860", fontSize: "14px" }}>Tidak ada soal ditemukan.</div>
           )}
         </div>
       )}
@@ -547,322 +290,134 @@ export default function AdminSoal() {
       {/* ── MOBILE: Card list ── */}
       {isMobile && (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {loading &&
-            Array.from({ length: 5 }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  height: "88px",
-                  borderRadius: "14px",
-                  background: "#e2ddd5",
-                  opacity: 0.5,
-                  animation: "pulse 1.5s infinite",
-                }}
-              />
-            ))}
-
-          {!loading && soal.length === 0 && (
-            <div
-              style={{
-                background: "white",
-                borderRadius: "14px",
-                border: "1px solid #e2ddd5",
-                padding: "48px",
-                textAlign: "center",
-                color: "#6b6860",
-                fontSize: "14px",
-              }}
-            >
-              Tidak ada soal ditemukan.
+          {/* Select all bar (mobile) */}
+          {soal.length > 0 && !loading && (
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", background: "white", borderRadius: "10px", border: "1px solid #e2ddd5" }}>
+              <Checkbox checked={allOnPageSelected} indeterminate={someOnPageSelected} onChange={toggleAll} size={18} />
+              <span style={{ fontSize: "13px", color: "#6b6860", fontWeight: "500" }}>
+                {allOnPageSelected ? "Batalkan semua" : `Pilih semua (${currentIds.length})`}
+              </span>
+              {selected.size > 0 && (
+                <span style={{ marginLeft: "auto", fontSize: "12px", fontWeight: "700", color: "#e84c2b" }}>{selected.size} dipilih</span>
+              )}
             </div>
           )}
 
-          {!loading &&
-            soal.map((s, i) => (
-              <div
-                key={s.id}
-                style={{
-                  background: "white",
-                  borderRadius: "14px",
-                  border: "1px solid #e2ddd5",
-                  padding: "14px 16px",
-                  display: "flex",
-                  gap: "12px",
-                  alignItems: "flex-start",
-                }}
-              >
-                {/* Nomor avatar + kode */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: "4px",
-                    flexShrink: 0,
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "36px",
-                      height: "36px",
-                      borderRadius: "10px",
-                      background: "#f2efe8",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "13px",
-                      fontWeight: "800",
-                      color: "#6b6860",
-                    }}
-                  >
-                    {(page - 1) * limit + i + 1}
-                  </div>
-                  <span
-                    style={{
-                      fontSize: "10px",
-                      fontWeight: "700",
-                      color: "#b4b2a9",
-                      fontFamily: "monospace",
-                      letterSpacing: ".04em",
-                    }}
-                  >
-                    {s.kode || "—"}
-                  </span>
+          {loading && Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} style={{ height: "88px", borderRadius: "14px", background: "#e2ddd5", opacity: 0.5, animation: "pulse 1.5s infinite" }} />
+          ))}
+
+          {!loading && soal.length === 0 && (
+            <div style={{ background: "white", borderRadius: "14px", border: "1px solid #e2ddd5", padding: "48px", textAlign: "center", color: "#6b6860", fontSize: "14px" }}>Tidak ada soal ditemukan.</div>
+          )}
+
+          {!loading && soal.map((s, i) => (
+            <div key={s.id}
+              style={{ background: selected.has(s.id) ? "#fff8f7" : "white", borderRadius: "14px", border: `1.5px solid ${selected.has(s.id) ? "#fca5a5" : "#e2ddd5"}`, padding: "14px 16px", display: "flex", gap: "10px", alignItems: "flex-start", transition: "all .1s" }}>
+              <div style={{ paddingTop: "2px" }}>
+                <Checkbox checked={selected.has(s.id)} onChange={() => toggleOne(s.id)} size={18} />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", flexShrink: 0 }}>
+                <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "#f2efe8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: "800", color: "#6b6860" }}>
+                  {(page - 1) * limit + i + 1}
                 </div>
-
-                {/* Konten */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  {/* Body soal */}
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      color: "#0f0e17",
-                      fontWeight: "500",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    {s.body
-                      .replace(/\$[^$]+\$/g, "[math]")
-                      .replace(/[*_~`#]/g, "")}
-                  </div>
-
-                  {/* Subtopik */}
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#b4b2a9",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    {s.mapel} — {s.subtopik}
-                  </div>
-
-                  {/* Badges + aksi */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}
-                  >
-                    <DifficultyBadge level={s.difficulty} />
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        fontWeight: "700",
-                        padding: "3px 8px",
-                        borderRadius: "6px",
-                        background: s.is_published == 1 ? "#e4f5f0" : "#f2efe8",
-                        color: s.is_published == 1 ? "#1a8a6e" : "#6b6860",
-                      }}
-                    >
-                      {s.is_published == 1 ? "Published" : "Draft"}
-                    </span>
-                    <div style={{ flex: 1 }} />
-                    <ToggleSwitch
-                      checked={s.is_published == 1}
-                      onChange={() => handleTogglePublish(s.id, s.is_published)}
-                      loading={publishLoading[s.id]}
-                    />
-                    <ActionMenu
-                      soal={s}
-                      onPreview={() => setPreviewId(s.id)}
-                      onSalin={() => handleSalin(s.id)}
-                      onEdit={() => navigate(`/admin/soal/edit/${s.id}`)}
-                      onDelete={() => setDeleteId(s.id)}
-                      copying={copying[s.id]}
-                      isMobile={true}
-                    />
-                  </div>
+                <span style={{ fontSize: "10px", fontWeight: "700", color: "#b4b2a9", fontFamily: "monospace", letterSpacing: ".04em" }}>{s.kode || "—"}</span>
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: "14px", color: "#0f0e17", fontWeight: "500", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: "4px" }}>
+                  {s.body.replace(/\$[^$]+\$/g, "[math]").replace(/[*_~`#]/g, "")}
+                </div>
+                <div style={{ fontSize: "12px", color: "#b4b2a9", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: "8px" }}>
+                  {s.mapel} — {s.subtopik}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <DifficultyBadge level={s.difficulty} />
+                  <span style={{ fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px", background: s.is_published == 1 ? "#e4f5f0" : "#f2efe8", color: s.is_published == 1 ? "#1a8a6e" : "#6b6860" }}>
+                    {s.is_published == 1 ? "Published" : "Draft"}
+                  </span>
+                  <div style={{ flex: 1 }} />
+                  <ToggleSwitch checked={s.is_published == 1} onChange={() => handleTogglePublish(s.id, s.is_published)} loading={publishLoading[s.id]} />
+                  <ActionMenu soal={s} onPreview={() => setPreviewId(s.id)} onSalin={() => handleSalin(s.id)} onEdit={() => navigate(`/admin/soal/edit/${s.id}`)} onDelete={() => setDeleteId(s.id)} copying={copying[s.id]} />
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
         </div>
       )}
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginTop: "20px",
-          }}
-        >
-          <span style={{ fontSize: "13px", color: "#6b6860" }}>
-            {isMobile
-              ? `${page} / ${totalPages}`
-              : `Halaman ${page} dari ${totalPages}`}
-          </span>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "20px", marginBottom: selected.size > 0 ? "80px" : "0" }}>
+          <span style={{ fontSize: "13px", color: "#6b6860" }}>{isMobile ? `${page} / ${totalPages}` : `Halaman ${page} dari ${totalPages}`}</span>
           <div style={{ display: "flex", gap: "8px" }}>
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                padding: isMobile ? "8px 12px" : "8px 14px",
-                borderRadius: "8px",
-                border: "1px solid #e2ddd5",
-                background: "white",
-                fontSize: "13px",
-                fontWeight: "500",
-                cursor: page === 1 ? "not-allowed" : "pointer",
-                color: page === 1 ? "#b4b2a9" : "#0f0e17",
-                fontFamily: "inherit",
-              }}
-            >
-              <ChevronLeft size={14} />
-              {!isMobile && "Sebelumnya"}
+            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+              style={{ display: "flex", alignItems: "center", gap: "4px", padding: isMobile ? "8px 12px" : "8px 14px", borderRadius: "8px", border: "1px solid #e2ddd5", background: "white", fontSize: "13px", fontWeight: "500", cursor: page === 1 ? "not-allowed" : "pointer", color: page === 1 ? "#b4b2a9" : "#0f0e17", fontFamily: "inherit" }}>
+              <ChevronLeft size={14} />{!isMobile && "Sebelumnya"}
             </button>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                padding: isMobile ? "8px 12px" : "8px 14px",
-                borderRadius: "8px",
-                border: "1px solid #e2ddd5",
-                background: "white",
-                fontSize: "13px",
-                fontWeight: "500",
-                cursor: page === totalPages ? "not-allowed" : "pointer",
-                color: page === totalPages ? "#b4b2a9" : "#0f0e17",
-                fontFamily: "inherit",
-              }}
-            >
-              {!isMobile && "Berikutnya"}
-              <ChevronRight size={14} />
+            <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+              style={{ display: "flex", alignItems: "center", gap: "4px", padding: isMobile ? "8px 12px" : "8px 14px", borderRadius: "8px", border: "1px solid #e2ddd5", background: "white", fontSize: "13px", fontWeight: "500", cursor: page === totalPages ? "not-allowed" : "pointer", color: page === totalPages ? "#b4b2a9" : "#0f0e17", fontFamily: "inherit" }}>
+              {!isMobile && "Berikutnya"}<ChevronRight size={14} />
             </button>
           </div>
         </div>
       )}
 
-      {/* Delete modal */}
-      {deleteId && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 300,
-            padding: "16px",
-          }}
-        >
-          <div
-            style={{
-              background: "white",
-              borderRadius: "16px",
-              padding: "28px",
-              maxWidth: "400px",
-              width: "100%",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "18px",
-                fontWeight: "800",
-                color: "#0f0e17",
-                marginBottom: "8px",
-              }}
-            >
-              Hapus Soal?
-            </h3>
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#6b6860",
-                marginBottom: "24px",
-                lineHeight: "1.6",
-              }}
-            >
-              Soal ini akan dihapus permanen dan tidak bisa dikembalikan.
+      {/* ── Floating Bulk Bar ── */}
+      {selected.size > 0 && (
+        <BulkBar
+          count={selected.size}
+          onDelete={() => setConfirmBulkDelete(true)}
+          onClear={() => setSelected(new Set())}
+          deleting={false}
+        />
+      )}
+
+      {/* ── Confirm bulk delete modal ── */}
+      {confirmBulkDelete && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, padding: "16px" }}>
+          <div style={{ background: "white", borderRadius: "16px", padding: "28px", maxWidth: "400px", width: "100%" }}>
+            <h3 style={{ fontSize: "18px", fontWeight: "800", color: "#0f0e17", marginBottom: "8px" }}>Hapus {selected.size} Soal?</h3>
+            <p style={{ fontSize: "14px", color: "#6b6860", marginBottom: "24px", lineHeight: "1.6" }}>
+              Tindakan ini <strong>tidak bisa dibatalkan</strong>. Semua soal yang dipilih akan dihapus permanen beserta data terkait.
             </p>
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                justifyContent: "flex-end",
-              }}
-            >
-              <button
-                onClick={() => setDeleteId(null)}
-                style={{
-                  padding: "10px 20px",
-                  borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
-                  background: "white",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                  color: "#0f0e17",
-                }}
-              >
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+              <button onClick={() => setConfirmBulkDelete(false)} disabled={bulkDeleting}
+                style={{ padding: "10px 20px", borderRadius: "10px", border: "1px solid #e2ddd5", background: "white", fontSize: "14px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", color: "#0f0e17" }}>
                 Batal
               </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                style={{
-                  padding: "10px 20px",
-                  borderRadius: "10px",
-                  border: "none",
-                  background: "#e84c2b",
-                  color: "white",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  cursor: deleting ? "not-allowed" : "pointer",
-                  fontFamily: "inherit",
-                  opacity: deleting ? 0.7 : 1,
-                }}
-              >
+              <button onClick={handleBulkDelete} disabled={bulkDeleting}
+                style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 20px", borderRadius: "10px", border: "none", background: "#e84c2b", color: "white", fontSize: "14px", fontWeight: "600", cursor: bulkDeleting ? "not-allowed" : "pointer", fontFamily: "inherit", opacity: bulkDeleting ? 0.7 : 1 }}>
+                {bulkDeleting ? <Loader2 size={15} style={{ animation: "spin .7s linear infinite" }} /> : <Trash2 size={15} />}
+                {bulkDeleting ? "Menghapus..." : `Hapus ${selected.size} Soal`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Single delete modal ── */}
+      {deleteId && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, padding: "16px" }}>
+          <div style={{ background: "white", borderRadius: "16px", padding: "28px", maxWidth: "400px", width: "100%" }}>
+            <h3 style={{ fontSize: "18px", fontWeight: "800", color: "#0f0e17", marginBottom: "8px" }}>Hapus Soal?</h3>
+            <p style={{ fontSize: "14px", color: "#6b6860", marginBottom: "24px", lineHeight: "1.6" }}>
+              Soal ini akan dihapus permanen dan tidak bisa dikembalikan.
+            </p>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+              <button onClick={() => setDeleteId(null)}
+                style={{ padding: "10px 20px", borderRadius: "10px", border: "1px solid #e2ddd5", background: "white", fontSize: "14px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", color: "#0f0e17" }}>
+                Batal
+              </button>
+              <button onClick={handleDelete} disabled={deleting}
+                style={{ padding: "10px 20px", borderRadius: "10px", border: "none", background: "#e84c2b", color: "white", fontSize: "14px", fontWeight: "600", cursor: deleting ? "not-allowed" : "pointer", fontFamily: "inherit", opacity: deleting ? 0.7 : 1 }}>
                 {deleting ? "Menghapus..." : "Hapus"}
               </button>
             </div>
           </div>
         </div>
       )}
-      {previewId && (
-        <SoalPreviewModal
-          soalId={previewId}
-          onClose={() => setPreviewId(null)}
-        />
-      )}
-      <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>
+
+      {previewId && <SoalPreviewModal soalId={previewId} onClose={() => setPreviewId(null)} />}
     </div>
   );
 }

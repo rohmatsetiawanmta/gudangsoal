@@ -46,6 +46,8 @@ import QuizReview from "./features/quiz/QuizReview";
 import SearchPage from "./features/search/SearchPage";
 import ProfilePage from "./features/profile/ProfilePage";
 import AdminSoalForm from "./features/admin/soal-form";
+import AdminSoalBulkAIPage from "./features/admin/AdminSoalBulkAIPage";
+import AdminSoalBulkImportPage from "./features/admin/AdminSoalBulkImportPage";
 import GamesPage from "./features/games/GamesPage";
 import NumberSequenceGame from "./features/games/number-sequence/NumberSequenceGame";
 
@@ -107,6 +109,8 @@ export default function App() {
           <Route path="soal" element={<AdminSoal />} />
           <Route path="soal/tambah" element={<AdminSoalForm />} />
           <Route path="soal/edit/:id" element={<AdminSoalForm />} />
+          <Route path="soal/ai-bulk" element={<AdminSoalBulkAIPage />} />
+          <Route path="soal/bulk-import" element={<AdminSoalBulkImportPage />} />
           <Route path="struktur" element={<AdminStruktur />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="reports" element={<AdminReports />} />

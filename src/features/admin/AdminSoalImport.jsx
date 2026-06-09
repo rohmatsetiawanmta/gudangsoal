@@ -6,9 +6,28 @@ export default function AdminSoalImport({ setForm, isMobile }) {
   const [open, setOpen] = useState(false);
   const [jsonInput, setJsonInput] = useState("");
   const [error, setError] = useState("");
+  const [snippet, setSnippet] = useState("");
+
+  const parseDifficulty = (val) => {
+    if (val === undefined || val === null) return null;
+    if (typeof val === "number" && [1, 2, 3].includes(val)) return val;
+    const map = { easy: 1, medium: 2, hard: 3, mudah: 1, sedang: 2, sulit: 3, susah: 3 };
+    return map[String(val).toLowerCase()] ?? null;
+  };
+
+  const VALID_TIPE = [
+    "pilihan_ganda", "isian_singkat", "isian_numerik",
+    "checklist", "multiple_choice_table", "menjodohkan", "isian_multi",
+  ];
+  const parseTipe = (val) => {
+    if (!val) return null;
+    const v = String(val).toLowerCase().replace(/[\s-]/g, "_");
+    return VALID_TIPE.includes(v) ? v : null;
+  };
 
   const handleImport = () => {
     setError("");
+    setSnippet("");
     if (!jsonInput.trim()) {
       setError("Paste JSON dulu sebelum import");
       return;
@@ -19,25 +38,37 @@ export default function AdminSoalImport({ setForm, isMobile }) {
         .replace(/```json/gi, "")
         .replace(/```/g, "")
         .trim();
-      text = text.replace(/\\([a-zA-Z])/g, "\\\\$1");
       const parsed = JSON.parse(text);
       if (!parsed.body || !parsed.options || !parsed.answer) {
         setError("JSON tidak lengkap — harus ada body, options, dan answer");
         return;
       }
+      const difficulty = parseDifficulty(parsed.difficulty);
+      const tipe = parseTipe(parsed.tipe);
       setForm((f) => ({
         ...f,
         body: parsed.body,
         options: parsed.options,
         answer: parsed.answer,
         explanation: parsed.explanation || "",
+        ...(difficulty !== null && { difficulty }),
+        ...(tipe !== null && { tipe }),
       }));
       setOpen(false);
       setJsonInput("");
-    } catch {
-      setError(
-        "Format JSON tidak valid. Pastikan JSON yang dipaste sudah benar."
-      );
+    } catch (e) {
+      const msg = e.message || "";
+      const posMatch = msg.match(/position (\d+)/i) || msg.match(/at (\d+)/i);
+      if (posMatch) {
+        const pos = Number(posMatch[1]);
+        const src = jsonInput.trim().replace(/```json/gi, "").replace(/```/g, "").trim();
+        const start = Math.max(0, pos - 40);
+        const end = Math.min(src.length, pos + 40);
+        const snip = src.slice(start, end);
+        const arrow = " ".repeat(Math.min(pos - start, 40)) + "^";
+        setSnippet(snip + "\n" + arrow);
+      }
+      setError("JSON tidak valid — " + msg.replace(/^JSON Parse error: /i, "").replace(/^SyntaxError: /i, ""));
     }
   };
 
@@ -45,6 +76,7 @@ export default function AdminSoalImport({ setForm, isMobile }) {
     setOpen(false);
     setJsonInput("");
     setError("");
+    setSnippet("");
   };
 
   return (
@@ -172,13 +204,15 @@ export default function AdminSoalImport({ setForm, isMobile }) {
             >
               {`{
   "body": "teks soal...",
-  "options": [
-    {"label": "A", "text": "..."},
-    {"label": "B", "text": "..."}
-  ],
+  "options": [{"label":"A","text":"..."},{"label":"B","text":"..."}],
   "answer": "A",
-  "explanation": "pembahasan..."
-}`}
+  "explanation": "pembahasan...",
+  "tipe": "pilihan_ganda",
+  "difficulty": "easy"
+}
+// tipe: pilihan_ganda / isian_singkat / isian_numerik /
+//        checklist / multiple_choice_table / menjodohkan / isian_multi
+// difficulty: easy / medium / hard  (keduanya opsional)`}
             </pre>
 
             {/* Textarea */}
@@ -230,9 +264,17 @@ export default function AdminSoalImport({ setForm, isMobile }) {
                   borderRadius: "10px",
                   padding: "10px 14px",
                   marginBottom: "16px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px",
                 }}
               >
-                {error}
+                <div>{error}</div>
+                {snippet && (
+                  <pre style={{ margin: 0, padding: "8px 10px", background: "rgba(0,0,0,0.06)", borderRadius: "6px", fontSize: "12px", fontFamily: "monospace", overflowX: "auto", whiteSpace: "pre", color: "#7f1d1d", lineHeight: "1.5" }}>
+                    {snippet}
+                  </pre>
+                )}
               </div>
             )}
 

@@ -59,6 +59,7 @@ export default function AdminSoalAI({
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
 
+  const [model, setModel] = useState("gemini-2.5-flash");
   const [konteks, setKonteks] = useState("sekolah");
   const [jumlahPilihan, setJumlahPilihan] = useState(4);
   const [tipe, setTipe] = useState("hitungan");
@@ -121,6 +122,7 @@ export default function AdminSoalAI({
     try {
       const result = await api.post("/admin/ai/generate", {
         prompt: buildPrompt(promptArgs),
+        model,
       });
       const parsed = parseResult(result);
       if (!parsed.body || !parsed.options || !parsed.answer)
@@ -321,6 +323,39 @@ export default function AdminSoalAI({
                 marginBottom: "20px",
               }}
             >
+              {/* Model selector */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                <label style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}>Model AI</label>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                  {[
+                    { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
+                    { value: "gemini-2.5-pro",   label: "Gemini 2.5 Pro" },
+                    { value: "gpt-4o-mini",       label: "GPT-4o Mini" },
+                    { value: "gpt-4o",            label: "GPT-4o" },
+                  ].map(({ value, label }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setModel(value)}
+                      style={{
+                        padding: "7px 10px",
+                        borderRadius: "8px",
+                        border: `1.5px solid ${model === value ? "#e84c2b" : "#e2ddd5"}`,
+                        background: model === value ? "#fff3f0" : "white",
+                        color: model === value ? "#e84c2b" : "#6b6860",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                        transition: "all .15s",
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <RadioGroup
                 label="Konteks Soal"
                 options={KONTEKS_OPTIONS}

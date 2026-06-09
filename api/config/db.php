@@ -1,7 +1,7 @@
 <?php
 // api/config/db.php
 
-$env = parse_ini_file(__DIR__ . '/../.env');
+$env = parse_ini_file(__DIR__ . '/../.env') ?: [];
 
 define('DB_HOST', $env['DB_HOST']);
 define('DB_NAME', $env['DB_NAME']);
