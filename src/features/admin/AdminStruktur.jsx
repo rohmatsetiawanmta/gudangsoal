@@ -7,139 +7,61 @@ import {
   Trash2,
   X,
   ArrowLeft,
-  Minus,
+  ChevronUp,
+  ChevronDown,
+  FolderTree,
+  BookOpen,
+  Layers,
+  Tag,
+  Hash,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import api from "../../lib/api";
 import ToggleSwitch from "../../components/ToggleSwitch";
 import useWindowWidth from "../../hooks/useWindowWidth";
 
+// ── Constants ─────────────────────────────────────────────────────────────────
+
 const LEVELS = [
-  { key: "jenjang", label: "Jenjang", parentKey: null, parentIdCol: null },
-  {
-    key: "subjenjang",
-    label: "Subjenjang",
-    parentKey: "jenjang",
-    parentIdCol: "jenjang_id",
-  },
-  {
-    key: "mapel",
-    label: "Mapel",
-    parentKey: "subjenjang",
-    parentIdCol: "subjenjang_id",
-  },
-  { key: "topik", label: "Topik", parentKey: "mapel", parentIdCol: "mapel_id" },
-  {
-    key: "subtopik",
-    label: "Subtopik",
-    parentKey: "topik",
-    parentIdCol: "topik_id",
-  },
+  { key: "jenjang",   label: "Jenjang",    parentKey: null,        parentIdCol: null,          color: "#e84c2b", icon: FolderTree },
+  { key: "subjenjang",label: "Subjenjang", parentKey: "jenjang",   parentIdCol: "jenjang_id",  color: "#f5a623", icon: Layers },
+  { key: "mapel",     label: "Mapel",      parentKey: "subjenjang",parentIdCol: "subjenjang_id",color: "#2563eb", icon: BookOpen },
+  { key: "topik",     label: "Topik",      parentKey: "mapel",     parentIdCol: "mapel_id",    color: "#1a8a6e", icon: Hash },
+  { key: "subtopik",  label: "Subtopik",   parentKey: "topik",     parentIdCol: "topik_id",    color: "#7c3aed", icon: Tag },
 ];
 
-function Modal({ title, onClose, onSubmit, loading, error, children }) {
+// ── Modal ─────────────────────────────────────────────────────────────────────
+
+function Modal({ title, subtitle, onClose, onSubmit, loading, error, submitLabel = "Simpan", submitColor = "#e84c2b", children }) {
   return (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 300,
-        padding: "16px",
-      }}
+      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, padding: "16px" }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div
-        style={{
-          background: "white",
-          borderRadius: "16px",
-          padding: "28px",
-          maxWidth: "400px",
-          width: "100%",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: "20px",
-          }}
-        >
-          <h3 style={{ fontSize: "17px", fontWeight: "800", color: "#0f0e17" }}>
-            {title}
-          </h3>
-          <button
-            onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "#6b6860",
-              display: "flex",
-            }}
-          >
+      <div style={{ background: "white", borderRadius: "20px", padding: "28px", maxWidth: "420px", width: "100%", boxShadow: "0 24px 64px rgba(0,0,0,0.18)" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: subtitle ? "4px" : "24px" }}>
+          <h3 style={{ fontSize: "17px", fontWeight: "800", color: "#0f0e17", margin: 0 }}>{title}</h3>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#b4b2a9", display: "flex", padding: "2px", borderRadius: "6px" }}>
             <X size={18} />
           </button>
         </div>
+        {subtitle && (
+          <p style={{ fontSize: "13px", color: "#6b6860", marginBottom: "20px", lineHeight: 1.5 }}>{subtitle}</p>
+        )}
         {error && (
-          <div
-            style={{
-              background: "#fff3f0",
-              border: "1px solid #fca5a5",
-              color: "#b91c1c",
-              fontSize: "13px",
-              borderRadius: "10px",
-              padding: "10px 14px",
-              marginBottom: "16px",
-            }}
-          >
+          <div style={{ background: "#fff3f0", border: "1px solid #fca5a5", color: "#b91c1c", fontSize: "13px", borderRadius: "10px", padding: "10px 14px", marginBottom: "16px" }}>
             {error}
           </div>
         )}
         {children}
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            justifyContent: "flex-end",
-            marginTop: "20px",
-          }}
-        >
-          <button
-            onClick={onClose}
-            style={{
-              padding: "9px 20px",
-              borderRadius: "10px",
-              border: "1px solid #e2ddd5",
-              background: "white",
-              fontSize: "14px",
-              fontWeight: "600",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              color: "#0f0e17",
-            }}
-          >
+        <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "24px" }}>
+          <button onClick={onClose}
+            style={{ padding: "9px 20px", borderRadius: "10px", border: "1px solid #e2ddd5", background: "white", fontSize: "13.5px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", color: "#0f0e17" }}>
             Batal
           </button>
-          <button
-            onClick={onSubmit}
-            disabled={loading}
-            style={{
-              padding: "9px 20px",
-              borderRadius: "10px",
-              border: "none",
-              background: loading ? "#f5a07a" : "#e84c2b",
-              color: "white",
-              fontSize: "14px",
-              fontWeight: "600",
-              cursor: loading ? "not-allowed" : "pointer",
-              fontFamily: "inherit",
-            }}
-          >
-            {loading ? "Menyimpan..." : "Simpan"}
+          <button onClick={onSubmit} disabled={loading}
+            style={{ padding: "9px 20px", borderRadius: "10px", border: "none", background: loading ? submitColor + "99" : submitColor, color: "white", fontSize: "13.5px", fontWeight: "600", cursor: loading ? "not-allowed" : "pointer", fontFamily: "inherit", minWidth: "90px" }}>
+            {loading ? "Menyimpan..." : submitLabel}
           </button>
         </div>
       </div>
@@ -147,45 +69,71 @@ function Modal({ title, onClose, onSubmit, loading, error, children }) {
   );
 }
 
+// ── FormInput ─────────────────────────────────────────────────────────────────
+
+function FormInput({ label, hint, value, onChange, placeholder, type = "text", autoFocus }) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+      <label style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}>
+        {label}{hint && <span style={{ fontWeight: "400", color: "#6b6860" }}> {hint}</span>}
+      </label>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        type={type}
+        autoFocus={autoFocus}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        style={{
+          padding: "10px 14px",
+          borderRadius: "10px",
+          border: `1.5px solid ${focused ? "#e84c2b" : "#e2ddd5"}`,
+          fontSize: "14px",
+          outline: "none",
+          fontFamily: "inherit",
+          color: "#0f0e17",
+          transition: "border-color .15s",
+          background: "white",
+        }}
+      />
+    </div>
+  );
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+
 export default function AdminStruktur() {
   const width = useWindowWidth();
   const isMobile = width <= 480;
 
   const [stack, setStack] = useState([{ level: "jenjang", item: null }]);
-  const [allData, setAllData] = useState({
-    jenjang: [],
-    subjenjang: [],
-    mapel: [],
-    topik: [],
-    subtopik: [],
-  });
-  const [loading, setLoading] = useState(true);
+  const [allData, setAllData] = useState({ jenjang: [], subjenjang: [], mapel: [], topik: [], subtopik: [] });
+  const [loading, setLoading]     = useState(true);
   const [publishLoading, setPublishLoading] = useState({});
-  const [urutanLoading, setUrutanLoading] = useState({});
-  const [editingIndex, setEditingIndex] = useState(null);
-  const [editingValue, setEditingValue] = useState("");
-  const [modal, setModal] = useState(null);
-  const [modalForm, setModalForm] = useState({ nama: "", urutan: "" });
+  const [urutanLoading, setUrutanLoading]   = useState({});
+  const [editingIndex, setEditingIndex]     = useState(null);
+  const [editingValue, setEditingValue]     = useState("");
+  const [modal, setModal]           = useState(null);
+  const [modalForm, setModalForm]   = useState({ nama: "", urutan: "" });
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState("");
 
   const currentStack = stack[stack.length - 1];
-  const currentLevel = LEVELS.find((l) => l.key === currentStack.level);
-  const isLastLevel =
-    LEVELS.findIndex((l) => l.key === currentStack.level) === LEVELS.length - 1;
+  const currentLevelIndex = LEVELS.findIndex((l) => l.key === currentStack.level);
+  const currentLevel = LEVELS[currentLevelIndex];
+  const isLastLevel  = currentLevelIndex === LEVELS.length - 1;
 
   const fetchAll = () => {
     setLoading(true);
-    api
-      .get("/admin/struktur")
+    api.get("/admin/struktur")
       .then((data) => setAllData(data))
       .catch(() => {})
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => {
-    fetchAll();
-  }, []);
+  useEffect(() => { fetchAll(); }, []);
 
   const getCurrentItems = () => {
     const data = allData[currentStack.level] || [];
@@ -197,36 +145,27 @@ export default function AdminStruktur() {
   const currentItems = getCurrentItems();
 
   const handleDrillDown = (item) => {
-    const nextIndex = LEVELS.findIndex((l) => l.key === currentStack.level) + 1;
+    const nextIndex = currentLevelIndex + 1;
     if (nextIndex >= LEVELS.length) return;
     setStack([...stack, { level: LEVELS[nextIndex].key, item }]);
   };
 
-  const handleBack = () => {
-    if (stack.length > 1) setStack((s) => s.slice(0, -1));
-  };
-  const handleGoTo = (i) => setStack((s) => s.slice(0, i + 1));
+  const handleBack   = () => { if (stack.length > 1) setStack((s) => s.slice(0, -1)); };
+  const handleGoTo   = (i) => setStack((s) => s.slice(0, i + 1));
 
   const handleTogglePublish = async (e, item) => {
     e.stopPropagation();
     setPublishLoading((p) => ({ ...p, [item.id]: true }));
     try {
-      const res = await api.put(
-        `/admin/publish/${currentStack.level}?id=${item.id}`
-      );
+      const res = await api.put(`/admin/publish/${currentStack.level}?id=${item.id}`);
       setAllData((prev) => ({
         ...prev,
         [currentStack.level]: prev[currentStack.level].map((i) =>
-          i.id === item.id
-            ? { ...i, is_published: res.is_published ? 1 : 0 }
-            : i
+          i.id === item.id ? { ...i, is_published: res.is_published ? 1 : 0 } : i
         ),
       }));
-    } catch {
-      alert("Gagal mengubah status publish");
-    } finally {
-      setPublishLoading((p) => ({ ...p, [item.id]: false }));
-    }
+    } catch { alert("Gagal mengubah status publish"); }
+    finally { setPublishLoading((p) => ({ ...p, [item.id]: false })); }
   };
 
   const handleUrutanChange = async (item, delta) => {
@@ -238,130 +177,69 @@ export default function AdminStruktur() {
     setUrutanLoading((u) => ({ ...u, [item.id]: true }));
     try {
       await Promise.all([
-        api.put(`/admin/urutan/${currentStack.level}?id=${item.id}`, {
-          urutan: newIndex,
-        }),
-        api.put(`/admin/urutan/${currentStack.level}?id=${targetItem.id}`, {
-          urutan: index,
-        }),
+        api.put(`/admin/urutan/${currentStack.level}?id=${item.id}`, { urutan: newIndex }),
+        api.put(`/admin/urutan/${currentStack.level}?id=${targetItem.id}`, { urutan: index }),
       ]);
       fetchAll();
-    } catch {
-      alert("Gagal mengubah urutan");
-    } finally {
-      setUrutanLoading((u) => ({ ...u, [item.id]: false }));
-    }
+    } catch { alert("Gagal mengubah urutan"); }
+    finally { setUrutanLoading((u) => ({ ...u, [item.id]: false })); }
   };
 
-  const handleIndexClick = (item, currentIndex) => {
-    setEditingIndex(item.id);
-    setEditingValue(String(currentIndex + 1));
-  };
-
-  const handleIndexSubmit = async (item, currentIndex) => {
+  const handleIndexClick  = (item, i) => { setEditingIndex(item.id); setEditingValue(String(i + 1)); };
+  const handleIndexSubmit = async (item, i) => {
     const items = getCurrentItems();
     const newIndex = parseInt(editingValue) - 1;
     setEditingIndex(null);
-    if (isNaN(newIndex) || newIndex === currentIndex) return;
+    if (isNaN(newIndex) || newIndex === i) return;
     if (newIndex < 0 || newIndex >= items.length) return;
     setUrutanLoading((u) => ({ ...u, [item.id]: true }));
     try {
       const newItems = [...items];
-      newItems.splice(currentIndex, 1);
+      newItems.splice(i, 1);
       newItems.splice(newIndex, 0, item);
-      await Promise.all(
-        newItems.map((it, idx) =>
-          api.put(`/admin/urutan/${currentStack.level}?id=${it.id}`, {
-            urutan: idx,
-          })
-        )
-      );
+      await Promise.all(newItems.map((it, idx) => api.put(`/admin/urutan/${currentStack.level}?id=${it.id}`, { urutan: idx })));
       fetchAll();
-    } catch {
-      alert("Gagal mengubah urutan");
-    } finally {
-      setUrutanLoading((u) => ({ ...u, [item.id]: false }));
-    }
+    } catch { alert("Gagal mengubah urutan"); }
+    finally { setUrutanLoading((u) => ({ ...u, [item.id]: false })); }
   };
 
-  const openTambah = () => {
-    setModal({ type: "tambah" });
-    setModalForm({ nama: "", urutan: "" });
-    setModalError("");
-  };
-  const openEdit = (item) => {
-    setModal({ type: "edit", item });
-    setModalForm({ nama: item.nama, urutan: item.urutan || "" });
-    setModalError("");
-  };
-  const openHapus = (item) => {
-    setModal({ type: "hapus", item });
-    setModalError("");
-  };
-  const closeModal = () => {
-    setModal(null);
-    setModalError("");
-  };
+  const openTambah = () => { setModal({ type: "tambah" }); setModalForm({ nama: "", urutan: "" }); setModalError(""); };
+  const openEdit   = (item) => { setModal({ type: "edit", item }); setModalForm({ nama: item.nama, urutan: item.urutan || "" }); setModalError(""); };
+  const openHapus  = (item) => { setModal({ type: "hapus", item }); setModalError(""); };
+  const closeModal = () => { setModal(null); setModalError(""); };
 
   const handleTambah = async () => {
-    if (!modalForm.nama.trim()) {
-      setModalError("Nama wajib diisi");
-      return;
-    }
+    if (!modalForm.nama.trim()) { setModalError("Nama wajib diisi"); return; }
     setModalLoading(true);
     try {
-      const payload = {
-        nama: modalForm.nama,
-        urutan: parseInt(modalForm.urutan) || currentItems.length,
-      };
-      if (currentLevel.parentIdCol && currentStack.item)
-        payload[currentLevel.parentIdCol] = currentStack.item.id;
+      const payload = { nama: modalForm.nama, urutan: parseInt(modalForm.urutan) || currentItems.length };
+      if (currentLevel.parentIdCol && currentStack.item) payload[currentLevel.parentIdCol] = currentStack.item.id;
       await api.post(`/admin/struktur/${currentStack.level}`, payload);
-      closeModal();
-      fetchAll();
-    } catch (err) {
-      setModalError(err.error || "Gagal menambahkan");
-    } finally {
-      setModalLoading(false);
-    }
+      closeModal(); fetchAll();
+    } catch (err) { setModalError(err.error || "Gagal menambahkan"); }
+    finally { setModalLoading(false); }
   };
 
   const handleEdit = async () => {
-    if (!modalForm.nama.trim()) {
-      setModalError("Nama wajib diisi");
-      return;
-    }
+    if (!modalForm.nama.trim()) { setModalError("Nama wajib diisi"); return; }
     setModalLoading(true);
     try {
-      await api.put(
-        `/admin/struktur/${currentStack.level}?id=${modal.item.id}`,
-        { nama: modalForm.nama }
-      );
-      closeModal();
-      fetchAll();
-    } catch (err) {
-      setModalError(err.error || "Gagal mengupdate");
-    } finally {
-      setModalLoading(false);
-    }
+      await api.put(`/admin/struktur/${currentStack.level}?id=${modal.item.id}`, { nama: modalForm.nama });
+      closeModal(); fetchAll();
+    } catch (err) { setModalError(err.error || "Gagal mengupdate"); }
+    finally { setModalLoading(false); }
   };
 
   const handleHapus = async () => {
     setModalLoading(true);
     try {
-      await api.delete(
-        `/admin/struktur/${currentStack.level}?id=${modal.item.id}`
-      );
-      closeModal();
-      fetchAll();
-    } catch (err) {
-      setModalError(
-        err.error || "Gagal menghapus. Pastikan tidak ada data di bawahnya."
-      );
-    } finally {
-      setModalLoading(false);
-    }
+      await api.delete(`/admin/struktur/${currentStack.level}?id=${modal.item.id}`);
+      closeModal(); fetchAll();
+    } catch (err) { setModalError(err.error || "Gagal menghapus. Pastikan tidak ada data di bawahnya."); }
+    finally { setModalLoading(false); }
   };
+
+  const LevelIcon = currentLevel?.icon || FolderTree;
 
   return (
     <div>
@@ -369,17 +247,9 @@ export default function AdminStruktur() {
         <title>Kelola Struktur | Admin Gudang Soal</title>
       </Helmet>
 
-      {/* Header */}
-      <div style={{ marginBottom: "28px" }}>
-        <h1
-          style={{
-            fontSize: isMobile ? "22px" : "24px",
-            fontWeight: "800",
-            color: "#0f0e17",
-            letterSpacing: "-0.5px",
-            marginBottom: "4px",
-          }}
-        >
+      {/* ── Header ── */}
+      <div style={{ marginBottom: "24px" }}>
+        <h1 style={{ fontSize: isMobile ? "22px" : "24px", fontWeight: "800", color: "#0f0e17", letterSpacing: "-0.5px", marginBottom: "4px" }}>
           Kelola Struktur
         </h1>
         <p style={{ fontSize: "14px", color: "#6b6860" }}>
@@ -387,58 +257,72 @@ export default function AdminStruktur() {
         </p>
       </div>
 
-      {/* Breadcrumb */}
+      {/* ── Level progress strip ── */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "6px",
+          gap: 0,
           marginBottom: "20px",
-          flexWrap: "wrap",
+          background: "white",
+          border: "1px solid #e8e6e0",
+          borderRadius: "14px",
+          padding: "6px",
+          overflowX: "auto",
         }}
       >
-        {stack.map((s, i) => {
-          const isLast = i === stack.length - 1;
+        {LEVELS.map((lvl, i) => {
+          const isActive  = lvl.key === currentStack.level;
+          const isPast    = i < currentLevelIndex;
+          const stackItem = stack[i + 1]?.item;
+          const Icon = lvl.icon;
           return (
-            <div
-              key={i}
-              style={{ display: "flex", alignItems: "center", gap: "6px" }}
-            >
-              {i > 0 && <ChevronRight size={14} color="#b4b2a9" />}
+            <div key={lvl.key} style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+              {i > 0 && (
+                <ChevronRight size={13} color={isPast || isActive ? "#c8c6be" : "#e2ddd5"} style={{ margin: "0 2px" }} />
+              )}
               <button
-                onClick={() => !isLast && handleGoTo(i)}
+                onClick={() => isPast && handleGoTo(i)}
+                disabled={!isPast}
                 style={{
-                  background: isLast ? "#f2efe8" : "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "7px 12px",
+                  borderRadius: "9px",
                   border: "none",
-                  borderRadius: "8px",
-                  padding: "5px 10px",
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  color: isLast ? "#0f0e17" : "#6b6860",
-                  cursor: isLast ? "default" : "pointer",
+                  background: isActive ? lvl.color : isPast ? lvl.color + "15" : "transparent",
+                  color: isActive ? "white" : isPast ? lvl.color : "#c8c6be",
+                  fontSize: "12.5px",
+                  fontWeight: "700",
+                  cursor: isPast ? "pointer" : "default",
                   fontFamily: "inherit",
-                  maxWidth: isMobile ? "120px" : "none",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
+                  transition: "all .15s",
                   whiteSpace: "nowrap",
                 }}
               >
-                {s.item
-                  ? s.item.nama
-                  : LEVELS.find((l) => l.key === s.level)?.label}
+                <Icon size={13} />
+                {!isMobile || isActive ? (
+                  <span>{isActive && stackItem ? stackItem.nama : lvl.label}</span>
+                ) : isPast ? (
+                  <span style={{ maxWidth: "60px", overflow: "hidden", textOverflow: "ellipsis", display: "inline-block" }}>
+                    {stackItem ? stackItem.nama : lvl.label}
+                  </span>
+                ) : null}
               </button>
             </div>
           );
         })}
       </div>
 
-      {/* Main card */}
+      {/* ── Main card ── */}
       <div
         style={{
           background: "white",
-          borderRadius: "14px",
-          border: "1px solid #e2ddd5",
+          borderRadius: "16px",
+          border: "1px solid #e8e6e0",
           overflow: "hidden",
+          boxShadow: "0 1px 8px rgba(0,0,0,0.04)",
         }}
       >
         {/* Card header */}
@@ -451,33 +335,42 @@ export default function AdminStruktur() {
             gap: isMobile ? "12px" : "0",
             padding: isMobile ? "14px 16px" : "16px 20px",
             borderBottom: "1px solid #f2efe8",
+            background: "linear-gradient(135deg, " + currentLevel?.color + "08 0%, transparent 60%)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             {stack.length > 1 && (
               <button
                 onClick={handleBack}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "#6b6860",
-                  padding: 0,
-                }}
+                style={{ display: "flex", alignItems: "center", background: "none", border: "none", cursor: "pointer", color: "#6b6860", padding: "4px", borderRadius: "6px" }}
               >
-                <ArrowLeft size={15} />
+                <ArrowLeft size={16} />
               </button>
             )}
-            <span
-              style={{ fontSize: "14px", fontWeight: "700", color: "#0f0e17" }}
+            {/* Level badge */}
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                background: currentLevel?.color + "18",
+                border: `1px solid ${currentLevel?.color}30`,
+                borderRadius: "8px",
+                padding: "4px 10px",
+              }}
             >
-              {currentStack.item ? currentStack.item.nama : "Semua"} —{" "}
-              {currentLevel?.label}
-            </span>
-            <span style={{ fontSize: "13px", color: "#6b6860" }}>
-              ({currentItems.length})
+              <LevelIcon size={13} color={currentLevel?.color} />
+              <span style={{ fontSize: "12px", fontWeight: "700", color: currentLevel?.color }}>
+                {currentLevel?.label}
+              </span>
+            </div>
+            {currentStack.item && (
+              <span style={{ fontSize: "14px", fontWeight: "600", color: "#0f0e17" }}>
+                di <span style={{ color: currentLevel?.color }}>{currentStack.item.nama}</span>
+              </span>
+            )}
+            <span style={{ fontSize: "12.5px", color: "#b4b2a9", fontWeight: "600" }}>
+              {loading ? "..." : currentItems.length} item
             </span>
           </div>
           <button
@@ -487,16 +380,17 @@ export default function AdminStruktur() {
               alignItems: "center",
               justifyContent: "center",
               gap: "6px",
-              padding: "8px 14px",
-              borderRadius: "8px",
+              padding: "8px 16px",
+              borderRadius: "9px",
               border: "none",
-              background: "#e84c2b",
+              background: currentLevel?.color || "#e84c2b",
               color: "white",
               fontSize: "13px",
               fontWeight: "600",
               cursor: "pointer",
               fontFamily: "inherit",
               width: isMobile ? "100%" : "auto",
+              boxShadow: `0 2px 8px ${currentLevel?.color}40`,
             }}
           >
             <Plus size={14} />
@@ -504,456 +398,213 @@ export default function AdminStruktur() {
           </button>
         </div>
 
-        {/* Loading */}
+        {/* Loading skeleton */}
         {loading && (
           <div style={{ display: "flex", flexDirection: "column" }}>
             {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  height: isMobile ? "72px" : "60px",
-                  borderBottom: "1px solid #f2efe8",
-                  animation: "pulse 1.5s infinite",
-                  background: i % 2 === 0 ? "white" : "#faf9f6",
-                }}
-              />
+              <div key={i} style={{ height: "58px", borderBottom: "1px solid #f2efe8", animation: "pulse 1.5s infinite", background: i % 2 === 0 ? "white" : "#faf9f6" }} />
             ))}
           </div>
         )}
 
-        {/* Empty */}
+        {/* Empty state */}
         {!loading && currentItems.length === 0 && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "48px",
-              color: "#6b6860",
-              fontSize: "14px",
-            }}
-          >
-            Belum ada {currentLevel?.label}.
+          <div style={{ textAlign: "center", padding: "52px 24px" }}>
+            <div
+              style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "16px",
+                background: currentLevel?.color + "15",
+                border: `1px solid ${currentLevel?.color}25`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 14px",
+              }}
+            >
+              <LevelIcon size={24} color={currentLevel?.color} />
+            </div>
+            <div style={{ fontSize: "15px", fontWeight: "700", color: "#0f0e17", marginBottom: "6px" }}>
+              Belum ada {currentLevel?.label}
+            </div>
+            <p style={{ fontSize: "13px", color: "#b4b2a9", marginBottom: "20px", lineHeight: 1.5 }}>
+              {currentStack.item
+                ? `Tambahkan ${currentLevel?.label} pertama di ${currentStack.item.nama}`
+                : `Tambahkan ${currentLevel?.label} pertama untuk mulai menyusun struktur`}
+            </p>
+            <button
+              onClick={openTambah}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "9px 20px",
+                borderRadius: "10px",
+                border: "none",
+                background: currentLevel?.color,
+                color: "white",
+                fontSize: "13.5px",
+                fontWeight: "600",
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              <Plus size={14} />
+              Tambah {currentLevel?.label}
+            </button>
           </div>
         )}
 
         {/* Items */}
-        {!loading &&
-          currentItems.map((item, i) => (
-            <div
-              key={item.id}
-              style={{
-                padding: isMobile ? "12px 16px" : "12px 20px",
-                borderBottom:
-                  i < currentItems.length - 1 ? "1px solid #f2efe8" : "none",
-                cursor: !isLastLevel ? "pointer" : "default",
-                transition: "background .15s",
-              }}
-              onClick={() => !isLastLevel && handleDrillDown(item)}
-              onMouseEnter={(e) => {
-                if (!isLastLevel) e.currentTarget.style.background = "#faf9f6";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "white";
-              }}
-            >
-              {isMobile ? (
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
-                >
-                  <span
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: "700",
-                      color: "#b4b2a9",
-                      minWidth: "20px",
-                      textAlign: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {i + 1}
-                  </span>
-                  <div
-                    style={{
-                      flex: 1,
-                      minWidth: 0,
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      color: "#0f0e17",
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {item.nama}
-                  </div>
-                  <span
-                    style={{
-                      fontSize: "11px",
-                      fontWeight: "600",
-                      padding: "2px 7px",
-                      borderRadius: "6px",
-                      background: item.jumlah_soal > 0 ? "#e4f5f0" : "#f2efe8",
-                      color: item.jumlah_soal > 0 ? "#1a8a6e" : "#b4b2a9",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {item.jumlah_soal} soal
-                  </span>
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <ToggleSwitch
-                      checked={item.is_published == 1}
-                      onChange={(e) => handleTogglePublish(e, item)}
-                      loading={publishLoading[item.id]}
-                      hideLabel
-                    />
-                    <button
-                      onClick={() => openEdit(item)}
-                      style={{
-                        width: "28px",
-                        height: "28px",
-                        borderRadius: "8px",
-                        border: "1px solid #e2ddd5",
-                        background: "white",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#6b6860",
-                      }}
-                    >
-                      <Pencil size={13} />
-                    </button>
-                    <button
-                      onClick={() => openHapus(item)}
-                      style={{
-                        width: "28px",
-                        height: "28px",
-                        borderRadius: "8px",
-                        border: "1px solid #fca5a5",
-                        background: "#fff3f0",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#e84c2b",
-                      }}
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
-                  {!isLastLevel && (
-                    <ChevronRight
-                      size={15}
-                      color="#b4b2a9"
-                      style={{ flexShrink: 0 }}
-                    />
+        {!loading && currentItems.map((item, i) => (
+          <div
+            key={item.id}
+            style={{
+              padding: isMobile ? "12px 16px" : "11px 20px",
+              borderBottom: i < currentItems.length - 1 ? "1px solid #f5f3ef" : "none",
+              cursor: !isLastLevel ? "pointer" : "default",
+              transition: "background .12s",
+              borderLeft: `3px solid ${item.is_published == 1 ? currentLevel?.color : "#e2ddd5"}`,
+            }}
+            onClick={() => !isLastLevel && handleDrillDown(item)}
+            onMouseEnter={(e) => { if (!isLastLevel) e.currentTarget.style.background = "#faf9f6"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
+          >
+            {isMobile ? (
+              // ── MOBILE ──
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <span style={{ fontSize: "12px", fontWeight: "700", color: "#c8c6be", minWidth: "20px", textAlign: "center", flexShrink: 0 }}>
+                  {i + 1}
+                </span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: "14px", fontWeight: "600", color: "#0f0e17", wordBreak: "break-word" }}>{item.nama}</div>
+                  {item.jumlah_soal > 0 && (
+                    <span style={{ fontSize: "11px", fontWeight: "700", color: "#1a8a6e" }}>{item.jumlah_soal} soal</span>
                   )}
                 </div>
-              ) : (
-                // ── DESKTOP: 1 baris ──
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "12px" }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      flexShrink: 0,
-                    }}
-                    onClick={(e) => e.stopPropagation()}
+                <div onClick={(e) => e.stopPropagation()} style={{ display: "flex", alignItems: "center", gap: "5px", flexShrink: 0 }}>
+                  <ToggleSwitch checked={item.is_published == 1} onChange={(e) => handleTogglePublish(e, item)} loading={publishLoading[item.id]} hideLabel />
+                  <button onClick={(e) => { e.stopPropagation(); openEdit(item); }}
+                    style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1px solid #e2ddd5", background: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b6860" }}>
+                    <Pencil size={13} />
+                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); openHapus(item); }}
+                    style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1px solid #fca5a5", background: "#fff3f0", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#e84c2b" }}>
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+                {!isLastLevel && <ChevronRight size={14} color="#c8c6be" style={{ flexShrink: 0 }} />}
+              </div>
+            ) : (
+              // ── DESKTOP ──
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                {/* Order controls */}
+                <div style={{ display: "flex", alignItems: "center", gap: "3px", flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => handleUrutanChange(item, -1)}
+                    disabled={i === 0 || urutanLoading[item.id]}
+                    style={{ width: "22px", height: "22px", borderRadius: "6px", border: "1px solid #e8e6e0", background: "white", cursor: i === 0 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: i === 0 ? "#e2ddd5" : "#9b9992", transition: "all .12s" }}
                   >
-                    <button
-                      onClick={() => handleUrutanChange(item, -1)}
-                      disabled={i === 0 || urutanLoading[item.id]}
-                      style={{
-                        width: "22px",
-                        height: "22px",
-                        borderRadius: "6px",
-                        border: "1px solid #e2ddd5",
-                        background: "white",
-                        cursor: i === 0 ? "not-allowed" : "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: i === 0 ? "#e2ddd5" : "#6b6860",
-                      }}
+                    <ChevronUp size={11} />
+                  </button>
+                  {editingIndex === item.id ? (
+                    <input
+                      autoFocus
+                      value={editingValue}
+                      onChange={(e) => setEditingValue(e.target.value)}
+                      onBlur={() => handleIndexSubmit(item, i)}
+                      onKeyDown={(e) => { if (e.key === "Enter") handleIndexSubmit(item, i); if (e.key === "Escape") setEditingIndex(null); }}
+                      style={{ width: "32px", height: "22px", borderRadius: "6px", border: `1.5px solid ${currentLevel?.color}`, fontSize: "12px", fontWeight: "700", textAlign: "center", outline: "none", fontFamily: "inherit", color: "#0f0e17", padding: 0 }}
+                    />
+                  ) : (
+                    <span
+                      onClick={(e) => { e.stopPropagation(); handleIndexClick(item, i); }}
+                      title="Klik untuk ubah urutan"
+                      style={{ fontSize: "12px", fontWeight: "700", color: "#b4b2a9", minWidth: "24px", textAlign: "center", cursor: "text", padding: "2px 4px", borderRadius: "4px", transition: "background .12s" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "#f2efe8")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
                     >
-                      <Minus size={10} />
-                    </button>
-                    {editingIndex === item.id ? (
-                      <input
-                        autoFocus
-                        value={editingValue}
-                        onChange={(e) => setEditingValue(e.target.value)}
-                        onBlur={() => handleIndexSubmit(item, i)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") handleIndexSubmit(item, i);
-                          if (e.key === "Escape") setEditingIndex(null);
-                        }}
-                        style={{
-                          width: "30px",
-                          height: "22px",
-                          borderRadius: "6px",
-                          border: "1.5px solid #e84c2b",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          textAlign: "center",
-                          outline: "none",
-                          fontFamily: "inherit",
-                          color: "#0f0e17",
-                          padding: 0,
-                        }}
-                      />
-                    ) : (
-                      <span
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleIndexClick(item, i);
-                        }}
-                        title="Klik untuk edit urutan"
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          color: "#b4b2a9",
-                          minWidth: "22px",
-                          textAlign: "center",
-                          cursor: "text",
-                          padding: "2px 4px",
-                          borderRadius: "4px",
-                          transition: "background .15s",
-                        }}
-                        onMouseEnter={(e) =>
-                          (e.currentTarget.style.background = "#f2efe8")
-                        }
-                        onMouseLeave={(e) =>
-                          (e.currentTarget.style.background = "none")
-                        }
-                      >
-                        {urutanLoading[item.id] ? "…" : i + 1}
-                      </span>
-                    )}
-                    <button
-                      onClick={() => handleUrutanChange(item, 1)}
-                      disabled={
-                        i === currentItems.length - 1 || urutanLoading[item.id]
-                      }
-                      style={{
-                        width: "22px",
-                        height: "22px",
-                        borderRadius: "6px",
-                        border: "1px solid #e2ddd5",
-                        background: "white",
-                        cursor:
-                          i === currentItems.length - 1
-                            ? "not-allowed"
-                            : "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color:
-                          i === currentItems.length - 1 ? "#e2ddd5" : "#6b6860",
-                      }}
-                    >
-                      <Plus size={10} />
-                    </button>
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: "14px",
-                          fontWeight: "500",
-                          color: "#0f0e17",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {item.nama}
-                      </div>
-                      <span
-                        style={{
-                          fontSize: "11px",
-                          fontWeight: "600",
-                          padding: "2px 7px",
-                          borderRadius: "6px",
-                          background:
-                            item.jumlah_soal > 0 ? "#e4f5f0" : "#f2efe8",
-                          color: item.jumlah_soal > 0 ? "#1a8a6e" : "#b4b2a9",
-                          flexShrink: 0,
-                        }}
-                      >
+                      {urutanLoading[item.id] ? "…" : i + 1}
+                    </span>
+                  )}
+                  <button
+                    onClick={() => handleUrutanChange(item, 1)}
+                    disabled={i === currentItems.length - 1 || urutanLoading[item.id]}
+                    style={{ width: "22px", height: "22px", borderRadius: "6px", border: "1px solid #e8e6e0", background: "white", cursor: i === currentItems.length - 1 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: i === currentItems.length - 1 ? "#e2ddd5" : "#9b9992", transition: "all .12s" }}
+                  >
+                    <ChevronDown size={11} />
+                  </button>
+                </div>
+
+                {/* Name + slug */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "14px", fontWeight: "500", color: "#0f0e17", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {item.nama}
+                    </span>
+                    {item.jumlah_soal > 0 ? (
+                      <span style={{ fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "6px", background: "#e4f5f0", color: "#1a8a6e", flexShrink: 0 }}>
                         {item.jumlah_soal} soal
                       </span>
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "#b4b2a9",
-                        marginTop: "2px",
-                      }}
-                    >
-                      slug: {item.slug}
-                    </div>
+                    ) : (
+                      <span style={{ fontSize: "11px", fontWeight: "600", padding: "2px 8px", borderRadius: "6px", background: "#f2efe8", color: "#c8c6be", flexShrink: 0 }}>
+                        0 soal
+                      </span>
+                    )}
                   </div>
-                  {!isLastLevel && (
-                    <ChevronRight
-                      size={16}
-                      color="#b4b2a9"
-                      style={{ flexShrink: 0 }}
-                    />
-                  )}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      flexShrink: 0,
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <ToggleSwitch
-                      checked={item.is_published == 1}
-                      onChange={(e) => handleTogglePublish(e, item)}
-                      loading={publishLoading[item.id]}
-                    />
-                    <button
-                      onClick={() => openEdit(item)}
-                      style={{
-                        width: "30px",
-                        height: "30px",
-                        borderRadius: "8px",
-                        border: "1px solid #e2ddd5",
-                        background: "white",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#6b6860",
-                      }}
-                    >
-                      <Pencil size={13} />
-                    </button>
-                    <button
-                      onClick={() => openHapus(item)}
-                      style={{
-                        width: "30px",
-                        height: "30px",
-                        borderRadius: "8px",
-                        border: "1px solid #fca5a5",
-                        background: "#fff3f0",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#e84c2b",
-                      }}
-                    >
-                      <Trash2 size={13} />
-                    </button>
+                  <div style={{ fontSize: "11.5px", color: "#c8c6be", marginTop: "1px", fontFamily: "monospace" }}>
+                    {item.slug}
                   </div>
                 </div>
-              )}
-            </div>
-          ))}
+
+                {!isLastLevel && <ChevronRight size={15} color="#c8c6be" style={{ flexShrink: 0 }} />}
+
+                {/* Actions */}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+                  <ToggleSwitch checked={item.is_published == 1} onChange={(e) => handleTogglePublish(e, item)} loading={publishLoading[item.id]} />
+                  <button
+                    onClick={() => openEdit(item)}
+                    style={{ width: "30px", height: "30px", borderRadius: "8px", border: "1px solid #e8e6e0", background: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b6860", transition: "all .12s" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "#f2efe8"; e.currentTarget.style.color = "#0f0e17"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "white"; e.currentTarget.style.color = "#6b6860"; }}
+                  >
+                    <Pencil size={13} />
+                  </button>
+                  <button
+                    onClick={() => openHapus(item)}
+                    style={{ width: "30px", height: "30px", borderRadius: "8px", border: "1px solid #fca5a5", background: "#fff3f0", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#e84c2b", transition: "all .12s" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "#fee2e2"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "#fff3f0"; }}
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
 
-      {/* Modal Tambah */}
+      {/* ── Modal Tambah ── */}
       {modal?.type === "tambah" && (
         <Modal
           title={`Tambah ${currentLevel?.label}`}
+          subtitle={currentStack.item ? `Di bawah: ${currentStack.item.nama}` : undefined}
           onClose={closeModal}
           onSubmit={handleTambah}
           loading={modalLoading}
           error={modalError}
+          submitColor={currentLevel?.color}
         >
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-          >
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "6px" }}
-            >
-              <label
-                style={{
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  color: "#0f0e17",
-                }}
-              >
-                Nama
-              </label>
-              <input
-                value={modalForm.nama}
-                onChange={(e) =>
-                  setModalForm((f) => ({ ...f, nama: e.target.value }))
-                }
-                placeholder={`Nama ${currentLevel?.label}`}
-                autoFocus
-                style={{
-                  padding: "10px 14px",
-                  borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
-                  fontSize: "14px",
-                  outline: "none",
-                  fontFamily: "inherit",
-                  color: "#0f0e17",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
-                onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
-              />
-            </div>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "6px" }}
-            >
-              <label
-                style={{
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  color: "#0f0e17",
-                }}
-              >
-                Urutan{" "}
-                <span style={{ fontWeight: "400", color: "#6b6860" }}>
-                  (opsional, default: akhir list)
-                </span>
-              </label>
-              <input
-                value={modalForm.urutan}
-                onChange={(e) =>
-                  setModalForm((f) => ({ ...f, urutan: e.target.value }))
-                }
-                placeholder={`${currentItems.length + 1}`}
-                type="number"
-                style={{
-                  padding: "10px 14px",
-                  borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
-                  fontSize: "14px",
-                  outline: "none",
-                  fontFamily: "inherit",
-                  color: "#0f0e17",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
-                onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
-              />
-            </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            <FormInput label="Nama" value={modalForm.nama} onChange={(v) => setModalForm((f) => ({ ...f, nama: v }))} placeholder={`Nama ${currentLevel?.label}`} autoFocus />
+            <FormInput label="Urutan" hint="(opsional, default: akhir list)" value={modalForm.urutan} onChange={(v) => setModalForm((f) => ({ ...f, urutan: v }))} placeholder={String(currentItems.length + 1)} type="number" />
           </div>
         </Modal>
       )}
 
-      {/* Modal Edit */}
+      {/* ── Modal Edit ── */}
       {modal?.type === "edit" && (
         <Modal
           title={`Edit ${currentLevel?.label}`}
@@ -961,143 +612,33 @@ export default function AdminStruktur() {
           onSubmit={handleEdit}
           loading={modalLoading}
           error={modalError}
+          submitColor={currentLevel?.color}
         >
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label
-              style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}
-            >
-              Nama
-            </label>
-            <input
-              value={modalForm.nama}
-              onChange={(e) =>
-                setModalForm((f) => ({ ...f, nama: e.target.value }))
-              }
-              placeholder={`Nama ${currentLevel?.label}`}
-              autoFocus
-              style={{
-                padding: "10px 14px",
-                borderRadius: "10px",
-                border: "1px solid #e2ddd5",
-                fontSize: "14px",
-                outline: "none",
-                fontFamily: "inherit",
-                color: "#0f0e17",
-              }}
-              onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
-              onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
-            />
+          <FormInput label="Nama" value={modalForm.nama} onChange={(v) => setModalForm((f) => ({ ...f, nama: v }))} placeholder={`Nama ${currentLevel?.label}`} autoFocus />
+        </Modal>
+      )}
+
+      {/* ── Modal Hapus ── */}
+      {modal?.type === "hapus" && (
+        <Modal
+          title={`Hapus ${currentLevel?.label}?`}
+          subtitle={`"${modal.item.nama}" akan dihapus permanen beserta semua data di bawahnya. Tindakan ini tidak bisa dibatalkan.`}
+          onClose={closeModal}
+          onSubmit={handleHapus}
+          loading={modalLoading}
+          error={modalError}
+          submitLabel="Hapus"
+          submitColor="#e84c2b"
+        >
+          {/* confirmation pill */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 14px", background: "#fff7f7", borderRadius: "10px", border: "1px solid #fca5a5" }}>
+            <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#e84c2b", flexShrink: 0 }} />
+            <span style={{ fontSize: "13px", fontWeight: "600", color: "#b91c1c" }}>{modal.item.nama}</span>
           </div>
         </Modal>
       )}
 
-      {/* Modal Hapus */}
-      {modal?.type === "hapus" && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 300,
-            padding: "16px",
-          }}
-        >
-          <div
-            style={{
-              background: "white",
-              borderRadius: "16px",
-              padding: "28px",
-              maxWidth: "400px",
-              width: "100%",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "17px",
-                fontWeight: "800",
-                color: "#0f0e17",
-                marginBottom: "8px",
-              }}
-            >
-              Hapus {currentLevel?.label}?
-            </h3>
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#6b6860",
-                lineHeight: "1.6",
-                marginBottom: "8px",
-              }}
-            >
-              <strong>{modal.item.nama}</strong> akan dihapus permanen beserta
-              semua data di bawahnya.
-            </p>
-            {modalError && (
-              <div
-                style={{
-                  background: "#fff3f0",
-                  border: "1px solid #fca5a5",
-                  color: "#b91c1c",
-                  fontSize: "13px",
-                  borderRadius: "10px",
-                  padding: "10px 14px",
-                  marginBottom: "16px",
-                }}
-              >
-                {modalError}
-              </div>
-            )}
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                justifyContent: "flex-end",
-                marginTop: "20px",
-              }}
-            >
-              <button
-                onClick={closeModal}
-                style={{
-                  padding: "9px 20px",
-                  borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
-                  background: "white",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                  color: "#0f0e17",
-                }}
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleHapus}
-                disabled={modalLoading}
-                style={{
-                  padding: "9px 20px",
-                  borderRadius: "10px",
-                  border: "none",
-                  background: "#e84c2b",
-                  color: "white",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  cursor: modalLoading ? "not-allowed" : "pointer",
-                  fontFamily: "inherit",
-                  opacity: modalLoading ? 0.7 : 1,
-                }}
-              >
-                {modalLoading ? "Menghapus..." : "Hapus"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>
+      <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }`}</style>
     </div>
   );
 }
