@@ -37,10 +37,13 @@ function parseJsonArray(raw) {
 }
 
 function normalizeAnswer(s) {
-  if (typeof s.answer === "string") {
-    if (["pilihan_ganda","checklist"].includes(s.tipe)) return [s.answer];
-    return s.answer;
+  if (s.tipe === "checklist") {
+    // checklist harus array — kalau string, bungkus
+    if (typeof s.answer === "string") return [s.answer];
+    if (Array.isArray(s.answer)) return s.answer;
+    return [];
   }
+  // semua tipe lain: kembalikan apa adanya
   return s.answer;
 }
 

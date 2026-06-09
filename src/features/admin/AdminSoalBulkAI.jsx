@@ -130,15 +130,10 @@ function parseJsonArray(raw) {
 }
 
 function normalizeAnswer(s) {
-  // string → pilihan_ganda/isian
-  if (typeof s.answer === "string") {
-    if (["pilihan_ganda","checklist"].includes(s.tipe)) return [s.answer];
-    return s.answer;
-  }
-  // already array
-  if (Array.isArray(s.answer)) {
-    if (s.tipe === "pilihan_ganda" && s.answer.length > 0 && typeof s.answer[0] === "string") return s.answer;
-    return s.answer;
+  if (s.tipe === "checklist") {
+    if (typeof s.answer === "string") return [s.answer];
+    if (Array.isArray(s.answer)) return s.answer;
+    return [];
   }
   return s.answer;
 }
