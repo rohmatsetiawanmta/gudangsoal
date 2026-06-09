@@ -184,9 +184,8 @@ export default function AdminSoalImport({ setForm, isMobile }) {
                 marginBottom: "16px",
               }}
             >
-              Paste response JSON dari AI lain (ChatGPT, Claude, Gemini, dll) di
-              bawah ini. Gunakan fitur <strong>Generate dengan AI</strong> untuk
-              mendapatkan prompt yang bisa dicopy ke AI lain.
+              Paste JSON soal di bawah ini. Lihat format yang didukung di
+              tombol <strong>Lihat Format</strong> untuk referensi struktur JSON.
             </div>
 
             {/* Format contoh */}

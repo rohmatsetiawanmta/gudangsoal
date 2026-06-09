@@ -19,7 +19,6 @@ import ChecklistInput from "./AnswerInput/ChecklistInput";
 import MCTInput from "./AnswerInput/MCTInput";
 import MenjodohkanInput from "./AnswerInput/MenjodohkanInput";
 import IsianMultiInput from "./AnswerInput/IsianMultiInput";
-import AdminSoalAI from "../AdminSoalAI";
 import AdminSoalImport from "../AdminSoalImport";
 
 export default function AdminSoalForm() {
@@ -196,24 +195,8 @@ export default function AdminSoalForm() {
           </p>
         </div>
 
-        {/* Tombol AI + Import */}
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            flexDirection: isMobile ? "column" : "row",
-            width: isMobile ? "100%" : "auto",
-          }}
-        >
-          <AdminSoalAI
-            form={form}
-            setForm={setForm}
-            struktur={struktur}
-            selected={selected}
-            isMobile={isMobile}
-          />
-          <AdminSoalImport setForm={setForm} isMobile={isMobile} />
-        </div>
+        {/* Import */}
+        <AdminSoalImport setForm={setForm} isMobile={isMobile} />
       </div>
 
       {error && (
