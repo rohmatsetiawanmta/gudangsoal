@@ -25,54 +25,52 @@ if ($userRole !== 'admin') {
 
 // GET /admin/soal
 if ($uri === '/admin/soal' && $method === 'GET') {
-  $page   = intval($_GET['page']  ?? 1);
-  $limit  = intval($_GET['limit'] ?? 20);
-  $offset = ($page - 1) * $limit;
-  $search = $_GET['search'] ?? '';
+  $page       = intval($_GET['page']       ?? 1);
+  $limit      = intval($_GET['limit']      ?? 20);
+  $offset     = ($page - 1) * $limit;
+  $search     = $_GET['search']     ?? '';
+  $difficulty = isset($_GET['difficulty']) && $_GET['difficulty'] !== '' ? intval($_GET['difficulty']) : null;
+  $published  = isset($_GET['published'])  && $_GET['published']  !== '' ? intval($_GET['published'])  : null;
 
-  if ($search) {
-    $stmt = $pdo->prepare('
-      SELECT s.id, s.body, s.answer, s.difficulty, s.is_published, s.created_at, s.kode,
-             st.nama as subtopik, t.nama as topik,
-             m.nama as mapel, sj.nama as subjenjang, j.nama as jenjang
-      FROM soal s
-      JOIN subtopik st ON s.subtopik_id = st.id
-      JOIN topik t ON st.topik_id = t.id
-      JOIN mapel m ON t.mapel_id = m.id
-      JOIN subjenjang sj ON m.subjenjang_id = sj.id
-      JOIN jenjang j ON sj.jenjang_id = j.id
-      WHERE s.body LIKE ?
-      ORDER BY s.created_at DESC
-      LIMIT ' . $limit . ' OFFSET ' . $offset . '
-    ');
-    $stmt->execute(["%$search%"]);
+  $where  = [];
+  $params = [];
 
-    $totalStmt = $pdo->prepare('SELECT COUNT(*) FROM soal WHERE body LIKE ?');
-    $totalStmt->execute(["%$search%"]);
-  } else {
-    $stmt = $pdo->prepare('
-      SELECT s.id, s.body, s.answer, s.difficulty, s.is_published, s.created_at, s.kode,
-             st.nama as subtopik, t.nama as topik,
-             m.nama as mapel, sj.nama as subjenjang, j.nama as jenjang
-      FROM soal s
-      JOIN subtopik st ON s.subtopik_id = st.id
-      JOIN topik t ON st.topik_id = t.id
-      JOIN mapel m ON t.mapel_id = m.id
-      JOIN subjenjang sj ON m.subjenjang_id = sj.id
-      JOIN jenjang j ON sj.jenjang_id = j.id
-      ORDER BY s.created_at DESC
-      LIMIT ' . $limit . ' OFFSET ' . $offset . '
-    ');
-    $stmt->execute([]);
+  if ($search)                { $where[] = 's.body LIKE ?';         $params[] = "%$search%"; }
+  if ($difficulty !== null)   { $where[] = 's.difficulty = ?';      $params[] = $difficulty; }
+  if ($published  !== null)   { $where[] = 's.is_published = ?';    $params[] = $published;  }
 
-    $totalStmt = $pdo->query('SELECT COUNT(*) FROM soal');
-  }
+  $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+  $stmt = $pdo->prepare('
+    SELECT s.id, s.tipe, s.body, s.answer, s.difficulty, s.is_published, s.created_at, s.kode,
+           st.nama as subtopik, t.nama as topik,
+           m.nama as mapel, sj.nama as subjenjang, j.nama as jenjang
+    FROM soal s
+    JOIN subtopik st ON s.subtopik_id = st.id
+    JOIN topik t ON st.topik_id = t.id
+    JOIN mapel m ON t.mapel_id = m.id
+    JOIN subjenjang sj ON m.subjenjang_id = sj.id
+    JOIN jenjang j ON sj.jenjang_id = j.id
+    ' . $whereClause . '
+    ORDER BY s.created_at DESC
+    LIMIT ' . $limit . ' OFFSET ' . $offset . '
+  ');
+  $stmt->execute($params);
+
+  $totalStmt = $pdo->prepare('SELECT COUNT(*) FROM soal s ' . $whereClause);
+  $totalStmt->execute($params);
+
+  // counts for stats bar
+  $published_count = (int) $pdo->query('SELECT COUNT(*) FROM soal WHERE is_published = 1')->fetchColumn();
+  $draft_count     = (int) $pdo->query('SELECT COUNT(*) FROM soal WHERE is_published = 0')->fetchColumn();
 
   echo json_encode([
-    'data'  => $stmt->fetchAll(),
-    'total' => (int) $totalStmt->fetchColumn(),
-    'page'  => $page,
-    'limit' => $limit,
+    'data'            => $stmt->fetchAll(),
+    'total'           => (int) $totalStmt->fetchColumn(),
+    'page'            => $page,
+    'limit'           => $limit,
+    'published_count' => $published_count,
+    'draft_count'     => $draft_count,
   ]);
   exit;
 }
