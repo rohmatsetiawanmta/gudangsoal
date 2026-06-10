@@ -1,7 +1,7 @@
 // src/features/admin/soal-form/index.jsx
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, ArrowLeft, Save, PlusCircle } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import api from "../../../lib/api";
 import useWindowWidth from "../../../hooks/useWindowWidth";
@@ -20,6 +20,49 @@ import MCTInput from "./AnswerInput/MCTInput";
 import MenjodohkanInput from "./AnswerInput/MenjodohkanInput";
 import IsianMultiInput from "./AnswerInput/IsianMultiInput";
 import AdminSoalImport from "../AdminSoalImport";
+
+// ── Section card wrapper ──────────────────────────────────────────────────────
+
+function SectionCard({ label, accent, children, isMobile, noPad }) {
+  return (
+    <div style={{
+      background: "white",
+      borderRadius: "14px",
+      border: "1px solid #e2ddd5",
+      borderLeft: `3px solid ${accent || "#e2ddd5"}`,
+      overflow: "hidden",
+    }}>
+      {label && (
+        <div style={{
+          padding: isMobile ? "12px 16px" : "14px 20px",
+          borderBottom: "1px solid #f0ede6",
+          fontSize: "13px", fontWeight: "700", color: "#0f0e17",
+          background: "linear-gradient(to right, #faf9f6, white)",
+          display: "flex", alignItems: "center", gap: "8px",
+        }}>
+          <span style={{
+            width: "6px", height: "6px", borderRadius: "50%",
+            background: accent || "#e2ddd5", flexShrink: 0,
+          }} />
+          {label}
+        </div>
+      )}
+      <div style={noPad ? {} : { padding: isMobile ? "16px" : "20px" }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+const TIPE_ANSWER_LABEL = {
+  pilihan_ganda: "Pilihan Jawaban",
+  isian_singkat: "Kunci Jawaban",
+  isian_numerik: "Kunci Jawaban",
+  checklist: "Pilihan Jawaban",
+  multiple_choice_table: "Tabel Pernyataan",
+  menjodohkan: "Pasangan Jawaban",
+  isian_multi: "Sub-jawaban",
+};
 
 export default function AdminSoalForm() {
   const navigate = useNavigate();
@@ -157,201 +200,162 @@ export default function AdminSoalForm() {
     }
   };
 
+  const answerLabel = TIPE_ANSWER_LABEL[form.tipe] || "Jawaban";
+
   return (
     <div>
       <Helmet>
-        <title>{`${
-          isEdit ? "Edit Soal" : "Tambah Soal"
-        } | Admin Gudang Soal`}</title>
+        <title>{`${isEdit ? "Edit Soal" : "Tambah Soal"} | Admin Gudang Soal`}</title>
       </Helmet>
 
-      {/* Header */}
-      <div
-        style={{
-          marginBottom: "28px",
-          display: "flex",
-          alignItems: isMobile ? "flex-start" : "center",
-          flexDirection: isMobile ? "column" : "row",
-          justifyContent: "space-between",
-          gap: isMobile ? "14px" : "0",
-        }}
-      >
-        <div>
-          <h1
-            style={{
-              fontSize: isMobile ? "22px" : "24px",
-              fontWeight: "800",
-              color: "#0f0e17",
-              letterSpacing: "-0.5px",
-              marginBottom: "4px",
-            }}
-          >
-            {isEdit ? "Edit Soal" : "Tambah Soal"}
-          </h1>
-          <p style={{ fontSize: "14px", color: "#6b6860" }}>
-            {isEdit
-              ? "Ubah soal yang sudah ada"
-              : "Tambahkan soal baru ke bank soal"}
-          </p>
+      {/* ── Hero header ── */}
+      <div style={{
+        borderRadius: "18px",
+        background: "linear-gradient(135deg, #0f0e17 0%, #1a1830 60%, #2c1810 100%)",
+        padding: isMobile ? "24px 20px" : "28px 32px",
+        marginBottom: "28px",
+        position: "relative",
+        overflow: "hidden",
+      }}>
+        {/* watermark */}
+        <div style={{
+          position: "absolute", right: isMobile ? "-10px" : "32px", top: "50%",
+          transform: "translateY(-50%)",
+          fontSize: isMobile ? "72px" : "100px",
+          fontWeight: "900", color: "rgba(255,255,255,.03)",
+          letterSpacing: "-4px", userSelect: "none", lineHeight: 1,
+          pointerEvents: "none",
+        }}>
+          {isEdit ? "EDIT" : "NEW"}
         </div>
 
-        {/* Import */}
-        <AdminSoalImport setForm={setForm} isMobile={isMobile} />
+        <div style={{
+          display: "flex",
+          alignItems: isMobile ? "flex-start" : "center",
+          justifyContent: "space-between",
+          flexDirection: isMobile ? "column" : "row",
+          gap: "16px",
+          position: "relative", zIndex: 1,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+            {/* back button */}
+            <button
+              type="button"
+              onClick={() => navigate("/admin/soal")}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                width: "36px", height: "36px", borderRadius: "10px",
+                border: "1px solid rgba(255,255,255,.15)",
+                background: "rgba(255,255,255,.08)",
+                color: "rgba(255,255,255,.7)", cursor: "pointer",
+                transition: "all .15s", flexShrink: 0,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.15)"; e.currentTarget.style.color = "white"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.08)"; e.currentTarget.style.color = "rgba(255,255,255,.7)"; }}
+            >
+              <ArrowLeft size={16} />
+            </button>
+            <div>
+              <div style={{
+                fontSize: "11px", fontWeight: "600",
+                color: "rgba(255,255,255,.45)",
+                textTransform: "uppercase", letterSpacing: ".08em",
+                marginBottom: "3px",
+              }}>
+                {isEdit ? "Edit Soal" : "Buat Soal Baru"}
+              </div>
+              <h1 style={{
+                fontSize: isMobile ? "20px" : "22px",
+                fontWeight: "800", color: "white",
+                letterSpacing: "-0.4px", margin: 0,
+              }}>
+                {isEdit ? "Edit Soal" : "Tambah Soal"}
+              </h1>
+            </div>
+          </div>
+
+          {/* Import JSON button */}
+          <div style={{ width: isMobile ? "100%" : "auto" }}>
+            <AdminSoalImport setForm={setForm} isMobile={isMobile} />
+          </div>
+        </div>
       </div>
 
+      {/* Error banner */}
       {error && (
-        <div
-          style={{
-            background: "#fff3f0",
-            border: "1px solid #fca5a5",
-            color: "#b91c1c",
-            fontSize: "14px",
-            borderRadius: "12px",
-            padding: "12px 16px",
-            marginBottom: "24px",
-          }}
-        >
+        <div style={{
+          background: "#fff3f0", border: "1px solid #fca5a5",
+          color: "#b91c1c", fontSize: "14px", borderRadius: "12px",
+          padding: "12px 16px", marginBottom: "20px",
+          display: "flex", alignItems: "center", gap: "10px",
+        }}>
+          <AlertCircle size={16} style={{ flexShrink: 0 }} />
           {error}
         </div>
       )}
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-          gap: "24px",
-          alignItems: "start",
-        }}
-      >
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+        gap: "24px",
+        alignItems: "start",
+      }}>
         {/* Kiri — Form */}
         <form
           onSubmit={handleSubmit}
-          style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+          style={{ display: "flex", flexDirection: "column", gap: "16px" }}
         >
-          <LokasiSoal
-            form={form}
-            setForm={setForm}
-            struktur={struktur}
-            selected={selected}
-            setSelected={setSelected}
-            loadingStruktur={loadingStruktur}
-            isMobile={isMobile}
-          />
+          {/* Lokasi soal */}
+          <SectionCard label="Lokasi Soal" accent="#7c3aed" isMobile={isMobile}>
+            <LokasiSoal
+              form={form} setForm={setForm}
+              struktur={struktur} selected={selected} setSelected={setSelected}
+              loadingStruktur={loadingStruktur} isMobile={isMobile}
+            />
+          </SectionCard>
 
-          <TeksSoal form={form} setForm={setForm} isMobile={isMobile} />
+          {/* Teks soal */}
+          <SectionCard label="Teks Soal" accent="#2563eb" isMobile={isMobile}>
+            <TeksSoal form={form} setForm={setForm} isMobile={isMobile} />
+          </SectionCard>
 
           {/* Answer input per tipe */}
-          {form.tipe === "pilihan_ganda" && (
-            <div
-              style={{
-                background: "white",
-                borderRadius: "14px",
-                border: "1px solid #e2ddd5",
-                padding: isMobile ? "20px 16px" : "24px",
-              }}
-            >
-              <PilihanGanda form={form} setForm={setForm} />
-            </div>
-          )}
-          {(form.tipe === "isian_singkat" || form.tipe === "isian_numerik") && (
-            <div
-              style={{
-                background: "white",
-                borderRadius: "14px",
-                border: "1px solid #e2ddd5",
-                padding: isMobile ? "20px 16px" : "24px",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "700",
-                  color: "#0f0e17",
-                  marginBottom: "16px",
-                }}
-              >
-                Kunci Jawaban
-              </div>
-              <IsianInput form={form} setForm={setForm} />
-            </div>
-          )}
-          {form.tipe === "checklist" && (
-            <div
-              style={{
-                background: "white",
-                borderRadius: "14px",
-                border: "1px solid #e2ddd5",
-                padding: isMobile ? "20px 16px" : "24px",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "700",
-                  color: "#0f0e17",
-                  marginBottom: "16px",
-                }}
-              >
-                Pilihan Jawaban
-              </div>
-              <ChecklistInput form={form} setForm={setForm} />
-            </div>
-          )}
-          {form.tipe === "multiple_choice_table" && (
-            <div
-              style={{
-                background: "white",
-                borderRadius: "14px",
-                border: "1px solid #e2ddd5",
-                padding: isMobile ? "20px 16px" : "24px",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "700",
-                  color: "#0f0e17",
-                  marginBottom: "16px",
-                }}
-              >
-                Tabel Pernyataan
-              </div>
-              <MCTInput form={form} setForm={setForm} />
-            </div>
-          )}
-          {form.tipe === "menjodohkan" && (
-            <div
-              style={{
-                background: "white",
-                borderRadius: "14px",
-                border: "1px solid #e2ddd5",
-                padding: isMobile ? "20px 16px" : "24px",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "700",
-                  color: "#0f0e17",
-                  marginBottom: "16px",
-                }}
-              >
-                Pasangan Jawaban
-              </div>
-              <MenjodohkanInput
-                form={form}
-                setForm={setForm}
-                isMobile={isMobile}
-              />
-            </div>
+          {form.tipe !== "isian_multi" && (
+            <SectionCard label={answerLabel} accent="#e84c2b" isMobile={isMobile}>
+              {form.tipe === "pilihan_ganda" && (
+                <PilihanGanda form={form} setForm={setForm} />
+              )}
+              {(form.tipe === "isian_singkat" || form.tipe === "isian_numerik") && (
+                <IsianInput form={form} setForm={setForm} />
+              )}
+              {form.tipe === "checklist" && (
+                <ChecklistInput form={form} setForm={setForm} />
+              )}
+              {form.tipe === "multiple_choice_table" && (
+                <MCTInput form={form} setForm={setForm} />
+              )}
+              {form.tipe === "menjodohkan" && (
+                <MenjodohkanInput form={form} setForm={setForm} isMobile={isMobile} />
+              )}
+            </SectionCard>
           )}
           {form.tipe === "isian_multi" && (
             <IsianMultiInput form={form} setForm={setForm} />
           )}
 
-          <Pembahasan form={form} setForm={setForm} isMobile={isMobile} />
-          <PembahasanPublik form={form} setForm={setForm} isMobile={isMobile} />
-          <Video form={form} setForm={setForm} isMobile={isMobile} />
+          {/* Pembahasan */}
+          <SectionCard label="Pembahasan" accent="#1a8a6e" isMobile={isMobile}>
+            <Pembahasan form={form} setForm={setForm} isMobile={isMobile} />
+          </SectionCard>
+
+          {/* Pembahasan publik + video — tanpa label, accent subtle */}
+          <SectionCard accent="#f5a623" isMobile={isMobile}>
+            <PembahasanPublik form={form} setForm={setForm} isMobile={isMobile} />
+          </SectionCard>
+
+          <SectionCard accent="#b4b2a9" isMobile={isMobile}>
+            <Video form={form} setForm={setForm} isMobile={isMobile} />
+          </SectionCard>
 
           {/* Mobile: toggle preview */}
           {isMobile && (
@@ -359,19 +363,11 @@ export default function AdminSoalForm() {
               type="button"
               onClick={() => setShowPreview((v) => !v)}
               style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                padding: "12px",
-                borderRadius: "12px",
-                border: "1px solid #e2ddd5",
-                background: "white",
-                fontSize: "14px",
-                fontWeight: "600",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                color: "#0f0e17",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                gap: "8px", padding: "12px", borderRadius: "12px",
+                border: "1px solid #e2ddd5", background: "white",
+                fontSize: "14px", fontWeight: "600", cursor: "pointer",
+                fontFamily: "inherit", color: "#0f0e17",
               }}
             >
               {showPreview ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -380,23 +376,22 @@ export default function AdminSoalForm() {
           )}
 
           {/* Actions */}
-          <div
-            style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}
-          >
+          <div style={{
+            display: "flex", gap: "10px", justifyContent: "flex-end",
+            paddingTop: "4px",
+          }}>
             <button
               type="button"
               onClick={() => navigate("/admin/soal")}
               style={{
-                padding: "11px 24px",
-                borderRadius: "10px",
-                border: "1px solid #e2ddd5",
-                background: "white",
-                fontSize: "14px",
-                fontWeight: "600",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                color: "#0f0e17",
+                padding: "11px 24px", borderRadius: "10px",
+                border: "1px solid #e2ddd5", background: "white",
+                fontSize: "14px", fontWeight: "600", cursor: "pointer",
+                fontFamily: "inherit", color: "#0f0e17",
+                transition: "all .15s",
               }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#f2efe8"; e.currentTarget.style.borderColor = "#0f0e17"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "white"; e.currentTarget.style.borderColor = "#e2ddd5"; }}
             >
               Batal
             </button>
@@ -404,32 +399,30 @@ export default function AdminSoalForm() {
               type="submit"
               disabled={loading}
               style={{
-                padding: "11px 24px",
-                borderRadius: "10px",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                gap: "8px", padding: "11px 24px", borderRadius: "10px",
                 border: "none",
                 background: loading ? "#f5a07a" : "#e84c2b",
-                color: "white",
-                fontSize: "14px",
-                fontWeight: "600",
+                color: "white", fontSize: "14px", fontWeight: "700",
                 cursor: loading ? "not-allowed" : "pointer",
-                fontFamily: "inherit",
-                minWidth: "120px",
+                fontFamily: "inherit", minWidth: "148px",
+                transition: "opacity .15s",
               }}
             >
-              {loading
-                ? "Menyimpan..."
-                : isEdit
-                ? "Simpan Perubahan"
-                : "Tambah Soal"}
+              {loading ? (
+                "Menyimpan..."
+              ) : isEdit ? (
+                <><Save size={15} /> Simpan Perubahan</>
+              ) : (
+                <><PlusCircle size={15} /> Tambah Soal</>
+              )}
             </button>
           </div>
         </form>
 
         {/* Kanan — Preview */}
         {(!isMobile || showPreview) && (
-          <div
-            style={{ position: isMobile ? "static" : "sticky", top: "24px" }}
-          >
+          <div style={{ position: isMobile ? "static" : "sticky", top: "24px" }}>
             <PreviewPanel form={form} />
           </div>
         )}

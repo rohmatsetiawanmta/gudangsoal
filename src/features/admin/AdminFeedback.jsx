@@ -1,7 +1,7 @@
 // src/features/admin/AdminFeedback.jsx
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, MessageSquare } from "lucide-react";
 import api from "../../lib/api";
 import useWindowWidth from "../../hooks/useWindowWidth";
 
@@ -436,53 +436,81 @@ export default function AdminFeedback() {
         <title>Masukan User | Admin Gudang Soal</title>
       </Helmet>
 
-      {/* Header */}
-      <div
-        style={{
+      {/* ── Hero header ── */}
+      <div style={{
+        borderRadius: "18px",
+        background: "linear-gradient(135deg, #0f0e17 0%, #1a1830 55%, #1a0d28 100%)",
+        padding: isMobile ? "24px 20px" : "28px 32px",
+        marginBottom: "28px",
+        position: "relative",
+        overflow: "hidden",
+      }}>
+        {/* watermark */}
+        <div style={{
+          position: "absolute", right: isMobile ? "-10px" : "24px", top: "50%",
+          transform: "translateY(-50%)",
+          fontSize: isMobile ? "64px" : "90px",
+          fontWeight: "900", color: "rgba(255,255,255,.03)",
+          letterSpacing: "-4px", userSelect: "none", lineHeight: 1,
+          pointerEvents: "none",
+        }}>FEED</div>
+
+        <div style={{
           display: "flex",
           alignItems: isMobile ? "flex-start" : "center",
-          flexDirection: isMobile ? "column" : "row",
           justifyContent: "space-between",
-          gap: isMobile ? "12px" : "0",
-          marginBottom: "24px",
-        }}
-      >
-        <div>
-          <h1
-            style={{
-              fontSize: isMobile ? "22px" : "24px",
-              fontWeight: "800",
-              color: "#0f0e17",
-              letterSpacing: "-0.5px",
-              marginBottom: "4px",
-            }}
-          >
-            Masukan User
-          </h1>
-          <p style={{ fontSize: "14px", color: "#6b6860" }}>
-            {total} masukan masuk
-          </p>
-        </div>
-        {pendingCount > 0 && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              background: "#faeeda",
-              border: "1px solid #f5a623",
-              borderRadius: "10px",
-              padding: "8px 14px",
-              width: isMobile ? "100%" : "auto",
-            }}
-          >
-            <span
-              style={{ fontSize: "13px", fontWeight: "600", color: "#854F0B" }}
-            >
-              {pendingCount} belum dibaca di halaman ini
-            </span>
+          flexDirection: isMobile ? "column" : "row",
+          gap: "16px",
+          position: "relative", zIndex: 1,
+        }}>
+          <div>
+            <div style={{
+              fontSize: "11px", fontWeight: "600",
+              color: "rgba(255,255,255,.45)",
+              textTransform: "uppercase", letterSpacing: ".08em",
+              marginBottom: "6px",
+            }}>MASUKAN USER</div>
+            <h1 style={{
+              fontSize: isMobile ? "22px" : "26px",
+              fontWeight: "800", color: "white",
+              letterSpacing: "-0.5px", margin: "0 0 12px",
+            }}>Feedback & Masukan</h1>
+
+            {/* stat chips */}
+            {!loading && (
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {[
+                  { label: `${total} Total`, color: "rgba(255,255,255,.8)", bg: "rgba(255,255,255,.1)" },
+                  { label: `${feedback.filter(f => f.status === "pending").length} Menunggu`, color: "#fcd34d", bg: "rgba(252,211,77,.12)" },
+                  { label: `${feedback.filter(f => f.status === "dibaca").length} Dibaca`, color: "#93c5fd", bg: "rgba(37,99,235,.12)" },
+                  { label: `${feedback.filter(f => f.status === "ditindaklanjuti").length} Ditindaklanjuti`, color: "#6ee7b7", bg: "rgba(110,231,183,.12)" },
+                ].map((c) => (
+                  <span key={c.label} style={{
+                    fontSize: "12px", fontWeight: "700",
+                    padding: "4px 12px", borderRadius: "99px",
+                    color: c.color, background: c.bg,
+                    backdropFilter: "blur(4px)",
+                  }}>{c.label}</span>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+
+          {pendingCount > 0 && (
+            <div style={{
+              display: "flex", alignItems: "center", gap: "8px",
+              background: "rgba(252,211,77,.15)",
+              border: "1px solid rgba(252,211,77,.3)",
+              borderRadius: "10px", padding: "8px 14px",
+              flexShrink: 0, width: isMobile ? "100%" : "auto",
+            }}>
+              <MessageSquare size={14} color="#fcd34d" />
+              <span style={{ fontSize: "13px", fontWeight: "600", color: "#fcd34d" }}>
+                {pendingCount} belum dibaca
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Filter */}

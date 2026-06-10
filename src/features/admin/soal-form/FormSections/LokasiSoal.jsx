@@ -105,16 +105,8 @@ export default function LokasiSoal({
   );
 
   return (
-    <div style={{
-      background: "white",
-      borderRadius: "14px",
-      border: "1px solid #e2ddd5",
-      padding: isMobile ? "20px 16px" : "24px",
-    }}>
-      <div style={{ fontSize: "14px", fontWeight: "700", color: "#0f0e17", marginBottom: "4px" }}>
-        Lokasi Soal
-      </div>
-      <p style={{ fontSize: "13px", color: "#6b6860", marginBottom: "16px", marginTop: 0 }}>
+    <div>
+      <p style={{ fontSize: "13px", color: "#6b6860", marginBottom: "14px", marginTop: 0 }}>
         Cari dan pilih subtopik — jenjang, kelas, mapel, dan topik akan terisi otomatis.
       </p>
 

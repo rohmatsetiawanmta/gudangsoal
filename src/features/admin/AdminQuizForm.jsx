@@ -2,7 +2,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ChevronLeft } from "lucide-react";
+import {
+  ArrowLeft, Save, Plus, AlertCircle,
+  Clock, Star, RefreshCw, List, Eye, EyeOff, Shuffle, AlignLeft,
+} from "lucide-react";
 import useWindowWidth from "../../hooks/useWindowWidth";
 import {
   adminCreateQuizSet,
@@ -23,43 +26,69 @@ const defaultForm = {
   show_answer: 1,
 };
 
-function Select({ label, value, onChange, options, placeholder }) {
+// ── Reusable sub-components ───────────────────────────────────────────────────
+
+function SectionCard({ label, accent, children, isMobile }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-      <label style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}>
-        {label}
-      </label>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        style={{
-          padding: "10px 14px",
-          borderRadius: "10px",
-          border: "1px solid #e2ddd5",
-          fontSize: "14px",
-          outline: "none",
-          fontFamily: "inherit",
-          color: "#0f0e17",
-          background: "white",
-        }}
-      >
-        {placeholder && <option value="">{placeholder}</option>}
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
+    <div style={{
+      background: "white", borderRadius: "14px",
+      border: "1px solid #e2ddd5",
+      borderLeft: `3px solid ${accent || "#e2ddd5"}`,
+      overflow: "hidden",
+    }}>
+      {label && (
+        <div style={{
+          padding: isMobile ? "12px 16px" : "14px 20px",
+          borderBottom: "1px solid #f0ede6",
+          fontSize: "13px", fontWeight: "700", color: "#0f0e17",
+          background: "linear-gradient(to right, #faf9f6, white)",
+          display: "flex", alignItems: "center", gap: "8px",
+        }}>
+          <span style={{
+            width: "6px", height: "6px", borderRadius: "50%",
+            background: accent || "#e2ddd5", flexShrink: 0,
+          }} />
+          {label}
+        </div>
+      )}
+      <div style={{ padding: isMobile ? "16px" : "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+        {children}
+      </div>
     </div>
   );
 }
 
-function NumberInput({ label, value, onChange, min = 1, max, hint }) {
+function FormField({ label, hint, children }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-      <label style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}>
-        {label}
-      </label>
+      <label style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}>{label}</label>
+      {children}
+      {hint && <div style={{ fontSize: "11px", color: "#b4b2a9", lineHeight: "1.5" }}>{hint}</div>}
+    </div>
+  );
+}
+
+function TextInput({ value, onChange, placeholder, onFocus, onBlur }) {
+  return (
+    <input
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      style={{
+        padding: "10px 14px", borderRadius: "10px",
+        border: "1px solid #e2ddd5", fontSize: "14px",
+        outline: "none", fontFamily: "inherit", color: "#0f0e17",
+        transition: "border-color .15s",
+      }}
+      onFocus={e => { e.target.style.borderColor = "#e84c2b"; onFocus?.(e); }}
+      onBlur={e => { e.target.style.borderColor = "#e2ddd5"; onBlur?.(e); }}
+    />
+  );
+}
+
+function NumberField({ label, value, onChange, min = 1, max, hint }) {
+  return (
+    <FormField label={label} hint={hint}>
       <input
         type="number"
         value={value}
@@ -67,21 +96,55 @@ function NumberInput({ label, value, onChange, min = 1, max, hint }) {
         min={min}
         max={max}
         style={{
-          padding: "10px 14px",
-          borderRadius: "10px",
-          border: "1px solid #e2ddd5",
-          fontSize: "14px",
-          outline: "none",
-          fontFamily: "inherit",
-          color: "#0f0e17",
+          padding: "10px 14px", borderRadius: "10px",
+          border: "1px solid #e2ddd5", fontSize: "14px",
+          outline: "none", fontFamily: "inherit", color: "#0f0e17",
         }}
         onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
         onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
       />
-      {hint && <div style={{ fontSize: "12px", color: "#b4b2a9" }}>{hint}</div>}
+    </FormField>
+  );
+}
+
+function OptionToggle({ options, value, onChange }) {
+  return (
+    <div style={{ display: "flex", gap: "8px" }}>
+      {options.map((m) => {
+        const active = value === m.value;
+        return (
+          <button
+            key={m.value}
+            type="button"
+            onClick={() => onChange(m.value)}
+            style={{
+              flex: 1, padding: "11px 12px",
+              borderRadius: "10px", border: "none",
+              cursor: "pointer", fontFamily: "inherit",
+              textAlign: "left",
+              background: active ? "#fff3f0" : "#f2efe8",
+              outline: active ? "2px solid #e84c2b" : "none",
+              transition: "all .15s",
+            }}
+          >
+            <div style={{
+              display: "flex", alignItems: "center", gap: "6px",
+              fontSize: "13px", fontWeight: "700",
+              color: active ? "#e84c2b" : "#0f0e17",
+              marginBottom: "2px",
+            }}>
+              {m.icon && <m.icon size={13} />}
+              {m.label}
+            </div>
+            <div style={{ fontSize: "11px", color: "#6b6860", lineHeight: "1.4" }}>{m.desc}</div>
+          </button>
+        );
+      })}
     </div>
   );
 }
+
+// ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function AdminQuizForm() {
   const navigate = useNavigate();
@@ -127,22 +190,10 @@ export default function AdminQuizForm() {
 
   const handleSubmit = async () => {
     setError("");
-    if (!form.judul.trim()) {
-      setError("Judul wajib diisi");
-      return;
-    }
-    if (form.durasi < 1) {
-      setError("Durasi minimal 1 menit");
-      return;
-    }
-    if (form.max_xp < 1) {
-      setError("Max XP minimal 1");
-      return;
-    }
-    if (form.max_attempt < 1) {
-      setError("Max attempt minimal 1");
-      return;
-    }
+    if (!form.judul.trim()) { setError("Judul wajib diisi"); return; }
+    if (form.durasi < 1)     { setError("Durasi minimal 1 menit"); return; }
+    if (form.max_xp < 1)     { setError("Max XP minimal 1"); return; }
+    if (form.max_attempt < 1){ setError("Max attempt minimal 1"); return; }
 
     setSaving(true);
     try {
@@ -162,441 +213,240 @@ export default function AdminQuizForm() {
 
   if (loading)
     return (
-      <div style={{ padding: "40px", textAlign: "center", color: "#6b6860" }}>
-        Memuat...
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} style={{
+            height: "80px", borderRadius: "14px",
+            background: "#e2ddd5", opacity: 0.5,
+            animation: "pulse 1.5s infinite",
+          }} />
+        ))}
+        <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>
       </div>
     );
 
   return (
     <div>
       <Helmet>
-        <title>{`${
-          isEdit ? "Edit" : "Buat"
-        } Set Soal | Admin Gudang Soal`}</title>
+        <title>{`${isEdit ? "Edit" : "Buat"} Set Soal | Admin Gudang Soal`}</title>
       </Helmet>
 
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          marginBottom: "24px",
-        }}
-      >
-        <button
-          onClick={() => navigate("/admin/latihan")}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "4px",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "#6b6860",
-            fontSize: "13px",
-            fontFamily: "inherit",
-            padding: 0,
-          }}
-        >
-          <ChevronLeft size={15} /> Kembali
-        </button>
-        <h1
-          style={{
-            fontSize: isMobile ? "20px" : "22px",
-            fontWeight: "800",
-            color: "#0f0e17",
-            letterSpacing: "-0.5px",
-          }}
-        >
-          {isEdit ? "Edit Set Soal" : "Buat Set Soal Baru"}
-        </h1>
+      {/* ── Hero header ── */}
+      <div style={{
+        borderRadius: "18px",
+        background: "linear-gradient(135deg, #0f0e17 0%, #1a1830 55%, #0d2210 100%)",
+        padding: isMobile ? "24px 20px" : "28px 32px",
+        marginBottom: "28px",
+        position: "relative", overflow: "hidden",
+      }}>
+        <div style={{
+          position: "absolute", right: isMobile ? "-10px" : "24px", top: "50%",
+          transform: "translateY(-50%)",
+          fontSize: isMobile ? "72px" : "100px",
+          fontWeight: "900", color: "rgba(255,255,255,.03)",
+          letterSpacing: "-4px", userSelect: "none", lineHeight: 1,
+          pointerEvents: "none",
+        }}>
+          {isEdit ? "EDIT" : "NEW"}
+        </div>
+
+        <div style={{
+          display: "flex", alignItems: "center", gap: "14px",
+          position: "relative", zIndex: 1,
+        }}>
+          <button
+            type="button"
+            onClick={() => navigate("/admin/latihan")}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              width: "36px", height: "36px", borderRadius: "10px",
+              border: "1px solid rgba(255,255,255,.15)",
+              background: "rgba(255,255,255,.08)",
+              color: "rgba(255,255,255,.7)", cursor: "pointer",
+              transition: "all .15s", flexShrink: 0,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.15)"; e.currentTarget.style.color = "white"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.08)"; e.currentTarget.style.color = "rgba(255,255,255,.7)"; }}
+          >
+            <ArrowLeft size={16} />
+          </button>
+          <div>
+            <div style={{
+              fontSize: "11px", fontWeight: "600",
+              color: "rgba(255,255,255,.45)",
+              textTransform: "uppercase", letterSpacing: ".08em", marginBottom: "3px",
+            }}>
+              {isEdit ? "Edit Set Soal" : "Buat Set Soal Baru"}
+            </div>
+            <h1 style={{
+              fontSize: isMobile ? "20px" : "22px",
+              fontWeight: "800", color: "white",
+              letterSpacing: "-0.4px", margin: 0,
+            }}>
+              {isEdit ? "Edit Set Soal" : "Buat Set Soal Baru"}
+            </h1>
+          </div>
+        </div>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-          gap: "20px",
-        }}
-      >
+      {/* Error banner */}
+      {error && (
+        <div style={{
+          background: "#fff3f0", border: "1px solid #fca5a5",
+          color: "#b91c1c", fontSize: "14px", borderRadius: "12px",
+          padding: "12px 16px", marginBottom: "20px",
+          display: "flex", alignItems: "center", gap: "10px",
+        }}>
+          <AlertCircle size={16} style={{ flexShrink: 0 }} />
+          {error}
+        </div>
+      )}
+
+      {/* ── Form grid ── */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+        gap: "16px",
+      }}>
         {/* Kiri */}
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          {/* Info dasar */}
-          <div
-            style={{
-              background: "white",
-              borderRadius: "14px",
-              border: "1px solid #e2ddd5",
-              padding: isMobile ? "16px" : "20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "14px",
-            }}
-          >
-            <div
-              style={{ fontSize: "14px", fontWeight: "700", color: "#0f0e17" }}
-            >
-              Informasi Dasar
-            </div>
 
-            {/* Judul */}
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "6px" }}
-            >
-              <label
-                style={{
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  color: "#0f0e17",
-                }}
-              >
-                Judul
-              </label>
-              <input
+          <SectionCard label="Informasi Dasar" accent="#2563eb" isMobile={isMobile}>
+            <FormField label="Judul">
+              <TextInput
                 value={form.judul}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, judul: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, judul: e.target.value }))}
                 placeholder="Contoh: Try Out UTBK Matematika #1"
-                style={{
-                  padding: "10px 14px",
-                  borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
-                  fontSize: "14px",
-                  outline: "none",
-                  fontFamily: "inherit",
-                  color: "#0f0e17",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
-                onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
               />
-            </div>
+            </FormField>
 
-            {/* Deskripsi */}
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "6px" }}
-            >
-              <label
-                style={{
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  color: "#0f0e17",
-                }}
-              >
-                Deskripsi{" "}
-                <span style={{ fontWeight: "400", color: "#b4b2a9" }}>
-                  (opsional)
-                </span>
-              </label>
+            <FormField label={<>Deskripsi <span style={{ fontWeight: "400", color: "#b4b2a9", fontSize: "12px" }}>(opsional)</span></>}>
               <textarea
                 value={form.deskripsi}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, deskripsi: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, deskripsi: e.target.value }))}
                 placeholder="Deskripsi singkat tentang set soal ini..."
                 rows={3}
                 style={{
-                  padding: "10px 14px",
-                  borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
-                  fontSize: "14px",
-                  outline: "none",
-                  fontFamily: "inherit",
-                  color: "#0f0e17",
-                  resize: "none",
-                  lineHeight: "1.6",
+                  padding: "10px 14px", borderRadius: "10px",
+                  border: "1px solid #e2ddd5", fontSize: "14px",
+                  outline: "none", fontFamily: "inherit", color: "#0f0e17",
+                  resize: "none", lineHeight: "1.6",
+                  transition: "border-color .15s",
                 }}
                 onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
                 onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
               />
-            </div>
+            </FormField>
 
-            {/* Jenjang */}
-            <Select
-              label="Jenjang"
-              value={form.jenjang_id}
-              onChange={(v) => setForm((f) => ({ ...f, jenjang_id: v }))}
-              placeholder="Semua jenjang"
-              options={jenjangList.map((j) => ({ value: j.id, label: j.nama }))}
-            />
-          </div>
+            <FormField label="Jenjang">
+              <select
+                value={form.jenjang_id}
+                onChange={(e) => setForm((f) => ({ ...f, jenjang_id: e.target.value }))}
+                style={{
+                  padding: "10px 14px", borderRadius: "10px",
+                  border: "1px solid #e2ddd5", fontSize: "14px",
+                  outline: "none", fontFamily: "inherit", color: "#0f0e17",
+                  background: "white",
+                }}
+              >
+                <option value="">Semua jenjang</option>
+                {jenjangList.map((j) => (
+                  <option key={j.id} value={j.id}>{j.nama}</option>
+                ))}
+              </select>
+            </FormField>
+          </SectionCard>
 
-          {/* Pengaturan waktu & XP */}
-          <div
-            style={{
-              background: "white",
-              borderRadius: "14px",
-              border: "1px solid #e2ddd5",
-              padding: isMobile ? "16px" : "20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "14px",
-            }}
-          >
-            <div
-              style={{ fontSize: "14px", fontWeight: "700", color: "#0f0e17" }}
-            >
-              Waktu & XP
-            </div>
-
-            <NumberInput
-              label="Durasi (menit)"
+          <SectionCard label="Waktu & Reward" accent="#f5a623" isMobile={isMobile}>
+            <NumberField
+              label={<><Clock size={12} style={{ marginRight: 4 }} />Durasi (menit)</>}
               value={form.durasi}
               onChange={(v) => setForm((f) => ({ ...f, durasi: v }))}
               min={1}
               hint="Waktu total untuk mengerjakan semua soal"
             />
-            <NumberInput
-              label="Max XP"
+            <NumberField
+              label={<><Star size={12} style={{ marginRight: 4 }} />Max XP</>}
               value={form.max_xp}
               onChange={(v) => setForm((f) => ({ ...f, max_xp: v }))}
               min={1}
-              hint="XP maksimal yang bisa didapat jika jawab 90-100% benar"
+              hint="XP maksimal jika jawab 90–100% benar"
             />
-          </div>
+          </SectionCard>
         </div>
 
         {/* Kanan */}
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          {/* Pengaturan attempt */}
-          <div
-            style={{
-              background: "white",
-              borderRadius: "14px",
-              border: "1px solid #e2ddd5",
-              padding: isMobile ? "16px" : "20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "14px",
-            }}
-          >
-            <div
-              style={{ fontSize: "14px", fontWeight: "700", color: "#0f0e17" }}
-            >
-              Pengaturan Attempt
-            </div>
 
-            <NumberInput
-              label="Max Attempt"
+          <SectionCard label="Attempt & Urutan" accent="#7c3aed" isMobile={isMobile}>
+            <NumberField
+              label={<><RefreshCw size={12} style={{ marginRight: 4 }} />Max Attempt</>}
               value={form.max_attempt}
               onChange={(v) => setForm((f) => ({ ...f, max_attempt: v }))}
-              min={1}
-              max={10}
+              min={1} max={10}
               hint="Berapa kali user boleh mengerjakan set soal ini"
             />
-
-            <NumberInput
-              label="Urutan"
+            <NumberField
+              label={<><List size={12} style={{ marginRight: 4 }} />Urutan Tampil</>}
               value={form.urutan}
               onChange={(v) => setForm((f) => ({ ...f, urutan: v }))}
               min={0}
-              hint="Urutan tampil di halaman latihan (angka kecil = tampil duluan)"
+              hint="Angka kecil tampil lebih dulu di halaman latihan"
             />
-          </div>
+          </SectionCard>
 
-          {/* Mode & Pembahasan */}
-          <div
-            style={{
-              background: "white",
-              borderRadius: "14px",
-              border: "1px solid #e2ddd5",
-              padding: isMobile ? "16px" : "20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "14px",
-            }}
-          >
-            <div
-              style={{ fontSize: "14px", fontWeight: "700", color: "#0f0e17" }}
-            >
-              Mode Soal
-            </div>
+          <SectionCard label="Mode Soal" accent="#1a8a6e" isMobile={isMobile}>
+            <FormField label="Urutan Soal">
+              <OptionToggle
+                value={form.urutan_mode}
+                onChange={(v) => setForm((f) => ({ ...f, urutan_mode: v }))}
+                options={[
+                  { value: "fixed",  label: "Tetap",  icon: AlignLeft, desc: "Urutan sama tiap attempt" },
+                  { value: "random", label: "Acak",   icon: Shuffle,   desc: "Diacak tiap attempt baru" },
+                ]}
+              />
+            </FormField>
 
-            {/* Urutan mode */}
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-            >
-              <label
-                style={{
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  color: "#0f0e17",
-                }}
-              >
-                Urutan Soal
-              </label>
-              <div style={{ display: "flex", gap: "8px" }}>
-                {[
-                  {
-                    value: "fixed",
-                    label: "Tetap",
-                    desc: "Urutan sama tiap attempt",
-                  },
-                  {
-                    value: "random",
-                    label: "Acak",
-                    desc: "Diacak tiap attempt baru",
-                  },
-                ].map((m) => (
-                  <button
-                    key={m.value}
-                    type="button"
-                    onClick={() =>
-                      setForm((f) => ({ ...f, urutan_mode: m.value }))
-                    }
-                    style={{
-                      flex: 1,
-                      padding: "10px",
-                      borderRadius: "10px",
-                      border: "none",
-                      cursor: "pointer",
-                      fontFamily: "inherit",
-                      textAlign: "left",
-                      background:
-                        form.urutan_mode === m.value ? "#fff3f0" : "#f2efe8",
-                      outline:
-                        form.urutan_mode === m.value
-                          ? "2px solid #e84c2b"
-                          : "none",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: "700",
-                        color:
-                          form.urutan_mode === m.value ? "#e84c2b" : "#0f0e17",
-                        marginBottom: "2px",
-                      }}
-                    >
-                      {m.label}
-                    </div>
-                    <div style={{ fontSize: "11px", color: "#6b6860" }}>
-                      {m.desc}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Show answer */}
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-            >
-              <label
-                style={{
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  color: "#0f0e17",
-                }}
-              >
-                Tampilkan Pembahasan
-              </label>
-              <div style={{ display: "flex", gap: "8px" }}>
-                {[
-                  {
-                    value: 1,
-                    label: "Ya",
-                    desc: "User bisa lihat kunci & pembahasan",
-                  },
-                  {
-                    value: 0,
-                    label: "Tidak",
-                    desc: "Kunci jawaban disembunyikan",
-                  },
-                ].map((m) => (
-                  <button
-                    key={m.value}
-                    type="button"
-                    onClick={() =>
-                      setForm((f) => ({ ...f, show_answer: m.value }))
-                    }
-                    style={{
-                      flex: 1,
-                      padding: "10px",
-                      borderRadius: "10px",
-                      border: "none",
-                      cursor: "pointer",
-                      fontFamily: "inherit",
-                      textAlign: "left",
-                      background:
-                        form.show_answer === m.value ? "#fff3f0" : "#f2efe8",
-                      outline:
-                        form.show_answer === m.value
-                          ? "2px solid #e84c2b"
-                          : "none",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: "700",
-                        color:
-                          form.show_answer === m.value ? "#e84c2b" : "#0f0e17",
-                        marginBottom: "2px",
-                      }}
-                    >
-                      {m.label}
-                    </div>
-                    <div style={{ fontSize: "11px", color: "#6b6860" }}>
-                      {m.desc}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div
-              style={{
-                background: "#fff3f0",
-                border: "1px solid #fca5a5",
-                color: "#b91c1c",
-                fontSize: "13px",
-                borderRadius: "10px",
-                padding: "10px 14px",
-              }}
-            >
-              {error}
-            </div>
-          )}
+            <FormField label="Tampilkan Pembahasan">
+              <OptionToggle
+                value={form.show_answer}
+                onChange={(v) => setForm((f) => ({ ...f, show_answer: v }))}
+                options={[
+                  { value: 1, label: "Ya",    icon: Eye,    desc: "User bisa lihat kunci & pembahasan" },
+                  { value: 0, label: "Tidak", icon: EyeOff, desc: "Kunci jawaban disembunyikan" },
+                ]}
+              />
+            </FormField>
+          </SectionCard>
 
           {/* Submit */}
           <button
             onClick={handleSubmit}
             disabled={saving}
             style={{
-              padding: "14px",
-              borderRadius: "12px",
-              border: "none",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              gap: "8px", padding: "14px",
+              borderRadius: "12px", border: "none",
               background: saving ? "#f5a07a" : "#e84c2b",
-              color: "white",
-              fontSize: "15px",
-              fontWeight: "700",
+              color: "white", fontSize: "15px", fontWeight: "700",
               cursor: saving ? "not-allowed" : "pointer",
               fontFamily: "inherit",
+              boxShadow: saving ? "none" : "0 4px 16px rgba(232,76,43,.25)",
+              transition: "all .15s",
             }}
           >
-            {saving
-              ? "Menyimpan..."
-              : isEdit
-              ? "Simpan Perubahan"
-              : "Buat Set Soal"}
+            {saving ? (
+              "Menyimpan..."
+            ) : isEdit ? (
+              <><Save size={16} /> Simpan Perubahan</>
+            ) : (
+              <><Plus size={16} /> Buat Set Soal</>
+            )}
           </button>
 
           {!isEdit && (
-            <p
-              style={{
-                fontSize: "12px",
-                color: "#b4b2a9",
-                textAlign: "center",
-              }}
-            >
-              Setelah membuat set soal, kamu bisa langsung menambahkan soal di
-              dalamnya.
+            <p style={{ fontSize: "12px", color: "#b4b2a9", textAlign: "center", lineHeight: "1.6" }}>
+              Setelah membuat set soal, kamu bisa langsung menambahkan soal di dalamnya.
             </p>
           )}
         </div>

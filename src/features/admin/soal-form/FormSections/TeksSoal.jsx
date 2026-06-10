@@ -4,24 +4,7 @@ import { TIPE_SOAL, defaultForm } from "../constants";
 
 export default function TeksSoal({ form, setForm, isMobile }) {
   return (
-    <div
-      style={{
-        background: "white",
-        borderRadius: "14px",
-        border: "1px solid #e2ddd5",
-        padding: isMobile ? "20px 16px" : "24px",
-      }}
-    >
-      <div
-        style={{
-          fontSize: "14px",
-          fontWeight: "700",
-          color: "#0f0e17",
-          marginBottom: "16px",
-        }}
-      >
-        Soal
-      </div>
+    <div>
       <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
         {/* Tipe soal */}
         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>

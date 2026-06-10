@@ -9,6 +9,7 @@ import {
   User,
   Eye,
   Crown,
+  Users,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import api from "../../lib/api";
@@ -278,22 +279,56 @@ export default function AdminUsers() {
         <title>Kelola User | Admin Gudang Soal</title>
       </Helmet>
 
-      {/* Header */}
-      <div style={{ marginBottom: "28px" }}>
-        <h1
-          style={{
-            fontSize: isMobile ? "22px" : "24px",
-            fontWeight: "800",
-            color: "#0f0e17",
-            letterSpacing: "-0.5px",
-            marginBottom: "4px",
-          }}
-        >
-          Kelola User
-        </h1>
-        <p style={{ fontSize: "14px", color: "#6b6860" }}>
-          {total} user terdaftar
-        </p>
+      {/* ── Hero header ── */}
+      <div style={{
+        borderRadius: "18px",
+        background: "linear-gradient(135deg, #0f0e17 0%, #1a1830 55%, #0a1628 100%)",
+        padding: isMobile ? "24px 20px" : "28px 32px",
+        marginBottom: "28px",
+        position: "relative",
+        overflow: "hidden",
+      }}>
+        {/* watermark */}
+        <div style={{
+          position: "absolute", right: isMobile ? "-10px" : "24px", top: "50%",
+          transform: "translateY(-50%)",
+          fontSize: isMobile ? "72px" : "100px",
+          fontWeight: "900", color: "rgba(255,255,255,.03)",
+          letterSpacing: "-4px", userSelect: "none", lineHeight: 1,
+          pointerEvents: "none",
+        }}>USER</div>
+
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{
+            fontSize: "11px", fontWeight: "600",
+            color: "rgba(255,255,255,.45)",
+            textTransform: "uppercase", letterSpacing: ".08em",
+            marginBottom: "6px",
+          }}>KELOLA USER</div>
+          <h1 style={{
+            fontSize: isMobile ? "22px" : "26px",
+            fontWeight: "800", color: "white",
+            letterSpacing: "-0.5px", margin: "0 0 12px",
+          }}>Manajemen User</h1>
+
+          {/* stat chips */}
+          {!loading && (
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+              {[
+                { label: `${total} Total`, color: "rgba(255,255,255,.8)", bg: "rgba(255,255,255,.1)" },
+                { label: `${users.filter(u => u.role === "admin").length} Admin`, color: "#fca5a5", bg: "rgba(232,76,43,.15)" },
+                { label: `${users.filter(u => u.role !== "admin").length} User`, color: "#93c5fd", bg: "rgba(37,99,235,.15)" },
+              ].map((c) => (
+                <span key={c.label} style={{
+                  fontSize: "12px", fontWeight: "700",
+                  padding: "4px 12px", borderRadius: "99px",
+                  color: c.color, background: c.bg,
+                  backdropFilter: "blur(4px)",
+                }}>{c.label}</span>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Search */}

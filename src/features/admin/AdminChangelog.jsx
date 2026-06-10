@@ -188,54 +188,86 @@ export default function AdminChangelog() {
         <title>Changelog | Admin Gudang Soal</title>
       </Helmet>
 
-      {/* Header */}
-      <div
-        style={{
+      {/* ── Hero header ── */}
+      <div style={{
+        borderRadius: "18px",
+        background: "linear-gradient(135deg, #0f0e17 0%, #1a1830 55%, #0f1a10 100%)",
+        padding: isMobile ? "24px 20px" : "28px 32px",
+        marginBottom: "28px",
+        position: "relative",
+        overflow: "hidden",
+      }}>
+        {/* watermark */}
+        <div style={{
+          position: "absolute", right: isMobile ? "-10px" : "24px", top: "50%",
+          transform: "translateY(-50%)",
+          fontSize: isMobile ? "64px" : "90px",
+          fontWeight: "900", color: "rgba(255,255,255,.03)",
+          letterSpacing: "-4px", userSelect: "none", lineHeight: 1,
+          pointerEvents: "none",
+        }}>LOG</div>
+
+        <div style={{
           display: "flex",
           alignItems: isMobile ? "flex-start" : "center",
-          flexDirection: isMobile ? "column" : "row",
           justifyContent: "space-between",
-          gap: isMobile ? "14px" : "0",
-          marginBottom: "28px",
-        }}
-      >
-        <div>
-          <h1
+          flexDirection: isMobile ? "column" : "row",
+          gap: "16px",
+          position: "relative", zIndex: 1,
+        }}>
+          <div>
+            <div style={{
+              fontSize: "11px", fontWeight: "600",
+              color: "rgba(255,255,255,.45)",
+              textTransform: "uppercase", letterSpacing: ".08em",
+              marginBottom: "6px",
+            }}>RIWAYAT PERUBAHAN</div>
+            <h1 style={{
+              fontSize: isMobile ? "22px" : "26px",
+              fontWeight: "800", color: "white",
+              letterSpacing: "-0.5px", margin: "0 0 12px",
+            }}>Changelog</h1>
+
+            {/* stat chips */}
+            {!loading && (
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {[
+                  { label: `${changelogs.length} Entri`, color: "rgba(255,255,255,.8)", bg: "rgba(255,255,255,.1)" },
+                  { label: `${changelogs.filter(c => c.is_published == 1).length} Published`, color: "#6ee7b7", bg: "rgba(110,231,183,.12)" },
+                  { label: `${changelogs.filter(c => c.is_published != 1).length} Draft`, color: "#fcd34d", bg: "rgba(252,211,77,.12)" },
+                ].map((c) => (
+                  <span key={c.label} style={{
+                    fontSize: "12px", fontWeight: "700",
+                    padding: "4px 12px", borderRadius: "99px",
+                    color: c.color, background: c.bg,
+                    backdropFilter: "blur(4px)",
+                  }}>{c.label}</span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={openTambah}
             style={{
-              fontSize: isMobile ? "22px" : "24px",
-              fontWeight: "800",
-              color: "#0f0e17",
-              letterSpacing: "-0.5px",
-              marginBottom: "4px",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              gap: "8px",
+              background: "#e84c2b", color: "white",
+              border: "none", borderRadius: "12px",
+              padding: "12px 22px",
+              fontSize: "14px", fontWeight: "700",
+              cursor: "pointer", fontFamily: "inherit",
+              width: isMobile ? "100%" : "auto",
+              flexShrink: 0,
+              boxShadow: "0 4px 16px rgba(232,76,43,.35)",
+              transition: "opacity .15s",
             }}
+            onMouseEnter={e => e.currentTarget.style.opacity = ".88"}
+            onMouseLeave={e => e.currentTarget.style.opacity = "1"}
           >
-            Changelog
-          </h1>
-          <p style={{ fontSize: "14px", color: "#6b6860" }}>
-            {changelogs.length} entri
-          </p>
+            <Plus size={16} /> Tambah Entri
+          </button>
         </div>
-        <button
-          onClick={openTambah}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-            padding: "10px 18px",
-            borderRadius: "10px",
-            border: "none",
-            background: "#e84c2b",
-            color: "white",
-            fontSize: "14px",
-            fontWeight: "600",
-            cursor: "pointer",
-            fontFamily: "inherit",
-            width: isMobile ? "100%" : "auto",
-          }}
-        >
-          <Plus size={16} /> Tambah
-        </button>
       </div>
 
       {/* ── DESKTOP: Table ── */}

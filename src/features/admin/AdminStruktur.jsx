@@ -247,14 +247,42 @@ export default function AdminStruktur() {
         <title>Kelola Struktur | Admin Gudang Soal</title>
       </Helmet>
 
-      {/* ── Header ── */}
-      <div style={{ marginBottom: "24px" }}>
-        <h1 style={{ fontSize: isMobile ? "22px" : "24px", fontWeight: "800", color: "#0f0e17", letterSpacing: "-0.5px", marginBottom: "4px" }}>
-          Kelola Struktur
-        </h1>
-        <p style={{ fontSize: "14px", color: "#6b6860" }}>
-          Atur hierarki jenjang, subjenjang, mapel, topik, dan subtopik.
-        </p>
+      {/* ── Hero header ── */}
+      <div style={{
+        borderRadius: "18px",
+        background: "linear-gradient(135deg, #0f0e17 0%, #1a1830 55%, #1a0e2c 100%)",
+        padding: isMobile ? "24px 20px" : "28px 32px",
+        marginBottom: "20px",
+        position: "relative", overflow: "hidden",
+      }}>
+        {/* watermark */}
+        <div style={{
+          position: "absolute", right: isMobile ? "-10px" : "24px", top: "50%",
+          transform: "translateY(-50%)",
+          fontSize: isMobile ? "60px" : "88px",
+          fontWeight: "900", color: "rgba(255,255,255,.03)",
+          letterSpacing: "-4px", userSelect: "none", lineHeight: 1, pointerEvents: "none",
+        }}>TREE</div>
+
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ fontSize: "11px", fontWeight: "600", color: "rgba(255,255,255,.45)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: "6px" }}>
+            Kelola Struktur
+          </div>
+          <h1 style={{ fontSize: isMobile ? "22px" : "26px", fontWeight: "800", color: "white", letterSpacing: "-0.5px", margin: "0 0 10px" }}>
+            Hierarki Kurikulum
+          </h1>
+          {/* Level chips */}
+          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+            {LEVELS.map(lvl => (
+              <span key={lvl.key} style={{
+                fontSize: "11px", fontWeight: "700",
+                padding: "3px 10px", borderRadius: "99px",
+                color: lvl.color,
+                background: lvl.color + "20",
+              }}>{lvl.label}</span>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* ── Level progress strip ── */}

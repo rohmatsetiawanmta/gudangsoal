@@ -309,36 +309,65 @@ export default function AdminSoal() {
         @keyframes spin{to{transform:rotate(360deg)}}
       `}</style>
 
-      {/* ── Header ── */}
-      <div style={{ display: "flex", alignItems: isMobile ? "flex-start" : "center", justifyContent: "space-between", flexDirection: isMobile ? "column" : "row", gap: isMobile ? "14px" : "0", marginBottom: "20px" }}>
-        <div>
-          <h1 style={{ fontSize: isMobile ? "22px" : "24px", fontWeight: "800", color: "#0f0e17", letterSpacing: "-0.5px", marginBottom: "6px" }}>
-            Kelola Soal
-          </h1>
-          {/* Stats pills */}
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-            <span style={{ fontSize: "12px", fontWeight: "700", color: "#6b6860", background: "#f2efe8", borderRadius: "6px", padding: "3px 10px" }}>
-              {total.toLocaleString()} total
-            </span>
-            <span style={{ fontSize: "12px", fontWeight: "700", color: "#1a8a6e", background: "#e4f5f0", borderRadius: "6px", padding: "3px 10px" }}>
-              {counts.published.toLocaleString()} published
-            </span>
-            <span style={{ fontSize: "12px", fontWeight: "700", color: "#6b6860", background: "#f2efe8", borderRadius: "6px", padding: "3px 10px" }}>
-              {counts.draft.toLocaleString()} draft
-            </span>
+      {/* ── Hero header ── */}
+      <div style={{
+        borderRadius: "18px",
+        background: "linear-gradient(135deg, #0f0e17 0%, #1a1830 55%, #0c1a2e 100%)",
+        padding: isMobile ? "24px 20px" : "28px 32px",
+        marginBottom: "20px",
+        position: "relative", overflow: "hidden",
+      }}>
+        {/* watermark */}
+        <div style={{
+          position: "absolute", right: isMobile ? "-10px" : "24px", top: "50%",
+          transform: "translateY(-50%)",
+          fontSize: isMobile ? "72px" : "100px",
+          fontWeight: "900", color: "rgba(255,255,255,.03)",
+          letterSpacing: "-4px", userSelect: "none", lineHeight: 1, pointerEvents: "none",
+        }}>SOAL</div>
+
+        <div style={{
+          display: "flex",
+          alignItems: isMobile ? "flex-start" : "center",
+          justifyContent: "space-between",
+          flexDirection: isMobile ? "column" : "row",
+          gap: "16px", position: "relative", zIndex: 1,
+        }}>
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: "600", color: "rgba(255,255,255,.45)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: "6px" }}>
+              Kelola Soal
+            </div>
+            <h1 style={{ fontSize: isMobile ? "22px" : "26px", fontWeight: "800", color: "white", letterSpacing: "-0.5px", margin: "0 0 12px" }}>
+              Bank Soal
+            </h1>
+            {/* Stats pills */}
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+              {[
+                { label: `${total.toLocaleString()} Total`,               color: "rgba(255,255,255,.8)",  bg: "rgba(255,255,255,.1)" },
+                { label: `${counts.published.toLocaleString()} Published`, color: "#6ee7b7",              bg: "rgba(110,231,183,.12)" },
+                { label: `${counts.draft.toLocaleString()} Draft`,         color: "#fcd34d",              bg: "rgba(252,211,77,.12)" },
+              ].map(c => (
+                <span key={c.label} style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: c.color, background: c.bg }}>
+                  {c.label}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-        <div style={{ display: "flex", gap: "8px", width: isMobile ? "100%" : "auto" }}>
-          <button onClick={() => navigate("/admin/soal/bulk-import")}
-            style={{ display: "flex", alignItems: "center", gap: "7px", background: "white", color: "#0f0e17", border: "1.5px solid #e8e6e0", borderRadius: "10px", padding: "9px 16px", fontSize: "13.5px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", flexShrink: 0, flex: isMobile ? 1 : "none", justifyContent: "center" }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = "#0f0e17"}
-            onMouseLeave={e => e.currentTarget.style.borderColor = "#e8e6e0"}>
-            <FileJson size={15} /> Bulk Import
-          </button>
-          <button onClick={() => navigate("/admin/soal/tambah")}
-            style={{ display: "flex", alignItems: "center", gap: "7px", background: "#e84c2b", color: "white", border: "none", borderRadius: "10px", padding: "9px 16px", fontSize: "13.5px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", flexShrink: 0, flex: isMobile ? 1 : "none", justifyContent: "center", boxShadow: "0 2px 8px #e84c2b40" }}>
-            <Plus size={15} /> Tambah Soal
-          </button>
+
+          <div style={{ display: "flex", gap: "8px", width: isMobile ? "100%" : "auto", flexShrink: 0 }}>
+            <button onClick={() => navigate("/admin/soal/bulk-import")}
+              style={{ display: "flex", alignItems: "center", gap: "7px", background: "rgba(255,255,255,.1)", color: "rgba(255,255,255,.85)", border: "1px solid rgba(255,255,255,.15)", borderRadius: "10px", padding: "10px 16px", fontSize: "13.5px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", flex: isMobile ? 1 : "none", justifyContent: "center", transition: "all .15s" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.18)"; e.currentTarget.style.color = "white"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.1)"; e.currentTarget.style.color = "rgba(255,255,255,.85)"; }}>
+              <FileJson size={15} /> Bulk Import
+            </button>
+            <button onClick={() => navigate("/admin/soal/tambah")}
+              style={{ display: "flex", alignItems: "center", gap: "7px", background: "#e84c2b", color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontSize: "13.5px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", flex: isMobile ? 1 : "none", justifyContent: "center", boxShadow: "0 4px 16px rgba(232,76,43,.35)", transition: "opacity .15s" }}
+              onMouseEnter={e => e.currentTarget.style.opacity = ".88"}
+              onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+              <Plus size={15} /> Tambah Soal
+            </button>
+          </div>
         </div>
       </div>
 
