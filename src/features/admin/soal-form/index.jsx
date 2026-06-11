@@ -256,14 +256,6 @@ export default function AdminSoalForm() {
               <ArrowLeft size={16} />
             </button>
             <div>
-              <div style={{
-                fontSize: "11px", fontWeight: "600",
-                color: "rgba(255,255,255,.45)",
-                textTransform: "uppercase", letterSpacing: ".08em",
-                marginBottom: "3px",
-              }}>
-                {isEdit ? "Edit Soal" : "Buat Soal Baru"}
-              </div>
               <h1 style={{
                 fontSize: isMobile ? "20px" : "22px",
                 fontWeight: "800", color: "white",

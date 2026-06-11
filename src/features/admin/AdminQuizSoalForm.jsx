@@ -237,7 +237,7 @@ export default function AdminQuizSoalForm() {
             letterSpacing: "-0.5px",
           }}
         >
-          {isEdit ? "Edit Soal" : "Tambah Soal Baru"}
+          {isEdit ? "Edit Soal" : "Tambah Soal"}
         </h1>
         <p style={{ fontSize: "13px", color: "#b4b2a9", marginTop: "4px" }}>
           Soal ini eksklusif untuk set latihan dan tidak muncul di direktori

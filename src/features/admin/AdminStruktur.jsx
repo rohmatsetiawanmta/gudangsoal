@@ -265,11 +265,8 @@ export default function AdminStruktur() {
         }}>TREE</div>
 
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontSize: "11px", fontWeight: "600", color: "rgba(255,255,255,.45)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: "6px" }}>
-            Kelola Struktur
-          </div>
           <h1 style={{ fontSize: isMobile ? "22px" : "26px", fontWeight: "800", color: "white", letterSpacing: "-0.5px", margin: "0 0 10px" }}>
-            Hierarki Kurikulum
+            Kelola Struktur
           </h1>
           {/* Level chips */}
           <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>

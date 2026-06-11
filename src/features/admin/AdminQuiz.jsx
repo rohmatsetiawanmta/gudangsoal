@@ -120,17 +120,11 @@ export default function AdminQuiz() {
           position: "relative", zIndex: 1,
         }}>
           <div>
-            <div style={{
-              fontSize: "11px", fontWeight: "600",
-              color: "rgba(255,255,255,.45)",
-              textTransform: "uppercase", letterSpacing: ".08em",
-              marginBottom: "6px",
-            }}>Kelola Latihan</div>
             <h1 style={{
               fontSize: isMobile ? "22px" : "26px",
               fontWeight: "800", color: "white",
               letterSpacing: "-0.5px", margin: "0 0 12px",
-            }}>Set Soal Latihan</h1>
+            }}>Kelola Latihan</h1>
 
             {/* stat chips */}
             {!loading && (

@@ -230,15 +230,15 @@ export default function AdminQuizDetail() {
         marginBottom: "24px",
         position: "relative", overflow: "hidden",
       }}>
-        {/* watermark */}
+        {/* icon watermark */}
         <div style={{
           position: "absolute", right: isMobile ? "-10px" : "24px", top: "50%",
           transform: "translateY(-50%)",
-          fontSize: isMobile ? "60px" : "90px",
-          fontWeight: "900", color: "rgba(255,255,255,.025)",
-          letterSpacing: "-4px", userSelect: "none", lineHeight: 1,
-          pointerEvents: "none",
-        }}>SET</div>
+          opacity: 0.06, userSelect: "none", lineHeight: 1,
+          pointerEvents: "none", color: "white",
+        }}>
+          <BookOpen size={isMobile ? 80 : 110} />
+        </div>
 
         <div style={{ position: "relative", zIndex: 1 }}>
           {/* Back + breadcrumb */}

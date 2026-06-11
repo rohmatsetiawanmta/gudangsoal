@@ -216,12 +216,6 @@ export default function AdminChangelog() {
           position: "relative", zIndex: 1,
         }}>
           <div>
-            <div style={{
-              fontSize: "11px", fontWeight: "600",
-              color: "rgba(255,255,255,.45)",
-              textTransform: "uppercase", letterSpacing: ".08em",
-              marginBottom: "6px",
-            }}>RIWAYAT PERUBAHAN</div>
             <h1 style={{
               fontSize: isMobile ? "22px" : "26px",
               fontWeight: "800", color: "white",

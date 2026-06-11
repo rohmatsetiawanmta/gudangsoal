@@ -271,19 +271,12 @@ export default function AdminQuizForm() {
             <ArrowLeft size={16} />
           </button>
           <div>
-            <div style={{
-              fontSize: "11px", fontWeight: "600",
-              color: "rgba(255,255,255,.45)",
-              textTransform: "uppercase", letterSpacing: ".08em", marginBottom: "3px",
-            }}>
-              {isEdit ? "Edit Set Soal" : "Buat Set Soal Baru"}
-            </div>
             <h1 style={{
               fontSize: isMobile ? "20px" : "22px",
               fontWeight: "800", color: "white",
               letterSpacing: "-0.4px", margin: 0,
             }}>
-              {isEdit ? "Edit Set Soal" : "Buat Set Soal Baru"}
+              Kelola Latihan
             </h1>
           </div>
         </div>

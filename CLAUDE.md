@@ -274,7 +274,7 @@ List item standar (published/draft aware):
 
 ---
 
-### 8. Pages yang sudah dielevate
+### 8. Pages yang sudah dielevate (semua selesai ✅)
 
 - ✅ AdminDashboard
 - ✅ AdminStruktur
@@ -284,12 +284,9 @@ List item standar (published/draft aware):
 - ✅ AdminQuiz (list latihan)
 - ✅ AdminQuizDetail (isi set soal)
 - ✅ AdminQuizForm (buat/edit set soal)
-
-### Pages yang belum dielevate
-
-- ⬜ AdminUsers
-- ⬜ AdminFeedback
-- ⬜ AdminReports
-- ⬜ AdminChangelog
-- ⬜ AdminSoalRequests
-- ⬜ AdminQuizSoalForm (tambah/edit soal di dalam set)
+- ✅ AdminUsers
+- ✅ AdminFeedback
+- ✅ AdminReports
+- ✅ AdminChangelog
+- ✅ AdminSoalRequests
+- ✅ AdminQuizSoalForm (tambah/edit soal di dalam set)
