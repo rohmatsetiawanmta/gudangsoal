@@ -9,7 +9,6 @@ import { getBookmarks } from "../bookmark/bookmarkApi";
 import useWindowWidth from "../../hooks/useWindowWidth";
 
 import ProfileHeader from "./components/ProfileHeader";
-import XPBar from "./components/XPBar";
 import StatCards from "./components/StatCards";
 import TabSwitcher from "./components/TabSwitcher";
 import TabXP from "./components/TabXP";
@@ -94,7 +93,7 @@ export default function ProfilePage() {
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        background: "#faf9f6",
+        background: "#f2efe8",
       }}
     >
       <SEO
@@ -113,24 +112,6 @@ export default function ProfilePage() {
           padding: isMobile ? "24px 20px" : "40px",
         }}
       >
-        {/* Header */}
-        <div style={{ marginBottom: "24px" }}>
-          <h1
-            style={{
-              fontSize: isMobile ? "22px" : "26px",
-              fontWeight: "800",
-              color: "#0f0e17",
-              letterSpacing: "-0.5px",
-              marginBottom: "4px",
-            }}
-          >
-            Profil Saya
-          </h1>
-          <p style={{ fontSize: "14px", color: "#6b6860" }}>
-            Lihat progress dan kelola akun kamu.
-          </p>
-        </div>
-
         {loading ? (
           <div
             style={{ display: "flex", flexDirection: "column", gap: "16px" }}
@@ -157,8 +138,6 @@ export default function ProfilePage() {
               isMobile={isMobile}
               onUpdate={handleUpdate}
             />
-
-            <XPBar xp={data?.user?.xp || 0} isMobile={isMobile} />
 
             <StatCards
               user={data?.user}
