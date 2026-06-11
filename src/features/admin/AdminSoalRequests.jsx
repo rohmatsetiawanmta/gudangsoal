@@ -253,11 +253,11 @@ export default function AdminSoalRequests() {
         <div style={{
           position: "absolute", right: isMobile ? "-10px" : "24px", top: "50%",
           transform: "translateY(-50%)",
-          fontSize: isMobile ? "64px" : "90px",
-          fontWeight: "900", color: "rgba(255,255,255,.03)",
-          letterSpacing: "-4px", userSelect: "none", lineHeight: 1,
-          pointerEvents: "none",
-        }}>REQUEST</div>
+          opacity: 0.06, userSelect: "none", lineHeight: 1,
+          pointerEvents: "none", color: "white",
+        }}>
+          <Inbox size={isMobile ? 80 : 110} />
+        </div>
 
         <div style={{ position: "relative", zIndex: 1 }}>
           <h1 style={{

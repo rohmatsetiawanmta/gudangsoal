@@ -259,10 +259,11 @@ export default function AdminStruktur() {
         <div style={{
           position: "absolute", right: isMobile ? "-10px" : "24px", top: "50%",
           transform: "translateY(-50%)",
-          fontSize: isMobile ? "60px" : "88px",
-          fontWeight: "900", color: "rgba(255,255,255,.03)",
-          letterSpacing: "-4px", userSelect: "none", lineHeight: 1, pointerEvents: "none",
-        }}>TREE</div>
+          opacity: 0.06, userSelect: "none", lineHeight: 1,
+          pointerEvents: "none", color: "white",
+        }}>
+          <Layers size={isMobile ? 80 : 110} />
+        </div>
 
         <div style={{ position: "relative", zIndex: 1 }}>
           <h1 style={{ fontSize: isMobile ? "22px" : "26px", fontWeight: "800", color: "white", letterSpacing: "-0.5px", margin: "0 0 10px" }}>
@@ -276,7 +277,9 @@ export default function AdminStruktur() {
                 padding: "3px 10px", borderRadius: "99px",
                 color: lvl.color,
                 background: lvl.color + "20",
-              }}>{lvl.label}</span>
+              }}>
+                {loading ? "—" : allData[lvl.key].length} {lvl.label}
+              </span>
             ))}
           </div>
         </div>
