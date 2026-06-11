@@ -51,6 +51,8 @@ if (str_starts_with($uri, '/auth/')) {
   require 'routes/quiz.php';
 } elseif (str_starts_with($uri, '/games')) {
   require 'routes/game.php';
+} elseif (str_starts_with($uri, '/materi')) {
+  require 'routes/materi.php';
 } else {
   http_response_code(404);
   echo json_encode(['error' => 'Endpoint tidak ditemukan']);

@@ -1236,3 +1236,136 @@ if ($uri === '/admin/soal/salin' && $method === 'POST') {
   echo json_encode(['id' => $newId, 'kode' => $kode, 'message' => 'Soal berhasil disalin']);
   exit;
 }
+
+// ==================
+// MATERI
+// ==================
+
+// GET /admin/materi
+if ($uri === '/admin/materi' && $method === 'GET') {
+  $page        = intval($_GET['page']        ?? 1);
+  $limit       = intval($_GET['limit']       ?? 20);
+  $offset      = ($page - 1) * $limit;
+  $search      = $_GET['search']      ?? '';
+  $subtopik_id = isset($_GET['subtopik_id']) && $_GET['subtopik_id'] !== '' ? intval($_GET['subtopik_id']) : null;
+  $published   = isset($_GET['published'])   && $_GET['published']   !== '' ? intval($_GET['published'])   : null;
+
+  $where  = [];
+  $params = [];
+  if ($search)              { $where[] = 'm.judul LIKE ?';     $params[] = "%$search%"; }
+  if ($subtopik_id !== null){ $where[] = 'm.subtopik_id = ?'; $params[] = $subtopik_id; }
+  if ($published !== null)  { $where[] = 'm.is_published = ?'; $params[] = $published; }
+  $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+  $stmt = $pdo->prepare("
+    SELECT m.id, m.judul, m.is_published, m.created_at, m.updated_at,
+           st.nama AS subtopik, t.nama AS topik,
+           mp.nama AS mapel, sj.nama AS subjenjang, j.nama AS jenjang
+    FROM materi m
+    JOIN subtopik st ON m.subtopik_id = st.id
+    JOIN topik    t  ON st.topik_id   = t.id
+    JOIN mapel    mp ON t.mapel_id    = mp.id
+    JOIN subjenjang sj ON mp.subjenjang_id = sj.id
+    JOIN jenjang    j  ON sj.jenjang_id    = j.id
+    $whereClause
+    ORDER BY m.created_at DESC
+    LIMIT $limit OFFSET $offset
+  ");
+  $stmt->execute($params);
+
+  $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM materi m $whereClause");
+  $totalStmt->execute($params);
+
+  echo json_encode([
+    'data'            => $stmt->fetchAll(),
+    'total'           => (int) $totalStmt->fetchColumn(),
+    'page'            => $page,
+    'limit'           => $limit,
+    'published_count' => (int) $pdo->query('SELECT COUNT(*) FROM materi WHERE is_published = 1')->fetchColumn(),
+    'draft_count'     => (int) $pdo->query('SELECT COUNT(*) FROM materi WHERE is_published = 0')->fetchColumn(),
+  ]);
+  exit;
+}
+
+// GET /admin/materi/detail?id=X
+if ($uri === '/admin/materi/detail' && $method === 'GET') {
+  $id = $_GET['id'] ?? null;
+  if (!$id) { http_response_code(400); echo json_encode(['error' => 'id wajib']); exit; }
+
+  $stmt = $pdo->prepare("
+    SELECT m.*,
+           st.nama AS subtopik, st.id AS subtopik_id,
+           t.nama  AS topik,    t.id  AS topik_id,
+           mp.nama AS mapel,    mp.id AS mapel_id,
+           sj.nama AS subjenjang, sj.id AS subjenjang_id,
+           j.nama  AS jenjang,  j.id  AS jenjang_id
+    FROM materi m
+    JOIN subtopik   st ON m.subtopik_id    = st.id
+    JOIN topik       t ON st.topik_id      = t.id
+    JOIN mapel      mp ON t.mapel_id       = mp.id
+    JOIN subjenjang sj ON mp.subjenjang_id = sj.id
+    JOIN jenjang     j ON sj.jenjang_id   = j.id
+    WHERE m.id = ?
+  ");
+  $stmt->execute([$id]);
+  $materi = $stmt->fetch();
+  if (!$materi) { http_response_code(404); echo json_encode(['error' => 'Materi tidak ditemukan']); exit; }
+
+  $materi['highlights'] = json_decode($materi['highlights'] ?? '[]');
+  echo json_encode($materi);
+  exit;
+}
+
+// POST /admin/materi
+if ($uri === '/admin/materi' && $method === 'POST') {
+  if (empty($body['subtopik_id']) || empty($body['judul'])) {
+    http_response_code(400); echo json_encode(['error' => 'subtopik_id dan judul wajib']); exit;
+  }
+  $stmt = $pdo->prepare('
+    INSERT INTO materi (subtopik_id, judul, konten, highlights, is_published)
+    VALUES (?, ?, ?, ?, ?)
+  ');
+  $stmt->execute([
+    $body['subtopik_id'],
+    trim($body['judul']),
+    $body['konten']       ?? null,
+    json_encode($body['highlights'] ?? []),
+    $body['is_published'] ?? 0,
+  ]);
+  http_response_code(201);
+  echo json_encode(['id' => (int) $pdo->lastInsertId(), 'message' => 'Materi berhasil ditambahkan']);
+  exit;
+}
+
+// PUT /admin/materi?id=X
+if ($uri === '/admin/materi' && $method === 'PUT') {
+  $id = $_GET['id'] ?? null;
+  if (!$id) { http_response_code(400); echo json_encode(['error' => 'id wajib']); exit; }
+  if (empty($body['subtopik_id']) || empty($body['judul'])) {
+    http_response_code(400); echo json_encode(['error' => 'subtopik_id dan judul wajib']); exit;
+  }
+  $stmt = $pdo->prepare('
+    UPDATE materi
+    SET subtopik_id=?, judul=?, konten=?, highlights=?, is_published=?, updated_at=NOW()
+    WHERE id=?
+  ');
+  $stmt->execute([
+    $body['subtopik_id'],
+    trim($body['judul']),
+    $body['konten']       ?? null,
+    json_encode($body['highlights'] ?? []),
+    $body['is_published'] ?? 0,
+    $id,
+  ]);
+  echo json_encode(['message' => 'Materi berhasil diupdate']);
+  exit;
+}
+
+// DELETE /admin/materi?id=X
+if ($uri === '/admin/materi' && $method === 'DELETE') {
+  $id = $_GET['id'] ?? null;
+  if (!$id) { http_response_code(400); echo json_encode(['error' => 'id wajib']); exit; }
+  $pdo->prepare('DELETE FROM materi WHERE id = ?')->execute([$id]);
+  echo json_encode(['message' => 'Materi berhasil dihapus']);
+  exit;
+}

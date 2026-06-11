@@ -30,7 +30,7 @@ export default function TabSwitcher({ activeTab, onChange, isMobile }) {
             borderRadius: "10px", border: "none",
             background: active ? "#0f0e17" : "transparent",
             color: active ? "white" : "#6b6860",
-            fontSize: isMobile ? "12px" : "13px",
+            fontSize: isMobile ? "11px" : "13px",
             fontWeight: active ? "700" : "500",
             cursor: "pointer", fontFamily: "inherit",
             transition: "all .15s",
@@ -40,8 +40,8 @@ export default function TabSwitcher({ activeTab, onChange, isMobile }) {
             onMouseEnter={e => { if (!active) e.currentTarget.style.background = "#f2efe8"; }}
             onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}
           >
-            <Icon size={14} />
-            {!isMobile && label}
+            <Icon size={13} />
+            {isMobile ? short : label}
           </button>
         );
       })}

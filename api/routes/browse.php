@@ -508,3 +508,20 @@ $stmt = $pdo->prepare('
   echo json_encode($result);
   exit;
 }
+
+// GET /browse/materi?subtopik_id=X
+if ($uri === '/browse/materi' && $method === 'GET') {
+  $subtopik_id = $_GET['subtopik_id'] ?? null;
+  if (!$subtopik_id) {
+    http_response_code(400); echo json_encode(['error' => 'subtopik_id wajib']); exit;
+  }
+  $stmt = $pdo->prepare('
+    SELECT id, judul, created_at, updated_at
+    FROM materi
+    WHERE subtopik_id = ? AND is_published = 1
+    ORDER BY created_at ASC
+  ');
+  $stmt->execute([$subtopik_id]);
+  echo json_encode($stmt->fetchAll());
+  exit;
+}
