@@ -30,7 +30,6 @@ function SectionCard({ label, accent, children, isMobile, noPad }) {
       borderRadius: "14px",
       border: "1px solid #e2ddd5",
       borderLeft: `3px solid ${accent || "#e2ddd5"}`,
-      overflow: "hidden",
     }}>
       {label && (
         <div style={{

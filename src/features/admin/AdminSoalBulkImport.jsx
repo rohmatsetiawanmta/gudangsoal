@@ -469,7 +469,6 @@ function SectionCard({ num, title, subtitle, children }) {
   return (
     <div style={{
       background: "white", border: "1px solid #e2ddd5", borderRadius: "16px",
-      overflow: "hidden",
     }}>
       <div style={{
         padding: "16px 20px",

@@ -8,6 +8,7 @@ function ScrollToTop() {
   return null;
 }
 import { useAuthStore } from "./features/auth/authStore";
+import FloatingTools from "./components/FloatingTools";
 
 import LandingPage from "./features/home/LandingPage";
 import HomePage from "./features/home/HomePage";
@@ -68,6 +69,7 @@ export default function App() {
   return (
     <>
     <ScrollToTop />
+    <FloatingTools />
     <Routes>
       <Route
         path="/"
