@@ -1,5 +1,12 @@
 // src/App.jsx
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
 import { useAuthStore } from "./features/auth/authStore";
 
 import LandingPage from "./features/home/LandingPage";
@@ -36,6 +43,8 @@ import AdminQuiz from "./features/admin/AdminQuiz";
 import AdminQuizForm from "./features/admin/AdminQuizForm";
 import AdminQuizDetail from "./features/admin/AdminQuizDetail";
 import AdminQuizSoalForm from "./features/admin/AdminQuizSoalForm";
+import AdminMateri from "./features/admin/AdminMateri";
+import AdminMateriForm from "./features/admin/AdminMateriForm";
 
 import LatihanPage from "./features/quiz/LatihanPage";
 import LatihanDetail from "./features/quiz/LatihanDetail";
@@ -49,11 +58,16 @@ import AdminSoalForm from "./features/admin/soal-form";
 import AdminSoalBulkImportPage from "./features/admin/AdminSoalBulkImportPage";
 import GamesPage from "./features/games/GamesPage";
 import NumberSequenceGame from "./features/games/number-sequence/NumberSequenceGame";
+import MateriDetail from "./features/materi/MateriDetail";
+import MateriList from "./features/materi/MateriList";
+import AdminMateriBulkImport from "./features/admin/AdminMateriBulkImport";
 
 export default function App() {
   const { isLoggedIn } = useAuthStore();
 
   return (
+    <>
+    <ScrollToTop />
     <Routes>
       <Route
         path="/"
@@ -96,6 +110,8 @@ export default function App() {
         element={<BrowseSoal />}
       />
       <Route path="/soal/:kode" element={<SoalDetail />} />
+      <Route path="/materi" element={<MateriList />} />
+      <Route path="/materi/:id" element={<MateriDetail />} />
       <Route path="/populer" element={<PopulerPage />} />
       <Route path="/games" element={<GamesPage />} />
       <Route path="/games/number-sequence" element={<NumberSequenceGame />} />
@@ -128,6 +144,11 @@ export default function App() {
             path="latihan/:id/soal/edit/:soal_id"
             element={<AdminQuizSoalForm />}
           />
+
+          <Route path="materi" element={<AdminMateri />} />
+          <Route path="materi/tambah" element={<AdminMateriForm />} />
+          <Route path="materi/edit/:id" element={<AdminMateriForm />} />
+          <Route path="materi/bulk-import" element={<AdminMateriBulkImport />} />
         </Route>
       </Route>
 
@@ -140,5 +161,6 @@ export default function App() {
         element={<QuizReview />}
       />
     </Routes>
+    </>
   );
 }

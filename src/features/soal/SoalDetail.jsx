@@ -29,6 +29,7 @@ import {
 import JawabanInput from "./components/JawabanInput";
 import PembahasanPanel from "./components/PembahasanPanel";
 import ReportModal from "./components/ReportModal";
+import MateriTerkaitBanner from "../../components/MateriTerkaitBanner";
 import {
   checkBookmark,
   addBookmark,
@@ -446,6 +447,8 @@ export default function SoalDetail() {
         )}
 
         {!loading && soal && (
+          <>
+          <MateriTerkaitBanner subtopikId={soal.subtopik_id} style={{ marginBottom: "20px" }} />
           <div
             style={{
               display: "grid",
@@ -692,6 +695,7 @@ export default function SoalDetail() {
               />
             </div>
           </div>
+          </>
         )}
       </main>
 

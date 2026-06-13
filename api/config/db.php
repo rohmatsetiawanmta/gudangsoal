@@ -17,6 +17,8 @@ try {
   $pdo->exec("SET time_zone = '+07:00'");
   $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
   $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+  $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+  $pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 } catch (PDOException $e) {
   http_response_code(500);
   echo json_encode(['error' => 'Koneksi database gagal']);

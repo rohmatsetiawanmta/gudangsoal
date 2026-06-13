@@ -1,8 +1,11 @@
 // src/features/browse/BrowseSoal.jsx
 import { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ChevronLeft } from "lucide-react";
+
+const PAGE_SIZE = 10;
 import Breadcrumb from "../../components/Breadcrumb";
+import MateriTerkaitBanner from "../../components/MateriTerkaitBanner";
 import { getSoal } from "./browseApi";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -47,16 +50,21 @@ export default function BrowseSoal() {
   const topikNama = state?.topikNama || topikSlug;
   const subtopikNama = state?.subtopikNama || subtopikSlug;
 
-  const [soal, setSoal] = useState([]);
+  const [soal, setSoal]     = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError]   = useState("");
+  const [page, setPage]     = useState(1);
 
   useEffect(() => {
+    setPage(1);
     getSoal(jenjangSlug, subjenjangSlug, mapelSlug, topikSlug, subtopikSlug)
       .then((data) => setSoal(data))
       .catch(() => setError("Gagal memuat soal"))
       .finally(() => setLoading(false));
   }, [jenjangSlug, subjenjangSlug, mapelSlug, topikSlug, subtopikSlug]);
+
+  const totalPages = Math.ceil(soal.length / PAGE_SIZE);
+  const pagedSoal  = soal.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div
@@ -173,6 +181,8 @@ export default function BrowseSoal() {
           )}
         </div>
 
+        <MateriTerkaitBanner subtopikSlug={subtopikSlug} style={{ marginBottom: "20px" }} />
+
         {error && (
           <div
             style={{
@@ -209,117 +219,113 @@ export default function BrowseSoal() {
         )}
 
         {!loading && !error && (
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-          >
-            {soal.length === 0 && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "48px",
-                  color: "#6b6860",
-                  fontSize: "14px",
-                }}
-              >
-                Belum ada soal untuk {subtopikNama}.
+          <>
+            {/* Daftar Soal header */}
+            {soal.length > 0 && (
+              <div style={{ fontSize: "11px", fontWeight: "700", color: "#2563eb", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>
+                Daftar Soal ({soal.length})
               </div>
             )}
-            {soal.map((s, i) => (
-              <div
-                key={s.id}
-                onClick={() =>
-                  navigate(`/soal/${s.kode}`, {
-                    state: { ...state, subtopikNama },
-                  })
-                }
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: isMobile ? "10px" : "14px",
-                  background: "white",
-                  borderRadius: "14px",
-                  padding: isMobile ? "12px 14px" : "16px 20px",
-                  border: "1px solid #e2ddd5",
-                  cursor: "pointer",
-                  transition: "transform .15s, box-shadow .15s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateX(4px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 4px 16px rgba(0,0,0,0.06)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateX(0)";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              >
-                {/* Nomor */}
-                <div
-                  style={{
-                    width: "28px",
-                    height: "28px",
-                    borderRadius: "8px",
-                    background: "#f2efe8",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "12px",
-                    fontWeight: "700",
-                    color: "#6b6860",
-                    flexShrink: 0,
-                  }}
-                >
-                  {i + 1}
-                </div>
 
-                {/* Kode — disembunyikan di mobile */}
-                {!isMobile && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {soal.length === 0 && (
+                <div style={{ textAlign: "center", padding: "48px", color: "#6b6860", fontSize: "14px" }}>
+                  Belum ada soal untuk {subtopikNama}.
+                </div>
+              )}
+              {pagedSoal.map((s, i) => {
+                const globalIndex = (page - 1) * PAGE_SIZE + i + 1;
+                return (
                   <div
+                    key={s.id}
+                    onClick={() => navigate(`/soal/${s.kode}`, { state: { ...state, subtopikNama } })}
                     style={{
-                      fontSize: "11px",
-                      fontWeight: "700",
-                      color: "#b4b2a9",
-                      fontFamily: "monospace",
-                      letterSpacing: ".05em",
-                      flexShrink: 0,
+                      display: "flex", alignItems: "center",
+                      gap: isMobile ? "10px" : "14px",
+                      background: "white", borderRadius: "14px",
+                      padding: isMobile ? "12px 14px" : "16px 20px",
+                      border: "1px solid #e2ddd5", cursor: "pointer",
+                      transition: "transform .15s, box-shadow .15s",
                     }}
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.06)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
                   >
-                    {s.kode}
+                    <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: "#f2efe8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "700", color: "#6b6860", flexShrink: 0 }}>
+                      {globalIndex}
+                    </div>
+                    {!isMobile && (
+                      <div style={{ fontSize: "11px", fontWeight: "700", color: "#b4b2a9", fontFamily: "monospace", letterSpacing: ".05em", flexShrink: 0 }}>
+                        {s.kode}
+                      </div>
+                    )}
+                    <div style={{ flex: 1, fontSize: "14px", color: "#0f0e17", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
+                      {s.body.replace(/\$\$?[^$]+\$\$?/g, "[math]").replace(/[*_~`#]/g, "")}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", flexShrink: 0 }}>
+                      <DifficultyBadge level={s.difficulty} />
+                      <ChevronRight size={16} color="#b4b2a9" />
+                    </div>
                   </div>
-                )}
+                );
+              })}
+            </div>
 
-                {/* Body soal */}
-                <div
-                  style={{
-                    flex: 1,
-                    fontSize: "14px",
-                    color: "#0f0e17",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    minWidth: 0,
-                  }}
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginTop: "24px" }}>
+                {/* Prev */}
+                <button
+                  onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  disabled={page === 1}
+                  style={{ width: "36px", height: "36px", borderRadius: "10px", border: "1px solid #e2ddd5", background: "white", display: "flex", alignItems: "center", justifyContent: "center", cursor: page === 1 ? "not-allowed" : "pointer", color: page === 1 ? "#d4d0c8" : "#6b6860", transition: "all .15s" }}
+                  onMouseEnter={e => { if (page !== 1) e.currentTarget.style.borderColor = "#0f0e17"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "#e2ddd5"; }}
                 >
-                  {s.body
-                    .replace(/\$\$?[^$]+\$\$?/g, "[math]")
-                    .replace(/[*_~`#]/g, "")}
-                </div>
+                  <ChevronLeft size={15} />
+                </button>
 
-                {/* Badge + arrow */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: isMobile ? "6px" : "10px",
-                    flexShrink: 0,
-                  }}
+                {/* Page numbers */}
+                {(() => {
+                  const pages = [];
+                  if (totalPages <= 7) {
+                    for (let i = 1; i <= totalPages; i++) pages.push(i);
+                  } else {
+                    pages.push(1);
+                    if (page > 3) pages.push("...");
+                    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
+                    if (page < totalPages - 2) pages.push("...");
+                    pages.push(totalPages);
+                  }
+                  return pages.map((p, idx) =>
+                    p === "..." ? (
+                      <span key={`ellipsis-${idx}`} style={{ width: "36px", textAlign: "center", color: "#b4b2a9", fontSize: "13px" }}>…</span>
+                    ) : (
+                      <button
+                        key={p}
+                        onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                        style={{ width: "36px", height: "36px", borderRadius: "10px", border: `1px solid ${p === page ? "#2563eb" : "#e2ddd5"}`, background: p === page ? "#2563eb" : "white", color: p === page ? "white" : "#0f0e17", fontSize: "13px", fontWeight: p === page ? "700" : "500", cursor: "pointer", transition: "all .15s" }}
+                        onMouseEnter={e => { if (p !== page) e.currentTarget.style.borderColor = "#2563eb"; }}
+                        onMouseLeave={e => { if (p !== page) e.currentTarget.style.borderColor = "#e2ddd5"; }}
+                      >
+                        {p}
+                      </button>
+                    )
+                  );
+                })()}
+
+                {/* Next */}
+                <button
+                  onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  disabled={page === totalPages}
+                  style={{ width: "36px", height: "36px", borderRadius: "10px", border: "1px solid #e2ddd5", background: "white", display: "flex", alignItems: "center", justifyContent: "center", cursor: page === totalPages ? "not-allowed" : "pointer", color: page === totalPages ? "#d4d0c8" : "#6b6860", transition: "all .15s" }}
+                  onMouseEnter={e => { if (page !== totalPages) e.currentTarget.style.borderColor = "#0f0e17"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "#e2ddd5"; }}
                 >
-                  <DifficultyBadge level={s.difficulty} />
-                  <ChevronRight size={16} color="#b4b2a9" />
-                </div>
+                  <ChevronRight size={15} />
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </main>
 

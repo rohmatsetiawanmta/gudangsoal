@@ -509,19 +509,121 @@ $stmt = $pdo->prepare('
   exit;
 }
 
-// GET /browse/materi?subtopik_id=X
-if ($uri === '/browse/materi' && $method === 'GET') {
-  $subtopik_id = $_GET['subtopik_id'] ?? null;
-  if (!$subtopik_id) {
-    http_response_code(400); echo json_encode(['error' => 'subtopik_id wajib']); exit;
+// GET /browse/subjenjang-list?jenjang_id=X
+if ($uri === '/browse/subjenjang-list' && $method === 'GET') {
+  $jenjang_id = (int) ($_GET['jenjang_id'] ?? 0);
+  if (!$jenjang_id) { echo json_encode([]); exit; }
+  $stmt = $pdo->prepare('SELECT id, nama FROM subjenjang WHERE jenjang_id = ? ORDER BY urutan ASC, id ASC');
+  $stmt->execute([$jenjang_id]);
+  echo json_encode($stmt->fetchAll());
+  exit;
+}
+
+// GET /browse/mapel-list?subjenjang_id=X
+if ($uri === '/browse/mapel-list' && $method === 'GET') {
+  $subjenjang_id = (int) ($_GET['subjenjang_id'] ?? 0);
+  if (!$subjenjang_id) { echo json_encode([]); exit; }
+  $stmt = $pdo->prepare('SELECT id, nama FROM mapel WHERE subjenjang_id = ? ORDER BY urutan ASC, id ASC');
+  $stmt->execute([$subjenjang_id]);
+  echo json_encode($stmt->fetchAll());
+  exit;
+}
+
+// GET /browse/topik-list?mapel_id=X
+if ($uri === '/browse/topik-list' && $method === 'GET') {
+  $mapel_id = (int) ($_GET['mapel_id'] ?? 0);
+  if (!$mapel_id) { echo json_encode([]); exit; }
+  $stmt = $pdo->prepare('SELECT id, nama FROM topik WHERE mapel_id = ? ORDER BY urutan ASC, id ASC');
+  $stmt->execute([$mapel_id]);
+  echo json_encode($stmt->fetchAll());
+  exit;
+}
+
+// GET /browse/subtopik-list?topik_id=X
+if ($uri === '/browse/subtopik-list' && $method === 'GET') {
+  $topik_id = (int) ($_GET['topik_id'] ?? 0);
+  if (!$topik_id) { echo json_encode([]); exit; }
+  $stmt = $pdo->prepare('SELECT id, nama FROM subtopik WHERE topik_id = ? ORDER BY urutan ASC, id ASC');
+  $stmt->execute([$topik_id]);
+  echo json_encode($stmt->fetchAll());
+  exit;
+}
+
+// GET /browse/materi?subtopik_id=X  OR  ?subtopik_slug=X
+if ($uri === '/browse/materi' && $method === 'GET' && (isset($_GET['subtopik_id']) || isset($_GET['subtopik_slug']))) {
+  if (isset($_GET['subtopik_id'])) {
+    $subtopik_id = (int) $_GET['subtopik_id'];
+  } else {
+    $slugStmt = $pdo->prepare('SELECT id FROM subtopik WHERE slug = ?');
+    $slugStmt->execute([$_GET['subtopik_slug']]);
+    $subtopik_id = (int) ($slugStmt->fetchColumn() ?: 0);
+    if (!$subtopik_id) { echo json_encode([]); exit; }
   }
   $stmt = $pdo->prepare('
     SELECT id, judul, created_at, updated_at
     FROM materi
     WHERE subtopik_id = ? AND is_published = 1
-    ORDER BY created_at ASC
+    ORDER BY urutan ASC, id ASC
   ');
   $stmt->execute([$subtopik_id]);
   echo json_encode($stmt->fetchAll());
+  exit;
+}
+
+// GET /browse/materi/list  (index publik semua materi, dengan pagination + search)
+if ($uri === '/browse/materi/list' && $method === 'GET') {
+  $page   = max(1, intval($_GET['page']  ?? 1));
+  $limit  = min(40, max(1, intval($_GET['limit'] ?? 20)));
+  $offset = ($page - 1) * $limit;
+  $search = trim($_GET['search'] ?? '');
+
+  $where  = ['m.is_published = 1'];
+  $params = [];
+  if ($search)                    { $where[] = 'm.judul LIKE ?'; $params[] = "%$search%"; }
+  if (isset($_GET['subtopik_id']))     { $where[] = 'm.subtopik_id = ?';    $params[] = (int)$_GET['subtopik_id']; }
+  elseif (isset($_GET['topik_id']))    { $where[] = 'st.topik_id = ?';      $params[] = (int)$_GET['topik_id']; }
+  elseif (isset($_GET['mapel_id']))    { $where[] = 't.mapel_id = ?';       $params[] = (int)$_GET['mapel_id']; }
+  elseif (isset($_GET['subjenjang_id'])) { $where[] = 'sj.id = ?';         $params[] = (int)$_GET['subjenjang_id']; }
+  elseif (isset($_GET['jenjang_id'])) { $where[] = 'j.id = ?';             $params[] = (int)$_GET['jenjang_id']; }
+
+  $whereStr = 'WHERE ' . implode(' AND ', $where);
+
+  $orderBy = isset($_GET['subtopik_id'])
+    ? 'ORDER BY m.urutan ASC, m.id ASC'
+    : 'ORDER BY j.urutan ASC, sj.urutan ASC, mp.urutan ASC, t.urutan ASC, st.urutan ASC, m.urutan ASC, m.id ASC';
+
+  $stmt = $pdo->prepare("
+    SELECT m.id, m.judul, m.updated_at,
+           st.nama AS subtopik, t.nama AS topik,
+           mp.nama AS mapel, sj.nama AS subjenjang, j.nama AS jenjang
+    FROM materi m
+    JOIN subtopik   st ON m.subtopik_id    = st.id
+    JOIN topik       t ON st.topik_id      = t.id
+    JOIN mapel      mp ON t.mapel_id       = mp.id
+    JOIN subjenjang sj ON mp.subjenjang_id = sj.id
+    JOIN jenjang     j ON sj.jenjang_id    = j.id
+    $whereStr
+    $orderBy
+    LIMIT $limit OFFSET $offset
+  ");
+  $stmt->execute($params);
+
+  $countStmt = $pdo->prepare("
+    SELECT COUNT(*) FROM materi m
+    JOIN subtopik   st ON m.subtopik_id    = st.id
+    JOIN topik       t ON st.topik_id      = t.id
+    JOIN mapel      mp ON t.mapel_id       = mp.id
+    JOIN subjenjang sj ON mp.subjenjang_id = sj.id
+    JOIN jenjang     j ON sj.jenjang_id    = j.id
+    $whereStr
+  ");
+  $countStmt->execute($params);
+
+  echo json_encode([
+    'data'  => $stmt->fetchAll(),
+    'total' => (int) $countStmt->fetchColumn(),
+    'page'  => $page,
+    'limit' => $limit,
+  ]);
   exit;
 }

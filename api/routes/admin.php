@@ -371,7 +371,7 @@ if ($uri === '/admin/struktur' && $method === 'GET') {
 }
 
 // POST /admin/struktur/:level
-if (str_starts_with($uri, '/admin/struktur/') && $method === 'POST') {
+if (str_starts_with($uri, '/admin/struktur/') && $method === 'POST' && $uri !== '/admin/struktur/bulk-topik') {
   $level   = str_replace('/admin/struktur/', '', $uri);
   $allowed = ['jenjang', 'subjenjang', 'mapel', 'topik', 'subtopik'];
 
@@ -421,6 +421,56 @@ if (str_starts_with($uri, '/admin/struktur/') && $method === 'POST') {
     'slug'    => $slug,
     'message' => ucfirst($level) . ' berhasil ditambahkan',
   ]);
+  exit;
+}
+
+// POST /admin/struktur/bulk-topik — body: { mapel_id, items: [{topik, subtopik:[]}] }
+if ($uri === '/admin/struktur/bulk-topik' && $method === 'POST') {
+  $mapel_id = (int)($body['mapel_id'] ?? 0);
+  $items    = $body['items'] ?? [];
+  if (!$mapel_id) { http_response_code(400); echo json_encode(['error' => 'mapel_id wajib']); exit; }
+  if (!is_array($items) || count($items) === 0) { http_response_code(400); echo json_encode(['error' => 'items kosong']); exit; }
+
+  $inserted_topik    = 0;
+  $inserted_subtopik = 0;
+  $errors            = [];
+
+  $stmtFindTopik  = $pdo->prepare('SELECT id FROM topik WHERE mapel_id = ? AND nama = ? LIMIT 1');
+  $stmtTopik      = $pdo->prepare('INSERT INTO topik (mapel_id, nama, slug) VALUES (?, ?, ?)');
+  $stmtFindSt     = $pdo->prepare('SELECT id FROM subtopik WHERE topik_id = ? AND nama = ? LIMIT 1');
+  $stmtSubtopik   = $pdo->prepare('INSERT INTO subtopik (topik_id, nama, slug) VALUES (?, ?, ?)');
+
+  foreach ($items as $i => $item) {
+    $topikNama = trim($item['topik'] ?? '');
+    if (!$topikNama) { $errors[] = "Item #" . ($i + 1) . ": nama topik kosong"; continue; }
+    $topikSlug = trim(strtolower(preg_replace('/[^a-z0-9]+/i', '-', $topikNama)), '-');
+    try {
+      // Reuse existing topik if name matches
+      $stmtFindTopik->execute([$mapel_id, $topikNama]);
+      $existing = $stmtFindTopik->fetch();
+      if ($existing) {
+        $topikId = (int)$existing['id'];
+      } else {
+        $stmtTopik->execute([$mapel_id, $topikNama, $topikSlug]);
+        $topikId = (int)$pdo->lastInsertId();
+        $inserted_topik++;
+      }
+      foreach (($item['subtopik'] ?? []) as $stNama) {
+        $stNama = trim($stNama);
+        if (!$stNama) continue;
+        // Skip if subtopik with same name already exists under this topik
+        $stmtFindSt->execute([$topikId, $stNama]);
+        if ($stmtFindSt->fetch()) continue;
+        $stSlug = trim(strtolower(preg_replace('/[^a-z0-9]+/i', '-', $stNama)), '-');
+        $stmtSubtopik->execute([$topikId, $stNama, $stSlug]);
+        $inserted_subtopik++;
+      }
+    } catch (Exception $e) {
+      $errors[] = "Topik '$topikNama': " . $e->getMessage();
+    }
+  }
+
+  echo json_encode(['inserted_topik' => $inserted_topik, 'inserted_subtopik' => $inserted_subtopik, 'errors' => $errors]);
   exit;
 }
 
@@ -1256,9 +1306,12 @@ if ($uri === '/admin/materi' && $method === 'GET') {
   if ($subtopik_id !== null){ $where[] = 'm.subtopik_id = ?'; $params[] = $subtopik_id; }
   if ($published !== null)  { $where[] = 'm.is_published = ?'; $params[] = $published; }
   $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+  $orderBy = $subtopik_id !== null
+    ? 'm.urutan ASC, m.id ASC'
+    : 'm.updated_at DESC, m.id DESC';
 
   $stmt = $pdo->prepare("
-    SELECT m.id, m.judul, m.is_published, m.created_at, m.updated_at,
+    SELECT m.id, m.judul, m.is_published, m.urutan, m.views, m.created_at, m.updated_at,
            st.nama AS subtopik, t.nama AS topik,
            mp.nama AS mapel, sj.nama AS subjenjang, j.nama AS jenjang
     FROM materi m
@@ -1268,7 +1321,7 @@ if ($uri === '/admin/materi' && $method === 'GET') {
     JOIN subjenjang sj ON mp.subjenjang_id = sj.id
     JOIN jenjang    j  ON sj.jenjang_id    = j.id
     $whereClause
-    ORDER BY m.created_at DESC
+    ORDER BY {$orderBy}
     LIMIT $limit OFFSET $offset
   ");
   $stmt->execute($params);
@@ -1322,8 +1375,8 @@ if ($uri === '/admin/materi' && $method === 'POST') {
     http_response_code(400); echo json_encode(['error' => 'subtopik_id dan judul wajib']); exit;
   }
   $stmt = $pdo->prepare('
-    INSERT INTO materi (subtopik_id, judul, konten, highlights, is_published)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO materi (subtopik_id, judul, konten, highlights, is_published, urutan)
+    VALUES (?, ?, ?, ?, ?, ?)
   ');
   $stmt->execute([
     $body['subtopik_id'],
@@ -1331,9 +1384,46 @@ if ($uri === '/admin/materi' && $method === 'POST') {
     $body['konten']       ?? null,
     json_encode($body['highlights'] ?? []),
     $body['is_published'] ?? 0,
+    isset($body['urutan']) ? (int)$body['urutan'] : 0,
   ]);
   http_response_code(201);
   echo json_encode(['id' => (int) $pdo->lastInsertId(), 'message' => 'Materi berhasil ditambahkan']);
+  exit;
+}
+
+// POST /admin/materi/bulk
+if ($uri === '/admin/materi/bulk' && $method === 'POST') {
+  $items = $body['items'] ?? null;
+  if (!is_array($items) || count($items) === 0) {
+    http_response_code(400); echo json_encode(['error' => 'items harus array dan tidak boleh kosong']); exit;
+  }
+  $stmt = $pdo->prepare('
+    INSERT INTO materi (subtopik_id, judul, konten, highlights, is_published, urutan)
+    VALUES (?, ?, ?, ?, ?, ?)
+  ');
+  $inserted = 0;
+  $errors   = [];
+  foreach ($items as $i => $item) {
+    if (empty($item['subtopik_id']) || empty($item['judul'])) {
+      $errors[] = "Item #" . ($i + 1) . ": subtopik_id dan judul wajib ada";
+      continue;
+    }
+    try {
+      $stmt->execute([
+        (int) $item['subtopik_id'],
+        trim($item['judul']),
+        $item['konten']       ?? null,
+        json_encode($item['highlights'] ?? []),
+        isset($item['is_published']) ? (int)$item['is_published'] : 0,
+        isset($item['urutan'])       ? (int)$item['urutan']       : 0,
+      ]);
+      $inserted++;
+    } catch (Exception $e) {
+      $errors[] = "Item #" . ($i + 1) . " (" . $item['judul'] . "): " . $e->getMessage();
+    }
+  }
+  http_response_code($inserted > 0 ? 201 : 400);
+  echo json_encode(['inserted' => $inserted, 'errors' => $errors]);
   exit;
 }
 
@@ -1346,7 +1436,7 @@ if ($uri === '/admin/materi' && $method === 'PUT') {
   }
   $stmt = $pdo->prepare('
     UPDATE materi
-    SET subtopik_id=?, judul=?, konten=?, highlights=?, is_published=?, updated_at=NOW()
+    SET subtopik_id=?, judul=?, konten=?, highlights=?, is_published=?, urutan=?, updated_at=NOW()
     WHERE id=?
   ');
   $stmt->execute([
@@ -1355,9 +1445,35 @@ if ($uri === '/admin/materi' && $method === 'PUT') {
     $body['konten']       ?? null,
     json_encode($body['highlights'] ?? []),
     $body['is_published'] ?? 0,
+    isset($body['urutan']) ? (int)$body['urutan'] : 0,
     $id,
   ]);
   echo json_encode(['message' => 'Materi berhasil diupdate']);
+  exit;
+}
+
+// DELETE /admin/materi/bulk  — body: { ids: [1,2,3] }
+if ($uri === '/admin/materi/bulk' && $method === 'DELETE') {
+  $body = json_decode(file_get_contents('php://input'), true) ?? [];
+  $ids  = array_filter(array_map('intval', $body['ids'] ?? []), fn($id) => $id > 0);
+  if (empty($ids)) { http_response_code(400); echo json_encode(['error' => 'ids wajib']); exit; }
+  $placeholders = implode(',', array_fill(0, count($ids), '?'));
+  $pdo->prepare("DELETE FROM materi WHERE id IN ($placeholders)")->execute($ids);
+  echo json_encode(['deleted' => count($ids)]);
+  exit;
+}
+
+// PUT /admin/materi/reorder — body: { items: [{id, urutan}] }
+if ($uri === '/admin/materi/reorder' && $method === 'PUT') {
+  $items = $body['items'] ?? [];
+  $updated = 0;
+  $stmt = $pdo->prepare("UPDATE materi SET urutan = ? WHERE id = ?");
+  foreach ($items as $item) {
+    $id = (int)($item['id'] ?? 0);
+    $urutan = (int)($item['urutan'] ?? 0);
+    if ($id > 0) { $stmt->execute([$urutan, $id]); $updated++; }
+  }
+  echo json_encode(['updated' => $updated]);
   exit;
 }
 

@@ -4,7 +4,7 @@ import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, FolderTree, LogOut, ChevronRight,
   PanelLeftClose, PanelLeftOpen, Users, Flag, Inbox,
-  ScrollText, Menu, X, MessageCircle, Dumbbell,
+  ScrollText, Menu, X, MessageCircle, Dumbbell, GraduationCap,
 } from "lucide-react";
 import { useAuthStore } from "../auth/authStore";
 import useWindowWidth from "../../hooks/useWindowWidth";
@@ -19,6 +19,7 @@ const MENU = [
   { type: "link", to: "/admin/soal",     label: "Kelola Soal",     icon: BookOpen },
   { type: "link", to: "/admin/struktur", label: "Kelola Struktur", icon: FolderTree },
   { type: "link", to: "/admin/latihan",  label: "Kelola Latihan",  icon: Dumbbell },
+  { type: "link", to: "/admin/materi",   label: "Kelola Materi",   icon: GraduationCap },
 
   { type: "section", label: "Komunitas" },
   { type: "link", to: "/admin/users",        label: "Kelola User",   icon: Users },
@@ -103,6 +104,9 @@ export default function AdminLayout() {
     if (location.pathname.startsWith("/admin/changelog"))        return "Changelog";
     if (location.pathname.startsWith("/admin/feedback"))         return "Masukan User";
     if (location.pathname.startsWith("/admin/latihan"))          return "Kelola Latihan";
+    if (location.pathname.startsWith("/admin/materi/tambah"))   return "Tambah Materi";
+    if (location.pathname.startsWith("/admin/materi/edit"))     return "Edit Materi";
+    if (location.pathname.startsWith("/admin/materi"))          return "Kelola Materi";
     return "Panel";
   };
 

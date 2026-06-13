@@ -14,6 +14,9 @@ import {
   Layers,
   Tag,
   Hash,
+  Upload,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import api from "../../lib/api";
@@ -104,6 +107,177 @@ function FormInput({ label, hint, value, onChange, placeholder, type = "text", a
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
+// ── Bulk Topik+Subtopik ───────────────────────────────────────────────────────
+
+function parseBulkText(text) {
+  const items = [];
+  let current = null;
+  for (const line of text.split("\n")) {
+    if (!line.trim()) continue;
+    const isIndented = /^[ \t]/.test(line);
+    const name = line.trim();
+    if (isIndented) {
+      if (current) current.subtopik.push(name);
+    } else {
+      current = { topik: name, subtopik: [] };
+      items.push(current);
+    }
+  }
+  return items;
+}
+
+function BulkTopikModal({ mapelItem, onClose, onDone }) {
+  const [text, setText]         = useState("");
+  const [parsed, setParsed]     = useState(null);
+  const [importing, setImporting] = useState(false);
+  const [result, setResult]     = useState(null);
+
+  const handleParse = () => {
+    const items = parseBulkText(text);
+    if (!items.length) return;
+    setParsed(items);
+  };
+
+  const handleImport = async () => {
+    if (!parsed) return;
+    setImporting(true);
+    try {
+      const res = await api.post("/admin/struktur/bulk-topik", {
+        mapel_id: mapelItem.id,
+        items: parsed,
+      });
+      setResult(res);
+      onDone();
+    } catch (e) {
+      setResult({ inserted_topik: 0, inserted_subtopik: 0, errors: [e?.error || "Gagal import"] });
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const totalSubtopik = parsed ? parsed.reduce((s, i) => s + i.subtopik.length, 0) : 0;
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, padding: "16px" }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={{ background: "white", borderRadius: "18px", width: "100%", maxWidth: "620px", maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,.2)", display: "flex", flexDirection: "column" }}>
+        {/* Header */}
+        <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid #f0ede6", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+          <div>
+            <h3 style={{ fontSize: "17px", fontWeight: "800", color: "#0f0e17", margin: "0 0 3px" }}>Import Bulk Topik & Subtopik</h3>
+            <div style={{ fontSize: "12px", color: "#6b6860" }}>
+              Di bawah Mapel: <span style={{ fontWeight: "700", color: "#2563eb" }}>{mapelItem.nama}</span>
+            </div>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#6b6860", display: "flex" }}>
+            <X size={18} />
+          </button>
+        </div>
+
+        <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+          {result ? (
+            /* Result */
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+                {result.inserted_topik > 0
+                  ? <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "#e4f5f0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><CheckCircle size={22} color="#1a8a6e" /></div>
+                  : <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "#fff3f0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><AlertCircle size={22} color="#e84c2b" /></div>
+                }
+                <div>
+                  <div style={{ fontSize: "16px", fontWeight: "800", color: "#0f0e17" }}>
+                    {result.inserted_topik} topik + {result.inserted_subtopik} subtopik berhasil disimpan
+                  </div>
+                  {result.errors?.length > 0 && <div style={{ fontSize: "12px", color: "#e84c2b", marginTop: "2px" }}>{result.errors.length} error</div>}
+                </div>
+              </div>
+              {result.errors?.length > 0 && (
+                <div style={{ background: "#fff3f0", border: "1px solid #fca5a5", borderRadius: "10px", padding: "10px 14px", marginBottom: "14px" }}>
+                  {result.errors.map((e, i) => <div key={i} style={{ fontSize: "12px", color: "#b91c1c" }}>{e}</div>)}
+                </div>
+              )}
+              <button onClick={onClose} style={{ width: "100%", padding: "10px", borderRadius: "10px", border: "none", background: "#0f0e17", color: "white", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }}>
+                Tutup
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Format hint */}
+              <div style={{ background: "#f2efe8", borderRadius: "10px", padding: "12px 14px" }}>
+                <div style={{ fontSize: "11px", fontWeight: "700", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: "6px" }}>Format</div>
+                <pre style={{ margin: 0, fontSize: "12px", color: "#6b6860", fontFamily: "monospace", lineHeight: "1.7" }}>{`Persamaan Linear\n  Pengantar\n  Metode Substitusi\nPertidaksamaan\n  Definisi\n  Contoh Soal`}</pre>
+                <div style={{ fontSize: "11px", color: "#b4b2a9", marginTop: "6px" }}>Topik = tidak indented · Subtopik = 2 spasi di depan</div>
+              </div>
+
+              {/* Textarea */}
+              <textarea
+                value={text}
+                onChange={e => { setText(e.target.value); setParsed(null); }}
+                placeholder={"Persamaan Linear\n  Pengantar\n  Metode Substitusi\nPertidaksamaan\n  Definisi"}
+                rows={10}
+                style={{ width: "100%", padding: "10px 14px", borderRadius: "10px", border: "1px solid #e2ddd5", fontSize: "13px", fontFamily: "monospace", color: "#0f0e17", resize: "vertical", lineHeight: "1.7", outline: "none", boxSizing: "border-box" }}
+                onFocus={e => (e.target.style.borderColor = "#1a8a6e")}
+                onBlur={e => (e.target.style.borderColor = "#e2ddd5")}
+              />
+
+              {/* Preview */}
+              {parsed && (
+                <div style={{ background: "#faf9f6", borderRadius: "12px", border: "1px solid #e2ddd5", overflow: "hidden" }}>
+                  <div style={{ padding: "10px 14px", borderBottom: "1px solid #e2ddd5", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: "12px", fontWeight: "700", color: "#0f0e17" }}>Preview</span>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <span style={{ fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "99px", background: "rgba(26,138,110,.1)", color: "#1a8a6e" }}>{parsed.length} topik</span>
+                      <span style={{ fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "99px", background: "rgba(124,58,237,.1)", color: "#7c3aed" }}>{totalSubtopik} subtopik</span>
+                    </div>
+                  </div>
+                  <div style={{ padding: "10px 14px", maxHeight: "200px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "6px" }}>
+                    {parsed.map((item, i) => (
+                      <div key={i}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "3px" }}>
+                          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#1a8a6e", flexShrink: 0 }} />
+                          <span style={{ fontSize: "13px", fontWeight: "700", color: "#0f0e17" }}>{item.topik}</span>
+                          {item.subtopik.length === 0 && <span style={{ fontSize: "10px", color: "#f5a623", fontWeight: "600" }}>tanpa subtopik</span>}
+                        </div>
+                        {item.subtopik.map((st, j) => (
+                          <div key={j} style={{ display: "flex", alignItems: "center", gap: "6px", paddingLeft: "16px", marginBottom: "2px" }}>
+                            <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#7c3aed", flexShrink: 0 }} />
+                            <span style={{ fontSize: "12px", color: "#6b6860" }}>{st}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div style={{ display: "flex", gap: "10px" }}>
+                {!parsed ? (
+                  <button onClick={handleParse} disabled={!text.trim()}
+                    style={{ flex: 1, padding: "10px", borderRadius: "10px", border: "none", background: !text.trim() ? "#e2ddd5" : "#0f0e17", color: !text.trim() ? "#b4b2a9" : "white", fontSize: "14px", fontWeight: "700", cursor: !text.trim() ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
+                    Parse
+                  </button>
+                ) : (
+                  <>
+                    <button onClick={() => setParsed(null)}
+                      style={{ padding: "10px 18px", borderRadius: "10px", border: "1px solid #e2ddd5", background: "white", fontSize: "14px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", color: "#0f0e17" }}>
+                      Edit
+                    </button>
+                    <button onClick={handleImport} disabled={importing}
+                      style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "10px", borderRadius: "10px", border: "none", background: importing ? "#e2ddd5" : "#1a8a6e", color: importing ? "#b4b2a9" : "white", fontSize: "14px", fontWeight: "700", cursor: importing ? "not-allowed" : "pointer", fontFamily: "inherit", boxShadow: importing ? "none" : "0 4px 14px rgba(26,138,110,.3)" }}>
+                      <Upload size={15} />
+                      {importing ? "Menyimpan..." : `Simpan ${parsed.length} Topik & ${totalSubtopik} Subtopik`}
+                    </button>
+                  </>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminStruktur() {
   const width = useWindowWidth();
   const isMobile = width <= 480;
@@ -119,6 +293,7 @@ export default function AdminStruktur() {
   const [modalForm, setModalForm]   = useState({ nama: "", urutan: "" });
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState("");
+  const [bulkOpen, setBulkOpen]     = useState(false);
 
   const currentStack = stack[stack.length - 1];
   const currentLevelIndex = LEVELS.findIndex((l) => l.key === currentStack.level);
@@ -401,29 +576,32 @@ export default function AdminStruktur() {
               {loading ? "..." : currentItems.length} item
             </span>
           </div>
-          <button
-            onClick={openTambah}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px",
-              padding: "8px 16px",
-              borderRadius: "9px",
-              border: "none",
-              background: currentLevel?.color || "#e84c2b",
-              color: "white",
-              fontSize: "13px",
-              fontWeight: "600",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              width: isMobile ? "100%" : "auto",
-              boxShadow: `0 2px 8px ${currentLevel?.color}40`,
-            }}
-          >
-            <Plus size={14} />
-            Tambah {currentLevel?.label}
-          </button>
+          <div style={{ display: "flex", gap: "8px", width: isMobile ? "100%" : "auto" }}>
+            {currentStack.level === "topik" && currentStack.item && (
+              <button
+                onClick={() => setBulkOpen(true)}
+                style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 14px", borderRadius: "9px", border: `1px solid ${currentLevel?.color}40`, background: currentLevel?.color + "12", color: currentLevel?.color, fontSize: "13px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit" }}
+                onMouseEnter={e => { e.currentTarget.style.background = currentLevel?.color + "20"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = currentLevel?.color + "12"; }}
+              >
+                <Upload size={13} /> Import Bulk
+              </button>
+            )}
+            <button
+              onClick={openTambah}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+                padding: "8px 16px", borderRadius: "9px", border: "none",
+                background: currentLevel?.color || "#e84c2b", color: "white",
+                fontSize: "13px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit",
+                flex: isMobile ? 1 : "none",
+                boxShadow: `0 2px 8px ${currentLevel?.color}40`,
+              }}
+            >
+              <Plus size={14} />
+              Tambah {currentLevel?.label}
+            </button>
+          </div>
         </div>
 
         {/* Loading skeleton */}
@@ -664,6 +842,14 @@ export default function AdminStruktur() {
             <span style={{ fontSize: "13px", fontWeight: "600", color: "#b91c1c" }}>{modal.item.nama}</span>
           </div>
         </Modal>
+      )}
+
+      {bulkOpen && currentStack.item && (
+        <BulkTopikModal
+          mapelItem={currentStack.item}
+          onClose={() => setBulkOpen(false)}
+          onDone={() => { fetchAll(); }}
+        />
       )}
 
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }`}</style>
