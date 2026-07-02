@@ -1,5 +1,5 @@
 // src/features/admin/AdminSoal.jsx
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus, Search, Pencil, Trash2,
@@ -7,6 +7,7 @@ import {
   MoreHorizontal, X, BookOpen, Filter,
 } from "lucide-react";
 import api from "../../lib/api";
+import MathRenderer from "../../components/MathRenderer";
 import ToggleSwitch from "../../components/ToggleSwitch";
 import useWindowWidth from "../../hooks/useWindowWidth";
 import { Helmet } from "react-helmet-async";
@@ -64,12 +65,21 @@ function Checkbox({ checked, indeterminate, onChange, size = 16 }) {
 
 function ActionMenu({ onPreview, onSalin, onEdit, onDelete, copying }) {
   const [open, setOpen] = useState(false);
+  const [openUp, setOpenUp] = useState(false);
   const ref = useRef(null);
   useEffect(() => {
     const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
   }, []);
+
+  const handleOpen = () => {
+    if (!open && ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setOpenUp(rect.bottom + 160 > window.innerHeight);
+    }
+    setOpen(v => !v);
+  };
 
   const items = [
     { label: "Preview",    icon: Eye,    onClick: () => { onPreview(); setOpen(false); } },
@@ -80,14 +90,14 @@ function ActionMenu({ onPreview, onSalin, onEdit, onDelete, copying }) {
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
-      <button onClick={() => setOpen(v => !v)}
+      <button onClick={handleOpen}
         style={{ width: "30px", height: "30px", borderRadius: "8px", border: "1px solid #e8e6e0", background: open ? "#f2efe8" : "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b6860", transition: "all .12s" }}
         onMouseEnter={e => { if (!open) e.currentTarget.style.background = "#f2efe8"; }}
         onMouseLeave={e => { if (!open) e.currentTarget.style.background = "white"; }}>
         <MoreHorizontal size={15} />
       </button>
       {open && (
-        <div style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, background: "white", border: "1px solid #e8e6e0", borderRadius: "12px", padding: "5px", boxShadow: "0 8px 24px rgba(0,0,0,.1)", zIndex: 50, minWidth: "148px" }}>
+        <div style={{ position: "absolute", ...(openUp ? { bottom: "calc(100% + 6px)" } : { top: "calc(100% + 6px)" }), right: 0, background: "white", border: "1px solid #e8e6e0", borderRadius: "12px", padding: "5px", boxShadow: "0 8px 24px rgba(0,0,0,.1)", zIndex: 50, minWidth: "148px" }}>
           {items.map(({ label, icon: Icon, onClick, danger, disabled }) => (
             <button key={label} onClick={onClick} disabled={disabled}
               style={{ width: "100%", display: "flex", alignItems: "center", gap: "8px", padding: "8px 10px", borderRadius: "8px", border: "none", background: "none", cursor: disabled ? "not-allowed" : "pointer", fontSize: "13px", fontWeight: "500", color: danger ? "#e84c2b" : "#0f0e17", fontFamily: "inherit", textAlign: "left", opacity: disabled ? 0.5 : 1 }}
@@ -143,6 +153,115 @@ function FilterChip({ label, active, color = "#e84c2b", onClick, count }) {
   );
 }
 
+// ── SubtopikFilter ────────────────────────────────────────────────────────────
+
+function SubtopikFilter({ struktur, filterSubtopikId, onChange }) {
+  const [query, setQuery]   = useState("");
+  const [open, setOpen]     = useState(false);
+  const ref                 = useRef(null);
+
+  const topikMap   = useMemo(() => Object.fromEntries(struktur.topik.map(t => [t.id, t])), [struktur.topik]);
+  const mapelMap   = useMemo(() => Object.fromEntries(struktur.mapel.map(m => [m.id, m])), [struktur.mapel]);
+  const subjMap    = useMemo(() => Object.fromEntries(struktur.subjenjang.map(s => [s.id, s])), [struktur.subjenjang]);
+  const jenjangMap = useMemo(() => Object.fromEntries(struktur.jenjang.map(j => [j.id, j])), [struktur.jenjang]);
+
+  const enriched = useMemo(() => struktur.subtopik.map(st => {
+    const topik   = topikMap[st.topik_id]       || {};
+    const mapel   = mapelMap[topik.mapel_id]    || {};
+    const subj    = subjMap[mapel.subjenjang_id] || {};
+    const jenjang = jenjangMap[subj.jenjang_id] || {};
+    return { ...st, topik, mapel, subj, jenjang, fullText: [jenjang.nama, subj.nama, mapel.nama, topik.nama, st.nama].filter(Boolean).join(" ").toLowerCase() };
+  }), [struktur.subtopik, topikMap, mapelMap, subjMap, jenjangMap]);
+
+  const results = useMemo(() => {
+    if (!query.trim()) return enriched.slice(0, 60);
+    return enriched.filter(s => s.fullText.includes(query.toLowerCase())).slice(0, 60);
+  }, [enriched, query]);
+
+  const selected = useMemo(() => enriched.find(s => s.id == filterSubtopikId) || null, [enriched, filterSubtopikId]);
+
+  useEffect(() => {
+    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+
+  const handleSelect = st => {
+    onChange(st.id == filterSubtopikId ? null : st.id);
+    setOpen(false);
+    setQuery("");
+  };
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        style={{
+          display: "inline-flex", alignItems: "center", gap: "6px",
+          padding: "5px 12px", borderRadius: "20px",
+          border: `1.5px solid ${filterSubtopikId ? "#7c3aed" : "#e8e6e0"}`,
+          background: filterSubtopikId ? "#f5f3ff" : "white",
+          color: filterSubtopikId ? "#7c3aed" : "#6b6860",
+          fontSize: "12.5px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit",
+          transition: "all .12s", whiteSpace: "nowrap",
+        }}>
+        {selected ? selected.nama : "Subtopik"}
+        {filterSubtopikId && (
+          <span
+            onClick={e => { e.stopPropagation(); onChange(null); }}
+            style={{ display: "flex", alignItems: "center", color: "#7c3aed", opacity: 0.7, cursor: "pointer" }}>
+            <X size={11} />
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 100,
+          background: "white", border: "1px solid #e8e6e0", borderRadius: "14px",
+          boxShadow: "0 8px 32px rgba(0,0,0,.12)", width: "280px", overflow: "hidden",
+        }}>
+          <div style={{ padding: "10px" }}>
+            <input
+              autoFocus
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Cari subtopik..."
+              style={{ width: "100%", padding: "8px 12px", borderRadius: "8px", border: "1.5px solid #e8e6e0", fontSize: "13px", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }}
+              onFocus={e => (e.target.style.borderColor = "#7c3aed")}
+              onBlur={e => (e.target.style.borderColor = "#e8e6e0")}
+            />
+          </div>
+          <div style={{ maxHeight: "260px", overflowY: "auto" }}>
+            {results.length === 0 && (
+              <div style={{ padding: "16px", textAlign: "center", fontSize: "13px", color: "#b4b2a9" }}>Tidak ditemukan</div>
+            )}
+            {results.map(st => (
+              <button key={st.id} onClick={() => handleSelect(st)}
+                style={{
+                  display: "block", width: "100%", textAlign: "left",
+                  padding: "9px 14px", border: "none",
+                  background: st.id == filterSubtopikId ? "#f5f3ff" : "transparent",
+                  cursor: "pointer", fontFamily: "inherit",
+                  borderBottom: "1px solid #f0ede6",
+                }}
+                onMouseEnter={e => { if (st.id != filterSubtopikId) e.currentTarget.style.background = "#faf9f6"; }}
+                onMouseLeave={e => { if (st.id != filterSubtopikId) e.currentTarget.style.background = "transparent"; }}>
+                <div style={{ fontSize: "13px", fontWeight: "600", color: st.id == filterSubtopikId ? "#7c3aed" : "#0f0e17" }}>{st.nama}</div>
+                <div style={{ fontSize: "11px", color: "#b4b2a9", marginTop: "2px" }}>
+                  {[st.mapel?.nama, st.topik?.nama].filter(Boolean).map((c, i) => (
+                    <span key={i}>{i > 0 && " › "}{c}</span>
+                  ))}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── DeleteModal ───────────────────────────────────────────────────────────────
 
 function DeleteModal({ title, body, onConfirm, onClose, loading }) {
@@ -179,6 +298,8 @@ export default function AdminSoal() {
   const [loading, setLoading] = useState(true);
   const [searchInput, setSearchInput] = useState("");
   const [filters, setFilters] = useState({ search: "", difficulty: "", published: "" });
+  const [filterSubtopikId, setFilterSubtopikId] = useState(null);
+  const [struktur, setStruktur] = useState({ jenjang: [], subjenjang: [], mapel: [], topik: [], subtopik: [] });
   const [page, setPage]       = useState(1);
   const [total, setTotal]     = useState(0);
   const [counts, setCounts]   = useState({ published: 0, draft: 0 });
@@ -190,6 +311,7 @@ export default function AdminSoal() {
   const [selected, setSelected]     = useState(new Set());
   const [bulkDeleting, setBulkDeleting]     = useState(false);
   const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
+  const [openMateriId, setOpenMateriId] = useState(null);
 
   const limit = 20;
   const currentIds = soal.map(s => s.id);
@@ -203,6 +325,7 @@ export default function AdminSoal() {
       ...(filters.search     && { search:     filters.search }),
       ...(filters.difficulty && { difficulty: filters.difficulty }),
       ...(filters.published  !== "" && { published: filters.published }),
+      ...(filterSubtopikId   && { subtopik_id: filterSubtopikId }),
     });
     api.get(`/admin/soal?${params}`)
       .then(data => {
@@ -212,10 +335,22 @@ export default function AdminSoal() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [page, filters]);
+  }, [page, filters, filterSubtopikId]);
 
   useEffect(() => { fetchSoal(); }, [fetchSoal]);
-  useEffect(() => { setSelected(new Set()); }, [page, filters]);
+  useEffect(() => { setSelected(new Set()); }, [page, filters, filterSubtopikId]);
+  useEffect(() => { setPage(1); }, [filterSubtopikId]);
+
+  useEffect(() => {
+    api.get("/admin/struktur").then(d => setStruktur(d)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!openMateriId) return;
+    const close = () => setOpenMateriId(null);
+    const t = setTimeout(() => document.addEventListener("click", close), 0);
+    return () => { clearTimeout(t); document.removeEventListener("click", close); };
+  }, [openMateriId]);
 
   // debounced search
   useEffect(() => {
@@ -285,11 +420,12 @@ export default function AdminSoal() {
   };
 
   const totalPages = Math.ceil(total / limit);
-  const hasFilters = filters.search || filters.difficulty || filters.published !== "";
+  const hasFilters = filters.search || filters.difficulty || filters.published !== "" || filterSubtopikId;
 
   const clearFilters = () => {
     setSearchInput("");
     setFilters({ search: "", difficulty: "", published: "" });
+    setFilterSubtopikId(null);
     setPage(1);
   };
 
@@ -401,6 +537,9 @@ export default function AdminSoal() {
           <FilterChip label="Easy"   active={filters.difficulty === "1"} color="#1a8a6e" onClick={() => setFilter("difficulty", "1")} />
           <FilterChip label="Medium" active={filters.difficulty === "2"} color="#854F0B" onClick={() => setFilter("difficulty", "2")} />
           <FilterChip label="Hard"   active={filters.difficulty === "3"} color="#e84c2b" onClick={() => setFilter("difficulty", "3")} />
+          <div style={{ width: "1px", height: "16px", background: "#e8e6e0" }} />
+          {/* Subtopik */}
+          <SubtopikFilter struktur={struktur} filterSubtopikId={filterSubtopikId} onChange={setFilterSubtopikId} />
           {/* Clear all */}
           {hasFilters && (
             <button onClick={clearFilters}
@@ -413,11 +552,11 @@ export default function AdminSoal() {
 
       {/* ── DESKTOP: Table ── */}
       {!isMobile && (
-        <div style={{ background: "white", borderRadius: "16px", border: "1px solid #e8e6e0", overflow: "hidden", boxShadow: "0 1px 8px rgba(0,0,0,0.04)" }}>
+        <div style={{ background: "white", borderRadius: "16px", border: "1px solid #e8e6e0", boxShadow: "0 1px 8px rgba(0,0,0,0.04)", overflow: "visible" }}>
           {/* Table header */}
-          <div style={{ display: "grid", gridTemplateColumns: "36px 44px 72px 52px 1fr 180px 90px 110px 44px", gap: "10px", padding: "10px 20px", background: "#f7f5f0", borderBottom: "1px solid #e8e6e0", alignItems: "center" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "36px 44px 72px 52px 1fr 180px 70px 90px 110px 44px", gap: "10px", padding: "10px 20px", background: "#f7f5f0", borderBottom: "1px solid #e8e6e0", alignItems: "center", borderRadius: "16px 16px 0 0" }}>
             <Checkbox checked={allOnPageSelected} indeterminate={someOnPageSelected} onChange={toggleAll} />
-            {["#", "Kode", "Tipe", "Soal", "Lokasi", "Sulit", "Status", "Aksi"].map(h => (
+            {["#", "Kode", "Tipe", "Soal", "Subtopik", "Materi", "Sulit", "Status", "Aksi"].map(h => (
               <div key={h} style={{ fontSize: "11px", fontWeight: "700", color: "#9b9992", textTransform: "uppercase", letterSpacing: ".07em" }}>{h}</div>
             ))}
           </div>
@@ -432,10 +571,11 @@ export default function AdminSoal() {
             <div key={s.id}
               style={{
                 display: "grid",
-                gridTemplateColumns: "36px 44px 72px 52px 1fr 180px 90px 110px 44px",
+                gridTemplateColumns: "36px 44px 72px 52px 1fr 180px 70px 90px 110px 44px",
                 gap: "10px",
                 padding: "12px 20px",
                 borderBottom: i < soal.length - 1 ? "1px solid #f5f3ef" : "none",
+                borderRadius: i === soal.length - 1 ? "0 0 16px 16px" : "none",
                 alignItems: "center",
                 background: selected.has(s.id) ? "#fff8f7" : "white",
                 borderLeft: `3px solid ${selected.has(s.id) ? "#e84c2b" : "transparent"}`,
@@ -454,9 +594,47 @@ export default function AdminSoal() {
                 <div style={{ fontSize: "12px", color: "#6b6860", fontWeight: "500", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.subtopik}</div>
                 <div style={{ fontSize: "11px", color: "#c8c6be", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: "1px" }}>{s.mapel}</div>
               </div>
+              <div style={{ position: "relative" }}>
+                {s.materi?.length > 0 ? (
+                  <>
+                    <button
+                      onClick={e => { e.stopPropagation(); setOpenMateriId(openMateriId === s.id ? null : s.id); }}
+                      style={{ fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px", background: openMateriId === s.id ? "#1a8a6e" : "#e4f5f0", color: openMateriId === s.id ? "white" : "#1a8a6e", border: "none", cursor: "pointer", fontFamily: "inherit", transition: "all .12s" }}
+                    >
+                      {s.materi.length}
+                    </button>
+                    {openMateriId === s.id && (
+                      <div
+                        style={{ position: "absolute", top: "calc(100% + 6px)", left: "50%", transform: "translateX(-50%)", zIndex: 50, background: "white", borderRadius: "12px", border: "1px solid #e2ddd5", boxShadow: "0 8px 24px rgba(0,0,0,.12)", minWidth: "220px", maxWidth: "280px", overflow: "hidden" }}
+                        onClick={e => e.stopPropagation()}
+                      >
+                        <div style={{ padding: "10px 12px 8px", borderBottom: "1px solid #f0ede6", display: "flex", alignItems: "center", gap: "6px" }}>
+                          <BookOpen size={12} color="#1a8a6e" />
+                          <span style={{ fontSize: "11px", fontWeight: "700", color: "#1a8a6e", textTransform: "uppercase", letterSpacing: ".07em" }}>Materi Terkait</span>
+                          <span style={{ marginLeft: "auto", fontSize: "11px", fontWeight: "700", color: "#b4b2a9" }}>{s.materi.length}</span>
+                        </div>
+                        <div style={{ padding: "6px" }}>
+                          {s.materi.map((m, mi) => (
+                            <div key={m.id}
+                              style={{ display: "flex", alignItems: "flex-start", gap: "8px", padding: "7px 8px", borderRadius: "8px" }}
+                              onMouseEnter={e => e.currentTarget.style.background = "#f7f5f1"}
+                              onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                            >
+                              <span style={{ fontSize: "10px", fontWeight: "800", color: "#b4b2a9", marginTop: "2px", flexShrink: 0, width: "14px", textAlign: "right" }}>{mi + 1}</span>
+                              <span style={{ fontSize: "12.5px", color: "#0f0e17", lineHeight: 1.4, fontWeight: "500" }}><MathRenderer text={m.judul} /></span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <span style={{ fontSize: "12px", color: "#d4d0c8" }}>—</span>
+                )}
+              </div>
               <DifficultyBadge level={s.difficulty} />
               <ToggleSwitch checked={s.is_published == 1} onChange={() => handleTogglePublish(s.id, s.is_published)} loading={publishLoading[s.id]} />
-              <ActionMenu onPreview={() => setPreviewId(s.id)} onSalin={() => handleSalin(s.id)} onEdit={() => navigate(`/admin/soal/edit/${s.id}`)} onDelete={() => setDeleteId(s.id)} copying={copying[s.id]} />
+              <ActionMenu onPreview={() => setPreviewId(s.id)} onSalin={() => handleSalin(s.id)} onEdit={() => window.open(`/admin/soal/edit/${s.id}`, "_blank")} onDelete={() => setDeleteId(s.id)} copying={copying[s.id]} />
             </div>
           ))}
 
@@ -540,7 +718,7 @@ export default function AdminSoal() {
                   </span>
                   <div style={{ flex: 1 }} />
                   <ToggleSwitch checked={s.is_published == 1} onChange={() => handleTogglePublish(s.id, s.is_published)} loading={publishLoading[s.id]} hideLabel />
-                  <ActionMenu onPreview={() => setPreviewId(s.id)} onSalin={() => handleSalin(s.id)} onEdit={() => navigate(`/admin/soal/edit/${s.id}`)} onDelete={() => setDeleteId(s.id)} copying={copying[s.id]} />
+                  <ActionMenu onPreview={() => setPreviewId(s.id)} onSalin={() => handleSalin(s.id)} onEdit={() => window.open(`/admin/soal/edit/${s.id}`, "_blank")} onDelete={() => setDeleteId(s.id)} copying={copying[s.id]} />
                 </div>
               </div>
             </div>

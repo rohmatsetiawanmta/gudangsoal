@@ -400,7 +400,7 @@ function IsianMultiFields({soal,u}){
   );
 }
 
-function SoalCard({soal,index,onChange,onDelete,status}){
+function SoalCard({soal,index,onChange,onDelete,status,materiList=[]}){
   const [expanded,setExpanded]=useState(true);
   const borderColor=status==="saved"?"#1a8a6e":status==="error"?"#e84c2b":"#e2ddd5";
   const u=(field,val)=>onChange(index,{...soal,[field]:val});
@@ -457,6 +457,23 @@ function SoalCard({soal,index,onChange,onDelete,status}){
           <Field label="Pembahasan (opsional)">
             <textarea value={soal.explanation||""} onChange={e=>u("explanation",e.target.value)} rows={2} style={taStyle} onFocus={focusRed} onBlur={blurGray}/>
           </Field>
+          {materiList.length > 0 && (
+            <Field label="Materi Terkait">
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px"}}>
+                {materiList.map(m => {
+                  const checked = (soal.materi_ids||[]).includes(m.id);
+                  return (
+                    <label key={m.id} style={{display:"flex",alignItems:"flex-start",gap:"10px",cursor:"pointer",padding:"7px 10px",borderRadius:"9px",border:`1.5px solid ${checked?"#1a8a6e":"#e2ddd5"}`,background:checked?"#e4f5f0":"white",transition:"all .12s"}}>
+                      <input type="checkbox" checked={checked}
+                        onChange={()=>u("materi_ids",checked?(soal.materi_ids||[]).filter(x=>x!==m.id):[...(soal.materi_ids||[]),m.id])}
+                        style={{accentColor:"#1a8a6e",width:"14px",height:"14px",flexShrink:0,marginTop:"2px"}}/>
+                      <span style={{fontSize:"13px",fontWeight:checked?"600":"400",color:"#0f0e17",lineHeight:1.4}}>{m.judul}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </Field>
+          )}
         </div>
       )}
     </div>
@@ -507,6 +524,14 @@ export default function AdminSoalBulkImport({ struktur }) {
   const [saving, setSaving]       = useState(false);
   const [saveError, setSaveError] = useState("");
   const [showExample, setShowExample] = useState(false);
+  const [materiList, setMateriList] = useState([]);
+
+  useEffect(() => {
+    if (!subtopikId) { setMateriList([]); return; }
+    api.get(`/browse/materi?subtopik_id=${subtopikId}`)
+      .then(d => setMateriList(d.data || d || []))
+      .catch(() => setMateriList([]));
+  }, [subtopikId]);
 
   const CONTOH = `[
   {
@@ -515,7 +540,8 @@ export default function AdminSoalBulkImport({ struktur }) {
     "answer": "A",
     "explanation": "Pembahasan...",
     "tipe": "pilihan_ganda",
-    "difficulty": "medium"
+    "difficulty": "medium",
+    "materi_terkait": ["Rumus Suku ke-n pada Barisan Aritmetika"]
   },
   {
     "body": "Soal isian...",
@@ -533,6 +559,15 @@ export default function AdminSoalBulkImport({ struktur }) {
     try {
       const arr = parseJsonArray(jsonInput);
       if (!Array.isArray(arr) || arr.length === 0) throw new Error("Bukan array atau kosong");
+      const resolveMateri = (names) => {
+        if (!names || !materiList.length) return [];
+        const arr = Array.isArray(names) ? names : [names];
+        return arr
+          .map(n => materiList.find(m => m.judul.toLowerCase() === String(n).toLowerCase().trim()))
+          .filter(Boolean)
+          .map(m => m.id);
+      };
+
       const soal = arr.map((s, i) => {
         const tipe = parseTipe(s.tipe) ?? "pilihan_ganda";
         return {
@@ -544,6 +579,7 @@ export default function AdminSoalBulkImport({ struktur }) {
           options: s.options || [],
           answer: normalizeAnswer({ ...s, tipe }),
           explanation: s.explanation || "",
+          materi_ids: resolveMateri(s.materi_terkait),
         };
       });
       setSoalList(soal);
@@ -589,6 +625,7 @@ export default function AdminSoalBulkImport({ struktur }) {
   const handleReset = () => {
     setStep("import"); setSoalList([]); setCardStatus({}); setSaveError("");
     setJsonInput(""); setParseError(""); setParseSnippet(""); setSubtopikId("");
+    setMateriList([]);
   };
 
   const canImport = !!jsonInput.trim() && !!subtopikId;
@@ -648,7 +685,8 @@ export default function AdminSoalBulkImport({ struktur }) {
                     borderTop: "1px solid #e2ddd5",
                   }}>
                     <strong style={{ color: "#0f0e17" }}>tipe</strong> (opsional): pilihan_ganda · isian_singkat · isian_numerik · checklist · multiple_choice_table · menjodohkan · isian_multi<br />
-                    <strong style={{ color: "#0f0e17" }}>difficulty</strong> (opsional): easy · medium · hard — default easy jika tidak ada
+                    <strong style={{ color: "#0f0e17" }}>difficulty</strong> (opsional): easy · medium · hard — default easy jika tidak ada<br />
+                    <strong style={{ color: "#0f0e17" }}>materi_terkait</strong> (opsional): array nama materi — harus cocok persis dengan judul materi di subtopik yang dipilih
                   </div>
                 </div>
               )}
@@ -764,7 +802,8 @@ export default function AdminSoalBulkImport({ struktur }) {
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {soalList.map((soal, i) => (
               <SoalCard key={soal._key ?? i} soal={soal} index={i}
-                onChange={handleChange} onDelete={handleDelete} status={cardStatus[i]} />
+                onChange={handleChange} onDelete={handleDelete} status={cardStatus[i]}
+                materiList={materiList} />
             ))}
           </div>
 

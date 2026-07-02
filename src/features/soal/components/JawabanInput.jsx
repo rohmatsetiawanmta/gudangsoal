@@ -460,7 +460,7 @@ export default function JawabanInput({
     const { left: leftItems, right: rightItems } = normalizeMenjodohkan(
       soal.options
     );
-    const chosenObj =
+    const rawChosenObj =
       typeof chosen === "object" && !Array.isArray(chosen) && chosen !== null
         ? chosen
         : {};
@@ -470,6 +470,10 @@ export default function JawabanInput({
       soal.answer !== null
         ? soal.answer
         : {};
+    // When already correct (revisiting), show the correct answer as the displayed pairing
+    const chosenObj = alreadyCorrect && Object.keys(rawChosenObj).length === 0
+      ? answerObj
+      : rawChosenObj;
 
     const handleLeftClick = (li) => {
       if (submitted || alreadyCorrect) return;
@@ -523,32 +527,18 @@ export default function JawabanInput({
                   ? parseInt(chosenObj[String(li)])
                   : null;
               const isPaired = pairedRi !== null;
-              const isCorrectPair =
-                submitted && String(answerObj[String(li)]) === String(pairedRi);
+              const isCorrectPair = submitted && String(answerObj[String(li)]) === String(pairedRi);
               const isWrongPair = submitted && isPaired && !isCorrectPair;
-              const correctRi =
-                submitted && answerObj[String(li)] !== undefined
-                  ? parseInt(answerObj[String(li)])
-                  : null;
+              const correctRi = submitted && answerObj[String(li)] !== undefined
+                ? parseInt(answerObj[String(li)]) : null;
 
-              let border = "1px solid #e2ddd5",
-                bg = "white";
-              if (!submitted && !alreadyCorrect) {
-                if (isSelected) {
-                  border = "2px solid #e84c2b";
-                  bg = "#fff3f0";
-                } else if (isPaired) {
-                  border = "2px solid #2563eb";
-                  bg = "#eff6ff";
-                }
+              let border = "1px solid #e2ddd5", bg = "white";
+              if (submitted) {
+                if (isCorrectPair) { border = "2px solid #1a8a6e"; bg = "#e4f5f0"; }
+                else if (isWrongPair) { border = "2px solid #e84c2b"; bg = "#fff3f0"; }
               } else {
-                if (isCorrectPair) {
-                  border = "2px solid #1a8a6e";
-                  bg = "#e4f5f0";
-                } else if (isWrongPair) {
-                  border = "2px solid #e84c2b";
-                  bg = "#fff3f0";
-                }
+                if (isSelected) { border = "2px solid #e84c2b"; bg = "#fff3f0"; }
+                else if (isPaired) { border = "2px solid #2563eb"; bg = "#eff6ff"; }
               }
 
               return (
@@ -640,45 +630,19 @@ export default function JawabanInput({
               const pairedLi = pairedByLeftIdx
                 ? parseInt(pairedByLeftIdx[0])
                 : null;
-              const isCorrectPair =
-                submitted &&
-                isPaired &&
-                String(answerObj[String(pairedLi)]) === String(ri);
+              const isCorrectPair = submitted && isPaired && String(answerObj[String(pairedLi)]) === String(ri);
               const isWrongPair = submitted && isPaired && !isCorrectPair;
-              const isCorrectAnswer =
-                submitted &&
-                Object.values(answerObj).includes(String(ri)) &&
-                !isPaired;
+              const isCorrectAnswer = submitted && Object.values(answerObj).includes(String(ri)) && !isPaired;
 
-              let border = "1px solid #e2ddd5",
-                bg = "white",
-                color = "#0f0e17",
-                opacity = 1;
-              if (!submitted && !alreadyCorrect) {
-                if (isPaired) {
-                  border = "2px solid #2563eb";
-                  bg = "#eff6ff";
-                  color = "#2563eb";
-                } else if (selectedLeft !== null) {
-                  opacity = 0.8;
-                } else {
-                  opacity = 0.5;
-                }
+              let border = "1px solid #e2ddd5", bg = "white", color = "#0f0e17", opacity = 1;
+              if (submitted) {
+                if (isCorrectPair) { border = "2px solid #1a8a6e"; bg = "#e4f5f0"; color = "#1a8a6e"; }
+                else if (isWrongPair) { border = "2px solid #e84c2b"; bg = "#fff3f0"; color = "#e84c2b"; }
+                else if (isCorrectAnswer) { border = "2px solid #1a8a6e"; bg = "#e4f5f0"; color = "#1a8a6e"; opacity = 0.5; }
               } else {
-                if (isCorrectPair) {
-                  border = "2px solid #1a8a6e";
-                  bg = "#e4f5f0";
-                  color = "#1a8a6e";
-                } else if (isWrongPair) {
-                  border = "2px solid #e84c2b";
-                  bg = "#fff3f0";
-                  color = "#e84c2b";
-                } else if (isCorrectAnswer) {
-                  border = "2px solid #1a8a6e";
-                  bg = "#e4f5f0";
-                  color = "#1a8a6e";
-                  opacity = 0.5;
-                }
+                if (isPaired) { border = "2px solid #2563eb"; bg = "#eff6ff"; color = "#2563eb"; }
+                else if (selectedLeft !== null) { opacity = 0.8; }
+                else { opacity = 0.5; }
               }
 
               return (
@@ -724,12 +688,12 @@ export default function JawabanInput({
           </div>
         </div>
 
-        {!submitted && !alreadyCorrect && (
+        {!submitted && (
           <div style={{ fontSize: "12px", color: "#b4b2a9" }}>
             {Object.keys(chosenObj).length} / {leftItems.length} dipasangkan
           </div>
         )}
-        {submitted && !alreadyCorrect && (
+        {submitted && (
           <div
             style={{
               background: isCorrect ? "#e4f5f0" : "#fff3f0",
@@ -741,7 +705,7 @@ export default function JawabanInput({
               color: isCorrect ? "#0F6E56" : "#b91c1c",
             }}
           >
-            {isCorrect
+            {isCorrect || alreadyCorrect
               ? "Semua pasangan benar!"
               : "Ada pasangan yang kurang tepat."}
           </div>

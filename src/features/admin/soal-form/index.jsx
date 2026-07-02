@@ -88,6 +88,7 @@ export default function AdminSoalForm() {
   const [loadingStruktur, setLoadingStruktur] = useState(true);
   const [error, setError] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const [materiList, setMateriList] = useState([]);
 
   // Load struktur
   useEffect(() => {
@@ -123,6 +124,7 @@ export default function AdminSoalForm() {
           difficulty: data.difficulty,
           video_url: data.video_url || "",
           is_public_explanation: data.is_public_explanation ?? 0,
+          materi_ids: Array.isArray(data.materi_ids) ? data.materi_ids : [],
         });
 
         // Reconstruct selected dari subtopik_id
@@ -145,6 +147,14 @@ export default function AdminSoalForm() {
       })
       .catch(() => setError("Gagal memuat soal"));
   }, [id, struktur.subtopik.length]);
+
+  // Fetch materi saat subtopik_id berubah
+  useEffect(() => {
+    if (!form.subtopik_id) { setMateriList([]); return; }
+    api.get(`/browse/materi?subtopik_id=${form.subtopik_id}`)
+      .then(data => setMateriList(Array.isArray(data) ? data : []))
+      .catch(() => setMateriList([]));
+  }, [form.subtopik_id]);
 
   const validate = () => {
     if (!form.subtopik_id) return "Pilih subtopik terlebih dahulu";
@@ -294,8 +304,8 @@ export default function AdminSoalForm() {
           onSubmit={handleSubmit}
           style={{ display: "flex", flexDirection: "column", gap: "16px" }}
         >
-          {/* Lokasi soal */}
-          <SectionCard label="Lokasi Soal" accent="#7c3aed" isMobile={isMobile}>
+          {/* Subtopik */}
+          <SectionCard label="Subtopik" accent="#7c3aed" isMobile={isMobile}>
             <LokasiSoal
               form={form} setForm={setForm}
               struktur={struktur} selected={selected} setSelected={setSelected}
@@ -345,6 +355,34 @@ export default function AdminSoalForm() {
           <SectionCard accent="#b4b2a9" isMobile={isMobile}>
             <Video form={form} setForm={setForm} isMobile={isMobile} />
           </SectionCard>
+
+          {/* Materi Terkait */}
+          {materiList.length > 0 && (
+            <SectionCard label="Materi Terkait" accent="#1a8a6e" isMobile={isMobile}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <p style={{ fontSize: "12px", color: "#6b6860", margin: 0 }}>
+                  Pilih materi dari subtopik ini yang relevan dengan soal.
+                </p>
+                {materiList.map(m => {
+                  const checked = (form.materi_ids || []).includes(m.id);
+                  return (
+                    <label key={m.id} style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", padding: "8px 10px", borderRadius: "10px", border: `1.5px solid ${checked ? "#1a8a6e" : "#e2ddd5"}`, background: checked ? "#e4f5f0" : "white", transition: "all .12s" }}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => {
+                          const ids = form.materi_ids || [];
+                          setForm(f => ({ ...f, materi_ids: checked ? ids.filter(x => x !== m.id) : [...ids, m.id] }));
+                        }}
+                        style={{ accentColor: "#1a8a6e", width: "15px", height: "15px", flexShrink: 0 }}
+                      />
+                      <span style={{ fontSize: "13px", fontWeight: checked ? "600" : "400", color: "#0f0e17", lineHeight: 1.4 }}>{m.judul}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </SectionCard>
+          )}
 
           {/* Mobile: toggle preview */}
           {isMobile && (

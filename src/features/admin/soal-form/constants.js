@@ -30,6 +30,7 @@ export const defaultForm = {
   difficulty: 1,
   video_url: "",
   is_public_explanation: 0,
+  materi_ids: [],
 };
 
 export const getYouTubeId = (url) => {

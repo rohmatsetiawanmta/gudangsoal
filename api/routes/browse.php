@@ -130,7 +130,26 @@ if ($uri === '/browse/soal' && $method === 'GET') {
   $soal = $stmt->fetchAll();
   foreach ($soal as &$s) {
     $s['options'] = json_decode($s['options']);
+    $s['answered_correct'] = false;
   }
+
+  // Bulk answered status for logged-in user
+  $authUser = getAuthUser();
+  if ($authUser && !empty($soal)) {
+    $kodes = array_column($soal, 'kode');
+    $placeholders = implode(',', array_fill(0, count($kodes), '?'));
+    $aStmt = $pdo->prepare("
+      SELECT DISTINCT s.kode FROM sessions se
+      JOIN soal s ON se.soal_id = s.id
+      WHERE se.user_id = ? AND s.kode IN ($placeholders) AND se.is_correct = 1
+    ");
+    $aStmt->execute(array_merge([$authUser['id']], $kodes));
+    $answeredSet = array_flip(array_column($aStmt->fetchAll(), 'kode'));
+    foreach ($soal as &$s) {
+      $s['answered_correct'] = isset($answeredSet[$s['kode']]);
+    }
+  }
+
   echo json_encode($soal);
   exit;
 }
@@ -173,6 +192,18 @@ if ($uri === '/browse/soal/detail' && $method === 'GET') {
 
   $soal['options'] = json_decode($soal['options']);
   $soal['answer']  = json_decode($soal['answer']);
+
+  // Materi terkait
+  $materi_ids = $soal['materi_ids'] ? json_decode($soal['materi_ids'], true) : [];
+  if (!empty($materi_ids)) {
+    $placeholders = implode(',', array_fill(0, count($materi_ids), '?'));
+    $mStmt = $pdo->prepare("SELECT id, judul FROM materi WHERE id IN ($placeholders) AND is_published = 1 ORDER BY FIELD(id, $placeholders)");
+    $mStmt->execute(array_merge($materi_ids, $materi_ids));
+    $soal['materi_terkait'] = $mStmt->fetchAll();
+  } else {
+    $soal['materi_terkait'] = [];
+  }
+  unset($soal['materi_ids']);
 
   // Stats soal
   $stmt = $pdo->prepare('

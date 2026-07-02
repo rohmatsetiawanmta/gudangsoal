@@ -9,6 +9,7 @@ import {
   BarChart2,
 } from "lucide-react";
 import MathRenderer from "../../../components/MathRenderer";
+import MateriTerkaitBanner from "../../../components/MateriTerkaitBanner";
 import { formatAnswer, getYouTubeId, normalizeMenjodohkan } from "../soalUtils";
 
 export default function PembahasanPanel({
@@ -108,35 +109,15 @@ export default function PembahasanPanel({
   const renderKunci = () => {
     if (soal.tipe === "menjodohkan") {
       return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
           {menjodohkanOptions.left.map((leftText, li) => {
-            const ri =
-              answerObj[String(li)] !== undefined
-                ? parseInt(answerObj[String(li)])
-                : null;
-            const rightText = ri !== null ? menjodohkanOptions.right[ri] : null;
+            const ri = answerObj[String(li)] !== undefined ? parseInt(answerObj[String(li)]) : null;
+            const rightText = ri !== null ? menjodohkanOptions.right[ri] : "—";
             return (
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: "4px" }}
-              >
-                <div
-                  style={{
-                    fontSize: "13px",
-                    color: isBenar ? "#1a8a6e" : "#b91c1c",
-                  }}
-                >
-                  Jawaban:{" "}
-                  <strong>{formatAnswer(soal.tipe, soal.answer)}</strong>
-                </div>
-                {!isBenar &&
-                  jawabanUser !== null &&
-                  jawabanUser !== undefined &&
-                  jawabanUser !== "" && (
-                    <div style={{ fontSize: "13px", color: "#b91c1c" }}>
-                      Jawaban kamu:{" "}
-                      <strong>{formatAnswer(soal.tipe, jawabanUser)}</strong>
-                    </div>
-                  )}
+              <div key={li} style={{ fontSize: "13px", color: isBenar ? "#1a8a6e" : "#b91c1c", display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                <strong><MathRenderer text={leftText} /></strong>
+                <span style={{ opacity: 0.6 }}>→</span>
+                <strong><MathRenderer text={rightText} /></strong>
               </div>
             );
           })}
@@ -324,6 +305,11 @@ export default function PembahasanPanel({
             </div>
           ))}
         </div>
+      )}
+
+      {/* Materi Terkait */}
+      {Array.isArray(soal.materi_terkait) && soal.materi_terkait.length > 0 && (
+        <MateriTerkaitBanner materi={soal.materi_terkait} />
       )}
 
       {/* Pembahasan */}

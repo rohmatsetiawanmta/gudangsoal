@@ -1,11 +1,9 @@
 // src/features/browse/BrowseSubtopik.jsx
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { ChevronRight, Gamepad2 } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Breadcrumb from "../../components/Breadcrumb";
 import { getSubtopik } from "./browseApi";
-import { getGamesByTopik } from "../games/gameApi";
-import { getGameBySlug } from "../games/gamesConfig";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
@@ -26,23 +24,11 @@ export default function BrowseSubtopik() {
   const [subtopik, setSubtopik] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [games, setGames] = useState([]); // game yang di-assign ke topik ini
-
   useEffect(() => {
     getSubtopik(jenjangSlug, subjenjangSlug, mapelSlug, topikSlug)
       .then((data) => setSubtopik(data))
       .catch(() => setError("Gagal memuat data"))
       .finally(() => setLoading(false));
-
-    // Fetch games — tidak bloking, gagal pun tidak apa-apa
-    getGamesByTopik(topikSlug)
-      .then((data) => {
-        const resolved = (Array.isArray(data) ? data : [])
-          .map((g) => getGameBySlug(g.slug))
-          .filter(Boolean);
-        setGames(resolved);
-      })
-      .catch(() => {}); // silent — game section cukup tidak muncul
   }, [jenjangSlug, subjenjangSlug, mapelSlug, topikSlug]);
 
   return (
@@ -158,139 +144,10 @@ export default function BrowseSubtopik() {
           </div>
         )}
 
-        {!loading && !error && games.length > 0 && (
-          <div style={{ marginBottom: "28px" }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                marginBottom: "12px",
-              }}
-            >
-              <Gamepad2 size={16} color="#6b6860" />
-              <h2
-                style={{
-                  fontSize: "15px",
-                  fontWeight: "700",
-                  color: "#0f0e17",
-                  margin: 0,
-                }}
-              >
-                Games
-              </h2>
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: isMobile
-                  ? "1fr"
-                  : "repeat(auto-fill, minmax(200px, 1fr))",
-                gap: "10px",
-              }}
-            >
-              {games.map((game) => {
-                const Icon = game.icon;
-                return (
-                  <div
-                    key={game.slug}
-                    onClick={() => navigate(game.path)}
-                    style={{
-                      background: "white",
-                      borderRadius: "14px",
-                      border: "1px solid #e2ddd5",
-                      padding: "16px",
-                      cursor: "pointer",
-                      transition: "transform .15s, box-shadow .15s",
-                      position: "relative",
-                      overflow: "hidden",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                      e.currentTarget.style.boxShadow =
-                        "0 8px 24px rgba(0,0,0,0.08)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = "none";
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        bottom: 0,
-                        width: "3px",
-                        background: game.color,
-                        borderRadius: "14px 0 0 14px",
-                      }}
-                    />
-                    <div
-                      style={{
-                        width: "38px",
-                        height: "38px",
-                        borderRadius: "10px",
-                        background: game.bg,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <Icon size={18} color={game.color} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div
-                        style={{
-                          fontSize: "14px",
-                          fontWeight: "700",
-                          color: "#0f0e17",
-                          marginBottom: "2px",
-                        }}
-                      >
-                        {game.title}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          color: "#6b6860",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {game.description}
-                      </div>
-                    </div>
-                    <ChevronRight size={16} color="#b4b2a9" flexShrink={0} />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
         {!loading && !error && (
           <div
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
-            {games.length > 0 && subtopik.length > 0 && (
-              <h2
-                style={{
-                  fontSize: "15px",
-                  fontWeight: "700",
-                  color: "#0f0e17",
-                  margin: "0 0 2px",
-                }}
-              >
-                Pilih Subtopik
-              </h2>
-            )}
             {subtopik.length === 0 && (
               <div
                 style={{

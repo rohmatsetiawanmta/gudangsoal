@@ -57,19 +57,23 @@ import SearchPage from "./features/search/SearchPage";
 import ProfilePage from "./features/profile/ProfilePage";
 import AdminSoalForm from "./features/admin/soal-form";
 import AdminSoalBulkImportPage from "./features/admin/AdminSoalBulkImportPage";
-import GamesPage from "./features/games/GamesPage";
-import NumberSequenceGame from "./features/games/number-sequence/NumberSequenceGame";
 import MateriDetail from "./features/materi/MateriDetail";
 import MateriList from "./features/materi/MateriList";
 import AdminMateriBulkImport from "./features/admin/AdminMateriBulkImport";
 
 export default function App() {
-  const { isLoggedIn } = useAuthStore();
+  const { isLoggedIn, checkSessionExpiry } = useAuthStore();
+  const location = useLocation();
+
+  useEffect(() => {
+    checkSessionExpiry();
+  }, []);
 
   return (
     <>
     <ScrollToTop />
     <FloatingTools />
+    <div key={location.key} className="page-fade">
     <Routes>
       <Route
         path="/"
@@ -115,8 +119,6 @@ export default function App() {
       <Route path="/materi" element={<MateriList />} />
       <Route path="/materi/:id" element={<MateriDetail />} />
       <Route path="/populer" element={<PopulerPage />} />
-      <Route path="/games" element={<GamesPage />} />
-      <Route path="/games/number-sequence" element={<NumberSequenceGame />} />
 
       <Route path="*" element={<Navigate to="/" />} />
 
@@ -163,6 +165,7 @@ export default function App() {
         element={<QuizReview />}
       />
     </Routes>
+    </div>
     </>
   );
 }

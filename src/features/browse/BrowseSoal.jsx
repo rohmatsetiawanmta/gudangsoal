@@ -1,7 +1,7 @@
 // src/features/browse/BrowseSoal.jsx
 import { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import { ChevronRight, ChevronLeft, CheckCircle2 } from "lucide-react";
 
 const PAGE_SIZE = 10;
 import Breadcrumb from "../../components/Breadcrumb";
@@ -50,21 +50,26 @@ export default function BrowseSoal() {
   const topikNama = state?.topikNama || topikSlug;
   const subtopikNama = state?.subtopikNama || subtopikSlug;
 
-  const [soal, setSoal]     = useState([]);
+  const [soal, setSoal]       = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError]   = useState("");
-  const [page, setPage]     = useState(1);
+  const [error, setError]     = useState("");
+  const [page, setPage]       = useState(1);
+  const [filterDiff, setFilterDiff] = useState(0);
 
   useEffect(() => {
     setPage(1);
     getSoal(jenjangSlug, subjenjangSlug, mapelSlug, topikSlug, subtopikSlug)
-      .then((data) => setSoal(data))
+      .then((data) => {
+        data.sort((a, b) => (a.answered_correct === b.answered_correct ? 0 : a.answered_correct ? 1 : -1));
+        setSoal(data);
+      })
       .catch(() => setError("Gagal memuat soal"))
       .finally(() => setLoading(false));
   }, [jenjangSlug, subjenjangSlug, mapelSlug, topikSlug, subtopikSlug]);
 
-  const totalPages = Math.ceil(soal.length / PAGE_SIZE);
-  const pagedSoal  = soal.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const filtered   = filterDiff ? soal.filter(s => s.difficulty == filterDiff) : soal;
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const pagedSoal  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div
@@ -220,17 +225,40 @@ export default function BrowseSoal() {
 
         {!loading && !error && (
           <>
-            {/* Daftar Soal header */}
+            {/* Filter + header row */}
             {soal.length > 0 && (
-              <div style={{ fontSize: "11px", fontWeight: "700", color: "#2563eb", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>
-                Daftar Soal ({soal.length})
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px", gap: "8px", flexWrap: "wrap" }}>
+                <div style={{ fontSize: "11px", fontWeight: "700", color: "#2563eb", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  {filterDiff ? filtered.length : soal.length} Soal
+                </div>
+                <div style={{ display: "flex", gap: "6px" }}>
+                  {[
+                    { label: "Semua", val: 0,  color: "#6b6860",  bg: "#f2efe8" },
+                    { label: "Easy",  val: 1,  color: "#1a8a6e",  bg: "#e4f5f0" },
+                    { label: "Medium",val: 2,  color: "#854F0B",  bg: "#faeeda" },
+                    { label: "Hard",  val: 3,  color: "#e84c2b",  bg: "#fff3f0" },
+                  ].map(({ label, val, color, bg }) => (
+                    <button key={val} onClick={() => { setFilterDiff(v => v === val ? 0 : val); setPage(1); }}
+                      style={{
+                        padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "600",
+                        border: `1.5px solid ${filterDiff === val ? color : "#e2ddd5"}`,
+                        background: filterDiff === val ? bg : "white",
+                        color: filterDiff === val ? color : "#6b6860",
+                        cursor: "pointer", fontFamily: "inherit", transition: "all .12s",
+                      }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {soal.length === 0 && (
+              {filtered.length === 0 && (
                 <div style={{ textAlign: "center", padding: "48px", color: "#6b6860", fontSize: "14px" }}>
-                  Belum ada soal untuk {subtopikNama}.
+                  {soal.length === 0
+                    ? `Belum ada soal untuk ${subtopikNama}.`
+                    : "Tidak ada soal dengan filter ini."}
                 </div>
               )}
               {pagedSoal.map((s, i) => {
@@ -244,14 +272,18 @@ export default function BrowseSoal() {
                       gap: isMobile ? "10px" : "14px",
                       background: "white", borderRadius: "14px",
                       padding: isMobile ? "12px 14px" : "16px 20px",
-                      border: "1px solid #e2ddd5", cursor: "pointer",
+                      border: "1px solid #e2ddd5",
+                      borderLeft: s.answered_correct ? "3px solid #1a8a6e" : "1px solid #e2ddd5",
+                      cursor: "pointer",
                       transition: "transform .15s, box-shadow .15s",
                     }}
                     onMouseEnter={(e) => { e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.06)"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
                   >
-                    <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: "#f2efe8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "700", color: "#6b6860", flexShrink: 0 }}>
-                      {globalIndex}
+                    <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: s.answered_correct ? "#e4f5f0" : "#f2efe8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "700", color: s.answered_correct ? "#1a8a6e" : "#6b6860", flexShrink: 0 }}>
+                      {s.answered_correct
+                        ? <CheckCircle2 size={15} color="#1a8a6e" />
+                        : globalIndex}
                     </div>
                     {!isMobile && (
                       <div style={{ fontSize: "11px", fontWeight: "700", color: "#b4b2a9", fontFamily: "monospace", letterSpacing: ".05em", flexShrink: 0 }}>

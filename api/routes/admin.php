@@ -28,21 +28,23 @@ if ($uri === '/admin/soal' && $method === 'GET') {
   $page       = intval($_GET['page']       ?? 1);
   $limit      = intval($_GET['limit']      ?? 20);
   $offset     = ($page - 1) * $limit;
-  $search     = $_GET['search']     ?? '';
-  $difficulty = isset($_GET['difficulty']) && $_GET['difficulty'] !== '' ? intval($_GET['difficulty']) : null;
-  $published  = isset($_GET['published'])  && $_GET['published']  !== '' ? intval($_GET['published'])  : null;
+  $search      = $_GET['search']      ?? '';
+  $difficulty  = isset($_GET['difficulty'])  && $_GET['difficulty']  !== '' ? intval($_GET['difficulty'])  : null;
+  $published   = isset($_GET['published'])   && $_GET['published']   !== '' ? intval($_GET['published'])   : null;
+  $subtopik_id = isset($_GET['subtopik_id']) && $_GET['subtopik_id'] !== '' ? intval($_GET['subtopik_id']) : null;
 
-  $where  = [];
+  $where  = ['s.is_exclusive = 0'];
   $params = [];
 
-  if ($search)                { $where[] = 's.body LIKE ?';         $params[] = "%$search%"; }
-  if ($difficulty !== null)   { $where[] = 's.difficulty = ?';      $params[] = $difficulty; }
-  if ($published  !== null)   { $where[] = 's.is_published = ?';    $params[] = $published;  }
+  if ($search)                 { $where[] = 's.body LIKE ?';         $params[] = "%$search%"; }
+  if ($difficulty !== null)    { $where[] = 's.difficulty = ?';      $params[] = $difficulty; }
+  if ($published  !== null)    { $where[] = 's.is_published = ?';    $params[] = $published;  }
+  if ($subtopik_id !== null)   { $where[] = 's.subtopik_id = ?';    $params[] = $subtopik_id; }
 
-  $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+  $whereClause = 'WHERE ' . implode(' AND ', $where);
 
   $stmt = $pdo->prepare('
-    SELECT s.id, s.tipe, s.body, s.answer, s.difficulty, s.is_published, s.created_at, s.kode,
+    SELECT s.id, s.tipe, s.body, s.answer, s.difficulty, s.is_published, s.created_at, s.kode, s.materi_ids,
            st.nama as subtopik, t.nama as topik,
            m.nama as mapel, sj.nama as subjenjang, j.nama as jenjang
     FROM soal s
@@ -60,12 +62,30 @@ if ($uri === '/admin/soal' && $method === 'GET') {
   $totalStmt = $pdo->prepare('SELECT COUNT(*) FROM soal s ' . $whereClause);
   $totalStmt->execute($params);
 
-  // counts for stats bar
-  $published_count = (int) $pdo->query('SELECT COUNT(*) FROM soal WHERE is_published = 1')->fetchColumn();
-  $draft_count     = (int) $pdo->query('SELECT COUNT(*) FROM soal WHERE is_published = 0')->fetchColumn();
+  // counts for stats bar (non-exclusive only)
+  $published_count = (int) $pdo->query('SELECT COUNT(*) FROM soal WHERE is_published = 1 AND is_exclusive = 0')->fetchColumn();
+  $draft_count     = (int) $pdo->query('SELECT COUNT(*) FROM soal WHERE is_published = 0 AND is_exclusive = 0')->fetchColumn();
+
+  $rows = $stmt->fetchAll();
+  foreach ($rows as &$row) {
+    $row['materi_ids'] = $row['materi_ids'] ? json_decode($row['materi_ids']) : [];
+  }
+
+  // batch-fetch materi names for all rows
+  $allMateriIds = array_unique(array_merge(...array_map(fn($r) => (array)$r['materi_ids'], $rows)));
+  $materiMap = [];
+  if (!empty($allMateriIds)) {
+    $ph = implode(',', array_fill(0, count($allMateriIds), '?'));
+    $mStmt = $pdo->prepare("SELECT id, judul FROM materi WHERE id IN ($ph)");
+    $mStmt->execute(array_values($allMateriIds));
+    foreach ($mStmt->fetchAll() as $m) $materiMap[$m['id']] = $m['judul'];
+  }
+  foreach ($rows as &$row) {
+    $row['materi'] = array_map(fn($id) => ['id' => (int)$id, 'judul' => $materiMap[$id] ?? ''], $row['materi_ids']);
+  }
 
   echo json_encode([
-    'data'            => $stmt->fetchAll(),
+    'data'            => $rows,
     'total'           => (int) $totalStmt->fetchColumn(),
     'page'            => $page,
     'limit'           => $limit,
@@ -98,8 +118,9 @@ if ($uri === '/admin/soal/detail' && $method === 'GET') {
 
   if (!$soal) { http_response_code(404); echo json_encode(['error' => 'Soal tidak ditemukan']); exit; }
 
-  $soal['options'] = json_decode($soal['options']);
-  $soal['answer']  = json_decode($soal['answer']);
+  $soal['options']    = json_decode($soal['options']);
+  $soal['answer']     = json_decode($soal['answer']);
+  $soal['materi_ids'] = $soal['materi_ids'] ? json_decode($soal['materi_ids']) : [];
   echo json_encode($soal);
   exit;
 }
@@ -128,20 +149,22 @@ if ($uri === '/admin/soal' && $method === 'POST') {
   } while ($cek->fetch()); // ulangi kalau bentrok
 
   $stmt = $pdo->prepare('
-    INSERT INTO soal (kode, subtopik_id, tipe, body, options, answer, explanation, difficulty, video_url, is_public_explanation)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO soal (kode, subtopik_id, tipe, body, options, answer, explanation, difficulty, video_url, is_public_explanation, materi_ids)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   ');
+  $materi_ids = !empty($body['materi_ids']) ? json_encode($body['materi_ids']) : null;
   $stmt->execute([
     $kode,
     $body['subtopik_id'],
     $body['tipe']        ?? 'pilihan_ganda',
     $body['body'],
     json_encode($body['options']),
-    json_encode($body['answer']), 
+    json_encode($body['answer']),
     $body['explanation'] ?? null,
     $body['difficulty']  ?? 1,
     $body['video_url']   ?? null,
     $body['is_public_explanation'] ?? 0,
+    $materi_ids,
   ]);
 
   http_response_code(201);
@@ -185,9 +208,10 @@ if ($uri === '/admin/soal/bulk' && $method === 'POST') {
     } while ($cek->fetch());
 
     try {
+      $materi_ids_bulk = !empty($s['materi_ids']) ? json_encode($s['materi_ids']) : null;
       $stmt = $pdo->prepare('
-        INSERT INTO soal (kode, subtopik_id, tipe, body, options, answer, explanation, difficulty, video_url, is_public_explanation)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO soal (kode, subtopik_id, tipe, body, options, answer, explanation, difficulty, video_url, is_public_explanation, materi_ids)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ');
       $stmt->execute([
         $kode,
@@ -200,6 +224,7 @@ if ($uri === '/admin/soal/bulk' && $method === 'POST') {
         $s['difficulty']  ?? 1,
         $s['video_url']   ?? null,
         $s['is_public_explanation'] ?? 0,
+        $materi_ids_bulk,
       ]);
       $saved[] = ['index' => $i, 'id' => $pdo->lastInsertId(), 'kode' => $kode];
     } catch (Exception $e) {
@@ -232,9 +257,10 @@ if ($uri === '/admin/soal' && $method === 'PUT') {
 
   $stmt = $pdo->prepare('
     UPDATE soal
-    SET subtopik_id=?, tipe=?, body=?, options=?, answer=?, explanation=?, difficulty=?, video_url=?, is_public_explanation=?
+    SET subtopik_id=?, tipe=?, body=?, options=?, answer=?, explanation=?, difficulty=?, video_url=?, is_public_explanation=?, materi_ids=?
     WHERE id=?
   ');
+  $materi_ids = !empty($body['materi_ids']) ? json_encode($body['materi_ids']) : null;
   $stmt->execute([
     $body['subtopik_id'],
     $body['tipe']        ?? 'pilihan_ganda',
@@ -245,6 +271,7 @@ if ($uri === '/admin/soal' && $method === 'PUT') {
     $body['difficulty']  ?? 1,
     $body['video_url']   ?? null,
     $body['is_public_explanation'] ?? 0,
+    $materi_ids,
     $id,
   ]);
 

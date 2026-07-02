@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Gamepad2 } from "lucide-react";
+import { Gamepad2, TrendingUp } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
@@ -13,6 +13,14 @@ const GAMES = [
     icon: Gamepad2,
     color: "#2563eb",
     bg: "#eff6ff",
+  },
+  {
+    slug: "bank-pintar",
+    title: "Bank Pintar",
+    description: "Hitung bunga tunggal, bunga majemuk, dan cicilan pinjaman dengan cepat.",
+    icon: TrendingUp,
+    color: "#1a8a6e",
+    bg: "#e4f5f0",
   },
 ];
 

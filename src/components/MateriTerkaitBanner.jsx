@@ -7,20 +7,22 @@ import api from "../lib/api";
 
 const COLLAPSED_LIMIT = 4;
 
-export default function MateriTerkaitBanner({ subtopikId, subtopikSlug, style }) {
-  const [list,     setList]     = useState([]);
+export default function MateriTerkaitBanner({ subtopikId, subtopikSlug, materi, style }) {
+  const [fetched,  setFetched]  = useState([]);
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
+    if (materi !== undefined) return; // pakai prop langsung
     if (!subtopikId && !subtopikSlug) return;
     const param = subtopikId
       ? `subtopik_id=${subtopikId}`
       : `subtopik_slug=${subtopikSlug}`;
     api.get(`/browse/materi?${param}`)
-      .then(data => setList(Array.isArray(data) ? data : []))
+      .then(data => setFetched(Array.isArray(data) ? data : []))
       .catch(() => {});
-  }, [subtopikId, subtopikSlug]);
+  }, [subtopikId, subtopikSlug, materi]);
 
+  const list = materi !== undefined ? materi : fetched;
   if (!list.length) return null;
 
   const visible   = expanded ? list : list.slice(0, COLLAPSED_LIMIT);

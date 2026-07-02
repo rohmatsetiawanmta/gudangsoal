@@ -15,6 +15,7 @@
     "katex": "^0.16.9",
     "lucide-react": "^0.483.0",
     "marked": "^18.0.4",
+    "mermaid": "^11.15.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-helmet-async": "^3.0.0",

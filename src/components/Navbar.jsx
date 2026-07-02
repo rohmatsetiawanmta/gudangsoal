@@ -17,8 +17,7 @@ const JELAJAHI_LINKS = [
   { to: "/populer",       label: "Soal Populer",   icon: TrendingUp,        desc: "Soal yang paling banyak dikerjakan",        color: "#e84c2b" },
   { to: "/materi",        label: "Materi Belajar", icon: GraduationCap,     desc: "Teori & rumus per subtopik",               color: "#1a8a6e" },
   { to: "/latihan",       label: "Latihan",        icon: Dumbbell,          desc: "Set soal latihan terstruktur",             color: "#f5a623" },
-  { to: "/games",         label: "Games",           icon: Gamepad2,          desc: "Mini-game matematika seru",                color: "#7c3aed" },
-  { to: "/request-soal",  label: "Request Soal",   icon: MessageSquarePlus, desc: "Ajukan soal yang kamu butuhkan",           color: "#6b6860" },
+{ to: "/request-soal",  label: "Request Soal",   icon: MessageSquarePlus, desc: "Ajukan soal yang kamu butuhkan",           color: "#6b6860" },
 ];
 
 const NAV_LINKS = [];
