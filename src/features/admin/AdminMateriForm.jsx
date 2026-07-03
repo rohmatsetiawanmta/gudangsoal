@@ -11,6 +11,7 @@ import useWindowWidth from "../../hooks/useWindowWidth";
 import ToggleSwitch from "../../components/ToggleSwitch";
 import LokasiSoal from "./soal-form/FormSections/LokasiSoal";
 import AdminMateriImport from "./AdminMateriImport";
+import MarkdownEditor from "../../components/MarkdownEditor";
 
 // ── SectionCard ───────────────────────────────────────────────────────────────
 
@@ -361,7 +362,7 @@ export default function AdminMateriForm() {
               />
             </FormField>
             <FormField label="Konten" hint="(mendukung Markdown & LaTeX)">
-              <TextareaInput
+              <MarkdownEditor
                 value={form.konten}
                 onChange={v => setForm(f => ({ ...f, konten: v }))}
                 placeholder={"Tulis materi di sini...\n\nContoh LaTeX: $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$"}

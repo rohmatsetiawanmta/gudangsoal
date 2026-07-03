@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   BookOpen, Sigma, AlignLeft, ChevronLeft, ChevronRight, BookMarked, Lightbulb,
-  AlertTriangle, Eye, Copy, Share2, Flag, Check, X,
+  AlertTriangle, Eye, Copy, Share2, Flag, Check, X, Lock, UserPlus,
 } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -12,6 +12,7 @@ import MathRenderer from "../../components/MathRenderer";
 import Breadcrumb from "../../components/Breadcrumb";
 import useWindowWidth from "../../hooks/useWindowWidth";
 import api from "../../lib/api";
+import { useAuthStore } from "../../features/auth/authStore";
 
 // ── Highlight blocks ──────────────────────────────────────────────────────────
 
@@ -187,6 +188,43 @@ function ReportModal({ materiId, judul, onClose, isMobile }) {
   );
 }
 
+// ── Content Gate ──────────────────────────────────────────────────────────────
+
+function ContentGate({ isMobile }) {
+  return (
+    <div style={{
+      background: "white", borderRadius: "16px",
+      border: "1px solid #e2ddd5",
+      padding: isMobile ? "28px 20px" : "36px 40px",
+      textAlign: "center", marginBottom: "16px",
+    }}>
+      <div style={{ width: "52px", height: "52px", borderRadius: "16px", background: "#fff3f0", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+        <Lock size={22} color="#e84c2b" />
+      </div>
+      <div style={{ fontSize: "17px", fontWeight: "800", color: "#0f0e17", marginBottom: "8px" }}>
+        Baca materi selengkapnya
+      </div>
+      <p style={{ fontSize: "14px", color: "#6b6860", lineHeight: "1.6", maxWidth: "320px", margin: "0 auto 24px" }}>
+        Daftar gratis untuk akses penuh ke semua materi, soal latihan, dan fitur belajar lainnya.
+      </p>
+      <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+        <Link
+          to="/register"
+          style={{ display: "inline-flex", alignItems: "center", gap: "7px", padding: "10px 22px", borderRadius: "10px", background: "#e84c2b", color: "white", fontSize: "14px", fontWeight: "700", textDecoration: "none", boxShadow: "0 4px 14px rgba(232,76,43,.3)" }}
+        >
+          <UserPlus size={15} /> Daftar Gratis
+        </Link>
+        <Link
+          to="/login"
+          style={{ display: "inline-flex", alignItems: "center", padding: "10px 22px", borderRadius: "10px", background: "white", border: "1px solid #e2ddd5", color: "#0f0e17", fontSize: "14px", fontWeight: "600", textDecoration: "none" }}
+        >
+          Sudah punya akun? Masuk
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function MateriDetail() {
@@ -194,6 +232,7 @@ export default function MateriDetail() {
   const navigate = useNavigate();
   const width    = useWindowWidth();
   const isMobile = width <= 480;
+  const { isLoggedIn } = useAuthStore();
 
   const [materi, setMateri]   = useState(null);
   const [loading, setLoading] = useState(true);
@@ -326,67 +365,116 @@ export default function MateriDetail() {
             </div>
 
             {/* Konten */}
-            {materi.konten ? (
-              <div style={{ background: "white", borderRadius: "16px", border: "1px solid #e2ddd5", padding: isMobile ? "20px 18px" : "28px 32px", marginBottom: highlights.length > 0 ? "16px" : 0, fontSize: "15px", color: "#0f0e17" }}>
-                <MathRenderer text={materi.konten} block />
-              </div>
+            {isLoggedIn ? (
+              <>
+                {materi.konten ? (
+                  <div style={{ background: "white", borderRadius: "16px", border: "1px solid #e2ddd5", padding: isMobile ? "20px 18px" : "28px 32px", marginBottom: highlights.length > 0 ? "16px" : 0, fontSize: "15px", color: "#0f0e17" }}>
+                    <MathRenderer text={materi.konten} block />
+                  </div>
+                ) : (
+                  <div style={{ background: "white", borderRadius: "16px", border: "1px solid #e2ddd5", padding: "32px", marginBottom: highlights.length > 0 ? "16px" : 0, textAlign: "center", color: "#b4b2a9", fontSize: "14px" }}>
+                    Konten belum tersedia.
+                  </div>
+                )}
+
+                {/* Highlights */}
+                {highlights.length > 0 && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <div style={{ fontSize: "12px", fontWeight: "700", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".07em", padding: "4px 2px" }}>
+                      Highlights
+                    </div>
+                    {highlights.map((h, i) => (
+                      <HighlightBlock key={i} item={h} />
+                    ))}
+                  </div>
+                )}
+
+                {/* Prev / Next navigation */}
+                {(materi.prev || materi.next) && (
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "24px" }}>
+                    {materi.prev ? (
+                      <button
+                        onClick={() => navigate(`/materi/${materi.prev.id}`)}
+                        style={{ background: "white", border: "1px solid #e2ddd5", borderRadius: "14px", padding: "14px 16px", cursor: "pointer", textAlign: "left", display: "flex", flexDirection: "column", gap: "4px", transition: "box-shadow .15s, border-color .15s" }}
+                        onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.07)"; e.currentTarget.style.borderColor = "#0f0e17"; }}
+                        onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "#e2ddd5"; }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: "700", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".06em" }}>
+                          <ChevronLeft size={13} /> Sebelumnya
+                        </div>
+                        <div style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", lineHeight: 1.4 }}>
+                          {materi.prev.judul}
+                        </div>
+                      </button>
+                    ) : <div />}
+                    {materi.next ? (
+                      <button
+                        onClick={() => navigate(`/materi/${materi.next.id}`)}
+                        style={{ background: "white", border: "1px solid #e2ddd5", borderRadius: "14px", padding: "14px 16px", cursor: "pointer", textAlign: "right", display: "flex", flexDirection: "column", gap: "4px", transition: "box-shadow .15s, border-color .15s" }}
+                        onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.07)"; e.currentTarget.style.borderColor = "#0f0e17"; }}
+                        onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "#e2ddd5"; }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "4px", fontSize: "11px", fontWeight: "700", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".06em" }}>
+                          Berikutnya <ChevronRight size={13} />
+                        </div>
+                        <div style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", lineHeight: 1.4 }}>
+                          {materi.next.judul}
+                        </div>
+                      </button>
+                    ) : <div />}
+                  </div>
+                )}
+              </>
             ) : (
-              <div style={{ background: "white", borderRadius: "16px", border: "1px solid #e2ddd5", padding: "32px", marginBottom: highlights.length > 0 ? "16px" : 0, textAlign: "center", color: "#b4b2a9", fontSize: "14px" }}>
-                Konten belum tersedia.
-              </div>
-            )}
+              <>
+                {/* Partial konten dengan fade */}
+                {materi.konten && (
+                  <div style={{ position: "relative", maxHeight: "220px", overflow: "hidden", borderRadius: "16px", marginBottom: "16px" }}>
+                    <div style={{ background: "white", border: "1px solid #e2ddd5", borderRadius: "16px", padding: isMobile ? "20px 18px" : "28px 32px", fontSize: "15px", color: "#0f0e17" }}>
+                      <MathRenderer text={materi.konten} block />
+                    </div>
+                    {/* Gradient fade overlay */}
+                    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "120px", background: "linear-gradient(to bottom, transparent, #f2efe8)", pointerEvents: "none" }} />
+                  </div>
+                )}
+                <ContentGate isMobile={isMobile} />
 
-            {/* Highlights */}
-            {highlights.length > 0 && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                <div style={{ fontSize: "12px", fontWeight: "700", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".07em", padding: "4px 2px" }}>
-                  Highlights
-                </div>
-                {highlights.map((h, i) => (
-                  <HighlightBlock key={i} item={h} />
-                ))}
-              </div>
-            )}
-
-            {/* Prev / Next navigation */}
-            {(materi.prev || materi.next) && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "24px" }}>
-                {/* Prev */}
-                {materi.prev ? (
-                  <button
-                    onClick={() => navigate(`/materi/${materi.prev.id}`)}
-                    style={{ background: "white", border: "1px solid #e2ddd5", borderRadius: "14px", padding: "14px 16px", cursor: "pointer", textAlign: "left", display: "flex", flexDirection: "column", gap: "4px", transition: "box-shadow .15s, border-color .15s" }}
-                    onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.07)"; e.currentTarget.style.borderColor = "#0f0e17"; }}
-                    onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "#e2ddd5"; }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: "700", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".06em" }}>
-                      <ChevronLeft size={13} />
-                      Sebelumnya
-                    </div>
-                    <div style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", lineHeight: 1.4 }}>
-                      {materi.prev.judul}
-                    </div>
-                  </button>
-                ) : <div />}
-
-                {/* Next */}
-                {materi.next ? (
-                  <button
-                    onClick={() => navigate(`/materi/${materi.next.id}`)}
-                    style={{ background: "white", border: "1px solid #e2ddd5", borderRadius: "14px", padding: "14px 16px", cursor: "pointer", textAlign: "right", display: "flex", flexDirection: "column", gap: "4px", transition: "box-shadow .15s, border-color .15s" }}
-                    onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.07)"; e.currentTarget.style.borderColor = "#0f0e17"; }}
-                    onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "#e2ddd5"; }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "4px", fontSize: "11px", fontWeight: "700", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".06em" }}>
-                      Berikutnya
-                      <ChevronRight size={13} />
-                    </div>
-                    <div style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", lineHeight: 1.4 }}>
-                      {materi.next.judul}
-                    </div>
-                  </button>
-                ) : <div />}
-              </div>
+                {/* Prev / Next tetap tampil untuk guest */}
+                {(materi.prev || materi.next) && (
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "8px" }}>
+                    {materi.prev ? (
+                      <button
+                        onClick={() => navigate(`/materi/${materi.prev.id}`)}
+                        style={{ background: "white", border: "1px solid #e2ddd5", borderRadius: "14px", padding: "14px 16px", cursor: "pointer", textAlign: "left", display: "flex", flexDirection: "column", gap: "4px", transition: "box-shadow .15s, border-color .15s" }}
+                        onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.07)"; e.currentTarget.style.borderColor = "#0f0e17"; }}
+                        onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "#e2ddd5"; }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: "700", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".06em" }}>
+                          <ChevronLeft size={13} /> Sebelumnya
+                        </div>
+                        <div style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", lineHeight: 1.4 }}>
+                          {materi.prev.judul}
+                        </div>
+                      </button>
+                    ) : <div />}
+                    {materi.next ? (
+                      <button
+                        onClick={() => navigate(`/materi/${materi.next.id}`)}
+                        style={{ background: "white", border: "1px solid #e2ddd5", borderRadius: "14px", padding: "14px 16px", cursor: "pointer", textAlign: "right", display: "flex", flexDirection: "column", gap: "4px", transition: "box-shadow .15s, border-color .15s" }}
+                        onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.07)"; e.currentTarget.style.borderColor = "#0f0e17"; }}
+                        onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "#e2ddd5"; }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "4px", fontSize: "11px", fontWeight: "700", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".06em" }}>
+                          Berikutnya <ChevronRight size={13} />
+                        </div>
+                        <div style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", lineHeight: 1.4 }}>
+                          {materi.next.judul}
+                        </div>
+                      </button>
+                    ) : <div />}
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
