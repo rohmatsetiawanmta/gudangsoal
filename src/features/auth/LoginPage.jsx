@@ -1,9 +1,9 @@
 // src/features/auth/LoginPage.jsx
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LogIn, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { LogIn, Mail, Lock, Eye, EyeOff, Send } from "lucide-react";
 import { useAuthStore } from "./authStore";
-import { login } from "./authApi";
+import { login, resendVerification } from "./authApi";
 import Navbar from "../../components/Navbar";
 import SEO from "../../components/SEO";
 import useWindowWidth from "../../hooks/useWindowWidth";
@@ -87,24 +87,58 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
+  const [resending, setResending] = useState(false);
+  const [resendMsg, setResendMsg] = useState("");
+  const [cooldown, setCooldown] = useState(0);
+  const cooldownRef = useRef(null);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    cooldownRef.current = setTimeout(() => setCooldown(c => c - 1), 1000);
+    return () => clearTimeout(cooldownRef.current);
+  }, [cooldown]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setError("");
+    setUnverifiedEmail("");
+    setResendMsg("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setUnverifiedEmail("");
+    setResendMsg("");
     try {
       const res = await login(form.email, form.password);
       setAuth(res.user, res.token);
       navigate("/home");
     } catch (err) {
-      setError(err.error || "Terjadi kesalahan, coba lagi");
+      if (err.unverified) {
+        setUnverifiedEmail(err.email || form.email);
+      } else {
+        setError(err.error || "Terjadi kesalahan, coba lagi");
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!unverifiedEmail || resending || cooldown > 0) return;
+    setResending(true);
+    setResendMsg("");
+    try {
+      await resendVerification(unverifiedEmail);
+      setResendMsg("Email konfirmasi telah dikirim ulang. Cek inbox kamu.");
+      setCooldown(60);
+    } catch {
+      setResendMsg("Gagal mengirim ulang, coba beberapa saat lagi.");
+    } finally {
+      setResending(false);
     }
   };
 
@@ -240,18 +274,30 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div
-                style={{
-                  background: "#fff3f0",
-                  border: "1px solid #fca5a5",
-                  color: "#b91c1c",
-                  fontSize: "14px",
-                  borderRadius: "12px",
-                  padding: "12px 16px",
-                  marginBottom: "20px",
-                }}
-              >
+              <div style={{ background: "#fff3f0", border: "1px solid #fca5a5", color: "#b91c1c", fontSize: "14px", borderRadius: "12px", padding: "12px 16px", marginBottom: "20px" }}>
                 {error}
+              </div>
+            )}
+
+            {unverifiedEmail && (
+              <div style={{ background: "#fef9ee", border: "1px solid #fcd34d", borderRadius: "12px", padding: "14px 16px", marginBottom: "20px" }}>
+                <div style={{ fontSize: "14px", fontWeight: "600", color: "#854f0b", marginBottom: "6px" }}>
+                  Email belum diverifikasi
+                </div>
+                <div style={{ fontSize: "13px", color: "#92400e", lineHeight: "1.5", marginBottom: "10px" }}>
+                  Cek inbox <strong>{unverifiedEmail}</strong> dan klik link konfirmasi.
+                </div>
+                {resendMsg && (
+                  <div style={{ fontSize: "13px", color: "#1a8a6e", fontWeight: "500", marginBottom: "8px" }}>{resendMsg}</div>
+                )}
+                <button
+                  onClick={handleResend}
+                  disabled={resending || cooldown > 0}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 14px", borderRadius: "8px", border: "1px solid #fcd34d", background: "white", fontSize: "13px", fontWeight: "600", cursor: (resending || cooldown > 0) ? "not-allowed" : "pointer", fontFamily: "inherit", color: cooldown > 0 ? "#b4b2a9" : "#854f0b", opacity: cooldown > 0 ? 0.7 : 1 }}
+                >
+                  <Send size={12} />
+                  {resending ? "Mengirim..." : cooldown > 0 ? `Kirim ulang dalam ${cooldown}s` : "Kirim ulang email"}
+                </button>
               </div>
             )}
 

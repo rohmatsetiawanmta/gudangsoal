@@ -331,65 +331,71 @@ if ($uri === '/admin/struktur' && $method === 'GET') {
   $subtopik   = $pdo->query('SELECT * FROM subtopik ORDER BY urutan ASC, id ASC')->fetchAll();
 
   // Count soal per subtopik
-  $soalCount = $pdo->query('
-    SELECT subtopik_id, COUNT(*) as total
-    FROM soal
-    GROUP BY subtopik_id
-  ')->fetchAll();
-
-  // Map subtopik_id => total
+  $soalCount = $pdo->query('SELECT subtopik_id, COUNT(*) as total FROM soal GROUP BY subtopik_id')->fetchAll();
   $soalBySubtopik = [];
-  foreach ($soalCount as $sc) {
-    $soalBySubtopik[(int)$sc['subtopik_id']] = (int)$sc['total'];
-  }
+  foreach ($soalCount as $sc) $soalBySubtopik[(int)$sc['subtopik_id']] = (int)$sc['total'];
+
+  // Count materi per subtopik
+  $materiCount = $pdo->query('SELECT subtopik_id, COUNT(*) as total FROM materi GROUP BY subtopik_id')->fetchAll();
+  $materiBySubtopik = [];
+  foreach ($materiCount as $mc) $materiBySubtopik[(int)$mc['subtopik_id']] = (int)$mc['total'];
 
   // Inject ke subtopik
   foreach ($subtopik as &$st) {
-    $st['jumlah_soal'] = $soalBySubtopik[(int)$st['id']] ?? 0;
+    $st['jumlah_soal']   = $soalBySubtopik[(int)$st['id']]   ?? 0;
+    $st['jumlah_materi'] = $materiBySubtopik[(int)$st['id']] ?? 0;
   }
   unset($st);
 
   // Aggregate subtopik → topik
-  $soalByTopik = [];
+  $soalByTopik = []; $materiByTopik = [];
   foreach ($subtopik as $st) {
     $tid = (int)$st['topik_id'];
-    $soalByTopik[$tid] = ($soalByTopik[$tid] ?? 0) + (int)$st['jumlah_soal'];
+    $soalByTopik[$tid]   = ($soalByTopik[$tid]   ?? 0) + (int)$st['jumlah_soal'];
+    $materiByTopik[$tid] = ($materiByTopik[$tid] ?? 0) + (int)$st['jumlah_materi'];
   }
   foreach ($topik as &$t) {
-    $t['jumlah_soal'] = $soalByTopik[(int)$t['id']] ?? 0;
+    $t['jumlah_soal']   = $soalByTopik[(int)$t['id']]   ?? 0;
+    $t['jumlah_materi'] = $materiByTopik[(int)$t['id']] ?? 0;
   }
   unset($t);
 
   // Aggregate topik → mapel
-  $soalByMapel = [];
+  $soalByMapel = []; $materiByMapel = [];
   foreach ($topik as $t) {
     $mid = (int)$t['mapel_id'];
-    $soalByMapel[$mid] = ($soalByMapel[$mid] ?? 0) + (int)$t['jumlah_soal'];
+    $soalByMapel[$mid]   = ($soalByMapel[$mid]   ?? 0) + (int)$t['jumlah_soal'];
+    $materiByMapel[$mid] = ($materiByMapel[$mid] ?? 0) + (int)$t['jumlah_materi'];
   }
   foreach ($mapel as &$m) {
-    $m['jumlah_soal'] = $soalByMapel[(int)$m['id']] ?? 0;
+    $m['jumlah_soal']   = $soalByMapel[(int)$m['id']]   ?? 0;
+    $m['jumlah_materi'] = $materiByMapel[(int)$m['id']] ?? 0;
   }
   unset($m);
 
   // Aggregate mapel → subjenjang
-  $soalBySubjenjang = [];
+  $soalBySubjenjang = []; $materiBySubjenjang = [];
   foreach ($mapel as $m) {
     $sjid = (int)$m['subjenjang_id'];
-    $soalBySubjenjang[$sjid] = ($soalBySubjenjang[$sjid] ?? 0) + (int)$m['jumlah_soal'];
+    $soalBySubjenjang[$sjid]   = ($soalBySubjenjang[$sjid]   ?? 0) + (int)$m['jumlah_soal'];
+    $materiBySubjenjang[$sjid] = ($materiBySubjenjang[$sjid] ?? 0) + (int)$m['jumlah_materi'];
   }
   foreach ($subjenjang as &$sj) {
-    $sj['jumlah_soal'] = $soalBySubjenjang[(int)$sj['id']] ?? 0;
+    $sj['jumlah_soal']   = $soalBySubjenjang[(int)$sj['id']]   ?? 0;
+    $sj['jumlah_materi'] = $materiBySubjenjang[(int)$sj['id']] ?? 0;
   }
   unset($sj);
 
   // Aggregate subjenjang → jenjang
-  $soalByJenjang = [];
+  $soalByJenjang = []; $materiByJenjang = [];
   foreach ($subjenjang as $sj) {
     $jid = (int)$sj['jenjang_id'];
-    $soalByJenjang[$jid] = ($soalByJenjang[$jid] ?? 0) + (int)$sj['jumlah_soal'];
+    $soalByJenjang[$jid]   = ($soalByJenjang[$jid]   ?? 0) + (int)$sj['jumlah_soal'];
+    $materiByJenjang[$jid] = ($materiByJenjang[$jid] ?? 0) + (int)$sj['jumlah_materi'];
   }
   foreach ($jenjang as &$j) {
-    $j['jumlah_soal'] = $soalByJenjang[(int)$j['id']] ?? 0;
+    $j['jumlah_soal']   = $soalByJenjang[(int)$j['id']]   ?? 0;
+    $j['jumlah_materi'] = $materiByJenjang[(int)$j['id']] ?? 0;
   }
   unset($j);
 
@@ -1318,6 +1324,43 @@ if ($uri === '/admin/soal/salin' && $method === 'POST') {
 // MATERI
 // ==================
 
+// GET /admin/materi/export  — download materi as bulk-import JSON
+if ($uri === '/admin/materi/export' && $method === 'GET') {
+  $subtopik_id  = $_GET['subtopik_id']  ?? null;
+  $search       = trim($_GET['search']  ?? '');
+  $is_published = $_GET['is_published'] ?? null;
+
+  $where = []; $params = [];
+  if ($subtopik_id !== null && $subtopik_id !== '') { $where[] = 'm.subtopik_id = ?'; $params[] = (int) $subtopik_id; }
+  if ($search !== '')       { $where[] = 'm.judul LIKE ?'; $params[] = "%$search%"; }
+  if ($is_published !== null && $is_published !== '') { $where[] = 'm.is_published = ?'; $params[] = (int) $is_published; }
+  $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+  $stmt = $pdo->prepare("
+    SELECT m.id, m.judul, m.konten, m.highlights, m.pertanyaan, m.is_published, m.urutan
+    FROM materi m
+    $whereClause
+    ORDER BY m.urutan ASC, m.id ASC
+    LIMIT 500
+  ");
+  $stmt->execute($params);
+  $rows = $stmt->fetchAll();
+
+  foreach ($rows as &$r) {
+    $r['id']           = (int)  $r['id'];
+    $r['highlights']   = json_decode($r['highlights']  ?? '[]') ?: [];
+    $r['pertanyaan']   = json_decode($r['pertanyaan']  ?? '[]') ?: [];
+    $r['is_published'] = (bool) $r['is_published'];
+    $r['urutan']       = (int)  $r['urutan'];
+    if ($r['konten'] === null) unset($r['konten']);
+    if (empty($r['highlights']))  unset($r['highlights']);
+    if (empty($r['pertanyaan']))  unset($r['pertanyaan']);
+  }
+
+  echo json_encode($rows, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+  exit;
+}
+
 // GET /admin/materi
 if ($uri === '/admin/materi' && $method === 'GET') {
   $page        = intval($_GET['page']        ?? 1);
@@ -1391,7 +1434,8 @@ if ($uri === '/admin/materi/detail' && $method === 'GET') {
   $materi = $stmt->fetch();
   if (!$materi) { http_response_code(404); echo json_encode(['error' => 'Materi tidak ditemukan']); exit; }
 
-  $materi['highlights'] = json_decode($materi['highlights'] ?? '[]');
+  $materi['highlights']  = json_decode($materi['highlights']  ?? '[]') ?: [];
+  $materi['pertanyaan']  = json_decode($materi['pertanyaan']  ?? '[]') ?: [];
   echo json_encode($materi);
   exit;
 }
@@ -1402,14 +1446,15 @@ if ($uri === '/admin/materi' && $method === 'POST') {
     http_response_code(400); echo json_encode(['error' => 'subtopik_id dan judul wajib']); exit;
   }
   $stmt = $pdo->prepare('
-    INSERT INTO materi (subtopik_id, judul, konten, highlights, is_published, urutan)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO materi (subtopik_id, judul, konten, highlights, pertanyaan, is_published, urutan)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   ');
   $stmt->execute([
     $body['subtopik_id'],
     trim($body['judul']),
     $body['konten']       ?? null,
-    json_encode($body['highlights'] ?? []),
+    json_encode($body['highlights']  ?? []),
+    json_encode($body['pertanyaan'] ?? []),
     $body['is_published'] ?? 0,
     isset($body['urutan']) ? (int)$body['urutan'] : 0,
   ]);
@@ -1424,33 +1469,43 @@ if ($uri === '/admin/materi/bulk' && $method === 'POST') {
   if (!is_array($items) || count($items) === 0) {
     http_response_code(400); echo json_encode(['error' => 'items harus array dan tidak boleh kosong']); exit;
   }
-  $stmt = $pdo->prepare('
-    INSERT INTO materi (subtopik_id, judul, konten, highlights, is_published, urutan)
-    VALUES (?, ?, ?, ?, ?, ?)
+  $stmtInsert = $pdo->prepare('
+    INSERT INTO materi (subtopik_id, judul, konten, highlights, pertanyaan, is_published, urutan)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   ');
-  $inserted = 0;
-  $errors   = [];
+  $stmtUpdate = $pdo->prepare('
+    UPDATE materi SET subtopik_id=?, judul=?, konten=?, highlights=?, pertanyaan=?, is_published=?, urutan=?, updated_at=NOW()
+    WHERE id=?
+  ');
+  $inserted = 0; $updated = 0; $errors = [];
   foreach ($items as $i => $item) {
     if (empty($item['subtopik_id']) || empty($item['judul'])) {
       $errors[] = "Item #" . ($i + 1) . ": subtopik_id dan judul wajib ada";
       continue;
     }
+    $params = [
+      (int) $item['subtopik_id'],
+      trim($item['judul']),
+      $item['konten']       ?? null,
+      json_encode($item['highlights']  ?? []),
+      json_encode($item['pertanyaan']  ?? []),
+      isset($item['is_published']) ? (int)$item['is_published'] : 0,
+      isset($item['urutan'])       ? (int)$item['urutan']       : 0,
+    ];
     try {
-      $stmt->execute([
-        (int) $item['subtopik_id'],
-        trim($item['judul']),
-        $item['konten']       ?? null,
-        json_encode($item['highlights'] ?? []),
-        isset($item['is_published']) ? (int)$item['is_published'] : 0,
-        isset($item['urutan'])       ? (int)$item['urutan']       : 0,
-      ]);
-      $inserted++;
+      if (!empty($item['id'])) {
+        $stmtUpdate->execute([...$params, (int)$item['id']]);
+        $updated++;
+      } else {
+        $stmtInsert->execute($params);
+        $inserted++;
+      }
     } catch (Exception $e) {
       $errors[] = "Item #" . ($i + 1) . " (" . $item['judul'] . "): " . $e->getMessage();
     }
   }
-  http_response_code($inserted > 0 ? 201 : 400);
-  echo json_encode(['inserted' => $inserted, 'errors' => $errors]);
+  http_response_code(($inserted + $updated) > 0 ? 201 : 400);
+  echo json_encode(['inserted' => $inserted, 'updated' => $updated, 'errors' => $errors]);
   exit;
 }
 
@@ -1463,15 +1518,16 @@ if ($uri === '/admin/materi' && $method === 'PUT') {
   }
   $stmt = $pdo->prepare('
     UPDATE materi
-    SET subtopik_id=?, judul=?, konten=?, highlights=?, is_published=?, urutan=?, updated_at=NOW()
+    SET subtopik_id=?, judul=?, konten=?, highlights=?, pertanyaan=?, is_published=?, urutan=?, updated_at=NOW()
     WHERE id=?
   ');
   $stmt->execute([
     $body['subtopik_id'],
     trim($body['judul']),
-    $body['konten']       ?? null,
-    json_encode($body['highlights'] ?? []),
-    $body['is_published'] ?? 0,
+    $body['konten']        ?? null,
+    json_encode($body['highlights']  ?? []),
+    json_encode($body['pertanyaan'] ?? []),
+    $body['is_published']  ?? 0,
     isset($body['urutan']) ? (int)$body['urutan'] : 0,
     $id,
   ]);

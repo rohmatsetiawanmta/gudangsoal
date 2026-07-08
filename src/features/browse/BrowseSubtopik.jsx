@@ -1,7 +1,7 @@
 // src/features/browse/BrowseSubtopik.jsx
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, BookOpen } from "lucide-react";
 import Breadcrumb from "../../components/Breadcrumb";
 import { getSubtopik } from "./browseApi";
 import Navbar from "../../components/Navbar";
@@ -12,18 +12,19 @@ import useWindowWidth from "../../hooks/useWindowWidth";
 export default function BrowseSubtopik() {
   const navigate = useNavigate();
   const { jenjangSlug, subjenjangSlug, mapelSlug, topikSlug } = useParams();
-  const { state } = useLocation();
-  const width = useWindowWidth();
-  const isMobile = width <= 480;
+  const { state }  = useLocation();
+  const width      = useWindowWidth();
+  const isMobile   = width <= 480;
 
-  const jenjangNama = state?.jenjangNama || jenjangSlug;
+  const jenjangNama    = state?.jenjangNama    || jenjangSlug;
   const subjenjangNama = state?.subjenjangNama || subjenjangSlug;
-  const mapelNama = state?.mapelNama || mapelSlug;
-  const topikNama = state?.topikNama || topikSlug;
+  const mapelNama      = state?.mapelNama      || mapelSlug;
+  const topikNama      = state?.topikNama      || topikSlug;
 
   const [subtopik, setSubtopik] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState("");
+
   useEffect(() => {
     getSubtopik(jenjangSlug, subjenjangSlug, mapelSlug, topikSlug)
       .then((data) => setSubtopik(data))
@@ -32,14 +33,7 @@ export default function BrowseSubtopik() {
   }, [jenjangSlug, subjenjangSlug, mapelSlug, topikSlug]);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        background: "#faf9f6",
-      }}
-    >
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#f2efe8" }}>
       <SEO
         title={`${topikNama} — ${mapelNama}`}
         description={`Pilih subtopik ${topikNama} untuk latihan soal ${mapelNama} jenjang ${jenjangNama}.`}
@@ -47,174 +41,121 @@ export default function BrowseSubtopik() {
       />
       <Navbar />
 
-      <main
-        style={{
-          flex: 1,
-          maxWidth: "720px",
-          width: "100%",
-          margin: "0 auto",
-          padding: isMobile ? "24px 16px" : "40px",
-        }}
-      >
-        <div style={{ marginBottom: "32px" }}>
-          <Breadcrumb
-            items={[
-              { label: "Direktori Soal", to: "/browse" },
-              {
-                label: jenjangNama,
-                to: `/browse/${jenjangSlug}`,
-                state: { jenjangNama, jenjangSlug },
-              },
-              {
-                label: subjenjangNama,
-                to: `/browse/${jenjangSlug}/${subjenjangSlug}`,
-                state: {
-                  jenjangNama,
-                  jenjangSlug,
-                  subjenjangNama,
-                  subjenjangSlug,
-                },
-              },
-              {
-                label: mapelNama,
-                to: `/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}`,
-                state: {
-                  jenjangNama,
-                  jenjangSlug,
-                  subjenjangNama,
-                  subjenjangSlug,
-                  mapelNama,
-                  mapelSlug,
-                },
-              },
-              { label: topikNama },
-            ]}
-          />
+      <main style={{
+        flex: 1, maxWidth: "720px", width: "100%", margin: "0 auto",
+        padding: isMobile ? "20px 16px 48px" : "32px 24px 64px",
+      }}>
+        <div style={{ marginBottom: "16px" }}>
+          <Breadcrumb items={[
+            { label: "Direktori Soal", to: "/browse" },
+            { label: jenjangNama, to: `/browse/${jenjangSlug}`, state: { jenjangNama, jenjangSlug } },
+            { label: subjenjangNama, to: `/browse/${jenjangSlug}/${subjenjangSlug}`, state: { jenjangNama, jenjangSlug, subjenjangNama, subjenjangSlug } },
+            { label: mapelNama, to: `/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}`, state: { jenjangNama, jenjangSlug, subjenjangNama, subjenjangSlug, mapelNama, mapelSlug } },
+            { label: topikNama },
+          ]} />
         </div>
 
-        <div style={{ marginBottom: "28px" }}>
-          <h1
-            style={{
-              fontSize: isMobile ? "22px" : "26px",
-              fontWeight: "800",
-              color: "#0f0e17",
-              letterSpacing: "-0.5px",
-              marginBottom: "6px",
-            }}
-          >
-            Pilih Subtopik
-          </h1>
-          <p style={{ fontSize: "14px", color: "#6b6860" }}>
-            Pilih subtopik {topikNama} yang ingin kamu pelajari.
-          </p>
+        {/* Hero */}
+        <div style={{
+          borderRadius: "18px",
+          background: "linear-gradient(135deg, #0f0e17 0%, #1a1830 55%, #0c1a2e 100%)",
+          padding: isMobile ? "24px 20px" : "28px 32px",
+          marginBottom: "20px",
+          position: "relative", overflow: "hidden",
+        }}>
+          <div style={{
+            position: "absolute", right: isMobile ? "-10px" : "24px", top: "50%",
+            transform: "translateY(-50%)", opacity: 0.05,
+            pointerEvents: "none", color: "white",
+          }}>
+            <BookOpen size={isMobile ? 80 : 110} />
+          </div>
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <h1 style={{
+              fontSize: isMobile ? "22px" : "26px", fontWeight: "800",
+              color: "white", letterSpacing: "-0.5px", margin: "0 0 8px",
+            }}>
+              {topikNama}
+            </h1>
+            <p style={{ fontSize: "14px", color: "rgba(255,255,255,.5)", margin: 0 }}>
+              {mapelNama} · {subjenjangNama} · Pilih subtopik
+            </p>
+          </div>
         </div>
 
         {error && (
-          <div
-            style={{
-              background: "#fff3f0",
-              border: "1px solid #fca5a5",
-              color: "#b91c1c",
-              fontSize: "14px",
-              borderRadius: "12px",
-              padding: "12px 16px",
-              marginBottom: "20px",
-            }}
-          >
+          <div style={{
+            background: "#fff3f0", border: "1px solid #fca5a5",
+            color: "#b91c1c", fontSize: "14px",
+            borderRadius: "12px", padding: "12px 16px", marginBottom: "16px",
+          }}>
             {error}
           </div>
         )}
 
         {loading && (
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-          >
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  height: "64px",
-                  borderRadius: "14px",
-                  background: "#e2ddd5",
-                  opacity: 0.5,
-                  animation: "pulse 1.5s infinite",
-                }}
-              />
+              <div key={i} style={{
+                height: "60px", borderRadius: "14px",
+                background: "#e2ddd5", opacity: 0.5, animation: "pulse 1.5s infinite",
+              }} />
             ))}
           </div>
         )}
 
         {!loading && !error && (
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-          >
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {subtopik.length === 0 && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "48px",
-                  color: "#6b6860",
-                  fontSize: "14px",
-                }}
-              >
+              <div style={{ textAlign: "center", padding: "48px", color: "#6b6860", fontSize: "14px" }}>
                 Belum ada subtopik untuk {topikNama}.
               </div>
             )}
-            {subtopik.map((st) => (
-              <div
-                key={st.id}
-                onClick={() =>
-                  navigate(
-                    `/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}/${topikSlug}/${st.slug}`,
-                    {
-                      state: {
-                        jenjangNama,
-                        jenjangSlug,
-                        subjenjangNama,
-                        subjenjangSlug,
-                        mapelNama,
-                        mapelSlug,
-                        topikNama,
-                        topikSlug,
-                        subtopikNama: st.nama,
-                        subtopikSlug: st.slug,
-                      },
-                    }
-                  )
-                }
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  background: "white",
-                  borderRadius: "14px",
-                  padding: isMobile ? "14px 16px" : "18px 20px",
-                  border: "1px solid #e2ddd5",
-                  cursor: "pointer",
-                  transition: "transform .15s, box-shadow .15s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateX(4px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 4px 16px rgba(0,0,0,0.06)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateX(0)";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              >
-                <span
+            {subtopik.map((st) => {
+              const pct = st.soal_count > 0 ? Math.min(100, Math.round((st.answered_count / st.soal_count) * 100)) : 0;
+              const done = st.soal_count > 0 && st.answered_count >= st.soal_count;
+              return (
+                <div
+                  key={st.id}
+                  onClick={() => navigate(`/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}/${topikSlug}/${st.slug}`, {
+                    state: { jenjangNama, jenjangSlug, subjenjangNama, subjenjangSlug, mapelNama, mapelSlug, topikNama, topikSlug, subtopikNama: st.nama, subtopikSlug: st.slug },
+                  })}
                   style={{
-                    fontWeight: "600",
-                    fontSize: isMobile ? "14px" : "15px",
-                    color: "#0f0e17",
+                    background: "white", borderRadius: "14px",
+                    border: "1px solid #e2ddd5",
+                    borderLeft: `3px solid ${done ? "#1a8a6e" : "#7c3aed"}`,
+                    padding: isMobile ? "14px 16px" : "16px 20px",
+                    cursor: "pointer", transition: "transform .15s, box-shadow .15s",
                   }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.06)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
                 >
-                  {st.nama}
-                </span>
-                <ChevronRight size={18} color="#b4b2a9" />
-              </div>
-            ))}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span style={{ fontWeight: "600", fontSize: isMobile ? "14px" : "15px", color: "#0f0e17" }}>
+                      {st.nama}
+                    </span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+                      {st.soal_count > 0 && (
+                        <span style={{ fontSize: "11px", color: done ? "#1a8a6e" : "#b4b2a9", fontWeight: done ? "700" : "400" }}>
+                          {done ? "Selesai" : `${st.answered_count}/${st.soal_count}`}
+                        </span>
+                      )}
+                      <ChevronRight size={17} color="#b4b2a9" />
+                    </div>
+                  </div>
+                  {st.soal_count > 0 && (
+                    <div style={{ marginTop: "10px", height: "4px", borderRadius: "2px", background: "#f0ede6", overflow: "hidden" }}>
+                      <div style={{
+                        height: "100%", borderRadius: "2px",
+                        width: `${pct}%`,
+                        background: done ? "#1a8a6e" : "#7c3aed",
+                        transition: "width .4s ease",
+                      }} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </main>

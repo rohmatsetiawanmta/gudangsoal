@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft, GraduationCap, Save, Plus, Trash2,
-  BookOpen, AlignLeft,
+  BookOpen, AlignLeft, Check, X, Brain,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import api from "../../lib/api";
@@ -181,7 +181,115 @@ function HighlightCard({ item, index, onChange, onRemove, isMobile }) {
 
 // ── Main Form ─────────────────────────────────────────────────────────────────
 
-const DEFAULT_FORM = { subtopik_id: "", judul: "", konten: "", highlights: [], is_published: 0, urutan: 0 };
+const DEFAULT_FORM = { subtopik_id: "", judul: "", konten: "", highlights: [], pertanyaan: [], is_published: 0, urutan: 0 };
+
+const OPTION_LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+function PertanyaanCard({ item, index, onChange, onRemove, onPilihanChange, onPilihanAdd, onPilihanRemove, isMobile }) {
+  return (
+    <div style={{
+      background: "#faf9f6", borderRadius: "12px",
+      border: "1px solid #e2ddd5", borderLeft: "3px solid #e84c2b",
+      padding: isMobile ? "14px" : "16px",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+          {[{ value: "pilihan_ganda", label: "Pilihan Ganda" }, { value: "isian_singkat", label: "Isian Singkat" }, { value: "isian_numerik", label: "Isian Numerik" }].map(t => (
+            <button key={t.value} type="button" onClick={() => onChange(index, "tipe", t.value)}
+              style={{
+                padding: "5px 12px", borderRadius: "8px", fontSize: "12px", fontWeight: "700",
+                border: `1px solid ${item.tipe === t.value ? "#e84c2b" : "#e2ddd5"}`,
+                background: item.tipe === t.value ? "#fff3f0" : "white",
+                color: item.tipe === t.value ? "#e84c2b" : "#6b6860",
+                cursor: "pointer", fontFamily: "inherit",
+              }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <button type="button" onClick={() => onRemove(index)}
+          style={{ width: "28px", height: "28px", borderRadius: "7px", border: "1px solid #fca5a5", background: "#fff3f0", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#e84c2b" }}
+          onMouseEnter={e => e.currentTarget.style.background = "#fee2e2"}
+          onMouseLeave={e => e.currentTarget.style.background = "#fff3f0"}
+        >
+          <Trash2 size={13} />
+        </button>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <FormField label={`Pertanyaan ${index + 1}`} required>
+          <TextareaInput value={item.teks} onChange={v => onChange(index, "teks", v)} placeholder="Tulis pertanyaan..." rows={2} />
+        </FormField>
+
+        {item.tipe === "pilihan_ganda" && (
+          <div>
+            <label style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", display: "block", marginBottom: "8px" }}>
+              Pilihan <span style={{ color: "#e84c2b" }}>*</span>
+              <span style={{ fontWeight: "400", color: "#6b6860", marginLeft: "6px" }}>klik lingkaran untuk tandai jawaban benar</span>
+            </label>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {(item.pilihan || []).map((p, pi) => (
+                <div key={pi} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <button type="button" onClick={() => onChange(index, "jawaban", OPTION_LABELS[pi])}
+                    style={{
+                      width: "26px", height: "26px", borderRadius: "50%", flexShrink: 0,
+                      border: `2px solid ${item.jawaban === OPTION_LABELS[pi] ? "#1a8a6e" : "#e2ddd5"}`,
+                      background: item.jawaban === OPTION_LABELS[pi] ? "#1a8a6e" : "white",
+                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                    }}>
+                    {item.jawaban === OPTION_LABELS[pi] && <Check size={12} color="white" />}
+                  </button>
+                  <span style={{ fontSize: "12px", fontWeight: "700", color: "#b4b2a9", width: "16px", flexShrink: 0 }}>
+                    {OPTION_LABELS[pi]}
+                  </span>
+                  <input type="text" value={p} onChange={e => onPilihanChange(index, pi, e.target.value)}
+                    placeholder={`Opsi ${OPTION_LABELS[pi]}...`}
+                    style={{ flex: 1, padding: "8px 12px", borderRadius: "9px", border: "1px solid #e2ddd5", fontSize: "13px", outline: "none", fontFamily: "inherit", color: "#0f0e17", background: "white" }}
+                    onFocus={e => e.target.style.borderColor = "#e84c2b"}
+                    onBlur={e => e.target.style.borderColor = "#e2ddd5"}
+                  />
+                  {(item.pilihan || []).length > 2 && (
+                    <button type="button" onClick={() => onPilihanRemove(index, pi)}
+                      style={{ width: "24px", height: "24px", borderRadius: "6px", border: "none", background: "#f2efe8", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#b4b2a9", flexShrink: 0 }}
+                      onMouseEnter={e => { e.currentTarget.style.background = "#fff3f0"; e.currentTarget.style.color = "#e84c2b"; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = "#f2efe8"; e.currentTarget.style.color = "#b4b2a9"; }}>
+                      <X size={11} />
+                    </button>
+                  )}
+                </div>
+              ))}
+              {(item.pilihan || []).length < 6 && (
+                <button type="button" onClick={() => onPilihanAdd(index)}
+                  style={{ display: "flex", alignItems: "center", gap: "6px", padding: "7px 12px", borderRadius: "8px", border: "1.5px dashed #c8c6be", background: "transparent", color: "#6b6860", fontSize: "12px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit" }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#e84c2b"; e.currentTarget.style.color = "#e84c2b"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "#c8c6be"; e.currentTarget.style.color = "#6b6860"; }}>
+                  <Plus size={12} /> Tambah Opsi
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {(item.tipe === "isian_singkat" || item.tipe === "isian_numerik") && (
+          <FormField
+            label="Jawaban Benar" required
+            hint={item.tipe === "isian_numerik" ? "(angka, misal: 3.14)" : "(case-insensitive)"}
+          >
+            <TextInput
+              value={item.jawaban}
+              onChange={v => onChange(index, "jawaban", v)}
+              placeholder={item.tipe === "isian_numerik" ? "Contoh: 42 atau 3.14..." : "Jawaban yang diterima..."}
+            />
+          </FormField>
+        )}
+
+        <FormField label="Pembahasan" hint="(opsional)">
+          <TextareaInput value={item.pembahasan || ""} onChange={v => onChange(index, "pembahasan", v)} placeholder="Jelaskan kenapa jawaban ini benar..." rows={2} />
+        </FormField>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminMateriForm() {
   const navigate = useNavigate();
@@ -214,7 +322,8 @@ export default function AdminMateriForm() {
           subtopik_id: data.subtopik_id,
           judul:       data.judul || "",
           konten:      data.konten || "",
-          highlights:  Array.isArray(data.highlights) ? data.highlights : [],
+          highlights:  Array.isArray(data.highlights)  ? data.highlights  : [],
+          pertanyaan:  Array.isArray(data.pertanyaan)  ? data.pertanyaan  : [],
           is_published: Number(data.is_published ?? 0),
           urutan:      Number(data.urutan ?? 0),
         });
@@ -247,6 +356,66 @@ export default function AdminMateriForm() {
     setForm(f => ({
       ...f,
       highlights: [...f.highlights, { type: "rumus", label: "", content: "" }],
+    }));
+  };
+
+  const handleQuestionChange = (index, field, value) => {
+    setForm(f => ({
+      ...f,
+      pertanyaan: f.pertanyaan.map((q, i) => {
+        if (i !== index) return q;
+        if (field === "tipe") {
+          if (value === "pilihan_ganda")
+            return { ...q, tipe: value, pilihan: q.pilihan?.length >= 2 ? q.pilihan : ["", ""], jawaban: "" };
+          return { tipe: value, teks: q.teks, jawaban: "", pembahasan: q.pembahasan || "" };
+        }
+        return { ...q, [field]: value };
+      }),
+    }));
+  };
+
+  const handleQuestionRemove = (index) => {
+    setForm(f => ({ ...f, pertanyaan: f.pertanyaan.filter((_, i) => i !== index) }));
+  };
+
+  const handleQuestionAdd = (tipe) => {
+    setForm(f => ({
+      ...f,
+      pertanyaan: [...f.pertanyaan, tipe === "pilihan_ganda"
+        ? { tipe: "pilihan_ganda", teks: "", pilihan: ["", ""], jawaban: "", pembahasan: "" }
+        : { tipe: "isian_singkat", teks: "", jawaban: "", pembahasan: "" }
+      ],
+    }));
+  };
+
+  const handlePilihanChange = (qIndex, pIndex, value) => {
+    setForm(f => ({
+      ...f,
+      pertanyaan: f.pertanyaan.map((q, i) => {
+        if (i !== qIndex) return q;
+        const newPilihan = q.pilihan.map((p, j) => j === pIndex ? value : p);
+        return { ...q, pilihan: newPilihan };
+      }),
+    }));
+  };
+
+  const handlePilihanAdd = (qIndex) => {
+    setForm(f => ({
+      ...f,
+      pertanyaan: f.pertanyaan.map((q, i) => i === qIndex ? { ...q, pilihan: [...q.pilihan, ""] } : q),
+    }));
+  };
+
+  const handlePilihanRemove = (qIndex, pIndex) => {
+    setForm(f => ({
+      ...f,
+      pertanyaan: f.pertanyaan.map((q, i) => {
+        if (i !== qIndex) return q;
+        const newPilihan = q.pilihan.filter((_, j) => j !== pIndex);
+        const jawabanIdx = OPTION_LABELS.indexOf(q.jawaban);
+        const newJawaban = jawabanIdx === pIndex ? "" : jawabanIdx > pIndex ? OPTION_LABELS[jawabanIdx - 1] : q.jawaban;
+        return { ...q, pilihan: newPilihan, jawaban: newJawaban };
+      }),
     }));
   };
 
@@ -409,6 +578,46 @@ export default function AdminMateriForm() {
           >
             <Plus size={15} /> Tambah Highlight
           </button>
+        </SectionCard>
+
+        {/* ── Cek Pemahaman ── */}
+        <SectionCard label="Cek Pemahaman" accent="#e84c2b" isMobile={isMobile}>
+          <p style={{ fontSize: "13px", color: "#6b6860", marginTop: 0, marginBottom: "16px" }}>
+            Pertanyaan interaktif yang muncul setelah pembaca selesai membaca materi.
+          </p>
+
+          {form.pertanyaan.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "12px" }}>
+              {form.pertanyaan.map((q, i) => (
+                <PertanyaanCard
+                  key={i}
+                  item={q}
+                  index={i}
+                  onChange={handleQuestionChange}
+                  onRemove={handleQuestionRemove}
+                  onPilihanChange={handlePilihanChange}
+                  onPilihanAdd={handlePilihanAdd}
+                  onPilihanRemove={handlePilihanRemove}
+                  isMobile={isMobile}
+                />
+              ))}
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button type="button" onClick={() => handleQuestionAdd("pilihan_ganda")}
+              style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "7px", padding: "9px 14px", borderRadius: "10px", border: "1.5px dashed #c8c6be", background: "transparent", color: "#6b6860", fontSize: "13px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", transition: "all .15s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "#e84c2b"; e.currentTarget.style.color = "#e84c2b"; e.currentTarget.style.background = "#fff3f0"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "#c8c6be"; e.currentTarget.style.color = "#6b6860"; e.currentTarget.style.background = "transparent"; }}>
+              <Plus size={14} /> Pilihan Ganda
+            </button>
+            <button type="button" onClick={() => handleQuestionAdd("isian_singkat")}
+              style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "7px", padding: "9px 14px", borderRadius: "10px", border: "1.5px dashed #c8c6be", background: "transparent", color: "#6b6860", fontSize: "13px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", transition: "all .15s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "#2563eb"; e.currentTarget.style.color = "#2563eb"; e.currentTarget.style.background = "#eff6ff"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "#c8c6be"; e.currentTarget.style.color = "#6b6860"; e.currentTarget.style.background = "transparent"; }}>
+              <Plus size={14} /> Isian Singkat
+            </button>
+          </div>
         </SectionCard>
 
         {/* ── Pengaturan ── */}

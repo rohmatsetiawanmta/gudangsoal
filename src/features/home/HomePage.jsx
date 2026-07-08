@@ -52,7 +52,6 @@ export default function HomePage() {
 
   const QUICK_ACTIONS = [
     { label: "Direktori Soal", desc: "Jelajahi soal berdasarkan jenjang & topik", icon: BookOpen,      color: "#2563eb", bg: "rgba(37,99,235,.1)",   to: "/browse"   },
-    { label: "Latihan",        desc: "Set soal latihan terstruktur",             icon: Dumbbell,      color: "#f5a623", bg: "rgba(245,166,35,.1)",  to: "/latihan"  },
     { label: "Materi Belajar", desc: "Teori & rumus per subtopik",               icon: GraduationCap, color: "#1a8a6e", bg: "rgba(26,138,110,.1)",  to: "/materi"   },
     { label: "Soal Populer",   desc: "Soal yang paling banyak dikerjakan",       icon: TrendingUp,    color: "#e84c2b", bg: "rgba(232,76,43,.1)",   to: "/populer"  },
   ];

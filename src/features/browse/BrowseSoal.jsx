@@ -44,11 +44,12 @@ export default function BrowseSoal() {
   const width = useWindowWidth();
   const isMobile = width <= 480;
 
-  const jenjangNama = state?.jenjangNama || jenjangSlug;
-  const subjenjangNama = state?.subjenjangNama || subjenjangSlug;
-  const mapelNama = state?.mapelNama || mapelSlug;
-  const topikNama = state?.topikNama || topikSlug;
-  const subtopikNama = state?.subtopikNama || subtopikSlug;
+  const [meta, setMeta] = useState(null);
+  const jenjangNama   = state?.jenjangNama   || meta?.jenjang   || jenjangSlug;
+  const subjenjangNama = state?.subjenjangNama || meta?.subjenjang || subjenjangSlug;
+  const mapelNama     = state?.mapelNama     || meta?.mapel     || mapelSlug;
+  const topikNama     = state?.topikNama     || meta?.topik     || topikSlug;
+  const subtopikNama  = state?.subtopikNama  || meta?.subtopik  || subtopikSlug;
 
   const [soal, setSoal]       = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,8 +61,10 @@ export default function BrowseSoal() {
     setPage(1);
     getSoal(jenjangSlug, subjenjangSlug, mapelSlug, topikSlug, subtopikSlug)
       .then((data) => {
-        data.sort((a, b) => (a.answered_correct === b.answered_correct ? 0 : a.answered_correct ? 1 : -1));
-        setSoal(data);
+        const list = Array.isArray(data) ? data : (data.soal ?? []);
+        if (!Array.isArray(data) && data.meta) setMeta(data.meta);
+        list.sort((a, b) => (a.answered_correct === b.answered_correct ? 0 : a.answered_correct ? 1 : -1));
+        setSoal(list);
       })
       .catch(() => setError("Gagal memuat soal"))
       .finally(() => setLoading(false));
@@ -72,14 +75,7 @@ export default function BrowseSoal() {
   const pagedSoal  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        background: "#faf9f6",
-      }}
-    >
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#f2efe8" }}>
       {!loading && (
         <SEO
           title={`${subtopikNama} — ${mapelNama}`}
@@ -89,101 +85,61 @@ export default function BrowseSoal() {
       )}
       <Navbar />
 
-      <main
-        style={{
-          flex: 1,
-          maxWidth: "720px",
-          width: "100%",
-          margin: "0 auto",
-          padding: isMobile ? "24px 16px" : "40px",
-        }}
-      >
-        <div style={{ marginBottom: "32px" }}>
-          <Breadcrumb
-            items={[
-              { label: "Direktori Soal", to: "/browse" },
-              {
-                label: jenjangNama,
-                to: `/browse/${jenjangSlug}`,
-                state: { jenjangNama, jenjangSlug },
-              },
-              {
-                label: subjenjangNama,
-                to: `/browse/${jenjangSlug}/${subjenjangSlug}`,
-                state: {
-                  jenjangNama,
-                  jenjangSlug,
-                  subjenjangNama,
-                  subjenjangSlug,
-                },
-              },
-              {
-                label: mapelNama,
-                to: `/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}`,
-                state: {
-                  jenjangNama,
-                  jenjangSlug,
-                  subjenjangNama,
-                  subjenjangSlug,
-                  mapelNama,
-                  mapelSlug,
-                },
-              },
-              {
-                label: topikNama,
-                to: `/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}/${topikSlug}`,
-                state: {
-                  jenjangNama,
-                  jenjangSlug,
-                  subjenjangNama,
-                  subjenjangSlug,
-                  mapelNama,
-                  mapelSlug,
-                  topikNama,
-                  topikSlug,
-                },
-              },
-              { label: subtopikNama },
-            ]}
-          />
+      <main style={{
+        flex: 1, maxWidth: "720px", width: "100%", margin: "0 auto",
+        padding: isMobile ? "20px 16px 48px" : "32px 24px 64px",
+      }}>
+        <div style={{ marginBottom: "16px" }}>
+          <Breadcrumb items={[
+            { label: "Direktori Soal", to: "/browse" },
+            { label: jenjangNama, to: `/browse/${jenjangSlug}`, state: { jenjangNama, jenjangSlug } },
+            { label: subjenjangNama, to: `/browse/${jenjangSlug}/${subjenjangSlug}`, state: { jenjangNama, jenjangSlug, subjenjangNama, subjenjangSlug } },
+            { label: mapelNama, to: `/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}`, state: { jenjangNama, jenjangSlug, subjenjangNama, subjenjangSlug, mapelNama, mapelSlug } },
+            { label: topikNama, to: `/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}/${topikSlug}`, state: { jenjangNama, jenjangSlug, subjenjangNama, subjenjangSlug, mapelNama, mapelSlug, topikNama, topikSlug } },
+            { label: subtopikNama },
+          ]} />
         </div>
 
-        {/* Header */}
-        <div
-          style={{
-            marginBottom: "28px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "12px",
-          }}
-        >
-          <h1
-            style={{
-              fontSize: isMobile ? "20px" : "26px",
-              fontWeight: "800",
-              color: "#0f0e17",
-              letterSpacing: "-0.5px",
-              margin: 0,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
+        {/* Hero */}
+        <div style={{
+          borderRadius: "18px",
+          background: "linear-gradient(135deg, #0f0e17 0%, #1a1830 55%, #0c1a2e 100%)",
+          padding: isMobile ? "24px 20px" : "28px 32px",
+          marginBottom: "20px",
+          position: "relative", overflow: "hidden",
+        }}>
+          <div style={{
+            position: "absolute", right: isMobile ? "-10px" : "24px", top: "50%",
+            transform: "translateY(-50%)", opacity: 0.05,
+            pointerEvents: "none", color: "white",
+          }}>
+            <ChevronRight size={isMobile ? 80 : 110} strokeWidth={1} />
+          </div>
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <h1 style={{
+              fontSize: isMobile ? "20px" : "24px", fontWeight: "800",
+              color: "white", letterSpacing: "-0.5px",
+              margin: "0 0 8px",
+              overflow: "hidden", textOverflow: "ellipsis",
               whiteSpace: isMobile ? "nowrap" : "normal",
-            }}
-          >
-            {subtopikNama}
-          </h1>
-          {!loading && (
-            <span
-              style={{
-                fontSize: "13px",
-                fontWeight: "600",
-                color: "#6b6860",
-                flexShrink: 0,
-              }}
-            >
-              {soal.length} soal
-            </span>
-          )}
+            }}>
+              {subtopikNama}
+            </h1>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+              <p style={{ fontSize: "14px", color: "rgba(255,255,255,.5)", margin: 0 }}>
+                {topikNama} · {mapelNama}
+              </p>
+              {!loading && soal.length > 0 && (
+                <span style={{
+                  fontSize: "12px", fontWeight: "700", padding: "3px 10px",
+                  borderRadius: "99px", color: "rgba(255,255,255,.8)",
+                  background: "rgba(255,255,255,.1)",
+                }}>
+                  {soal.length} soal
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
         <MateriTerkaitBanner subtopikSlug={subtopikSlug} style={{ marginBottom: "20px" }} />

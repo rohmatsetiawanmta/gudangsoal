@@ -2,9 +2,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
-  Search, X, BookOpen, Home, User, LogOut, ChevronDown,
+  Search, X, BookOpen, User, LogOut, ChevronDown,
   LayoutDashboard, Warehouse, Flame, Shuffle, MessageSquarePlus,
-  TrendingUp, Menu, Dumbbell, Compass, Gamepad2, Zap, GraduationCap,
+  TrendingUp, Menu, Zap, GraduationCap, Lightbulb,
 } from "lucide-react";
 import { useAuthStore } from "../features/auth/authStore";
 import RandomSoal from "./RandomSoal";
@@ -13,18 +13,12 @@ import NotificationBell from "../features/notifications/NotificationBell";
 import useWindowWidth from "../hooks/useWindowWidth";
 
 const JELAJAHI_LINKS = [
-  { to: "/browse",        label: "Direktori Soal", icon: BookOpen,          desc: "Jelajahi soal berdasarkan jenjang & topik", color: "#2563eb" },
-  { to: "/populer",       label: "Soal Populer",   icon: TrendingUp,        desc: "Soal yang paling banyak dikerjakan",        color: "#e84c2b" },
-  { to: "/materi",        label: "Materi Belajar", icon: GraduationCap,     desc: "Teori & rumus per subtopik",               color: "#1a8a6e" },
-  { to: "/latihan",       label: "Latihan",        icon: Dumbbell,          desc: "Set soal latihan terstruktur",             color: "#f5a623" },
-{ to: "/request-soal",  label: "Request Soal",   icon: MessageSquarePlus, desc: "Ajukan soal yang kamu butuhkan",           color: "#6b6860" },
+  { to: "/browse",  label: "Soal",   icon: BookOpen,      color: "#2563eb" },
+  { to: "/materi",  label: "Materi", icon: GraduationCap, color: "#1a8a6e" },
 ];
 
 const NAV_LINKS = [];
-
-const NAV_LINKS_LOGGED_IN = [
-  { to: "/home", label: "Beranda", icon: Home },
-];
+const NAV_LINKS_LOGGED_IN = [];
 
 export default function Navbar() {
   const navigate  = useNavigate();
@@ -36,20 +30,17 @@ export default function Navbar() {
   const [searchOpen,   setSearchOpen]   = useState(false);
   const [searchQuery,  setSearchQuery]  = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [jelajahiOpen, setJelajahiOpen] = useState(false);
   const [menuOpen,     setMenuOpen]     = useState(false);
   const [randomOpen,   setRandomOpen]   = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const searchRef   = useRef(null);
   const dropdownRef = useRef(null);
-  const jelajahiRef = useRef(null);
   const menuRef     = useRef(null);
 
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setDropdownOpen(false);
-      if (jelajahiRef.current && !jelajahiRef.current.contains(e.target)) setJelajahiOpen(false);
       if (menuRef.current     && !menuRef.current.contains(e.target))     setMenuOpen(false);
     };
     document.addEventListener("mousedown", handler);
@@ -151,73 +142,27 @@ export default function Navbar() {
               );
             })}
 
-            {/* Jelajahi dropdown */}
-            <div ref={jelajahiRef} style={{ position: "relative" }}>
-              <button
-                onClick={() => setJelajahiOpen((o) => !o)}
-                style={{
+            {/* Jelajahi links langsung */}
+            {JELAJAHI_LINKS.map(({ to, label, icon: Icon }) => {
+              const active = isActive(to);
+              return (
+                <Link key={to} to={to} style={{
                   display: "flex", alignItems: "center", gap: "5px",
-                  padding: "6px 11px", borderRadius: "8px", border: "none",
-                  background: jelajahiOpen ? "#f5f3ef" : "transparent",
-                  fontSize: "13.5px", fontWeight: "500",
-                  color: jelajahiOpen ? "#0f0e17" : "#52504e",
-                  cursor: "pointer", fontFamily: "inherit",
+                  padding: "6px 11px", borderRadius: "8px",
+                  textDecoration: "none", fontSize: "13.5px",
+                  fontWeight: active ? "700" : "500",
+                  color: active ? "#e84c2b" : "#52504e",
+                  background: active ? "#fff3f0" : "transparent",
                   transition: "background .15s, color .15s",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#f5f3ef"; e.currentTarget.style.color = "#0f0e17"; }}
-                onMouseLeave={(e) => { if (!jelajahiOpen) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#52504e"; }}}
-              >
-                <Compass size={14} strokeWidth={2} />
-                Jelajahi
-                <ChevronDown size={12} style={{ transform: jelajahiOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform .2s", color: "#b4b2a9" }} />
-              </button>
-
-              {jelajahiOpen && (
-                <div style={{
-                  position: "absolute", top: "calc(100% + 10px)", left: "50%", transform: "translateX(-50%)",
-                  background: "white",
-                  border: "1px solid #ede9e2",
-                  borderRadius: "18px", padding: "8px",
-                  width: "400px",
-                  boxShadow: "0 20px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06)",
-                  zIndex: 200,
-                }}>
-                  {/* Header */}
-                  <div style={{ padding: "8px 12px 10px", borderBottom: "1px solid #f2efe8", marginBottom: "6px" }}>
-                    <div style={{ fontSize: "10px", fontWeight: "700", color: "#b4b2a9", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                      Jelajahi Platform
-                    </div>
-                  </div>
-                  {/* 2-column grid */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px" }}>
-                    {JELAJAHI_LINKS.map(({ to, label, icon: Icon, desc, color }) => (
-                      <Link key={to} to={to} onClick={() => setJelajahiOpen(false)} style={{
-                        display: "flex", alignItems: "flex-start", gap: "11px",
-                        padding: "11px 12px", borderRadius: "12px",
-                        textDecoration: "none", transition: "background .12s",
-                      }}
-                        onMouseEnter={(e) => (e.currentTarget.style.background = "#f8f7f4")}
-                        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                      >
-                        <div style={{
-                          width: "36px", height: "36px", borderRadius: "10px",
-                          background: `linear-gradient(135deg, ${color}18 0%, ${color}10 100%)`,
-                          border: `1px solid ${color}25`,
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          flexShrink: 0,
-                        }}>
-                          <Icon size={17} color={color} strokeWidth={2} />
-                        </div>
-                        <div>
-                          <div style={{ fontSize: "13.5px", fontWeight: "700", color: "#0f0e17", marginBottom: "2px" }}>{label}</div>
-                          <div style={{ fontSize: "11.5px", color: "#9b9890", lineHeight: "1.4" }}>{desc}</div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+                  onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = "#f5f3ef"; e.currentTarget.style.color = "#0f0e17"; }}}
+                  onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#52504e"; }}}
+                >
+                  <Icon size={14} strokeWidth={active ? 2.5 : 2} />
+                  {label}
+                </Link>
+              );
+            })}
           </div>
         )}
 
@@ -268,16 +213,6 @@ export default function Navbar() {
 
           {/* Notifikasi */}
           {!isMobile && isLoggedIn && <NotificationBell isMobile={false} />}
-
-          {/* Masukan — icon only on desktop */}
-          {!isMobile && (
-            <button onClick={() => setFeedbackOpen(true)} title="Kirim Masukan" style={iconBtnStyle}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#f5f3ef"; e.currentTarget.style.color = "#0f0e17"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#6b6860"; }}
-            >
-              <MessageSquarePlus size={16} />
-            </button>
-          )}
 
           {/* ── Separator ── */}
           {!isMobile && (
@@ -379,9 +314,12 @@ export default function Navbar() {
                   </div>
 
                   {[
-                    ...(user?.role === "admin" ? [{ icon: LayoutDashboard, label: "Admin Panel", onClick: () => { navigate("/admin"); setDropdownOpen(false); }, danger: false }] : []),
-                    { icon: User,   label: "Profile", onClick: () => { navigate("/profile"); setDropdownOpen(false); }, danger: false },
-                    { icon: LogOut, label: "Keluar",  onClick: handleLogout, danger: true },
+                    ...(user?.role === "admin" ? [{ icon: LayoutDashboard, label: "Admin Panel",    onClick: () => { navigate("/admin");         setDropdownOpen(false); }, danger: false }] : []),
+                    { icon: User,              label: "Profile",          onClick: () => { navigate("/profile");      setDropdownOpen(false); }, danger: false },
+                    { icon: TrendingUp,        label: "Soal Populer",     onClick: () => { navigate("/populer");      setDropdownOpen(false); }, danger: false },
+                    { icon: MessageSquarePlus, label: "Request Soal",     onClick: () => { navigate("/request-soal"); setDropdownOpen(false); }, danger: false },
+                    { icon: Lightbulb,         label: "Kirim Masukan",    onClick: () => { setDropdownOpen(false); setFeedbackOpen(true);  }, danger: false },
+                    { icon: LogOut,            label: "Keluar",           onClick: handleLogout,                                             danger: true  },
                   ].map(({ icon: Icon, label, onClick, danger }) => (
                     <button key={label} onClick={onClick} style={{ ...menuItemStyle, color: danger ? "#e84c2b" : "#0f0e17" }}
                       onMouseEnter={(e) => (e.currentTarget.style.background = danger ? "#fff3f0" : "#f5f3ef")}
@@ -483,21 +421,15 @@ export default function Navbar() {
                     {/* Jelajahi section */}
                     <div style={{ borderTop: "1px solid #f2efe8", paddingTop: "8px", marginBottom: "4px" }}>
                       <div style={{ fontSize: "10px", fontWeight: "700", color: "#b4b2a9", letterSpacing: "0.08em", textTransform: "uppercase", padding: "0 12px 6px" }}>Jelajahi</div>
-                      {/* 2x2 grid for mobile */}
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px", padding: "0 2px" }}>
-                        {JELAJAHI_LINKS.map(({ to, label, icon: Icon, color }) => (
-                          <button key={to} onClick={() => { navigate(to); setMenuOpen(false); }}
-                            style={{ display: "flex", alignItems: "center", gap: "8px", padding: "9px 10px", borderRadius: "10px", border: "none", background: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left", transition: "background .12s" }}
-                            onMouseEnter={(e) => (e.currentTarget.style.background = "#f5f3ef")}
-                            onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
-                          >
-                            <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                              <Icon size={14} color={color} />
-                            </div>
-                            <span style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}>{label}</span>
-                          </button>
-                        ))}
-                      </div>
+                      {[...JELAJAHI_LINKS, { to: "/populer", label: "Soal Populer", icon: TrendingUp, color: "#e84c2b" }].map(({ to, label, icon: Icon, color }) => (
+                        <button key={to} onClick={() => { navigate(to); setMenuOpen(false); }}
+                          style={{ ...menuItemStyle, color: isActive(to) ? "#e84c2b" : "#0f0e17", background: isActive(to) ? "#fff3f0" : "none", fontWeight: isActive(to) ? "600" : "500" }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = isActive(to) ? "#fff3f0" : "#f5f3ef")}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = isActive(to) ? "#fff3f0" : "none")}
+                        >
+                          <Icon size={15} color={isActive(to) ? "#e84c2b" : color} /> {label}
+                        </button>
+                      ))}
                     </div>
 
                     {/* Actions */}
@@ -542,6 +474,12 @@ export default function Navbar() {
                             onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
                           >
                             <User size={15} color="#6b6860" /> Profile
+                          </button>
+                          <button onClick={() => { navigate("/request-soal"); setMenuOpen(false); }} style={menuItemStyle}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = "#f5f3ef")}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+                          >
+                            <MessageSquarePlus size={15} color="#6b6860" /> Request Soal
                           </button>
                           <button onClick={handleLogout} style={{ ...menuItemStyle, color: "#e84c2b" }}
                             onMouseEnter={(e) => (e.currentTarget.style.background = "#fff3f0")}

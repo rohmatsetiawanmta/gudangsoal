@@ -153,6 +153,89 @@ function FilterChip({ label, active, color = "#e84c2b", onClick, count }) {
   );
 }
 
+// ── StrukturTreePanel ─────────────────────────────────────────────────────────
+
+const LEVEL_NEXT_S  = { root: "jenjang", jenjang: "subjenjang", subjenjang: "mapel", mapel: "topik", topik: null };
+const LEVEL_LABEL_S = { root: "Jenjang", jenjang: "Kelas", subjenjang: "Mapel", mapel: "Topik", topik: "Subtopik" };
+const LEVEL_COLOR_S = { root: "#e84c2b", jenjang: "#f5a623", subjenjang: "#2563eb", mapel: "#1a8a6e", topik: "#7c3aed" };
+
+function StrukturTreePanel({ struktur, filterSubtopikId, onChange, countKey = "jumlah_soal" }) {
+  const [stack, setStack] = useState([{ level: "root", item: null }]);
+  const current = stack[stack.length - 1];
+  const isLeaf  = current.level === "topik";
+  const color   = LEVEL_COLOR_S[current.level];
+
+  useEffect(() => {
+    if (!filterSubtopikId) setStack([{ level: "root", item: null }]);
+  }, [filterSubtopikId]);
+
+  const getChildren = ({ level, item }) => {
+    const pid = item?.id;
+    if (level === "root")       return struktur.jenjang;
+    if (level === "jenjang")    return struktur.subjenjang.filter(s => s.jenjang_id == pid);
+    if (level === "subjenjang") return struktur.mapel.filter(m => m.subjenjang_id == pid);
+    if (level === "mapel")      return struktur.topik.filter(t => t.mapel_id == pid);
+    if (level === "topik")      return struktur.subtopik.filter(st => st.topik_id == pid);
+    return [];
+  };
+
+  const items = getChildren(current);
+
+  const handleClick = item => {
+    if (isLeaf) {
+      onChange(item.id === filterSubtopikId ? null : item.id);
+    } else {
+      setStack(s => [...s, { level: LEVEL_NEXT_S[current.level], item }]);
+    }
+  };
+
+  return (
+    <div style={{ width: "196px", flexShrink: 0, background: "white", borderRadius: "14px", border: "1px solid #e2ddd5", overflow: "hidden", alignSelf: "flex-start", position: "sticky", top: "16px" }}>
+      <div style={{ padding: "10px 12px", borderBottom: "1px solid #f0ede6", display: "flex", alignItems: "center", gap: "6px", background: color + "08" }}>
+        {stack.length > 1 && (
+          <button onClick={() => setStack(s => s.slice(0, -1))}
+            style={{ background: "none", border: "none", cursor: "pointer", color: color, display: "flex", padding: "2px", borderRadius: "4px", flexShrink: 0 }}>
+            <ChevronLeft size={14} />
+          </button>
+        )}
+        <span style={{ fontSize: "11px", fontWeight: "700", color: color, textTransform: "uppercase", letterSpacing: ".07em", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {current.item ? current.item.nama : LEVEL_LABEL_S[current.level]}
+        </span>
+      </div>
+      {isLeaf && (
+        <button onClick={() => onChange(null)}
+          style={{ display: "flex", alignItems: "center", width: "100%", padding: "7px 12px", border: "none", borderBottom: "1px solid #f5f3ef", background: !filterSubtopikId ? color + "12" : "white", cursor: "pointer", fontFamily: "inherit" }}
+          onMouseEnter={e => { if (filterSubtopikId) e.currentTarget.style.background = "#faf9f6"; }}
+          onMouseLeave={e => { if (filterSubtopikId) e.currentTarget.style.background = "white"; }}>
+          <span style={{ fontSize: "12px", fontWeight: !filterSubtopikId ? "700" : "500", color: !filterSubtopikId ? color : "#6b6860" }}>Semua subtopik</span>
+        </button>
+      )}
+      <div style={{ maxHeight: "460px", overflowY: "auto" }}>
+        {items.length === 0 ? (
+          <div style={{ padding: "14px 12px", fontSize: "12px", color: "#b4b2a9", textAlign: "center" }}>Kosong</div>
+        ) : items.map(item => {
+          const isSelected = isLeaf && item.id == filterSubtopikId;
+          const count = item[countKey] ?? 0;
+          return (
+            <button key={item.id} onClick={() => handleClick(item)}
+              style={{ display: "flex", alignItems: "center", width: "100%", padding: "7px 12px", border: "none", borderBottom: "1px solid #f5f3ef", background: isSelected ? color + "12" : "white", cursor: "pointer", fontFamily: "inherit", gap: "6px", textAlign: "left" }}
+              onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = "#faf9f6"; }}
+              onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = isSelected ? color + "12" : "white"; }}>
+              <span style={{ flex: 1, fontSize: "12.5px", fontWeight: isSelected ? "700" : "500", color: isSelected ? color : "#0f0e17", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {item.nama}
+              </span>
+              {count > 0 && (
+                <span style={{ fontSize: "10.5px", fontWeight: "700", color: isSelected ? color : "#b4b2a9", flexShrink: 0 }}>{count}</span>
+              )}
+              {!isLeaf && <ChevronRight size={11} color={isSelected ? color : "#d4d0c8"} style={{ flexShrink: 0 }} />}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── SubtopikFilter ────────────────────────────────────────────────────────────
 
 function SubtopikFilter({ struktur, filterSubtopikId, onChange }) {
@@ -505,6 +588,18 @@ export default function AdminSoal() {
         </div>
       </div>
 
+      {/* ── Two-column: Tree + Content ── */}
+      <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+        {!isMobile && (
+          <StrukturTreePanel
+            struktur={struktur}
+            filterSubtopikId={filterSubtopikId}
+            onChange={id => { setFilterSubtopikId(id); setPage(1); }}
+            countKey="jumlah_soal"
+          />
+        )}
+        <div style={{ flex: 1, minWidth: 0 }}>
+
       {/* ── Search + Filters ── */}
       <div style={{ marginBottom: "16px" }}>
         {/* Search bar */}
@@ -538,8 +633,8 @@ export default function AdminSoal() {
           <FilterChip label="Medium" active={filters.difficulty === "2"} color="#854F0B" onClick={() => setFilter("difficulty", "2")} />
           <FilterChip label="Hard"   active={filters.difficulty === "3"} color="#e84c2b" onClick={() => setFilter("difficulty", "3")} />
           <div style={{ width: "1px", height: "16px", background: "#e8e6e0" }} />
-          {/* Subtopik */}
-          <SubtopikFilter struktur={struktur} filterSubtopikId={filterSubtopikId} onChange={setFilterSubtopikId} />
+          {/* Subtopik (mobile only — desktop pakai tree panel) */}
+          {isMobile && <SubtopikFilter struktur={struktur} filterSubtopikId={filterSubtopikId} onChange={setFilterSubtopikId} />}
           {/* Clear all */}
           {hasFilters && (
             <button onClick={clearFilters}
@@ -757,6 +852,8 @@ export default function AdminSoal() {
           </div>
         </div>
       )}
+        </div>{/* end right column */}
+      </div>{/* end two-column wrapper */}
 
       {/* ── Floating Bulk Bar ── */}
       {selected.size > 0 && (

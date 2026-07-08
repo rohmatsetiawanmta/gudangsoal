@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   BookOpen, Sigma, AlignLeft, ChevronLeft, ChevronRight, BookMarked, Lightbulb,
-  AlertTriangle, Eye, Copy, Share2, Flag, Check, X, Lock, UserPlus,
+  AlertTriangle, Eye, Copy, Share2, Flag, Check, X, Lock, UserPlus, Brain,
 } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -46,6 +46,58 @@ function HighlightBlock({ item }) {
       </div>
       <div style={{ padding: "14px 16px", fontSize: "14px", lineHeight: "1.7", color: "#0f0e17" }}>
         <MathRenderer text={item.content} block />
+      </div>
+    </div>
+  );
+}
+
+// ── Sibling materi listing ────────────────────────────────────────────────────
+
+function MateriNav({ siblings, currentId, onNavigate }) {
+  if (!Array.isArray(siblings) || siblings.length <= 1) return null;
+  return (
+    <div style={{ marginTop: "32px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
+        <span style={{ fontSize: "11px", fontWeight: "700", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".08em", whiteSpace: "nowrap" }}>Materi lainnya</span>
+        <div style={{ flex: 1, height: "1px", background: "#e2ddd5" }} />
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        {siblings.map((s, i) => {
+          const isCurrent = s.id === currentId;
+          return (
+            <button
+              key={s.id}
+              onClick={() => !isCurrent && onNavigate(s.id)}
+              style={{
+                display: "flex", alignItems: "center", gap: "12px",
+                padding: "10px 14px", borderRadius: "10px",
+                border: `1px solid ${isCurrent ? "#fca5a5" : "#e2ddd5"}`,
+                boxShadow: isCurrent ? "inset 3px 0 0 #e84c2b" : "none",
+                background: isCurrent ? "#fff3f0" : "white",
+                cursor: isCurrent ? "default" : "pointer",
+                textAlign: "left", fontFamily: "inherit", transition: "all .15s",
+              }}
+              onMouseEnter={e => { if (!isCurrent) { e.currentTarget.style.background = "#faf9f6"; e.currentTarget.style.borderColor = "#d4d0c8"; }}}
+              onMouseLeave={e => { if (!isCurrent) { e.currentTarget.style.background = "white"; e.currentTarget.style.borderColor = "#e2ddd5"; }}}
+            >
+              <span style={{
+                width: "22px", height: "22px", borderRadius: "6px", flexShrink: 0,
+                background: isCurrent ? "#e84c2b" : "#f2efe8",
+                color: isCurrent ? "white" : "#b4b2a9",
+                fontSize: "11px", fontWeight: "700",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>{i + 1}</span>
+              <span style={{
+                fontSize: "13.5px", fontWeight: isCurrent ? "700" : "500",
+                color: isCurrent ? "#b91c1c" : "#0f0e17",
+                flex: 1, lineHeight: 1.4,
+              }}>
+                <MathRenderer text={s.judul} />
+              </span>
+              {!isCurrent && <ChevronRight size={14} color="#b4b2a9" style={{ flexShrink: 0 }} />}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -225,6 +277,165 @@ function ContentGate({ isMobile }) {
   );
 }
 
+// ── Quiz Card ─────────────────────────────────────────────────────────────────
+
+const OPTION_LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+function QuizCard({ question, index, answer, onAnswer, isMobile, materiId, isLoggedIn }) {
+  const [userInput, setUserInput]         = useState('');
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [xpEarned, setXpEarned]           = useState(null);
+  const isAnswered = answer !== undefined;
+
+  // Normalize jawaban to label (backward compat: old data stores full option text)
+  const correctLabel = (() => {
+    const j = question.jawaban;
+    if (!j) return null;
+    if (OPTION_LABELS.includes(j)) return j;
+    const idx = (question.pilihan || []).indexOf(j);
+    return idx >= 0 ? OPTION_LABELS[idx] : null;
+  })();
+
+  // Normalize stored user_answer to label (old answers may store full option text)
+  const userAnswerLabel = (() => {
+    const ua = answer?.userAnswer;
+    if (!ua) return null;
+    if (OPTION_LABELS.includes(ua)) return ua;
+    const idx = (question.pilihan || []).indexOf(ua);
+    return idx >= 0 ? OPTION_LABELS[idx] : null;
+  })();
+
+  const submitAnswer = async (userAnswer, isCorrect) => {
+    onAnswer(index, userAnswer, isCorrect);
+    if (isLoggedIn) {
+      try {
+        const res = await api.post(`/materi/${materiId}/answer`, { question_index: index, user_answer: userAnswer });
+        if (res.xp_earned > 0) setXpEarned(res.xp_earned);
+      } catch {}
+    }
+  };
+
+  return (
+    <div style={{
+      background: "white", borderRadius: "16px",
+      border: "1px solid #e2ddd5",
+      borderLeft: `3px solid ${isAnswered ? (answer.isCorrect ? "#1a8a6e" : "#e84c2b") : "#2563eb"}`,
+      overflow: "hidden",
+    }}>
+      <div style={{ padding: isMobile ? "14px 16px" : "16px 20px", borderBottom: "1px solid #f0ede6" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+          <span style={{ fontSize: "11px", fontWeight: "700", color: "#b4b2a9", background: "#f2efe8", padding: "3px 8px", borderRadius: "6px", flexShrink: 0, marginTop: "2px" }}>
+            {index + 1}
+          </span>
+          <div style={{ fontSize: "14px", color: "#0f0e17", lineHeight: "1.6", fontWeight: "500" }}>
+            <MathRenderer text={question.teks} />
+          </div>
+        </div>
+      </div>
+
+      <div style={{ padding: isMobile ? "14px 16px" : "16px 20px" }}>
+        {question.tipe === "pilihan_ganda" ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {(question.pilihan || []).map((p, pi) => {
+              const isCorrect  = OPTION_LABELS[pi] === correctLabel;
+              const isSelected = isAnswered ? userAnswerLabel === OPTION_LABELS[pi] : selectedOption === OPTION_LABELS[pi];
+              let bg = "white", border = "#e2ddd5";
+              if (isAnswered) {
+                if (isCorrect)       { bg = "#e4f5f0"; border = "#1a8a6e"; }
+                else if (isSelected) { bg = "#fff3f0"; border = "#e84c2b"; }
+              } else if (isSelected) {
+                bg = "#eff6ff"; border = "#2563eb";
+              }
+              return (
+                <button key={pi} type="button"
+                  disabled={isAnswered}
+                  onClick={() => !isAnswered && setSelectedOption(OPTION_LABELS[pi])}
+                  style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", border: `1.5px solid ${border}`, background: bg, cursor: isAnswered ? "default" : "pointer", textAlign: "left", fontFamily: "inherit", transition: "all .15s", width: "100%" }}
+                  onMouseEnter={e => { if (!isAnswered && selectedOption !== OPTION_LABELS[pi]) { e.currentTarget.style.borderColor = "#2563eb"; e.currentTarget.style.background = "#eff6ff"; }}}
+                  onMouseLeave={e => { if (!isAnswered && selectedOption !== OPTION_LABELS[pi]) { e.currentTarget.style.borderColor = "#e2ddd5"; e.currentTarget.style.background = "white"; }}}
+                >
+                  <span style={{ fontSize: "12px", fontWeight: "700", width: "24px", height: "24px", borderRadius: "6px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isAnswered && isCorrect ? "#1a8a6e" : isAnswered && isSelected ? "#e84c2b" : (!isAnswered && isSelected) ? "#2563eb" : "#f2efe8", color: (isAnswered && (isCorrect || isSelected)) || (!isAnswered && isSelected) ? "white" : "#6b6860" }}>
+                    {OPTION_LABELS[pi]}
+                  </span>
+                  <span style={{ fontSize: "14px", color: "#0f0e17", lineHeight: "1.5", flex: 1 }}>
+                    <MathRenderer text={p} />
+                  </span>
+                  {isAnswered && isCorrect  && <Check size={15} color="#1a8a6e" style={{ flexShrink: 0 }} />}
+                  {isAnswered && isSelected && !isCorrect && <X size={15} color="#e84c2b" style={{ flexShrink: 0 }} />}
+                </button>
+              );
+            })}
+            {!isAnswered && selectedOption !== null && (
+              <button type="button"
+                onClick={() => submitAnswer(selectedOption, selectedOption === correctLabel)}
+                style={{ alignSelf: "flex-end", padding: "10px 24px", borderRadius: "10px", border: "none", background: "#2563eb", color: "white", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", marginTop: "4px" }}>
+                Submit
+              </button>
+            )}
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <input
+                type={question.tipe === "isian_numerik" ? "number" : "text"}
+                value={isAnswered ? answer.userAnswer : userInput}
+                onChange={e => !isAnswered && setUserInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key !== "Enter" || isAnswered || !userInput.trim()) return;
+                  const correct = question.tipe === "isian_numerik"
+                    ? parseFloat(userInput) === parseFloat(question.jawaban)
+                    : userInput.trim().toLowerCase() === question.jawaban.toLowerCase();
+                  submitAnswer(userInput.trim(), correct);
+                }}
+                disabled={isAnswered}
+                placeholder={question.tipe === "isian_numerik" ? "Masukkan angka..." : "Tulis jawabanmu..."}
+                style={{ flex: 1, padding: "10px 14px", borderRadius: "10px", border: `1.5px solid ${isAnswered ? (answer.isCorrect ? "#1a8a6e" : "#e84c2b") : "#e2ddd5"}`, background: isAnswered ? (answer.isCorrect ? "#e4f5f0" : "#fff3f0") : "white", fontSize: "14px", outline: "none", fontFamily: "inherit", color: "#0f0e17" }}
+                onFocus={e => { if (!isAnswered) e.target.style.borderColor = "#2563eb"; }}
+                onBlur={e => { if (!isAnswered) e.target.style.borderColor = "#e2ddd5"; }}
+              />
+              {!isAnswered && (
+                <button type="button"
+                  onClick={() => {
+                    if (!userInput.trim()) return;
+                    const correct = question.tipe === "isian_numerik"
+                      ? parseFloat(userInput) === parseFloat(question.jawaban)
+                      : userInput.trim().toLowerCase() === question.jawaban.toLowerCase();
+                    submitAnswer(userInput.trim(), correct);
+                  }}
+                  disabled={!userInput.trim()}
+                  style={{ padding: "10px 18px", borderRadius: "10px", border: "none", background: userInput.trim() ? "#2563eb" : "#e2ddd5", color: "white", fontSize: "13px", fontWeight: "700", cursor: userInput.trim() ? "pointer" : "not-allowed", fontFamily: "inherit", flexShrink: 0 }}>
+                  Submit
+                </button>
+              )}
+            </div>
+            {isAnswered && (
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: "600", color: answer.isCorrect ? "#1a8a6e" : "#e84c2b" }}>
+                {answer.isCorrect ? <Check size={14} /> : <X size={14} />}
+                {answer.isCorrect ? "Benar!" : `Jawaban: ${correctLabel ?? question.jawaban}`}
+              </div>
+            )}
+          </div>
+        )}
+
+        {xpEarned && (
+          <div style={{ marginTop: "10px", display: "inline-flex", alignItems: "center", gap: "5px", padding: "5px 12px", borderRadius: "99px", background: "rgba(252,211,77,.15)", border: "1px solid rgba(252,211,77,.35)", fontSize: "13px", fontWeight: "700", color: "#92610c" }}>
+            +{xpEarned} XP
+          </div>
+        )}
+
+        {isAnswered && question.pembahasan && (
+          <div style={{ marginTop: "12px", padding: "12px 14px", borderRadius: "10px", background: "#f2efe8", border: "1px solid #e2ddd5" }}>
+            <div style={{ fontSize: "11px", fontWeight: "700", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "6px" }}>Pembahasan</div>
+            <div style={{ fontSize: "13px", color: "#0f0e17", lineHeight: "1.6" }}>
+              <MathRenderer text={question.pembahasan} />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function MateriDetail() {
@@ -239,17 +450,41 @@ export default function MateriDetail() {
   const [error, setError]     = useState("");
   const [copied, setCopied]   = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [quizAnswers, setQuizAnswers]       = useState({});
+  const [activeQuizIndex, setActiveQuizIndex] = useState(0);
+
+  const handleQuizAnswer = (qIndex, userAnswer, isCorrect) => {
+    setQuizAnswers(prev => ({ ...prev, [qIndex]: { userAnswer, isCorrect } }));
+  };
 
   useEffect(() => {
     setLoading(true);
+    setQuizAnswers({});
+    setActiveQuizIndex(0);
     api.get(`/materi/${id}`)
       .then(data => {
         setMateri(data);
         api.post(`/materi/${id}/view`).catch(() => {});
+        if (isLoggedIn && Array.isArray(data.pertanyaan) && data.pertanyaan.length > 0) {
+          api.get(`/materi/${id}/my-answers`)
+            .then(prev => {
+              const initial = {};
+              Object.entries(prev).forEach(([qiStr, { is_correct, user_answer }]) => {
+                const qi = parseInt(qiStr);
+                if (data.pertanyaan[qi]) initial[qi] = { userAnswer: user_answer ?? '', isCorrect: is_correct };
+              });
+              if (Object.keys(initial).length > 0) {
+                setQuizAnswers(initial);
+                const firstUnanswered = data.pertanyaan.findIndex((_, qi) => !initial[qi]);
+                setActiveQuizIndex(firstUnanswered === -1 ? 0 : firstUnanswered);
+              }
+            })
+            .catch(() => {});
+        }
       })
       .catch(() => setError("Materi tidak ditemukan atau belum dipublikasikan."))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, isLoggedIn]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(`https://gudangsoal.com/materi/${id}`);
@@ -271,7 +506,8 @@ export default function MateriDetail() {
     { label: materi.judul },
   ] : [];
 
-  const highlights = Array.isArray(materi?.highlights) ? materi.highlights : [];
+  const highlights  = Array.isArray(materi?.highlights)  ? materi.highlights  : [];
+  const pertanyaan  = Array.isArray(materi?.pertanyaan)  ? materi.pertanyaan  : [];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#f2efe8" }}>
@@ -345,6 +581,11 @@ export default function MateriDetail() {
                         {highlights.length} Highlight
                       </span>
                     )}
+                    {pertanyaan.length > 0 && (
+                      <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: "#93c5fd", background: "rgba(147,197,253,.12)" }}>
+                        {pertanyaan.length} Pertanyaan
+                      </span>
+                    )}
                   </div>
 
                   {/* Actions */}
@@ -379,9 +620,24 @@ export default function MateriDetail() {
 
                 {/* Highlights */}
                 {highlights.length > 0 && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    <div style={{ fontSize: "12px", fontWeight: "700", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".07em", padding: "4px 2px" }}>
-                      Highlights
+                  <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <div style={{
+                      background: "linear-gradient(135deg, #3c1a00 0%, #b45309 100%)",
+                      borderRadius: "14px",
+                      padding: isMobile ? "16px 18px" : "18px 22px",
+                      display: "flex", alignItems: "center", gap: "12px",
+                    }}>
+                      <div style={{ width: "38px", height: "38px", borderRadius: "11px", background: "rgba(255,255,255,.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <Lightbulb size={18} color="white" />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "14px", fontWeight: "800", color: "white", letterSpacing: "-0.2px" }}>
+                          Highlights
+                        </div>
+                        <div style={{ fontSize: "12px", color: "rgba(255,255,255,.5)", marginTop: "2px" }}>
+                          {highlights.length} poin penting
+                        </div>
+                      </div>
                     </div>
                     {highlights.map((h, i) => (
                       <HighlightBlock key={i} item={h} />
@@ -389,41 +645,115 @@ export default function MateriDetail() {
                   </div>
                 )}
 
-                {/* Prev / Next navigation */}
-                {(materi.prev || materi.next) && (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "24px" }}>
-                    {materi.prev ? (
+                {/* Cek Pemahaman */}
+                {pertanyaan.length > 0 && (
+                  <div style={{ marginTop: "24px" }}>
+                    {/* Header banner */}
+                    <div style={{
+                      background: "linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 100%)",
+                      borderRadius: "14px",
+                      padding: isMobile ? "16px 18px" : "18px 22px",
+                      marginBottom: "14px",
+                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px",
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <div style={{ width: "38px", height: "38px", borderRadius: "11px", background: "rgba(255,255,255,.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <Brain size={18} color="white" />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: "14px", fontWeight: "800", color: "white", letterSpacing: "-0.2px" }}>
+                            Cek Pemahaman
+                          </div>
+                          <div style={{ fontSize: "12px", color: "rgba(255,255,255,.5)", marginTop: "2px" }}>
+                            {pertanyaan.length} soal · uji pemahamanmu
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{
+                        fontSize: "13px", fontWeight: "700",
+                        padding: "5px 12px", borderRadius: "99px", flexShrink: 0,
+                        background: Object.keys(quizAnswers).length === pertanyaan.length ? "rgba(110,231,183,.25)" : "rgba(255,255,255,.12)",
+                        color: Object.keys(quizAnswers).length === pertanyaan.length ? "#6ee7b7" : "rgba(255,255,255,.7)",
+                      }}>
+                        {Object.keys(quizAnswers).length}/{pertanyaan.length} dijawab
+                      </div>
+                    </div>
+
+                    {/* Question number stepper */}
+                    {pertanyaan.length > 1 && (
+                      <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap" }}>
+                        {pertanyaan.map((_, qi) => {
+                          const ans = quizAnswers[qi];
+                          const isActive = qi === activeQuizIndex;
+                          return (
+                            <button key={qi} onClick={() => setActiveQuizIndex(qi)}
+                              style={{
+                                width: "34px", height: "34px", borderRadius: "10px",
+                                border: isActive ? "none" : "1px solid #e2ddd5",
+                                cursor: "pointer", fontSize: "13px", fontWeight: "700",
+                                background: isActive ? "#2563eb" : ans ? (ans.isCorrect ? "#1a8a6e" : "#e84c2b") : "white",
+                                color: isActive || ans ? "white" : "#b4b2a9",
+                                transition: "all .15s", flexShrink: 0,
+                                fontFamily: "inherit",
+                              }}>
+                              {qi + 1}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Active question card */}
+                    <QuizCard
+                      key={activeQuizIndex}
+                      question={pertanyaan[activeQuizIndex]}
+                      index={activeQuizIndex}
+                      answer={quizAnswers[activeQuizIndex]}
+                      onAnswer={handleQuizAnswer}
+                      isMobile={isMobile}
+                      materiId={id}
+                      isLoggedIn={isLoggedIn}
+                    />
+
+                    {/* Next / Prev nav */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "10px" }}>
                       <button
-                        onClick={() => navigate(`/materi/${materi.prev.id}`)}
-                        style={{ background: "white", border: "1px solid #e2ddd5", borderRadius: "14px", padding: "14px 16px", cursor: "pointer", textAlign: "left", display: "flex", flexDirection: "column", gap: "4px", transition: "box-shadow .15s, border-color .15s" }}
-                        onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.07)"; e.currentTarget.style.borderColor = "#0f0e17"; }}
-                        onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "#e2ddd5"; }}
-                      >
-                        <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: "700", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".06em" }}>
-                          <ChevronLeft size={13} /> Sebelumnya
-                        </div>
-                        <div style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", lineHeight: 1.4 }}>
-                          {materi.prev.judul}
-                        </div>
+                        onClick={() => setActiveQuizIndex(i => Math.max(0, i - 1))}
+                        disabled={activeQuizIndex === 0}
+                        style={{ display: "flex", alignItems: "center", gap: "5px", padding: "8px 14px", borderRadius: "10px", border: "1px solid #e2ddd5", background: "white", color: activeQuizIndex === 0 ? "#d4d0c8" : "#6b6860", fontSize: "13px", fontWeight: "600", cursor: activeQuizIndex === 0 ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
+                        <ChevronLeft size={16} />
                       </button>
-                    ) : <div />}
-                    {materi.next ? (
                       <button
-                        onClick={() => navigate(`/materi/${materi.next.id}`)}
-                        style={{ background: "white", border: "1px solid #e2ddd5", borderRadius: "14px", padding: "14px 16px", cursor: "pointer", textAlign: "right", display: "flex", flexDirection: "column", gap: "4px", transition: "box-shadow .15s, border-color .15s" }}
-                        onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.07)"; e.currentTarget.style.borderColor = "#0f0e17"; }}
-                        onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "#e2ddd5"; }}
-                      >
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "4px", fontSize: "11px", fontWeight: "700", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".06em" }}>
-                          Berikutnya <ChevronRight size={13} />
-                        </div>
-                        <div style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", lineHeight: 1.4 }}>
-                          {materi.next.judul}
-                        </div>
+                        onClick={() => setActiveQuizIndex(i => Math.min(pertanyaan.length - 1, i + 1))}
+                        disabled={activeQuizIndex === pertanyaan.length - 1}
+                        style={{ display: "flex", alignItems: "center", gap: "5px", padding: "8px 14px", borderRadius: "10px", border: "none", background: activeQuizIndex === pertanyaan.length - 1 ? "#f2efe8" : "#2563eb", color: activeQuizIndex === pertanyaan.length - 1 ? "#d4d0c8" : "white", fontSize: "13px", fontWeight: "600", cursor: activeQuizIndex === pertanyaan.length - 1 ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
+                        <ChevronRight size={16} />
                       </button>
-                    ) : <div />}
+                    </div>
+
                   </div>
                 )}
+
+                {/* Latihan Soal CTA */}
+                {materi.subtopik_slug && (
+                  <div style={{ marginTop: "20px", background: "white", borderRadius: "14px", border: "1px solid #e2ddd5", borderLeft: "3px solid #e84c2b", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+                    <div>
+                      <div style={{ fontSize: "13px", fontWeight: "700", color: "#0f0e17", marginBottom: "2px" }}>Siap latihan soal?</div>
+                      <div style={{ fontSize: "12px", color: "#6b6860" }}>Kerjakan soal-soal dari subtopik <strong style={{ color: "#0f0e17" }}>{materi.subtopik}</strong></div>
+                    </div>
+                    <button
+                      onClick={() => navigate(`/browse/${materi.jenjang_slug}/${materi.subjenjang_slug}/${materi.mapel_slug}/${materi.topik_slug}/${materi.subtopik_slug}`)}
+                      style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 18px", borderRadius: "10px", border: "none", background: "#e84c2b", color: "white", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", flexShrink: 0, boxShadow: "0 4px 12px rgba(232,76,43,.3)" }}
+                      onMouseEnter={e => e.currentTarget.style.background = "#d4401f"}
+                      onMouseLeave={e => e.currentTarget.style.background = "#e84c2b"}
+                    >
+                      Latihan Soal <ChevronRight size={14} />
+                    </button>
+                  </div>
+                )}
+
+                {/* Prev / Next navigation */}
+                <MateriNav prev={materi.prev} next={materi.next} siblings={materi.siblings} currentId={materi.id} onNavigate={id => navigate(`/materi/${id}`)} isMobile={isMobile} />
               </>
             ) : (
               <>
@@ -439,41 +769,26 @@ export default function MateriDetail() {
                 )}
                 <ContentGate isMobile={isMobile} />
 
-                {/* Prev / Next tetap tampil untuk guest */}
-                {(materi.prev || materi.next) && (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "8px" }}>
-                    {materi.prev ? (
-                      <button
-                        onClick={() => navigate(`/materi/${materi.prev.id}`)}
-                        style={{ background: "white", border: "1px solid #e2ddd5", borderRadius: "14px", padding: "14px 16px", cursor: "pointer", textAlign: "left", display: "flex", flexDirection: "column", gap: "4px", transition: "box-shadow .15s, border-color .15s" }}
-                        onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.07)"; e.currentTarget.style.borderColor = "#0f0e17"; }}
-                        onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "#e2ddd5"; }}
-                      >
-                        <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: "700", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".06em" }}>
-                          <ChevronLeft size={13} /> Sebelumnya
-                        </div>
-                        <div style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", lineHeight: 1.4 }}>
-                          {materi.prev.judul}
-                        </div>
-                      </button>
-                    ) : <div />}
-                    {materi.next ? (
-                      <button
-                        onClick={() => navigate(`/materi/${materi.next.id}`)}
-                        style={{ background: "white", border: "1px solid #e2ddd5", borderRadius: "14px", padding: "14px 16px", cursor: "pointer", textAlign: "right", display: "flex", flexDirection: "column", gap: "4px", transition: "box-shadow .15s, border-color .15s" }}
-                        onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.07)"; e.currentTarget.style.borderColor = "#0f0e17"; }}
-                        onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "#e2ddd5"; }}
-                      >
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "4px", fontSize: "11px", fontWeight: "700", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".06em" }}>
-                          Berikutnya <ChevronRight size={13} />
-                        </div>
-                        <div style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", lineHeight: 1.4 }}>
-                          {materi.next.judul}
-                        </div>
-                      </button>
-                    ) : <div />}
+                {/* Latihan Soal CTA */}
+                {materi.subtopik_slug && (
+                  <div style={{ marginTop: "20px", background: "white", borderRadius: "14px", border: "1px solid #e2ddd5", borderLeft: "3px solid #e84c2b", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+                    <div>
+                      <div style={{ fontSize: "13px", fontWeight: "700", color: "#0f0e17", marginBottom: "2px" }}>Siap latihan soal?</div>
+                      <div style={{ fontSize: "12px", color: "#6b6860" }}>Kerjakan soal-soal dari subtopik <strong style={{ color: "#0f0e17" }}>{materi.subtopik}</strong></div>
+                    </div>
+                    <button
+                      onClick={() => navigate(`/browse/${materi.jenjang_slug}/${materi.subjenjang_slug}/${materi.mapel_slug}/${materi.topik_slug}/${materi.subtopik_slug}`)}
+                      style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 18px", borderRadius: "10px", border: "none", background: "#e84c2b", color: "white", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", flexShrink: 0, boxShadow: "0 4px 12px rgba(232,76,43,.3)" }}
+                      onMouseEnter={e => e.currentTarget.style.background = "#d4401f"}
+                      onMouseLeave={e => e.currentTarget.style.background = "#e84c2b"}
+                    >
+                      Latihan Soal <ChevronRight size={14} />
+                    </button>
                   </div>
                 )}
+
+                {/* Prev / Next tetap tampil untuk guest */}
+                <MateriNav prev={materi.prev} next={materi.next} siblings={materi.siblings} currentId={materi.id} onNavigate={id => navigate(`/materi/${id}`)} isMobile={isMobile} />
               </>
             )}
           </>

@@ -2,24 +2,25 @@
 import { useState } from "react";
 import { Upload, X } from "lucide-react";
 
-const VALID_TYPES = ["definisi", "rumus", "ringkasan", "contoh", "catatan"];
+const VALID_TYPES      = ["definisi", "rumus", "ringkasan", "contoh", "catatan"];
+const VALID_TIPE_SOAL  = ["pilihan_ganda", "isian_singkat", "isian_numerik"];
 
 const FORMAT_EXAMPLE = `{
   "judul": "Luas Lingkaran",
   "konten": "Lingkaran adalah...",
   "highlights": [
-    { "type": "definisi",  "label": "Lingkaran",   "content": "Himpunan titik..." },
-    { "type": "rumus",     "label": "Luas",         "content": "$L = \\\\pi r^2$" },
-    { "type": "ringkasan", "label": "Poin Penting", "content": "- $r$ = jari-jari" },
-    { "type": "contoh",    "label": "Contoh",       "content": "r=7, L=154" },
-    { "type": "catatan",   "label": "Perhatikan",   "content": "Gunakan $\\\\pi \\\\approx 3.14$" }
+    { "type": "rumus", "label": "Luas", "content": "$L = \\\\pi r^2$" }
+  ],
+  "pertanyaan": [
+    { "tipe": "pilihan_ganda", "teks": "Soal...", "pilihan": ["A","B","C","D"], "jawaban": "A" },
+    { "tipe": "isian_singkat", "teks": "Soal...", "jawaban": "teks jawaban" },
+    { "tipe": "isian_numerik", "teks": "Soal...", "jawaban": "42" }
   ],
   "subtopik_id": 12,
   "is_published": 0,
   "urutan": 0
 }
-// subtopik_id — opsional, tetap bisa pilih manual di form
-// urutan — opsional, default 0 (makin kecil makin atas)`;
+// pertanyaan, highlights, subtopik_id, urutan — semua opsional`;
 
 export default function AdminMateriImport({ setForm, isMobile }) {
   const [open, setOpen]           = useState(false);
@@ -50,11 +51,22 @@ export default function AdminMateriImport({ setForm, isMobile }) {
           }))
         : [];
 
+      const pertanyaan = Array.isArray(parsed.pertanyaan)
+        ? parsed.pertanyaan.map(q => ({
+            tipe:       VALID_TIPE_SOAL.includes(q.tipe) ? q.tipe : "pilihan_ganda",
+            teks:       String(q.teks       ?? ""),
+            pilihan:    Array.isArray(q.pilihan) ? q.pilihan.map(String) : [],
+            jawaban:    String(q.jawaban    ?? ""),
+            pembahasan: String(q.pembahasan ?? ""),
+          }))
+        : [];
+
       setForm(f => ({
         ...f,
         judul:        String(parsed.judul).trim(),
         konten:       String(parsed.konten ?? ""),
         highlights,
+        pertanyaan,
         is_published: parsed.is_published ? 1 : 0,
         urutan:       parseInt(parsed.urutan ?? 0) || 0,
         ...(parsed.subtopik_id != null && { subtopik_id: parsed.subtopik_id }),

@@ -3,7 +3,7 @@ import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus, Search, Pencil, Trash2, BookOpen, GraduationCap,
-  X, Loader2, ChevronLeft, ChevronRight, Upload,
+  X, Loader2, ChevronLeft, ChevronRight, Upload, Download,
   Save, GripVertical,
 } from "lucide-react";
 import api from "../../lib/api";
@@ -268,6 +268,94 @@ function MateriRow({ item, selected, onToggle, onEdit, onDelete, isMobile, reord
   );
 }
 
+// ── StrukturTreePanel ─────────────────────────────────────────────────────────
+
+const LEVEL_NEXT  = { root: "jenjang", jenjang: "subjenjang", subjenjang: "mapel", mapel: "topik", topik: null };
+const LEVEL_LABEL = { root: "Jenjang", jenjang: "Kelas", subjenjang: "Mapel", mapel: "Topik", topik: "Subtopik" };
+const LEVEL_COLOR = { root: "#e84c2b", jenjang: "#f5a623", subjenjang: "#2563eb", mapel: "#1a8a6e", topik: "#7c3aed" };
+
+function StrukturTreePanel({ struktur, filterSubtopikId, onChange, countKey = "jumlah_soal" }) {
+  const [stack, setStack] = useState([{ level: "root", item: null }]);
+  const current  = stack[stack.length - 1];
+  const isLeaf   = current.level === "topik";
+  const color    = LEVEL_COLOR[current.level];
+
+  useEffect(() => {
+    if (!filterSubtopikId) setStack([{ level: "root", item: null }]);
+  }, [filterSubtopikId]);
+
+  const getChildren = ({ level, item }) => {
+    const pid = item?.id;
+    if (level === "root")       return struktur.jenjang;
+    if (level === "jenjang")    return struktur.subjenjang.filter(s => s.jenjang_id == pid);
+    if (level === "subjenjang") return struktur.mapel.filter(m => m.subjenjang_id == pid);
+    if (level === "mapel")      return struktur.topik.filter(t => t.mapel_id == pid);
+    if (level === "topik")      return struktur.subtopik.filter(st => st.topik_id == pid);
+    return [];
+  };
+
+  const items = getChildren(current);
+
+  const handleClick = item => {
+    if (isLeaf) {
+      onChange(item.id === filterSubtopikId ? null : item.id);
+    } else {
+      setStack(s => [...s, { level: LEVEL_NEXT[current.level], item }]);
+    }
+  };
+
+  return (
+    <div style={{ width: "196px", flexShrink: 0, background: "white", borderRadius: "14px", border: "1px solid #e2ddd5", overflow: "hidden", alignSelf: "flex-start", position: "sticky", top: "16px" }}>
+      {/* Header */}
+      <div style={{ padding: "10px 12px", borderBottom: "1px solid #f0ede6", display: "flex", alignItems: "center", gap: "6px", background: color + "08" }}>
+        {stack.length > 1 && (
+          <button onClick={() => setStack(s => s.slice(0, -1))}
+            style={{ background: "none", border: "none", cursor: "pointer", color: color, display: "flex", padding: "2px", borderRadius: "4px", flexShrink: 0 }}>
+            <ChevronLeft size={14} />
+          </button>
+        )}
+        <span style={{ fontSize: "11px", fontWeight: "700", color: color, textTransform: "uppercase", letterSpacing: ".07em", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {current.item ? current.item.nama : LEVEL_LABEL[current.level]}
+        </span>
+      </div>
+
+      {/* "Semua" row — only at leaf */}
+      {isLeaf && (
+        <button onClick={() => onChange(null)}
+          style={{ display: "flex", alignItems: "center", width: "100%", padding: "7px 12px", border: "none", borderBottom: "1px solid #f5f3ef", background: !filterSubtopikId ? color + "12" : "white", cursor: "pointer", fontFamily: "inherit" }}
+          onMouseEnter={e => { if (filterSubtopikId) e.currentTarget.style.background = "#faf9f6"; }}
+          onMouseLeave={e => { if (filterSubtopikId) e.currentTarget.style.background = "white"; }}>
+          <span style={{ fontSize: "12px", fontWeight: !filterSubtopikId ? "700" : "500", color: !filterSubtopikId ? color : "#6b6860" }}>Semua subtopik</span>
+        </button>
+      )}
+
+      {/* Items */}
+      <div style={{ maxHeight: "460px", overflowY: "auto" }}>
+        {items.length === 0 ? (
+          <div style={{ padding: "14px 12px", fontSize: "12px", color: "#b4b2a9", textAlign: "center" }}>Kosong</div>
+        ) : items.map(item => {
+          const isSelected = isLeaf && item.id == filterSubtopikId;
+          const count = item[countKey] ?? 0;
+          return (
+            <button key={item.id} onClick={() => handleClick(item)}
+              style={{ display: "flex", alignItems: "center", width: "100%", padding: "7px 12px", border: "none", borderBottom: "1px solid #f5f3ef", background: isSelected ? color + "12" : "white", cursor: "pointer", fontFamily: "inherit", gap: "6px", textAlign: "left" }}
+              onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = "#faf9f6"; }}
+              onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = isSelected ? color + "12" : "white"; }}>
+              <span style={{ flex: 1, fontSize: "12.5px", fontWeight: isSelected ? "700" : "500", color: isSelected ? color : "#0f0e17", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {item.nama}
+              </span>
+              {count > 0 && (
+                <span style={{ fontSize: "10.5px", fontWeight: "700", color: isSelected ? color : "#b4b2a9", flexShrink: 0 }}>{count}</span>
+              )}
+              {!isLeaf && <ChevronRight size={11} color={isSelected ? color : "#d4d0c8"} style={{ flexShrink: 0 }} />}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function AdminMateri() {
@@ -295,6 +383,33 @@ export default function AdminMateri() {
   // Single delete
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting]         = useState(false);
+
+  const [exporting, setExporting]   = useState(false);
+  const [exportError, setExportError] = useState("");
+  const handleExport = async () => {
+    setExporting(true); setExportError("");
+    try {
+      const params = new URLSearchParams();
+      if (filterSubtopikId)   params.set("subtopik_id", filterSubtopikId);
+      if (debouncedSearch)    params.set("search", debouncedSearch);
+      if (filterPublished !== "") params.set("is_published", filterPublished);
+      const data = await api.get(`/admin/materi/export?${params}`);
+      if (!Array.isArray(data) || data.length === 0) {
+        setExportError("Tidak ada materi yang cocok dengan filter saat ini.");
+        return;
+      }
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      const subtopikNama = struktur.subtopik.find(s => s.id == filterSubtopikId)?.nama;
+      a.href     = url;
+      a.download = subtopikNama ? `materi-${subtopikNama.toLowerCase().replace(/\s+/g, "-")}.json` : "materi-export.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setExportError(e?.error || e?.message || "Gagal export. Coba deploy API dulu.");
+    } finally { setExporting(false); }
+  };
 
   // Multi-select
   const [selected, setSelected]               = useState(new Set());
@@ -488,6 +603,12 @@ export default function AdminMateri() {
               ))}
             </div>
             <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+              <button onClick={handleExport} disabled={exporting}
+                style={{ display: "flex", alignItems: "center", gap: "7px", background: "rgba(255,255,255,.1)", color: "rgba(255,255,255,.85)", border: "1px solid rgba(255,255,255,.15)", borderRadius: "10px", padding: "10px 16px", fontSize: "13.5px", fontWeight: "600", cursor: exporting ? "not-allowed" : "pointer", fontFamily: "inherit", opacity: exporting ? 0.6 : 1 }}
+                onMouseEnter={e => { if (!exporting) { e.currentTarget.style.background = "rgba(255,255,255,.18)"; e.currentTarget.style.color = "white"; }}}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.1)"; e.currentTarget.style.color = "rgba(255,255,255,.85)"; }}>
+                <Download size={14} /> {exporting ? "Mengunduh..." : "Export JSON"}
+              </button>
               <button onClick={() => navigate("/admin/materi/bulk-import")}
                 style={{ display: "flex", alignItems: "center", gap: "7px", background: "rgba(255,255,255,.1)", color: "rgba(255,255,255,.85)", border: "1px solid rgba(255,255,255,.15)", borderRadius: "10px", padding: "10px 16px", fontSize: "13.5px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit" }}
                 onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.18)"; e.currentTarget.style.color = "white"; }}
@@ -502,6 +623,27 @@ export default function AdminMateri() {
           </div>
         </div>
       </div>
+
+      {exportError && (
+        <div style={{ background: "#fff3f0", border: "1px solid #fca5a5", borderRadius: "12px", padding: "12px 16px", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+          <span style={{ fontSize: "13px", color: "#b91c1c", fontWeight: "500" }}>{exportError}</span>
+          <button onClick={() => setExportError("")} style={{ background: "none", border: "none", cursor: "pointer", color: "#b91c1c", display: "flex", padding: 0, flexShrink: 0 }}>
+            <X size={15} />
+          </button>
+        </div>
+      )}
+
+      {/* ── Two-column: Tree + Content ── */}
+      <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+        {!isMobile && (
+          <StrukturTreePanel
+            struktur={struktur}
+            filterSubtopikId={filterSubtopikId}
+            onChange={id => { setFilterSubtopikId(id); setPage(1); }}
+            countKey="jumlah_materi"
+          />
+        )}
+        <div style={{ flex: 1, minWidth: 0 }}>
 
       {/* ── Filters ── */}
       <div style={{ display: "flex", gap: "10px", marginBottom: "12px", flexWrap: "wrap" }}>
@@ -527,13 +669,16 @@ export default function AdminMateri() {
         </div>
       </div>
 
-      {/* Subtopik filter + reorder save row */}
+      {/* Subtopik filter (mobile only) + reorder save row */}
+      {(isMobile || reorderMode) && (
       <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}>
-        <SubtopikFilter
-          struktur={struktur}
-          filterSubtopikId={filterSubtopikId}
-          onChange={id => { setFilterSubtopikId(id); setPage(1); }}
-        />
+        {isMobile && (
+          <SubtopikFilter
+            struktur={struktur}
+            filterSubtopikId={filterSubtopikId}
+            onChange={id => { setFilterSubtopikId(id); setPage(1); }}
+          />
+        )}
         {reorderMode && (
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "5px 12px", borderRadius: "8px", background: "#fff8e6", border: "1px solid #fcd34d", fontSize: "12px", fontWeight: "600", color: "#b45309" }}>
@@ -550,6 +695,7 @@ export default function AdminMateri() {
           </div>
         )}
       </div>
+      )}
 
       {/* ── List ── */}
       {loading ? (
@@ -610,7 +756,7 @@ export default function AdminMateri() {
                   selected={selected.has(item.id)}
                   onToggle={() => toggleOne(item.id)}
                   isMobile={isMobile}
-                  onEdit={i => navigate(`/admin/materi/edit/${i.id}`)}
+                  onEdit={i => window.open(`/admin/materi/edit/${i.id}`, "_blank")}
                   onDelete={i => setDeleteTarget(i)}
                   reorderMode={reorderMode}
                   isDragging={dragIndex === idx}
@@ -645,6 +791,8 @@ export default function AdminMateri() {
           </div>
         </div>
       )}
+        </div>{/* end right column */}
+      </div>{/* end two-column wrapper */}
 
       {/* ── Floating Bulk Bar ── */}
       {!reorderMode && selected.size > 0 && (

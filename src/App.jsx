@@ -17,6 +17,7 @@ import ChangelogPage from "./features/home/ChangelogPage";
 
 import LoginPage from "./features/auth/LoginPage";
 import RegisterPage from "./features/auth/RegisterPage";
+import VerifyEmailPage from "./features/auth/VerifyEmailPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RequestSoalPage from "./features/request/RequestSoalPage";
 
@@ -87,6 +88,7 @@ export default function App() {
         path="/register"
         element={isLoggedIn ? <Navigate to="/home" /> : <RegisterPage />}
       />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/faq" element={<FAQPage />} />
       <Route path="/changelog" element={<ChangelogPage />} />
 
@@ -156,14 +158,6 @@ export default function App() {
         </Route>
       </Route>
 
-      <Route path="/latihan" element={<LatihanPage />} />
-      <Route path="/latihan/:id" element={<LatihanDetail />} />
-      <Route path="/latihan/:id/quiz" element={<QuizPage />} />
-      <Route path="/latihan/:id/hasil/:session_id" element={<QuizHasil />} />
-      <Route
-        path="/latihan/:id/hasil/:session_id/review"
-        element={<QuizReview />}
-      />
     </Routes>
     </div>
     </>

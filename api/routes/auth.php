@@ -20,6 +20,16 @@ if ($uri === '/auth/login' && $method === 'POST') {
     exit;
   }
 
+  if (!$user['email_verified']) {
+    http_response_code(403);
+    echo json_encode([
+      'error'      => 'Email belum diverifikasi. Cek inbox kamu dan klik link konfirmasi.',
+      'unverified' => true,
+      'email'      => $user['email'],
+    ]);
+    exit;
+  }
+
   $token = generateToken(['id' => $user['id'], 'email' => $user['email']]);
 
   echo json_encode([
@@ -53,29 +63,98 @@ if ($uri === '/auth/register' && $method === 'POST') {
     exit;
   }
 
-  $stmt = $pdo->prepare('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)');
+  $verificationToken   = bin2hex(random_bytes(32));
+  $verificationExpires = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+  $stmt = $pdo->prepare(
+    'INSERT INTO users (name, email, password, role, email_verified, verification_token, verification_expires_at)
+     VALUES (?, ?, ?, ?, 0, ?, ?)'
+  );
   $stmt->execute([
     $body['name'],
     $body['email'],
     password_hash($body['password'], PASSWORD_DEFAULT),
     'user',
+    $verificationToken,
+    $verificationExpires,
   ]);
-  $id = $pdo->lastInsertId();
 
-  $token = generateToken(['id' => $id, 'email' => $body['email']]);
+  require_once __DIR__ . '/../config/mailer.php';
+  $sent = sendVerificationEmail($body['email'], $body['name'], $verificationToken);
 
   http_response_code(201);
   echo json_encode([
-    'user' => [
-      'id'     => $id,
-      'name'   => $body['name'],
-      'email'  => $body['email'],
-      'xp'     => 0,
-      'streak' => 0,
-      'role'   => 'user',
-    ],
-    'token' => $token,
+    'message' => $sent
+      ? 'Akun berhasil dibuat! Cek email kamu untuk konfirmasi.'
+      : 'Akun berhasil dibuat, tapi email gagal dikirim. Gunakan fitur kirim ulang.',
+    'email' => $body['email'],
   ]);
+  exit;
+}
+
+// GET /auth/verify-email
+if ($uri === '/auth/verify-email' && $method === 'GET') {
+
+  $token = $_GET['token'] ?? '';
+  if (!$token) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Token tidak ditemukan']);
+    exit;
+  }
+
+  $stmt = $pdo->prepare(
+    'SELECT id, name, email FROM users
+     WHERE verification_token = ? AND verification_expires_at > NOW() AND email_verified = 0'
+  );
+  $stmt->execute([$token]);
+  $user = $stmt->fetch();
+
+  if (!$user) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Link tidak valid atau sudah kedaluwarsa. Minta link baru.']);
+    exit;
+  }
+
+  $stmt = $pdo->prepare(
+    'UPDATE users SET email_verified = 1, verification_token = NULL, verification_expires_at = NULL WHERE id = ?'
+  );
+  $stmt->execute([$user['id']]);
+
+  echo json_encode(['message' => 'Email berhasil dikonfirmasi! Silakan login.']);
+  exit;
+}
+
+// POST /auth/resend-verification
+if ($uri === '/auth/resend-verification' && $method === 'POST') {
+
+  if (empty($body['email'])) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Email wajib diisi']);
+    exit;
+  }
+
+  $stmt = $pdo->prepare('SELECT id, name, email, email_verified FROM users WHERE email = ?');
+  $stmt->execute([$body['email']]);
+  $user = $stmt->fetch();
+
+  // Selalu response sama supaya tidak leak apakah email terdaftar
+  if (!$user || $user['email_verified']) {
+    echo json_encode(['message' => 'Jika email terdaftar dan belum diverifikasi, link baru telah dikirim.']);
+    exit;
+  }
+
+  $verificationToken   = bin2hex(random_bytes(32));
+  $verificationExpires = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+  $stmt = $pdo->prepare(
+    'UPDATE users SET verification_token = ?, verification_expires_at = ? WHERE id = ?'
+  );
+  $stmt->execute([$verificationToken, $verificationExpires, $user['id']]);
+
+  require_once __DIR__ . '/../config/mailer.php';
+  sendVerificationEmail($user['email'], $user['name'], $verificationToken);
+
+  echo json_encode(['message' => 'Jika email terdaftar dan belum diverifikasi, link baru telah dikirim.']);
   exit;
 }
 

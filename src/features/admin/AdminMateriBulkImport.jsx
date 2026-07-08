@@ -9,7 +9,8 @@ import {
 import api from "../../lib/api";
 import useWindowWidth from "../../hooks/useWindowWidth";
 
-const VALID_TYPES = ["definisi", "rumus", "ringkasan", "contoh", "catatan"];
+const VALID_TYPES      = ["definisi", "rumus", "ringkasan", "contoh", "catatan"];
+const VALID_TIPE_SOAL  = ["pilihan_ganda", "isian_singkat", "isian_numerik"];
 
 function parseItem(raw) {
   const highlights = Array.isArray(raw.highlights)
@@ -19,10 +20,23 @@ function parseItem(raw) {
         content: String(h.content ?? ""),
       }))
     : [];
+
+  const pertanyaan = Array.isArray(raw.pertanyaan)
+    ? raw.pertanyaan.map(q => ({
+        tipe:       VALID_TIPE_SOAL.includes(q.tipe) ? q.tipe : "pilihan_ganda",
+        teks:       String(q.teks       ?? ""),
+        pilihan:    Array.isArray(q.pilihan) ? q.pilihan.map(String) : [],
+        jawaban:    String(q.jawaban    ?? ""),
+        pembahasan: String(q.pembahasan ?? ""),
+      }))
+    : [];
+
   return {
+    id:           raw.id ? parseInt(raw.id) || null : null,
     judul:        String(raw.judul ?? "").trim(),
     konten:       String(raw.konten ?? ""),
     highlights,
+    pertanyaan,
     is_published: raw.is_published ? 1 : 0,
     urutan:       parseInt(raw.urutan ?? 0) || 0,
   };
@@ -229,9 +243,9 @@ export default function AdminMateriBulkImport() {
     try {
       const payload = items.map(item => ({ ...item, subtopik_id: subtopikId }));
       const res = await api.post("/admin/materi/bulk", { items: payload });
-      setResult({ inserted: res.inserted ?? 0, errors: res.errors ?? [] });
+      setResult({ inserted: res.inserted ?? 0, updated: res.updated ?? 0, errors: res.errors ?? [] });
     } catch (e) {
-      setResult({ inserted: 0, errors: [e?.response?.data?.error || e.message || "Gagal import"] });
+      setResult({ inserted: 0, updated: 0, errors: [e?.response?.data?.error || e.message || "Gagal import"] });
     } finally {
       setImporting(false);
     }
@@ -279,13 +293,15 @@ export default function AdminMateriBulkImport() {
         /* Result */
         <div style={{ background: "white", borderRadius: "16px", border: "1px solid #e2ddd5", padding: "32px", maxWidth: "560px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "20px" }}>
-            {result.inserted > 0
+            {(result.inserted + result.updated) > 0
               ? <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "#e4f5f0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><CheckCircle size={24} color="#1a8a6e" /></div>
               : <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "#fff3f0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><AlertCircle size={24} color="#e84c2b" /></div>
             }
             <div>
               <div style={{ fontSize: "18px", fontWeight: "800", color: "#0f0e17" }}>
-                {result.inserted > 0 ? `${result.inserted} materi berhasil disimpan!` : "Tidak ada yang tersimpan"}
+                {(result.inserted + result.updated) > 0
+                  ? [result.inserted > 0 && `${result.inserted} ditambahkan`, result.updated > 0 && `${result.updated} diupdate`].filter(Boolean).join(", ") + "!"
+                  : "Tidak ada yang tersimpan"}
               </div>
               {result.errors.length > 0 && <div style={{ fontSize: "13px", color: "#6b6860", marginTop: "3px" }}>{result.errors.length} item gagal</div>}
             </div>
@@ -377,9 +393,15 @@ export default function AdminMateriBulkImport() {
                         {i + 1}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: "12.5px", fontWeight: "600", color: "#0f0e17", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.judul}</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <span style={{ fontSize: "12.5px", fontWeight: "600", color: "#0f0e17", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>{item.judul}</span>
+                          {item.id
+                            ? <span style={{ fontSize: "10px", fontWeight: "700", padding: "2px 7px", borderRadius: "99px", background: "rgba(37,99,235,.1)", color: "#2563eb", flexShrink: 0 }}>Update #{item.id}</span>
+                            : <span style={{ fontSize: "10px", fontWeight: "700", padding: "2px 7px", borderRadius: "99px", background: "rgba(26,138,110,.1)", color: "#1a8a6e", flexShrink: 0 }}>Baru</span>
+                          }
+                        </div>
                         <div style={{ fontSize: "11px", color: "#b4b2a9" }}>
-                          {item.highlights.length} highlight · urutan {item.urutan} · {item.is_published ? "Published" : "Draft"}
+                          {item.highlights.length} highlight · {item.pertanyaan.length} pertanyaan · urutan {item.urutan} · {item.is_published ? "Published" : "Draft"}
                         </div>
                       </div>
                     </div>

@@ -16,8 +16,8 @@ const MENU = [
   { type: "link", to: "/admin",          label: "Dashboard",       icon: LayoutDashboard, end: true },
 
   { type: "section", label: "Konten" },
-  { type: "link", to: "/admin/soal",     label: "Kelola Soal",     icon: BookOpen },
   { type: "link", to: "/admin/struktur", label: "Kelola Struktur", icon: FolderTree },
+  { type: "link", to: "/admin/soal",     label: "Kelola Soal",     icon: BookOpen },
   { type: "link", to: "/admin/latihan",  label: "Kelola Latihan",  icon: Dumbbell },
   { type: "link", to: "/admin/materi",   label: "Kelola Materi",   icon: GraduationCap },
 

@@ -685,9 +685,14 @@ export default function AdminStruktur() {
                 </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: "14px", fontWeight: "600", color: "#0f0e17", wordBreak: "break-word" }}>{item.nama}</div>
-                  {item.jumlah_soal > 0 && (
-                    <span style={{ fontSize: "11px", fontWeight: "700", color: "#1a8a6e" }}>{item.jumlah_soal} soal</span>
-                  )}
+                  <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                    {item.jumlah_soal > 0 && (
+                      <span style={{ fontSize: "11px", fontWeight: "700", color: "#1a8a6e" }}>{item.jumlah_soal} soal</span>
+                    )}
+                    {item.jumlah_materi > 0 && (
+                      <span style={{ fontSize: "11px", fontWeight: "700", color: "#2563eb" }}>{item.jumlah_materi} materi</span>
+                    )}
+                  </div>
                 </div>
                 <div onClick={(e) => e.stopPropagation()} style={{ display: "flex", alignItems: "center", gap: "5px", flexShrink: 0 }}>
                   <ToggleSwitch checked={item.is_published == 1} onChange={(e) => handleTogglePublish(e, item)} loading={publishLoading[item.id]} hideLabel />
@@ -756,6 +761,11 @@ export default function AdminStruktur() {
                     ) : (
                       <span style={{ fontSize: "11px", fontWeight: "600", padding: "2px 8px", borderRadius: "6px", background: "#f2efe8", color: "#c8c6be", flexShrink: 0 }}>
                         0 soal
+                      </span>
+                    )}
+                    {item.jumlah_materi > 0 && (
+                      <span style={{ fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "6px", background: "#eff6ff", color: "#2563eb", flexShrink: 0 }}>
+                        {item.jumlah_materi} materi
                       </span>
                     )}
                   </div>

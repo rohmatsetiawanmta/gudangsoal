@@ -1,9 +1,9 @@
 // src/features/auth/RegisterPage.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { UserPlus, Mail, Lock, Eye, EyeOff, User } from "lucide-react";
+import { UserPlus, Mail, Lock, Eye, EyeOff, User, CheckCircle, Send } from "lucide-react";
 import { useAuthStore } from "./authStore";
-import { register } from "./authApi";
+import { register, resendVerification } from "./authApi";
 import Navbar from "../../components/Navbar";
 import SEO from "../../components/SEO";
 import useWindowWidth from "../../hooks/useWindowWidth";
@@ -79,19 +79,16 @@ function InputField({
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { setAuth } = useAuthStore();
   const width = useWindowWidth();
   const isMobile = width <= 480;
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(null); // { email }
+  const [resending, setResending] = useState(false);
+  const [resendMsg, setResendMsg] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -111,15 +108,78 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      const res = await register(form.name, form.email, form.password);
-      setAuth(res.user, res.token);
-      navigate("/home");
+      await register(form.name, form.email, form.password);
+      setDone({ email: form.email });
     } catch (err) {
       setError(err.error || "Terjadi kesalahan, coba lagi");
     } finally {
       setLoading(false);
     }
   };
+
+  const handleResend = async () => {
+    if (!done?.email || resending) return;
+    setResending(true);
+    setResendMsg("");
+    try {
+      await resendVerification(done.email);
+      setResendMsg("Email konfirmasi telah dikirim ulang.");
+    } catch {
+      setResendMsg("Gagal mengirim ulang, coba beberapa saat lagi.");
+    } finally {
+      setResending(false);
+    }
+  };
+
+  // ── Check email screen ────────────────────────────────────────────────────
+  if (done) {
+    return (
+      <div>
+        <SEO title="Cek Email" description="Konfirmasi email untuk mengaktifkan akun Gudang Soal." url="/register" />
+        <Navbar />
+        <div style={{ minHeight: "90vh", display: "flex", alignItems: "center", justifyContent: "center", padding: isMobile ? "32px 20px" : "48px 32px", background: "#faf9f6" }}>
+          <div style={{ width: "100%", maxWidth: "400px", textAlign: "center" }}>
+            <div style={{ width: "64px", height: "64px", borderRadius: "20px", background: "#e4f5f0", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
+              <CheckCircle size={30} color="#1a8a6e" />
+            </div>
+            <h2 style={{ fontSize: "24px", fontWeight: "800", color: "#0f0e17", marginBottom: "10px" }}>
+              Cek email kamu!
+            </h2>
+            <p style={{ fontSize: "15px", color: "#6b6860", lineHeight: "1.65", marginBottom: "8px" }}>
+              Kami mengirim link konfirmasi ke
+            </p>
+            <div style={{ display: "inline-block", background: "#f2efe8", border: "1px solid #e2ddd5", borderRadius: "10px", padding: "8px 16px", fontSize: "14px", fontWeight: "700", color: "#0f0e17", marginBottom: "24px" }}>
+              {done.email}
+            </div>
+            <p style={{ fontSize: "13px", color: "#b4b2a9", lineHeight: "1.65", marginBottom: "28px" }}>
+              Klik link di email untuk mengaktifkan akun.<br />Link berlaku 24 jam.
+            </p>
+
+            {resendMsg && (
+              <div style={{ background: "#e4f5f0", border: "1px solid #6ee7b7", color: "#0f6e56", fontSize: "13px", borderRadius: "10px", padding: "10px 14px", marginBottom: "16px" }}>
+                {resendMsg}
+              </div>
+            )}
+
+            <button
+              onClick={handleResend}
+              disabled={resending}
+              style={{ display: "inline-flex", alignItems: "center", gap: "7px", padding: "10px 22px", borderRadius: "10px", border: "1px solid #e2ddd5", background: "white", fontSize: "14px", fontWeight: "600", cursor: resending ? "not-allowed" : "pointer", fontFamily: "inherit", color: "#0f0e17", marginBottom: "16px" }}
+            >
+              <Send size={14} /> {resending ? "Mengirim..." : "Kirim ulang email"}
+            </button>
+
+            <div>
+              <Link to="/login" style={{ fontSize: "13px", color: "#6b6860", textDecoration: "underline" }}>
+                Kembali ke halaman login
+              </Link>
+            </div>
+          </div>
+        </div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   const togglePassword = (
     <button
