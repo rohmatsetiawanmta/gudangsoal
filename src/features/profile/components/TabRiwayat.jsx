@@ -1,8 +1,9 @@
 // src/features/profile/components/TabRiwayat.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
 import { getRiwayat } from "../profileApi";
+import Pagination from "./Pagination";
 
 const FILTERS = [
   { value: "semua", label: "Semua" },
@@ -48,10 +49,10 @@ export default function TabRiwayat({ isMobile }) {
               padding: "6px 14px",
               borderRadius: "8px",
               border: `1.5px solid ${
-                filter === f.value ? "#e84c2b" : "#e2ddd5"
+                filter === f.value ? "#e84c2b" : "var(--gs-border)"
               }`,
-              background: filter === f.value ? "#fff3f0" : "white",
-              color: filter === f.value ? "#e84c2b" : "#6b6860",
+              background: filter === f.value ? "#fff3f0" : "var(--gs-surface)",
+              color: filter === f.value ? "#e84c2b" : "var(--gs-text-muted)",
               fontSize: "13px",
               fontWeight: "600",
               cursor: "pointer",
@@ -64,7 +65,7 @@ export default function TabRiwayat({ isMobile }) {
         ))}
         {!loading && (
           <span
-            style={{ fontSize: "12px", color: "#b4b2a9", marginLeft: "4px" }}
+            style={{ fontSize: "12px", color: "var(--gs-text-hint)", marginLeft: "4px" }}
           >
             {total} soal
           </span>
@@ -80,7 +81,7 @@ export default function TabRiwayat({ isMobile }) {
               style={{
                 height: "48px",
                 borderRadius: "10px",
-                background: "#e2ddd5",
+                background: "var(--gs-border)",
                 opacity: 0.5,
                 animation: "pulse 1.5s infinite",
               }}
@@ -93,12 +94,12 @@ export default function TabRiwayat({ isMobile }) {
       {!loading && data.length === 0 && (
         <div
           style={{
-            background: "white",
+            background: "var(--gs-surface)",
             borderRadius: "12px",
-            border: "1px solid #e2ddd5",
+            border: "1px solid var(--gs-border)",
             padding: "28px",
             textAlign: "center",
-            color: "#6b6860",
+            color: "var(--gs-text-muted)",
             fontSize: "14px",
           }}
         >
@@ -114,9 +115,9 @@ export default function TabRiwayat({ isMobile }) {
       {!loading && data.length > 0 && (
         <div
           style={{
-            background: "white",
+            background: "var(--gs-surface)",
             borderRadius: "14px",
-            border: "1px solid #e2ddd5",
+            border: "1px solid var(--gs-border)",
             overflow: "hidden",
           }}
         >
@@ -130,14 +131,14 @@ export default function TabRiwayat({ isMobile }) {
                 gap: "10px",
                 padding: "10px 16px",
                 borderBottom:
-                  i < data.length - 1 ? "1px solid #f2efe8" : "none",
+                  i < data.length - 1 ? "1px solid var(--gs-divider)" : "none",
                 cursor: "pointer",
                 transition: "background .15s",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "#faf9f6")
+                (e.currentTarget.style.background = "var(--gs-surface-subtle)")
               }
-              onMouseLeave={(e) => (e.currentTarget.style.background = "white")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--gs-surface)")}
             >
               {/* Icon benar/salah */}
               {r.is_correct == 1 ? (
@@ -155,7 +156,7 @@ export default function TabRiwayat({ isMobile }) {
                 <div
                   style={{
                     fontSize: "13px",
-                    color: "#0f0e17",
+                    color: "var(--gs-text)",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -168,7 +169,7 @@ export default function TabRiwayat({ isMobile }) {
                 <div
                   style={{
                     fontSize: "11px",
-                    color: "#b4b2a9",
+                    color: "var(--gs-text-hint)",
                     marginTop: "1px",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
@@ -197,8 +198,8 @@ export default function TabRiwayat({ isMobile }) {
                       fontWeight: "700",
                       padding: "2px 7px",
                       borderRadius: "6px",
-                      background: "#f2efe8",
-                      color: "#6b6860",
+                      background: "var(--gs-hover)",
+                      color: "var(--gs-text-muted)",
                     }}
                   >
                     {r.total_attempt}×
@@ -209,14 +210,14 @@ export default function TabRiwayat({ isMobile }) {
                     style={{
                       fontSize: "11px",
                       fontWeight: "700",
-                      color: "#b4b2a9",
+                      color: "var(--gs-text-hint)",
                       fontFamily: "monospace",
                     }}
                   >
                     {r.kode}
                   </span>
                 )}
-                <span style={{ fontSize: "11px", color: "#b4b2a9" }}>
+                <span style={{ fontSize: "11px", color: "var(--gs-text-hint)" }}>
                   {new Date(r.created_at).toLocaleDateString("id-ID", {
                     day: "numeric",
                     month: "short",
@@ -228,65 +229,8 @@ export default function TabRiwayat({ isMobile }) {
         </div>
       )}
 
-      {/* Pagination */}
-      {!loading && totalPages > 1 && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <span style={{ fontSize: "12px", color: "#6b6860" }}>
-            {isMobile
-              ? `${page} / ${totalPages}`
-              : `Halaman ${page} dari ${totalPages}`}
-          </span>
-          <div style={{ display: "flex", gap: "6px" }}>
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                padding: "7px 12px",
-                borderRadius: "8px",
-                border: "1px solid #e2ddd5",
-                background: "white",
-                fontSize: "12px",
-                fontWeight: "500",
-                cursor: page === 1 ? "not-allowed" : "pointer",
-                color: page === 1 ? "#b4b2a9" : "#0f0e17",
-                fontFamily: "inherit",
-              }}
-            >
-              <ChevronLeft size={13} />
-              {!isMobile && "Sebelumnya"}
-            </button>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                padding: "7px 12px",
-                borderRadius: "8px",
-                border: "1px solid #e2ddd5",
-                background: "white",
-                fontSize: "12px",
-                fontWeight: "500",
-                cursor: page === totalPages ? "not-allowed" : "pointer",
-                color: page === totalPages ? "#b4b2a9" : "#0f0e17",
-                fontFamily: "inherit",
-              }}
-            >
-              {!isMobile && "Berikutnya"}
-              <ChevronRight size={13} />
-            </button>
-          </div>
-        </div>
+      {!loading && (
+        <Pagination page={page} totalPages={totalPages} onChange={setPage} isMobile={isMobile} />
       )}
     </div>
   );

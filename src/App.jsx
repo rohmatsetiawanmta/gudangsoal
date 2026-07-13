@@ -9,11 +9,13 @@ function ScrollToTop() {
 }
 import { useAuthStore } from "./features/auth/authStore";
 import FloatingTools from "./components/FloatingTools";
+import CookieConsent from "./components/CookieConsent";
 
 import LandingPage from "./features/home/LandingPage";
 import HomePage from "./features/home/HomePage";
 import FAQPage from "./features/home/FAQPage";
 import ChangelogPage from "./features/home/ChangelogPage";
+import PrivacyPage from "./features/home/PrivacyPage";
 
 import LoginPage from "./features/auth/LoginPage";
 import RegisterPage from "./features/auth/RegisterPage";
@@ -74,6 +76,7 @@ export default function App() {
     <>
     <ScrollToTop />
     <FloatingTools />
+    <CookieConsent />
     <div key={location.key} className="page-fade">
     <Routes>
       <Route
@@ -91,6 +94,7 @@ export default function App() {
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/faq" element={<FAQPage />} />
       <Route path="/changelog" element={<ChangelogPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
 
       <Route element={<ProtectedRoute />}>
         <Route path="/home" element={<HomePage />} />

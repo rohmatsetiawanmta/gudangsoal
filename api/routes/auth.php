@@ -38,7 +38,7 @@ if ($uri === '/auth/login' && $method === 'POST') {
       'name'   => $user['name'],
       'email'  => $user['email'],
       'xp'     => $user['xp'],
-      'streak' => $user['streak'],
+      'streak' => effectiveStreak($user['streak'], $user['last_active']),
       'role'   => $user['role'],
     ],
     'token' => $token,
@@ -168,7 +168,7 @@ if ($uri === '/auth/profile' && $method === 'GET') {
     exit;
   }
 
-  $stmt = $pdo->prepare('SELECT id, name, email, xp, streak, role FROM users WHERE id = ?');
+  $stmt = $pdo->prepare('SELECT id, name, email, xp, streak, last_active, role FROM users WHERE id = ?');
   $stmt->execute([$authUser['id']]);
   $user = $stmt->fetch();
 
@@ -178,6 +178,8 @@ if ($uri === '/auth/profile' && $method === 'GET') {
     exit;
   }
 
+  $user['streak'] = effectiveStreak($user['streak'], $user['last_active']);
+  unset($user['last_active']);
   echo json_encode($user);
   exit;
 }

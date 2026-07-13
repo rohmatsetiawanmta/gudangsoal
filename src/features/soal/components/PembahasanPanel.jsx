@@ -51,18 +51,18 @@ export default function PembahasanPanel({
           alignItems: "center",
         }}
       >
-        <Lock size={36} color="#b4b2a9" style={{ marginBottom: "16px" }} />
+        <Lock size={36} color="var(--gs-text-hint)" style={{ marginBottom: "16px" }} />
         <p
           style={{
             fontSize: "15px",
             fontWeight: "600",
-            color: "#0f0e17",
+            color: "var(--gs-text)",
             marginBottom: "8px",
           }}
         >
           Pembahasan tersembunyi
         </p>
-        <p style={{ fontSize: "14px", color: "#6b6860", lineHeight: "1.6" }}>
+        <p style={{ fontSize: "14px", color: "var(--gs-text-muted)", lineHeight: "1.6" }}>
           {soal.tipe === "multiple_choice_table"
             ? "Pilih jawaban untuk setiap pernyataan, lalu klik Submit."
             : soal.tipe === "checklist"
@@ -92,13 +92,13 @@ export default function PembahasanPanel({
           style={{
             fontSize: "15px",
             fontWeight: "600",
-            color: "#0f0e17",
+            color: "var(--gs-text)",
             marginBottom: "8px",
           }}
         >
           Jawaban kurang tepat
         </p>
-        <p style={{ fontSize: "14px", color: "#6b6860", lineHeight: "1.6" }}>
+        <p style={{ fontSize: "14px", color: "var(--gs-text-muted)", lineHeight: "1.6" }}>
           Coba lagi untuk melihat pembahasan.
         </p>
       </div>
@@ -259,7 +259,7 @@ export default function PembahasanPanel({
             <div
               key={label}
               style={{
-                background: "#faf9f6",
+                background: "var(--gs-surface-subtle)",
                 borderRadius: "10px",
                 padding: "10px 12px",
                 display: "flex",
@@ -286,7 +286,7 @@ export default function PembahasanPanel({
                   style={{
                     fontSize: "14px",
                     fontWeight: "800",
-                    color: "#0f0e17",
+                    color: "var(--gs-text)",
                     lineHeight: 1,
                   }}
                 >
@@ -295,7 +295,7 @@ export default function PembahasanPanel({
                 <div
                   style={{
                     fontSize: "11px",
-                    color: "#6b6860",
+                    color: "var(--gs-text-muted)",
                     marginTop: "2px",
                   }}
                 >
@@ -321,20 +321,20 @@ export default function PembahasanPanel({
               fontWeight: "700",
               letterSpacing: ".08em",
               textTransform: "uppercase",
-              color: "#6b6860",
+              color: "var(--gs-text-muted)",
               marginBottom: "12px",
             }}
           >
             Pembahasan
           </div>
-          <div style={{ fontSize: "15px", color: "#0f0e17" }}>
+          <div style={{ fontSize: "15px", color: "var(--gs-text)" }}>
             <MathRenderer text={soal.explanation} block />
           </div>
         </div>
       )}
       {showPembahasan && !soal.explanation && (
         <div
-          style={{ fontSize: "14px", color: "#6b6860", fontStyle: "italic" }}
+          style={{ fontSize: "14px", color: "var(--gs-text-muted)", fontStyle: "italic" }}
         >
           Pembahasan belum tersedia untuk soal ini.
         </div>
@@ -349,7 +349,7 @@ export default function PembahasanPanel({
               fontWeight: "700",
               letterSpacing: ".08em",
               textTransform: "uppercase",
-              color: "#6b6860",
+              color: "var(--gs-text-muted)",
               marginBottom: "12px",
             }}
           >
@@ -383,15 +383,15 @@ export default function PembahasanPanel({
           style={{
             padding: "16px",
             borderRadius: "12px",
-            background: "#f2efe8",
-            border: "1px solid #e2ddd5",
+            background: "var(--gs-hover)",
+            border: "1px solid var(--gs-border)",
           }}
         >
           <div
             style={{
               fontSize: "14px",
               fontWeight: "600",
-              color: "#0f0e17",
+              color: "var(--gs-text)",
               marginBottom: "6px",
             }}
           >
@@ -402,7 +402,7 @@ export default function PembahasanPanel({
           <p
             style={{
               fontSize: "13px",
-              color: "#6b6860",
+              color: "var(--gs-text-muted)",
               lineHeight: "1.5",
               marginBottom: "12px",
             }}
@@ -435,9 +435,9 @@ export default function PembahasanPanel({
                 flex: 1,
                 padding: "9px",
                 borderRadius: "10px",
-                border: "1px solid #e2ddd5",
-                background: "white",
-                color: "#0f0e17",
+                border: "1px solid var(--gs-border)",
+                background: "var(--gs-surface)",
+                color: "var(--gs-text)",
                 fontSize: "13px",
                 fontWeight: "600",
                 cursor: "pointer",

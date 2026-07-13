@@ -10,9 +10,10 @@ if (!$authUser) {
 
 // GET /profile
 if ($uri === '/profile' && $method === 'GET') {
-  $stmt = $pdo->prepare('SELECT id, name, email, xp, streak, soal_streak, soal_streak_best, role FROM users WHERE id = ?');
+  $stmt = $pdo->prepare('SELECT id, name, email, xp, streak, soal_streak, soal_streak_best, last_active, role FROM users WHERE id = ?');
   $stmt->execute([$authUser['id']]);
   $user = $stmt->fetch();
+  $user['streak'] = effectiveStreak($user['streak'], $user['last_active']);
 
   // Badge
   $stmt = $pdo->prepare('SELECT badge_id, earned_at FROM user_badges WHERE user_id = ? ORDER BY earned_at DESC');
@@ -43,13 +44,12 @@ if ($uri === '/profile' && $method === 'GET') {
   $stmt->execute([$authUser['id']]);
   $stats = $stmt->fetch();
 
-  // XP History — 20 terakhir
+  // XP History — semua
   $stmt = $pdo->prepare('
     SELECT xp, reason, soal_kode, created_at
     FROM xp_history
     WHERE user_id = ?
     ORDER BY created_at DESC
-    LIMIT 20
   ');
   $stmt->execute([$authUser['id']]);
   $xpHistory = $stmt->fetchAll();

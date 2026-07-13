@@ -21,15 +21,11 @@ export default function JawabanInput({
           const isChosen = chosen === opt.label;
           const isAnswer = opt.label === soal.answer;
           const isCorrectChosen = (isCorrect || alreadyCorrect) && isAnswer;
-          const isWrong =
-            submitted && !isCorrect && !alreadyCorrect && isChosen;
-          // Saat salah — tetap highlight hijau jawaban yang benar
-          const isCorrectHighlight =
-            submitted && !isCorrect && !alreadyCorrect && isAnswer;
+          const isWrong = submitted && !isCorrect && !alreadyCorrect && isChosen;
 
-          let border = "1px solid #e2ddd5",
-            bg = "white",
-            labelColor = "#6b6860";
+          let border = "1px solid var(--gs-border)",
+            bg = "var(--gs-surface)",
+            labelColor = "var(--gs-text-muted)";
 
           if (!submitted) {
             if (isChosen) {
@@ -38,11 +34,6 @@ export default function JawabanInput({
               labelColor = "#e84c2b";
             }
           } else if (isCorrectChosen) {
-            border = "2px solid #1a8a6e";
-            bg = "#e4f5f0";
-            labelColor = "#1a8a6e";
-          } else if (isCorrectHighlight) {
-            // Jawaban benar saat user salah — highlight hijau
             border = "2px solid #1a8a6e";
             bg = "#e4f5f0";
             labelColor = "#1a8a6e";
@@ -87,10 +78,10 @@ export default function JawabanInput({
               >
                 {opt.label}
               </span>
-              <span style={{ fontSize: "15px", color: "#0f0e17", flex: 1 }}>
+              <span style={{ fontSize: "15px", color: "var(--gs-text)", flex: 1 }}>
                 <MathRenderer text={opt.text} />
               </span>
-              {submitted && (isCorrectChosen || isCorrectHighlight) && (
+              {submitted && isCorrectChosen && (
                 <span
                   style={{
                     fontSize: "12px",
@@ -142,14 +133,14 @@ export default function JawabanInput({
             fontSize: "16px",
             outline: "none",
             fontFamily: "inherit",
-            color: "#0f0e17",
+            color: "var(--gs-text)",
             border: !submitted
-              ? "2px solid #e2ddd5"
+              ? "2px solid var(--gs-border)"
               : isCorrect || alreadyCorrect
               ? "2px solid #1a8a6e"
               : "2px solid #e84c2b",
             background: !submitted
-              ? "white"
+              ? "var(--gs-input-bg)"
               : isCorrect || alreadyCorrect
               ? "#e4f5f0"
               : "#fff3f0",
@@ -158,7 +149,7 @@ export default function JawabanInput({
             if (!submitted) e.target.style.borderColor = "#e84c2b";
           }}
           onBlur={(e) => {
-            if (!submitted) e.target.style.borderColor = "#e2ddd5";
+            if (!submitted) e.target.style.borderColor = "var(--gs-border)";
           }}
         />
         {submitted && !isCorrect && !alreadyCorrect && (
@@ -177,7 +168,7 @@ export default function JawabanInput({
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         <div
-          style={{ fontSize: "13px", color: "#6b6860", marginBottom: "4px" }}
+          style={{ fontSize: "13px", color: "var(--gs-text-muted)", marginBottom: "4px" }}
         >
           Pilih semua jawaban yang benar:
         </div>
@@ -186,11 +177,6 @@ export default function JawabanInput({
           const answerArr = Array.isArray(soal.answer) ? soal.answer : [];
           const isAnswer =
             (isCorrect || alreadyCorrect) && answerArr.includes(opt.label);
-          const isCorrectHighlight =
-            submitted &&
-            !isCorrect &&
-            !alreadyCorrect &&
-            answerArr.includes(opt.label);
           const isWrong =
             submitted &&
             !isCorrect &&
@@ -198,10 +184,10 @@ export default function JawabanInput({
             isChosen &&
             !answerArr.includes(opt.label);
 
-          let border = "1px solid #e2ddd5",
-            bg = "white",
-            checkBg = "white",
-            checkBorder = "#e2ddd5",
+          let border = "1px solid var(--gs-border)",
+            bg = "var(--gs-surface)",
+            checkBg = "var(--gs-surface)",
+            checkBorder = "var(--gs-border)",
             checkColor = "transparent";
           if (!submitted) {
             if (isChosen) {
@@ -211,7 +197,7 @@ export default function JawabanInput({
               checkBorder = "#e84c2b";
               checkColor = "white";
             }
-          } else if (isAnswer || isCorrectHighlight) {
+          } else if (isAnswer) {
             border = "2px solid #1a8a6e";
             bg = "#e4f5f0";
             checkBg = "#1a8a6e";
@@ -265,7 +251,7 @@ export default function JawabanInput({
                   transition: "all .15s",
                 }}
               >
-                {(isChosen || isAnswer || isCorrectHighlight) && (
+                {(isChosen || isAnswer) && (
                   <span
                     style={{
                       color: checkColor,
@@ -281,13 +267,13 @@ export default function JawabanInput({
                 style={{
                   fontSize: "13px",
                   fontWeight: "700",
-                  color: "#6b6860",
+                  color: "var(--gs-text-muted)",
                   flexShrink: 0,
                 }}
               >
                 {opt.label}
               </span>
-              <span style={{ fontSize: "15px", color: "#0f0e17", flex: 1 }}>
+              <span style={{ fontSize: "15px", color: "var(--gs-text)", flex: 1 }}>
                 <MathRenderer text={opt.text} />
               </span>
             </div>
@@ -322,7 +308,7 @@ export default function JawabanInput({
             gridTemplateColumns: `1fr ${cols.map(() => "80px").join(" ")}`,
             gap: "8px",
             padding: "10px 14px",
-            background: "#f2efe8",
+            background: "var(--gs-hover)",
             borderRadius: "10px 10px 0 0",
             marginBottom: "2px",
           }}
@@ -331,7 +317,7 @@ export default function JawabanInput({
             style={{
               fontSize: "12px",
               fontWeight: "700",
-              color: "#6b6860",
+              color: "var(--gs-text-muted)",
               textTransform: "uppercase",
               letterSpacing: ".06em",
             }}
@@ -344,7 +330,7 @@ export default function JawabanInput({
               style={{
                 fontSize: "13px",
                 fontWeight: "700",
-                color: "#0f0e17",
+                color: "var(--gs-text)",
                 textAlign: "center",
               }}
             >
@@ -363,29 +349,29 @@ export default function JawabanInput({
                 gridTemplateColumns: `1fr ${cols.map(() => "80px").join(" ")}`,
                 gap: "8px",
                 padding: "12px 14px",
-                background: rowIdx % 2 === 0 ? "white" : "#faf9f6",
+                background: rowIdx % 2 === 0 ? "var(--gs-surface)" : "var(--gs-surface-subtle)",
                 borderRadius:
                   rowIdx === soal.options.length - 1 ? "0 0 10px 10px" : "0",
-                border: "1px solid #f2efe8",
+                border: "1px solid var(--gs-divider)",
                 borderTop: "none",
                 alignItems: "center",
               }}
             >
-              <div style={{ fontSize: "14px", color: "#0f0e17" }}>
+              <div style={{ fontSize: "14px", color: "var(--gs-text)" }}>
                 <MathRenderer text={row.text} />
               </div>
               {cols.map((col) => {
                 const isSelected = rowChosen === col;
-                const isAns = submitted && rowAnswer === col;
+                const isAns = submitted && (isCorrect || alreadyCorrect) && rowAnswer === col;
                 const isWrong =
                   submitted &&
                   !isCorrect &&
                   !alreadyCorrect &&
                   isSelected &&
                   col !== rowAnswer;
-                let bg = "white",
-                  border = "2px solid #e2ddd5",
-                  color = "#6b6860";
+                let bg = "var(--gs-surface)",
+                  border = "2px solid var(--gs-border)",
+                  color = "var(--gs-text-muted)";
                 if (!submitted) {
                   if (isSelected) {
                     bg = "#fff3f0";
@@ -401,9 +387,9 @@ export default function JawabanInput({
                   border = "2px solid #e84c2b";
                   color = "#e84c2b";
                 } else if (isSelected) {
-                  bg = "white";
-                  border = "2px solid #e2ddd5";
-                  color = "#6b6860";
+                  bg = "var(--gs-surface)";
+                  border = "2px solid var(--gs-border)";
+                  color = "var(--gs-text-muted)";
                 }
                 return (
                   <div
@@ -504,7 +490,7 @@ export default function JawabanInput({
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {!submitted && !alreadyCorrect && (
-          <div style={{ fontSize: "13px", color: "#6b6860" }}>
+          <div style={{ fontSize: "13px", color: "var(--gs-text-muted)" }}>
             {selectedLeft !== null
               ? "Klik opsi di kanan untuk memasangkan."
               : "Klik item kiri, lalu klik pasangannya di kanan."}
@@ -529,10 +515,8 @@ export default function JawabanInput({
               const isPaired = pairedRi !== null;
               const isCorrectPair = submitted && String(answerObj[String(li)]) === String(pairedRi);
               const isWrongPair = submitted && isPaired && !isCorrectPair;
-              const correctRi = submitted && answerObj[String(li)] !== undefined
-                ? parseInt(answerObj[String(li)]) : null;
 
-              let border = "1px solid #e2ddd5", bg = "white";
+              let border = "1px solid var(--gs-border)", bg = "var(--gs-surface)";
               if (submitted) {
                 if (isCorrectPair) { border = "2px solid #1a8a6e"; bg = "#e4f5f0"; }
                 else if (isWrongPair) { border = "2px solid #e84c2b"; bg = "#fff3f0"; }
@@ -561,7 +545,7 @@ export default function JawabanInput({
                     style={{
                       fontSize: "12px",
                       fontWeight: "700",
-                      color: "#b4b2a9",
+                      color: "var(--gs-text-hint)",
                       flexShrink: 0,
                     }}
                   >
@@ -570,7 +554,7 @@ export default function JawabanInput({
                   <span
                     style={{
                       fontSize: "13px",
-                      color: "#0f0e17",
+                      color: "var(--gs-text)",
                       flex: 1,
                       minWidth: 0,
                     }}
@@ -599,22 +583,6 @@ export default function JawabanInput({
                       {isWrongPair && " ✗"}
                     </span>
                   )}
-                  {/* Tampilkan jawaban benar saat salah */}
-                  {isWrongPair && correctRi !== null && (
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        fontWeight: "700",
-                        padding: "2px 7px",
-                        borderRadius: "6px",
-                        flexShrink: 0,
-                        background: "#e4f5f0",
-                        color: "#1a8a6e",
-                      }}
-                    >
-                      ✓ {String.fromCharCode(65 + correctRi)}
-                    </span>
-                  )}
                 </div>
               );
             })}
@@ -632,13 +600,10 @@ export default function JawabanInput({
                 : null;
               const isCorrectPair = submitted && isPaired && String(answerObj[String(pairedLi)]) === String(ri);
               const isWrongPair = submitted && isPaired && !isCorrectPair;
-              const isCorrectAnswer = submitted && Object.values(answerObj).includes(String(ri)) && !isPaired;
-
-              let border = "1px solid #e2ddd5", bg = "white", color = "#0f0e17", opacity = 1;
+              let border = "1px solid var(--gs-border)", bg = "var(--gs-surface)", color = "var(--gs-text)", opacity = 1;
               if (submitted) {
                 if (isCorrectPair) { border = "2px solid #1a8a6e"; bg = "#e4f5f0"; color = "#1a8a6e"; }
                 else if (isWrongPair) { border = "2px solid #e84c2b"; bg = "#fff3f0"; color = "#e84c2b"; }
-                else if (isCorrectAnswer) { border = "2px solid #1a8a6e"; bg = "#e4f5f0"; color = "#1a8a6e"; opacity = 0.5; }
               } else {
                 if (isPaired) { border = "2px solid #2563eb"; bg = "#eff6ff"; color = "#2563eb"; }
                 else if (selectedLeft !== null) { opacity = 0.8; }
@@ -671,7 +636,7 @@ export default function JawabanInput({
                     style={{
                       fontSize: "12px",
                       fontWeight: "700",
-                      color: "#b4b2a9",
+                      color: "var(--gs-text-hint)",
                       flexShrink: 0,
                     }}
                   >
@@ -689,7 +654,7 @@ export default function JawabanInput({
         </div>
 
         {!submitted && (
-          <div style={{ fontSize: "12px", color: "#b4b2a9" }}>
+          <div style={{ fontSize: "12px", color: "var(--gs-text-hint)" }}>
             {Object.keys(chosenObj).length} / {leftItems.length} dipasangkan
           </div>
         )}
@@ -733,7 +698,7 @@ export default function JawabanInput({
                 style={{
                   fontSize: "13px",
                   fontWeight: "600",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                 }}
               >
                 {opt.label}
@@ -757,14 +722,14 @@ export default function JawabanInput({
                   fontSize: "16px",
                   outline: "none",
                   fontFamily: "inherit",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                   border: !submitted
-                    ? "2px solid #e2ddd5"
+                    ? "2px solid var(--gs-border)"
                     : isCorrect || alreadyCorrect
                     ? "2px solid #1a8a6e"
                     : "2px solid #e84c2b",
                   background: !submitted
-                    ? "white"
+                    ? "var(--gs-input-bg)"
                     : isCorrect || alreadyCorrect
                     ? "#e4f5f0"
                     : "#fff3f0",
@@ -773,12 +738,12 @@ export default function JawabanInput({
                   if (!submitted) e.target.style.borderColor = "#e84c2b";
                 }}
                 onBlur={(e) => {
-                  if (!submitted) e.target.style.borderColor = "#e2ddd5";
+                  if (!submitted) e.target.style.borderColor = "var(--gs-border)";
                 }}
               />
               {opt.satuan && (
                 <span
-                  style={{ fontSize: "14px", color: "#6b6860", flexShrink: 0 }}
+                  style={{ fontSize: "14px", color: "var(--gs-text-muted)", flexShrink: 0 }}
                 >
                   {opt.satuan}
                 </span>

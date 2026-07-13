@@ -4,13 +4,15 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Search, X, BookOpen, User, LogOut, ChevronDown,
   LayoutDashboard, Warehouse, Flame, Shuffle, MessageSquarePlus,
-  TrendingUp, Menu, Zap, GraduationCap, Lightbulb,
+  TrendingUp, Menu, Zap, GraduationCap, Lightbulb, Moon, Sun,
 } from "lucide-react";
 import { useAuthStore } from "../features/auth/authStore";
 import RandomSoal from "./RandomSoal";
-import FeedbackModal from "../features/feedback/FeedbackModal";
 import NotificationBell from "../features/notifications/NotificationBell";
 import useWindowWidth from "../hooks/useWindowWidth";
+import { useTheme } from "../contexts/ThemeContext";
+import FeedbackModal from "../features/feedback/FeedbackModal";
+import RequestSoalModal from "../features/request/RequestSoalModal";
 
 const JELAJAHI_LINKS = [
   { to: "/browse",  label: "Soal",   icon: BookOpen,      color: "#2563eb" },
@@ -26,6 +28,7 @@ export default function Navbar() {
   const width     = useWindowWidth();
   const isMobile  = width <= 480;
   const { user, isLoggedIn, logout } = useAuthStore();
+  const { isDark, toggle } = useTheme();
 
   const [searchOpen,   setSearchOpen]   = useState(false);
   const [searchQuery,  setSearchQuery]  = useState("");
@@ -33,6 +36,7 @@ export default function Navbar() {
   const [menuOpen,     setMenuOpen]     = useState(false);
   const [randomOpen,   setRandomOpen]   = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [requestOpen,  setRequestOpen]  = useState(false);
 
   const searchRef   = useRef(null);
   const dropdownRef = useRef(null);
@@ -70,12 +74,11 @@ export default function Navbar() {
   const isActive  = (to) => location.pathname === to || location.pathname.startsWith(to + "/");
   const navLinks  = isLoggedIn ? NAV_LINKS_LOGGED_IN : NAV_LINKS;
 
-  // shared icon-button style (no border, hover bg only)
   const iconBtnStyle = {
     display: "flex", alignItems: "center", justifyContent: "center",
     width: "36px", height: "36px", borderRadius: "10px",
     border: "none", background: "transparent",
-    cursor: "pointer", color: "#6b6860",
+    cursor: "pointer", color: "var(--gs-text-muted)",
     transition: "background .15s, color .15s",
   };
 
@@ -83,16 +86,16 @@ export default function Navbar() {
     width: "100%", display: "flex", alignItems: "center", gap: "10px",
     padding: "9px 12px", borderRadius: "8px", border: "none",
     background: "none", cursor: "pointer", fontSize: "14px",
-    fontWeight: "500", color: "#0f0e17", fontFamily: "inherit", textAlign: "left",
+    fontWeight: "500", color: "var(--gs-text)", fontFamily: "inherit", textAlign: "left",
   };
 
   return (
     <>
       <nav style={{
-        background: "rgba(255,255,255,0.94)",
+        background: "var(--gs-nav)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
-        borderBottom: "1px solid #ede9e2",
+        borderBottom: "1px solid var(--gs-border-nav)",
         boxShadow: "0 1px 0 rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.03)",
         padding: `0 ${isMobile ? "16px" : "32px"}`,
         height: "60px",
@@ -113,7 +116,7 @@ export default function Navbar() {
           }}>
             <Warehouse size={17} />
           </div>
-          <span style={{ fontWeight: "800", fontSize: "16.5px", color: "#0f0e17", letterSpacing: "-0.4px" }}>
+          <span style={{ fontWeight: "800", fontSize: "16.5px", color: "var(--gs-text)", letterSpacing: "-0.4px" }}>
             Gudang<span style={{ color: "#e84c2b" }}> Soal</span>
           </span>
         </Link>
@@ -129,12 +132,12 @@ export default function Navbar() {
                   padding: "6px 11px", borderRadius: "8px",
                   textDecoration: "none", fontSize: "13.5px",
                   fontWeight: active ? "700" : "500",
-                  color: active ? "#e84c2b" : "#52504e",
+                  color: active ? "#e84c2b" : "var(--gs-text-secondary)",
                   background: active ? "#fff3f0" : "transparent",
                   transition: "background .15s, color .15s",
                 }}
-                  onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = "#f5f3ef"; e.currentTarget.style.color = "#0f0e17"; }}}
-                  onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#52504e"; }}}
+                  onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = "var(--gs-hover)"; e.currentTarget.style.color = "var(--gs-text)"; }}}
+                  onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--gs-text-secondary)"; }}}
                 >
                   <Icon size={14} strokeWidth={active ? 2.5 : 2} />
                   {label}
@@ -142,7 +145,6 @@ export default function Navbar() {
               );
             })}
 
-            {/* Jelajahi links langsung */}
             {JELAJAHI_LINKS.map(({ to, label, icon: Icon }) => {
               const active = isActive(to);
               return (
@@ -151,12 +153,12 @@ export default function Navbar() {
                   padding: "6px 11px", borderRadius: "8px",
                   textDecoration: "none", fontSize: "13.5px",
                   fontWeight: active ? "700" : "500",
-                  color: active ? "#e84c2b" : "#52504e",
+                  color: active ? "#e84c2b" : "var(--gs-text-secondary)",
                   background: active ? "#fff3f0" : "transparent",
                   transition: "background .15s, color .15s",
                 }}
-                  onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = "#f5f3ef"; e.currentTarget.style.color = "#0f0e17"; }}}
-                  onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#52504e"; }}}
+                  onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = "var(--gs-hover)"; e.currentTarget.style.color = "var(--gs-text)"; }}}
+                  onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--gs-text-secondary)"; }}}
                 >
                   <Icon size={14} strokeWidth={active ? 2.5 : 2} />
                   {label}
@@ -173,7 +175,7 @@ export default function Navbar() {
           {!isMobile && (searchOpen ? (
             <form onSubmit={handleSearch} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <div style={{ position: "relative" }}>
-                <Search size={14} style={{ position: "absolute", left: "11px", top: "50%", transform: "translateY(-50%)", color: "#9b9890", pointerEvents: "none" }} />
+                <Search size={14} style={{ position: "absolute", left: "11px", top: "50%", transform: "translateY(-50%)", color: "var(--gs-text-faint)", pointerEvents: "none" }} />
                 <input
                   ref={searchRef}
                   value={searchQuery}
@@ -183,18 +185,18 @@ export default function Navbar() {
                     paddingLeft: "34px", paddingRight: "14px", paddingTop: "7px", paddingBottom: "7px",
                     borderRadius: "10px", border: "1.5px solid #e84c2b",
                     fontSize: "13.5px", outline: "none", width: "220px",
-                    fontFamily: "inherit", color: "#0f0e17", background: "#fff9f8",
+                    fontFamily: "inherit", color: "var(--gs-text)", background: "var(--gs-search-bg)",
                   }}
                 />
               </div>
-              <button type="button" onClick={() => { setSearchOpen(false); setSearchQuery(""); }} style={{ ...iconBtnStyle, color: "#9b9890" }}>
+              <button type="button" onClick={() => { setSearchOpen(false); setSearchQuery(""); }} style={{ ...iconBtnStyle, color: "var(--gs-text-faint)" }}>
                 <X size={16} />
               </button>
             </form>
           ) : (
             <button onClick={() => setSearchOpen(true)} style={iconBtnStyle}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#f5f3ef"; e.currentTarget.style.color = "#0f0e17"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#6b6860"; }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--gs-hover)"; e.currentTarget.style.color = "var(--gs-text)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--gs-text-muted)"; }}
               title="Cari"
             >
               <Search size={16} />
@@ -204,10 +206,20 @@ export default function Navbar() {
           {/* Desktop: Shuffle */}
           {!isMobile && (
             <button onClick={() => setRandomOpen(true)} title="Soal Random" style={iconBtnStyle}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#f5f3ef"; e.currentTarget.style.color = "#0f0e17"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#6b6860"; }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--gs-hover)"; e.currentTarget.style.color = "var(--gs-text)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--gs-text-muted)"; }}
             >
               <Shuffle size={16} />
+            </button>
+          )}
+
+          {/* Dark mode toggle */}
+          {!isMobile && (
+            <button onClick={toggle} title={isDark ? "Mode terang" : "Mode gelap"} style={iconBtnStyle}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--gs-hover)"; e.currentTarget.style.color = "var(--gs-text)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--gs-text-muted)"; }}
+            >
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
           )}
 
@@ -216,7 +228,7 @@ export default function Navbar() {
 
           {/* ── Separator ── */}
           {!isMobile && (
-            <div style={{ width: "1px", height: "22px", background: "#ede9e2", margin: "0 4px" }} />
+            <div style={{ width: "1px", height: "22px", background: "var(--gs-border-nav)", margin: "0 4px" }} />
           )}
 
           {/* Desktop: Login / Avatar */}
@@ -224,12 +236,12 @@ export default function Navbar() {
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <button onClick={() => navigate("/login")} style={{
                 padding: "6px 14px", borderRadius: "9px",
-                border: "1px solid #e2ddd5", background: "white",
+                border: "1px solid var(--gs-border)", background: "var(--gs-surface)",
                 fontSize: "13.5px", fontWeight: "600", cursor: "pointer",
-                fontFamily: "inherit", color: "#0f0e17", transition: "all .15s",
+                fontFamily: "inherit", color: "var(--gs-text)", transition: "all .15s",
               }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#f5f3ef"; e.currentTarget.style.borderColor = "#d4d0c8"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "white"; e.currentTarget.style.borderColor = "#e2ddd5"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--gs-hover)"; e.currentTarget.style.borderColor = "var(--gs-text-hint)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "var(--gs-surface)"; e.currentTarget.style.borderColor = "var(--gs-border)"; }}
               >
                 Masuk
               </button>
@@ -252,11 +264,12 @@ export default function Navbar() {
               <button onClick={() => setDropdownOpen(!dropdownOpen)} style={{
                 display: "flex", alignItems: "center", gap: "7px",
                 padding: "4px 10px 4px 4px", borderRadius: "10px",
-                border: "1px solid #ede9e2", background: dropdownOpen ? "#f5f3ef" : "white",
+                border: "1px solid var(--gs-border-nav)",
+                background: dropdownOpen ? "var(--gs-hover)" : "var(--gs-surface)",
                 cursor: "pointer", transition: "background .15s",
               }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#f5f3ef")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = dropdownOpen ? "#f5f3ef" : "white")}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--gs-hover)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = dropdownOpen ? "var(--gs-hover)" : "var(--gs-surface)")}
               >
                 <div style={{
                   width: "28px", height: "28px", borderRadius: "8px",
@@ -267,26 +280,25 @@ export default function Navbar() {
                 }}>
                   {user?.name?.[0]?.toUpperCase() || "U"}
                 </div>
-                <span style={{ fontSize: "13.5px", fontWeight: "600", color: "#0f0e17", maxWidth: "90px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <span style={{ fontSize: "13.5px", fontWeight: "600", color: "var(--gs-text)", maxWidth: "90px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {user?.name?.split(" ")[0] || "User"}
                 </span>
-                <ChevronDown size={13} color="#b4b2a9" style={{ transform: dropdownOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform .2s" }} />
+                <ChevronDown size={13} color="var(--gs-text-hint)" style={{ transform: dropdownOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform .2s" }} />
               </button>
 
               {dropdownOpen && (
                 <div style={{
                   position: "absolute", top: "calc(100% + 8px)", right: 0,
-                  background: "white", border: "1px solid #ede9e2",
+                  background: "var(--gs-surface)", border: "1px solid var(--gs-border-nav)",
                   borderRadius: "18px", padding: "8px", minWidth: "220px",
                   boxShadow: "0 20px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06)",
                   zIndex: 200,
                 }}>
-                  {/* User info */}
                   <div style={{
                     padding: "12px", marginBottom: "6px",
                     borderRadius: "12px",
-                    background: "linear-gradient(135deg, #fff9f8 0%, #faf9f6 100%)",
-                    border: "1px solid #f2ede7",
+                    background: "var(--gs-surface-gradient)",
+                    border: "1px solid var(--gs-border-nav)",
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
                       <div style={{
@@ -299,8 +311,8 @@ export default function Navbar() {
                         {user?.name?.[0]?.toUpperCase() || "U"}
                       </div>
                       <div style={{ minWidth: 0 }}>
-                        <div style={{ fontSize: "14px", fontWeight: "700", color: "#0f0e17", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.name}</div>
-                        <div style={{ fontSize: "11px", color: "#b4b2a9", marginTop: "1px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.email}</div>
+                        <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--gs-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.name}</div>
+                        <div style={{ fontSize: "11px", color: "var(--gs-text-hint)", marginTop: "1px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.email}</div>
                       </div>
                     </div>
                     <div style={{ display: "flex", gap: "6px" }}>
@@ -317,12 +329,12 @@ export default function Navbar() {
                     ...(user?.role === "admin" ? [{ icon: LayoutDashboard, label: "Admin Panel",    onClick: () => { navigate("/admin");         setDropdownOpen(false); }, danger: false }] : []),
                     { icon: User,              label: "Profile",          onClick: () => { navigate("/profile");      setDropdownOpen(false); }, danger: false },
                     { icon: TrendingUp,        label: "Soal Populer",     onClick: () => { navigate("/populer");      setDropdownOpen(false); }, danger: false },
-                    { icon: MessageSquarePlus, label: "Request Soal",     onClick: () => { navigate("/request-soal"); setDropdownOpen(false); }, danger: false },
-                    { icon: Lightbulb,         label: "Kirim Masukan",    onClick: () => { setDropdownOpen(false); setFeedbackOpen(true);  }, danger: false },
+                    { icon: MessageSquarePlus, label: "Request Soal",  onClick: () => { setDropdownOpen(false); setRequestOpen(true);  }, danger: false },
+                    { icon: Lightbulb,         label: "Kirim Masukan", onClick: () => { setDropdownOpen(false); setFeedbackOpen(true); }, danger: false },
                     { icon: LogOut,            label: "Keluar",           onClick: handleLogout,                                             danger: true  },
                   ].map(({ icon: Icon, label, onClick, danger }) => (
-                    <button key={label} onClick={onClick} style={{ ...menuItemStyle, color: danger ? "#e84c2b" : "#0f0e17" }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = danger ? "#fff3f0" : "#f5f3ef")}
+                    <button key={label} onClick={onClick} style={{ ...menuItemStyle, color: danger ? "#e84c2b" : "var(--gs-text)" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = danger ? "#fff3f0" : "var(--gs-hover)")}
                       onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
                     >
                       <Icon size={15} /> {label}
@@ -342,8 +354,9 @@ export default function Navbar() {
                 <button onClick={() => setMenuOpen(!menuOpen)} style={{
                   display: "flex", alignItems: "center", justifyContent: "center",
                   width: "36px", height: "36px", borderRadius: "10px",
-                  border: "1px solid #ede9e2", background: menuOpen ? "#f5f3ef" : "white",
-                  cursor: "pointer", color: "#52504e", transition: "background .15s",
+                  border: "1px solid var(--gs-border-nav)",
+                  background: menuOpen ? "var(--gs-hover)" : "var(--gs-surface)",
+                  cursor: "pointer", color: "var(--gs-text-secondary)", transition: "background .15s",
                 }}>
                   {menuOpen ? <X size={17} /> : <Menu size={17} />}
                 </button>
@@ -351,7 +364,7 @@ export default function Navbar() {
                 {menuOpen && (
                   <div style={{
                     position: "absolute", top: "calc(100% + 8px)", right: 0,
-                    background: "white", border: "1px solid #ede9e2",
+                    background: "var(--gs-surface)", border: "1px solid var(--gs-border-nav)",
                     borderRadius: "18px", padding: "8px", minWidth: "260px",
                     boxShadow: "0 20px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06)",
                     zIndex: 200,
@@ -361,8 +374,8 @@ export default function Navbar() {
                       <div style={{
                         padding: "12px", marginBottom: "8px",
                         borderRadius: "12px",
-                        background: "linear-gradient(135deg, #fff9f8 0%, #faf9f6 100%)",
-                        border: "1px solid #f2ede7",
+                        background: "var(--gs-surface-gradient)",
+                        border: "1px solid var(--gs-border-nav)",
                       }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
                           <div style={{
@@ -374,8 +387,8 @@ export default function Navbar() {
                             {user?.name?.[0]?.toUpperCase() || "U"}
                           </div>
                           <div style={{ minWidth: 0 }}>
-                            <div style={{ fontSize: "14px", fontWeight: "700", color: "#0f0e17", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.name}</div>
-                            <div style={{ fontSize: "11px", color: "#b4b2a9" }}>{user?.email}</div>
+                            <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--gs-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.name}</div>
+                            <div style={{ fontSize: "11px", color: "var(--gs-text-hint)" }}>{user?.email}</div>
                           </div>
                         </div>
                         <div style={{ display: "flex", gap: "6px" }}>
@@ -390,15 +403,15 @@ export default function Navbar() {
                     )}
 
                     {/* Search */}
-                    <div style={{ padding: "4px 4px 8px", borderBottom: "1px solid #f2efe8", marginBottom: "8px" }}>
+                    <div style={{ padding: "4px 4px 8px", borderBottom: "1px solid var(--gs-divider)", marginBottom: "8px" }}>
                       <form onSubmit={handleSearch}>
                         <div style={{ position: "relative" }}>
-                          <Search size={14} style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "#9b9890", pointerEvents: "none" }} />
+                          <Search size={14} style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--gs-text-faint)", pointerEvents: "none" }} />
                           <input
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Cari soal, topik..."
-                            style={{ width: "100%", paddingLeft: "32px", paddingRight: "12px", paddingTop: "9px", paddingBottom: "9px", borderRadius: "9px", border: "1px solid #ede9e2", fontSize: "13.5px", outline: "none", fontFamily: "inherit", color: "#0f0e17", boxSizing: "border-box", background: "#faf9f6" }}
+                            style={{ width: "100%", paddingLeft: "32px", paddingRight: "12px", paddingTop: "9px", paddingBottom: "9px", borderRadius: "9px", border: "1px solid var(--gs-border-nav)", fontSize: "13.5px", outline: "none", fontFamily: "inherit", color: "var(--gs-text)", boxSizing: "border-box", background: "var(--gs-input-bg)" }}
                           />
                         </div>
                       </form>
@@ -406,25 +419,25 @@ export default function Navbar() {
 
                     {/* Nav links */}
                     <div style={{ marginBottom: "4px" }}>
-                      <div style={{ fontSize: "10px", fontWeight: "700", color: "#b4b2a9", letterSpacing: "0.08em", textTransform: "uppercase", padding: "4px 12px 6px" }}>Menu</div>
+                      <div style={{ fontSize: "10px", fontWeight: "700", color: "var(--gs-text-hint)", letterSpacing: "0.08em", textTransform: "uppercase", padding: "4px 12px 6px" }}>Menu</div>
                       {navLinks.map(({ to, label, icon: Icon }) => (
                         <button key={to} onClick={() => { navigate(to); setMenuOpen(false); }}
-                          style={{ ...menuItemStyle, color: isActive(to) ? "#e84c2b" : "#0f0e17", background: isActive(to) ? "#fff3f0" : "none", fontWeight: isActive(to) ? "600" : "500" }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = isActive(to) ? "#fff3f0" : "#f5f3ef")}
+                          style={{ ...menuItemStyle, color: isActive(to) ? "#e84c2b" : "var(--gs-text)", background: isActive(to) ? "#fff3f0" : "none", fontWeight: isActive(to) ? "600" : "500" }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = isActive(to) ? "#fff3f0" : "var(--gs-hover)")}
                           onMouseLeave={(e) => (e.currentTarget.style.background = isActive(to) ? "#fff3f0" : "none")}
                         >
-                          <Icon size={15} color={isActive(to) ? "#e84c2b" : "#6b6860"} /> {label}
+                          <Icon size={15} color={isActive(to) ? "#e84c2b" : "var(--gs-text-muted)"} /> {label}
                         </button>
                       ))}
                     </div>
 
                     {/* Jelajahi section */}
-                    <div style={{ borderTop: "1px solid #f2efe8", paddingTop: "8px", marginBottom: "4px" }}>
-                      <div style={{ fontSize: "10px", fontWeight: "700", color: "#b4b2a9", letterSpacing: "0.08em", textTransform: "uppercase", padding: "0 12px 6px" }}>Jelajahi</div>
+                    <div style={{ borderTop: "1px solid var(--gs-divider)", paddingTop: "8px", marginBottom: "4px" }}>
+                      <div style={{ fontSize: "10px", fontWeight: "700", color: "var(--gs-text-hint)", letterSpacing: "0.08em", textTransform: "uppercase", padding: "0 12px 6px" }}>Jelajahi</div>
                       {[...JELAJAHI_LINKS, { to: "/populer", label: "Soal Populer", icon: TrendingUp, color: "#e84c2b" }].map(({ to, label, icon: Icon, color }) => (
                         <button key={to} onClick={() => { navigate(to); setMenuOpen(false); }}
-                          style={{ ...menuItemStyle, color: isActive(to) ? "#e84c2b" : "#0f0e17", background: isActive(to) ? "#fff3f0" : "none", fontWeight: isActive(to) ? "600" : "500" }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = isActive(to) ? "#fff3f0" : "#f5f3ef")}
+                          style={{ ...menuItemStyle, color: isActive(to) ? "#e84c2b" : "var(--gs-text)", background: isActive(to) ? "#fff3f0" : "none", fontWeight: isActive(to) ? "600" : "500" }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = isActive(to) ? "#fff3f0" : "var(--gs-hover)")}
                           onMouseLeave={(e) => (e.currentTarget.style.background = isActive(to) ? "#fff3f0" : "none")}
                         >
                           <Icon size={15} color={isActive(to) ? "#e84c2b" : color} /> {label}
@@ -432,27 +445,36 @@ export default function Navbar() {
                       ))}
                     </div>
 
-                    {/* Actions */}
-                    <div style={{ borderTop: "1px solid #f2efe8", paddingTop: "6px", marginTop: "2px" }}>
+                    {/* Actions + Dark mode toggle */}
+                    <div style={{ borderTop: "1px solid var(--gs-divider)", paddingTop: "6px", marginTop: "2px" }}>
                       <button onClick={() => { setMenuOpen(false); setRandomOpen(true); }} style={menuItemStyle}
-                        onMouseEnter={(e) => (e.currentTarget.style.background = "#f5f3ef")}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "var(--gs-hover)")}
                         onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
                       >
-                        <Shuffle size={15} color="#6b6860" /> Soal Random
+                        <Shuffle size={15} color="var(--gs-text-muted)" /> Soal Random
                       </button>
                       <button onClick={() => { setMenuOpen(false); setFeedbackOpen(true); }} style={menuItemStyle}
-                        onMouseEnter={(e) => (e.currentTarget.style.background = "#f5f3ef")}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "var(--gs-hover)")}
                         onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
                       >
-                        <MessageSquarePlus size={15} color="#6b6860" /> Kirim Masukan
+                        <MessageSquarePlus size={15} color="var(--gs-text-muted)" /> Kirim Masukan
+                      </button>
+                      <button onClick={toggle} style={menuItemStyle}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "var(--gs-hover)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+                      >
+                        {isDark
+                          ? <><Sun size={15} color="var(--gs-text-muted)" /> Mode Terang</>
+                          : <><Moon size={15} color="var(--gs-text-muted)" /> Mode Gelap</>
+                        }
                       </button>
                     </div>
 
                     {/* Auth */}
-                    <div style={{ borderTop: "1px solid #f2efe8", paddingTop: "6px", marginTop: "2px" }}>
+                    <div style={{ borderTop: "1px solid var(--gs-divider)", paddingTop: "6px", marginTop: "2px" }}>
                       {!isLoggedIn ? (
                         <div style={{ display: "flex", flexDirection: "column", gap: "6px", padding: "2px 2px" }}>
-                          <button onClick={() => { navigate("/login"); setMenuOpen(false); }} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: "10px 12px", borderRadius: "10px", border: "1px solid #e2ddd5", background: "white", cursor: "pointer", fontSize: "13.5px", fontWeight: "600", color: "#0f0e17", fontFamily: "inherit" }}>
+                          <button onClick={() => { navigate("/login"); setMenuOpen(false); }} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: "10px 12px", borderRadius: "10px", border: "1px solid var(--gs-border)", background: "var(--gs-surface)", cursor: "pointer", fontSize: "13.5px", fontWeight: "600", color: "var(--gs-text)", fontFamily: "inherit" }}>
                             Masuk
                           </button>
                           <button onClick={() => { navigate("/register"); setMenuOpen(false); }} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: "10px 12px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, #e84c2b 0%, #c0391a 100%)", cursor: "pointer", fontSize: "13.5px", fontWeight: "700", color: "white", fontFamily: "inherit" }}>
@@ -463,23 +485,23 @@ export default function Navbar() {
                         <>
                           {user?.role === "admin" && (
                             <button onClick={() => { navigate("/admin"); setMenuOpen(false); }} style={menuItemStyle}
-                              onMouseEnter={(e) => (e.currentTarget.style.background = "#f5f3ef")}
+                              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--gs-hover)")}
                               onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
                             >
-                              <LayoutDashboard size={15} color="#6b6860" /> Admin Panel
+                              <LayoutDashboard size={15} color="var(--gs-text-muted)" /> Admin Panel
                             </button>
                           )}
                           <button onClick={() => { navigate("/profile"); setMenuOpen(false); }} style={menuItemStyle}
-                            onMouseEnter={(e) => (e.currentTarget.style.background = "#f5f3ef")}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--gs-hover)")}
                             onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
                           >
-                            <User size={15} color="#6b6860" /> Profile
+                            <User size={15} color="var(--gs-text-muted)" /> Profile
                           </button>
-                          <button onClick={() => { navigate("/request-soal"); setMenuOpen(false); }} style={menuItemStyle}
-                            onMouseEnter={(e) => (e.currentTarget.style.background = "#f5f3ef")}
+                          <button onClick={() => { setMenuOpen(false); setRequestOpen(true); }} style={menuItemStyle}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--gs-hover)")}
                             onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
                           >
-                            <MessageSquarePlus size={15} color="#6b6860" /> Request Soal
+                            <MessageSquarePlus size={15} color="var(--gs-text-muted)" /> Request Soal
                           </button>
                           <button onClick={handleLogout} style={{ ...menuItemStyle, color: "#e84c2b" }}
                             onMouseEnter={(e) => (e.currentTarget.style.background = "#fff3f0")}
@@ -498,8 +520,9 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {randomOpen   && <RandomSoal   onClose={() => setRandomOpen(false)} />}
+      {randomOpen   && <RandomSoal onClose={() => setRandomOpen(false)} />}
       {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
+      {requestOpen  && <RequestSoalModal onClose={() => setRequestOpen(false)} />}
     </>
   );
 }

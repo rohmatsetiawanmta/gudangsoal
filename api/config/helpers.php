@@ -1,5 +1,13 @@
 <?php
 
+function effectiveStreak($streak, $lastActive) {
+  if (!$lastActive) return 0;
+  $yesterday = date('Y-m-d', strtotime('-1 day'));
+  $today     = date('Y-m-d');
+  if ($lastActive === $today || $lastActive === $yesterday) return (int) $streak;
+  return 0;
+}
+
 function updateDailyStreak($pdo, $userId) {
   $stmt = $pdo->prepare('SELECT last_active FROM users WHERE id = ?');
   $stmt->execute([$userId]);

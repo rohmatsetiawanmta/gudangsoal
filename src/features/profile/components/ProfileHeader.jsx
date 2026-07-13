@@ -1,5 +1,17 @@
 // src/features/profile/components/ProfileHeader.jsx
-import { User, Lock, Eye, EyeOff, Zap, Flame, Edit2, X } from "lucide-react";
+import { User, Lock, Eye, EyeOff, Zap, Flame, Edit2, X, Clock } from "lucide-react";
+
+function formatLastActive(dateStr) {
+  if (!dateStr) return null;
+  const today     = new Date(); today.setHours(0,0,0,0);
+  const d         = new Date(dateStr + "T00:00:00");
+  const diffDays  = Math.round((today - d) / 86400000);
+  if (diffDays === 0) return "hari ini";
+  if (diffDays === 1) return "kemarin";
+  if (diffDays < 7)  return `${diffDays} hari lalu`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} minggu lalu`;
+  return `${Math.floor(diffDays / 30)} bulan lalu`;
+}
 import { useState } from "react";
 
 export default function ProfileHeader({ user, isMobile, onUpdate }) {
@@ -25,9 +37,9 @@ export default function ProfileHeader({ user, isMobile, onUpdate }) {
     width: "100%",
     paddingLeft: "36px", paddingRight: "14px",
     paddingTop: "10px", paddingBottom: "10px",
-    borderRadius: "10px", border: "1px solid #e2ddd5",
+    borderRadius: "10px", border: "1px solid var(--gs-border)",
     fontSize: "14px", outline: "none",
-    fontFamily: "inherit", color: "#0f0e17", boxSizing: "border-box",
+    fontFamily: "inherit", color: "var(--gs-text)", boxSizing: "border-box",
   };
 
   const handleSave = async (e) => {
@@ -102,9 +114,15 @@ export default function ProfileHeader({ user, isMobile, onUpdate }) {
               }}>
                 {user?.name}
               </div>
-              <div style={{ fontSize: "13px", color: "rgba(255,255,255,.4)", marginBottom: "10px" }}>
+              <div style={{ fontSize: "13px", color: "rgba(255,255,255,.4)", marginBottom: "4px" }}>
                 {user?.email}
               </div>
+              {formatLastActive(user?.last_active) && (
+                <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", color: "rgba(255,255,255,.3)", marginBottom: "10px" }}>
+                  <Clock size={10} />
+                  Terakhir aktif {formatLastActive(user?.last_active)}
+                </div>
+              )}
               <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                 <span style={{
                   display: "inline-flex", alignItems: "center", gap: "4px",
@@ -177,13 +195,13 @@ export default function ProfileHeader({ user, isMobile, onUpdate }) {
       {editMode && (
         <div style={{
           marginTop: "16px",
-          background: "white", borderRadius: "16px",
-          border: "1px solid #e2ddd5", borderLeft: "3px solid #7c3aed",
+          background: "var(--gs-surface)", borderRadius: "16px",
+          border: "1px solid var(--gs-border)", borderLeft: "3px solid #7c3aed",
           overflow: "hidden",
         }}>
           <div style={{
             padding: "14px 20px", borderBottom: "1px solid #f0ede6",
-            fontSize: "13px", fontWeight: "700", color: "#0f0e17",
+            fontSize: "13px", fontWeight: "700", color: "var(--gs-text)",
             background: "linear-gradient(to right, #faf9f6, white)",
             display: "flex", alignItems: "center", gap: "8px",
           }}>
@@ -200,34 +218,34 @@ export default function ProfileHeader({ user, isMobile, onUpdate }) {
 
             {/* Nama */}
             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}>Nama</label>
+              <label style={{ fontSize: "13px", fontWeight: "600", color: "var(--gs-text)" }}>Nama</label>
               <div style={{ position: "relative" }}>
-                <User size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#6b6860", pointerEvents: "none" }} />
+                <User size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--gs-text-muted)", pointerEvents: "none" }} />
                 <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   style={inputStyle}
                   onFocus={e => (e.target.style.borderColor = "#e84c2b")}
-                  onBlur={e => (e.target.style.borderColor = "#e2ddd5")}
+                  onBlur={e => (e.target.style.borderColor = "var(--gs-border)")}
                 />
               </div>
             </div>
 
             {/* Password lama */}
             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}>
+              <label style={{ fontSize: "13px", fontWeight: "600", color: "var(--gs-text)" }}>
                 Password Lama{" "}
-                <span style={{ fontWeight: "400", color: "#6b6860" }}>(isi jika ingin ganti password)</span>
+                <span style={{ fontWeight: "400", color: "var(--gs-text-muted)" }}>(isi jika ingin ganti password)</span>
               </label>
               <div style={{ position: "relative" }}>
-                <Lock size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#6b6860", pointerEvents: "none" }} />
+                <Lock size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--gs-text-muted)", pointerEvents: "none" }} />
                 <input type={showPass ? "text" : "password"} value={form.current_password}
                   onChange={e => setForm(f => ({ ...f, current_password: e.target.value }))}
                   placeholder="Password lama"
                   style={{ ...inputStyle, paddingRight: "40px" }}
                   onFocus={e => (e.target.style.borderColor = "#e84c2b")}
-                  onBlur={e => (e.target.style.borderColor = "#e2ddd5")}
+                  onBlur={e => (e.target.style.borderColor = "var(--gs-border)")}
                 />
                 <button type="button" onClick={() => setShowPass(!showPass)}
-                  style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#6b6860", display: "flex" }}>
+                  style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "var(--gs-text-muted)", display: "flex" }}>
                   {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
@@ -236,28 +254,28 @@ export default function ProfileHeader({ user, isMobile, onUpdate }) {
             {/* Password baru + konfirmasi */}
             <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "12px" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                <label style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}>Password Baru</label>
+                <label style={{ fontSize: "13px", fontWeight: "600", color: "var(--gs-text)" }}>Password Baru</label>
                 <div style={{ position: "relative" }}>
-                  <Lock size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#6b6860", pointerEvents: "none" }} />
+                  <Lock size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--gs-text-muted)", pointerEvents: "none" }} />
                   <input type={showPass ? "text" : "password"} value={form.new_password}
                     onChange={e => setForm(f => ({ ...f, new_password: e.target.value }))}
                     placeholder="Minimal 8 karakter"
                     style={inputStyle}
                     onFocus={e => (e.target.style.borderColor = "#e84c2b")}
-                    onBlur={e => (e.target.style.borderColor = "#e2ddd5")}
+                    onBlur={e => (e.target.style.borderColor = "var(--gs-border)")}
                   />
                 </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                <label style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}>Konfirmasi Password</label>
+                <label style={{ fontSize: "13px", fontWeight: "600", color: "var(--gs-text)" }}>Konfirmasi Password</label>
                 <div style={{ position: "relative" }}>
-                  <Lock size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#6b6860", pointerEvents: "none" }} />
+                  <Lock size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--gs-text-muted)", pointerEvents: "none" }} />
                   <input type={showPass ? "text" : "password"} value={form.confirm_password}
                     onChange={e => setForm(f => ({ ...f, confirm_password: e.target.value }))}
                     placeholder="Ulangi password baru"
                     style={inputStyle}
                     onFocus={e => (e.target.style.borderColor = "#e84c2b")}
-                    onBlur={e => (e.target.style.borderColor = "#e2ddd5")}
+                    onBlur={e => (e.target.style.borderColor = "var(--gs-border)")}
                   />
                 </div>
               </div>
