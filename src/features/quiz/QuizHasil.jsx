@@ -66,7 +66,7 @@ function ScoreDonut({ persen }) {
       value: persen,
       color: persen >= 75 ? "#1a8a6e" : persen >= 50 ? "#f5a623" : "#e84c2b",
     },
-    { value: 100 - persen, color: "#f2efe8" },
+    { value: 100 - persen, color: "var(--gs-divider)" },
   ];
   return (
     <div style={{ position: "relative", width: "120px", height: "120px" }}>
@@ -101,7 +101,7 @@ function ScoreDonut({ persen }) {
           style={{
             fontSize: "22px",
             fontWeight: "800",
-            color: "#0f0e17",
+            color: "var(--gs-text)",
             lineHeight: 1,
           }}
         >
@@ -169,7 +169,7 @@ export default function QuizHasil() {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          background: "#faf9f6",
+          background: "var(--gs-bg)",
         }}
       >
         <Navbar />
@@ -191,7 +191,7 @@ export default function QuizHasil() {
                 style={{
                   height: "100px",
                   borderRadius: "14px",
-                  background: "#e2ddd5",
+                  background: "var(--gs-border)",
                   opacity: 0.5,
                   animation: "pulse 1.5s infinite",
                 }}
@@ -210,7 +210,7 @@ export default function QuizHasil() {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          background: "#faf9f6",
+          background: "var(--gs-bg)",
         }}
       >
         <Navbar />
@@ -294,7 +294,7 @@ export default function QuizHasil() {
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        background: "#faf9f6",
+        background: "var(--gs-bg)",
       }}
     >
       <Helmet>
@@ -318,7 +318,7 @@ export default function QuizHasil() {
         >
           <div
             style={{
-              background: "white",
+              background: "var(--gs-surface)",
               borderRadius: "16px",
               padding: "28px",
               maxWidth: "400px",
@@ -329,7 +329,7 @@ export default function QuizHasil() {
               style={{
                 fontSize: "17px",
                 fontWeight: "800",
-                color: "#0f0e17",
+                color: "var(--gs-text)",
                 marginBottom: "8px",
               }}
             >
@@ -338,7 +338,7 @@ export default function QuizHasil() {
             <p
               style={{
                 fontSize: "14px",
-                color: "#6b6860",
+                color: "var(--gs-text-muted)",
                 lineHeight: "1.6",
                 marginBottom: "24px",
               }}
@@ -353,13 +353,13 @@ export default function QuizHasil() {
                   flex: 1,
                   padding: "10px",
                   borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
-                  background: "white",
+                  border: "1px solid var(--gs-border)",
+                  background: "var(--gs-surface)",
                   fontSize: "14px",
                   fontWeight: "600",
                   cursor: "pointer",
                   fontFamily: "inherit",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                 }}
               >
                 Batal
@@ -406,7 +406,7 @@ export default function QuizHasil() {
             background: "none",
             border: "none",
             cursor: "pointer",
-            color: "#6b6860",
+            color: "var(--gs-text-muted)",
             fontSize: "13px",
             fontFamily: "inherit",
             padding: 0,
@@ -419,9 +419,9 @@ export default function QuizHasil() {
         {/* Bagian 1 — Summary */}
         <div
           style={{
-            background: "white",
+            background: "var(--gs-surface)",
             borderRadius: "16px",
-            border: "1px solid #e2ddd5",
+            border: "1px solid var(--gs-border)",
             padding: isMobile ? "20px" : "28px",
             marginBottom: "16px",
           }}
@@ -442,7 +442,7 @@ export default function QuizHasil() {
               <div
                 style={{
                   fontSize: "13px",
-                  color: "#6b6860",
+                  color: "var(--gs-text-muted)",
                   marginBottom: "4px",
                 }}
               >
@@ -452,7 +452,7 @@ export default function QuizHasil() {
                 style={{
                   fontSize: isMobile ? "22px" : "26px",
                   fontWeight: "800",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                   marginBottom: "8px",
                 }}
               >
@@ -540,7 +540,7 @@ export default function QuizHasil() {
                     alignItems: "center",
                     gap: "4px",
                     fontSize: "12px",
-                    color: "#6b6860",
+                    color: "var(--gs-text-muted)",
                   }}
                 >
                   <Zap size={13} color="#f5a623" />
@@ -555,7 +555,7 @@ export default function QuizHasil() {
                     alignItems: "center",
                     gap: "4px",
                     fontSize: "12px",
-                    color: "#6b6860",
+                    color: "var(--gs-text-muted)",
                   }}
                 >
                   <Clock size={13} />
@@ -567,7 +567,7 @@ export default function QuizHasil() {
                     alignItems: "center",
                     gap: "4px",
                     fontSize: "12px",
-                    color: "#6b6860",
+                    color: "var(--gs-text-muted)",
                   }}
                 >
                   <RotateCcw size={13} />
@@ -589,7 +589,7 @@ export default function QuizHasil() {
               flexWrap: "wrap",
             }}
           >
-            <span style={{ fontSize: "12px", color: "#b4b2a9", flexShrink: 0 }}>
+            <span style={{ fontSize: "12px", color: "var(--gs-text-hint)", flexShrink: 0 }}>
               Attempt:
             </span>
             {all_attempts.map((a) => {
@@ -604,9 +604,9 @@ export default function QuizHasil() {
                   style={{
                     padding: "5px 12px",
                     borderRadius: "8px",
-                    border: `1.5px solid ${isCurrent ? "#e84c2b" : "#e2ddd5"}`,
-                    background: isCurrent ? "#fff3f0" : "white",
-                    color: isCurrent ? "#e84c2b" : "#6b6860",
+                    border: `1.5px solid ${isCurrent ? "#e84c2b" : "var(--gs-border)"}`,
+                    background: isCurrent ? "#fff3f0" : "var(--gs-surface)",
+                    color: isCurrent ? "#e84c2b" : "var(--gs-text-muted)",
                     fontSize: "12px",
                     fontWeight: "600",
                     cursor: isCurrent ? "default" : "pointer",
@@ -630,13 +630,13 @@ export default function QuizHasil() {
                 flex: 1,
                 padding: "12px",
                 borderRadius: "12px",
-                border: "1px solid #e2ddd5",
-                background: "white",
+                border: "1px solid var(--gs-border)",
+                background: "var(--gs-surface)",
                 fontSize: "14px",
                 fontWeight: "600",
                 cursor: starting ? "not-allowed" : "pointer",
                 fontFamily: "inherit",
-                color: "#0f0e17",
+                color: "var(--gs-text)",
               }}
             >
               {starting ? "Memulai..." : `Coba Lagi (${sisa_attempt} tersisa)`}
@@ -689,7 +689,7 @@ export default function QuizHasil() {
           style={{
             display: "flex",
             gap: "4px",
-            background: "#f2efe8",
+            background: "var(--gs-hover)",
             padding: "4px",
             borderRadius: "12px",
             marginBottom: "16px",
@@ -707,8 +707,8 @@ export default function QuizHasil() {
                 padding: "8px",
                 borderRadius: "9px",
                 border: "none",
-                background: activeTab === t.key ? "white" : "transparent",
-                color: activeTab === t.key ? "#0f0e17" : "#6b6860",
+                background: activeTab === t.key ? "var(--gs-surface)" : "transparent",
+                color: activeTab === t.key ? "var(--gs-text)" : "var(--gs-text-muted)",
                 fontSize: "13px",
                 fontWeight: "600",
                 cursor: "pointer",
@@ -731,9 +731,9 @@ export default function QuizHasil() {
             {all_attempts.length > 1 && (
               <div
                 style={{
-                  background: "white",
+                  background: "var(--gs-surface)",
                   borderRadius: "14px",
-                  border: "1px solid #e2ddd5",
+                  border: "1px solid var(--gs-border)",
                   padding: isMobile ? "16px" : "20px",
                 }}
               >
@@ -741,7 +741,7 @@ export default function QuizHasil() {
                   style={{
                     fontSize: "13px",
                     fontWeight: "700",
-                    color: "#0f0e17",
+                    color: "var(--gs-text)",
                     marginBottom: "14px",
                   }}
                 >
@@ -768,7 +768,7 @@ export default function QuizHasil() {
                       formatter={(v) => [`${v}%`, "Skor"]}
                       contentStyle={{
                         borderRadius: "10px",
-                        border: "1px solid #e2ddd5",
+                        border: "1px solid var(--gs-border)",
                         fontSize: "13px",
                       }}
                     />
@@ -788,9 +788,9 @@ export default function QuizHasil() {
             {/* Breakdown difficulty */}
             <div
               style={{
-                background: "white",
+                background: "var(--gs-surface)",
                 borderRadius: "14px",
-                border: "1px solid #e2ddd5",
+                border: "1px solid var(--gs-border)",
                 padding: isMobile ? "16px" : "20px",
               }}
             >
@@ -798,7 +798,7 @@ export default function QuizHasil() {
                 style={{
                   fontSize: "13px",
                   fontWeight: "700",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                   marginBottom: "14px",
                 }}
               >
@@ -838,7 +838,7 @@ export default function QuizHasil() {
                         style={{
                           flex: 1,
                           height: "8px",
-                          background: "#f2efe8",
+                          background: "var(--gs-divider)",
                           borderRadius: "4px",
                           overflow: "hidden",
                         }}
@@ -855,7 +855,7 @@ export default function QuizHasil() {
                       <span
                         style={{
                           fontSize: "12px",
-                          color: "#6b6860",
+                          color: "var(--gs-text-muted)",
                           minWidth: "60px",
                           textAlign: "right",
                         }}
@@ -871,9 +871,9 @@ export default function QuizHasil() {
             {/* Waktu */}
             <div
               style={{
-                background: "white",
+                background: "var(--gs-surface)",
                 borderRadius: "14px",
-                border: "1px solid #e2ddd5",
+                border: "1px solid var(--gs-border)",
                 padding: isMobile ? "16px" : "20px",
               }}
             >
@@ -881,7 +881,7 @@ export default function QuizHasil() {
                 style={{
                   fontSize: "13px",
                   fontWeight: "700",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                   marginBottom: "14px",
                 }}
               >
@@ -907,7 +907,7 @@ export default function QuizHasil() {
                   <div
                     key={label}
                     style={{
-                      background: "#faf9f6",
+                      background: "var(--gs-bg)",
                       borderRadius: "10px",
                       padding: "12px",
                       textAlign: "center",
@@ -917,13 +917,13 @@ export default function QuizHasil() {
                       style={{
                         fontSize: "16px",
                         fontWeight: "800",
-                        color: "#0f0e17",
+                        color: "var(--gs-text)",
                         marginBottom: "4px",
                       }}
                     >
                       {value}
                     </div>
-                    <div style={{ fontSize: "11px", color: "#b4b2a9" }}>
+                    <div style={{ fontSize: "11px", color: "var(--gs-text-hint)" }}>
                       {label}
                     </div>
                   </div>
@@ -941,9 +941,9 @@ export default function QuizHasil() {
             {/* Breakdown per topik */}
             <div
               style={{
-                background: "white",
+                background: "var(--gs-surface)",
                 borderRadius: "14px",
-                border: "1px solid #e2ddd5",
+                border: "1px solid var(--gs-border)",
                 padding: isMobile ? "16px" : "20px",
               }}
             >
@@ -951,7 +951,7 @@ export default function QuizHasil() {
                 style={{
                   fontSize: "13px",
                   fontWeight: "700",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                   marginBottom: "14px",
                 }}
               >
@@ -982,7 +982,7 @@ export default function QuizHasil() {
                               flexShrink: 0,
                               fontSize: "13px",
                               fontWeight: "700",
-                              color: "#0f0e17",
+                              color: "var(--gs-text)",
                               overflow: "hidden",
                               textOverflow: "ellipsis",
                               whiteSpace: "nowrap",
@@ -991,7 +991,7 @@ export default function QuizHasil() {
                           >
                             {topik}
                           </div>
-                          <div style={{ flex: 1, height: "8px", background: "#f2efe8", borderRadius: "4px", overflow: "hidden" }}>
+                          <div style={{ flex: 1, height: "8px", background: "var(--gs-divider)", borderRadius: "4px", overflow: "hidden" }}>
                             <div
                               style={{
                                 height: "100%",
@@ -1001,14 +1001,14 @@ export default function QuizHasil() {
                               }}
                             />
                           </div>
-                          <span style={{ fontSize: "12px", color: "#6b6860", minWidth: "60px", textAlign: "right" }}>
+                          <span style={{ fontSize: "12px", color: "var(--gs-text-muted)", minWidth: "60px", textAlign: "right" }}>
                             {benar}/{total} ({p}%)
                           </span>
                         </div>
 
                         {/* Subtopik rows — hanya tampil kalau > 1 subtopik */}
                         {!singleSubtopik && (
-                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", borderLeft: "2px solid #e2ddd5", paddingLeft: isMobile ? "12px" : "16px" }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", borderLeft: `2px solid var(--gs-border)`, paddingLeft: isMobile ? "12px" : "16px" }}>
                           {subtopikEntries.sort((a, b) => (a[1].urutan ?? 0) - (b[1].urutan ?? 0)).map(([subtopik, sub]) => {
                           const sp = Math.round((sub.benar / sub.total) * 100);
                           return (
@@ -1026,7 +1026,7 @@ export default function QuizHasil() {
                                   width: isMobile ? "68px" : "124px",
                                   flexShrink: 0,
                                   fontSize: "12px",
-                                  color: "#6b6860",
+                                  color: "var(--gs-text-muted)",
                                   overflow: "hidden",
                                   textOverflow: "ellipsis",
                                   whiteSpace: "nowrap",
@@ -1035,7 +1035,7 @@ export default function QuizHasil() {
                               >
                                 {subtopik}
                               </div>
-                              <div style={{ flex: 1, height: "6px", background: "#f2efe8", borderRadius: "4px", overflow: "hidden" }}>
+                              <div style={{ flex: 1, height: "6px", background: "var(--gs-divider)", borderRadius: "4px", overflow: "hidden" }}>
                                 <div
                                   style={{
                                     height: "100%",
@@ -1046,7 +1046,7 @@ export default function QuizHasil() {
                                   }}
                                 />
                               </div>
-                              <span style={{ fontSize: "11px", color: "#b4b2a9", minWidth: "60px", textAlign: "right" }}>
+                              <span style={{ fontSize: "11px", color: "var(--gs-text-hint)", minWidth: "60px", textAlign: "right" }}>
                                 {sub.benar}/{sub.total} ({sp}%)
                               </span>
                             </div>
@@ -1063,9 +1063,9 @@ export default function QuizHasil() {
             {/* Soal dengan waktu terlama */}
             <div
               style={{
-                background: "white",
+                background: "var(--gs-surface)",
                 borderRadius: "14px",
-                border: "1px solid #e2ddd5",
+                border: "1px solid var(--gs-border)",
                 padding: isMobile ? "16px" : "20px",
               }}
             >
@@ -1073,7 +1073,7 @@ export default function QuizHasil() {
                 style={{
                   fontSize: "13px",
                   fontWeight: "700",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                   marginBottom: "14px",
                 }}
               >
@@ -1094,7 +1094,7 @@ export default function QuizHasil() {
                         gap: "10px",
                         padding: "10px 14px",
                         borderRadius: "10px",
-                        background: "#faf9f6",
+                        background: "var(--gs-bg)",
                       }}
                     >
                       {/* Rank */}
@@ -1109,13 +1109,13 @@ export default function QuizHasil() {
                               ? "#e84c2b"
                               : i === 1
                               ? "#f5a623"
-                              : "#f2efe8",
+                              : "var(--gs-hover)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           fontSize: "11px",
                           fontWeight: "800",
-                          color: i < 2 ? "white" : "#6b6860",
+                          color: i < 2 ? "white" : "var(--gs-text-muted)",
                         }}
                       >
                         {i + 1}
@@ -1140,7 +1140,7 @@ export default function QuizHasil() {
                       <span
                         style={{
                           fontSize: "13px",
-                          color: "#0f0e17",
+                          color: "var(--gs-text)",
                           flex: 1,
                           minWidth: 0,
                           overflow: "hidden",
@@ -1198,10 +1198,10 @@ export default function QuizHasil() {
                     padding: "6px 14px",
                     borderRadius: "8px",
                     border: `1.5px solid ${
-                      filterReview === f.value ? "#e84c2b" : "#e2ddd5"
+                      filterReview === f.value ? "#e84c2b" : "var(--gs-border)"
                     }`,
-                    background: filterReview === f.value ? "#fff3f0" : "white",
-                    color: filterReview === f.value ? "#e84c2b" : "#6b6860",
+                    background: filterReview === f.value ? "#fff3f0" : "var(--gs-surface)",
+                    color: filterReview === f.value ? "#e84c2b" : "var(--gs-text-muted)",
                     fontSize: "12px",
                     fontWeight: "600",
                     cursor: "pointer",
@@ -1233,7 +1233,7 @@ export default function QuizHasil() {
               <div
                 key={s.id}
                 style={{
-                  background: "white",
+                  background: "var(--gs-surface)",
                   borderRadius: "14px",
                   border: `1px solid ${s.is_correct ? "#9FE1CB" : "#fca5a5"}`,
                   padding: isMobile ? "14px 16px" : "20px 24px",
@@ -1260,7 +1260,7 @@ export default function QuizHasil() {
                     style={{
                       fontSize: "12px",
                       fontWeight: "600",
-                      color: "#6b6860",
+                      color: "var(--gs-text-muted)",
                     }}
                   >
                     Soal {soal.indexOf(s) + 1}
@@ -1269,14 +1269,14 @@ export default function QuizHasil() {
                   <span
                     style={{
                       fontSize: "11px",
-                      color: "#b4b2a9",
+                      color: "var(--gs-text-hint)",
                       fontFamily: "monospace",
                     }}
                   >
                     #{s.kode}
                   </span>
                   <div style={{ flex: 1 }} />
-                  <span style={{ fontSize: "11px", color: "#b4b2a9" }}>
+                  <span style={{ fontSize: "11px", color: "var(--gs-text-hint)" }}>
                     {DURASI_FORMAT(s.waktu_detik || 0)}
                   </span>
                 </div>
@@ -1285,7 +1285,7 @@ export default function QuizHasil() {
                 <div
                   style={{
                     fontSize: isMobile ? "15px" : "16px",
-                    color: "#0f0e17",
+                    color: "var(--gs-text)",
                     fontWeight: "500",
                     lineHeight: "1.7",
                   }}

@@ -54,7 +54,7 @@ export default function PopulerPage() {
   }, [limit]);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+    <div style={{ minHeight: "100vh", background: "var(--gs-bg)" }}>
       <SEO
         title="Soal Populer"
         description="Soal matematika yang paling banyak dikerjakan di Gudang Soal."
@@ -94,14 +94,14 @@ export default function PopulerPage() {
                 style={{
                   fontSize: isMobile ? "22px" : "24px",
                   fontWeight: "800",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                   letterSpacing: "-0.5px",
                 }}
               >
                 Soal Populer
               </h1>
             </div>
-            <p style={{ fontSize: "14px", color: "#6b6860" }}>
+            <p style={{ fontSize: "14px", color: "var(--gs-text-muted)" }}>
               Soal yang paling banyak dikerjakan oleh pengguna.
             </p>
           </div>
@@ -115,9 +115,9 @@ export default function PopulerPage() {
                 style={{
                   padding: "7px 14px",
                   borderRadius: "8px",
-                  border: `1.5px solid ${limit === n ? "#e84c2b" : "#e2ddd5"}`,
-                  background: limit === n ? "#fff3f0" : "white",
-                  color: limit === n ? "#e84c2b" : "#6b6860",
+                  border: `1.5px solid ${limit === n ? "#e84c2b" : "var(--gs-border)"}`,
+                  background: limit === n ? "#fff3f0" : "var(--gs-surface)",
+                  color: limit === n ? "#e84c2b" : "var(--gs-text-muted)",
                   fontSize: "13px",
                   fontWeight: "600",
                   cursor: "pointer",
@@ -142,7 +142,7 @@ export default function PopulerPage() {
                 style={{
                   height: "88px",
                   borderRadius: "14px",
-                  background: "#e2ddd5",
+                  background: "var(--gs-border)",
                   opacity: 0.5,
                   animation: "pulse 1.5s infinite",
                 }}
@@ -155,12 +155,12 @@ export default function PopulerPage() {
         {!loading && soal.length === 0 && (
           <div
             style={{
-              background: "white",
+              background: "var(--gs-surface)",
               borderRadius: "14px",
-              border: "1px solid #e2ddd5",
+              border: "1px solid var(--gs-border)",
               padding: "48px",
               textAlign: "center",
-              color: "#6b6860",
+              color: "var(--gs-text-muted)",
               fontSize: "14px",
             }}
           >
@@ -186,9 +186,9 @@ export default function PopulerPage() {
                     display: "flex",
                     alignItems: "center",
                     gap: isMobile ? "12px" : "16px",
-                    background: "white",
+                    background: "var(--gs-surface)",
                     borderRadius: "14px",
-                    border: "1px solid #e2ddd5",
+                    border: "1px solid var(--gs-border)",
                     padding: isMobile ? "14px 16px" : "18px 20px",
                     cursor: "pointer",
                     transition: "all .15s",
@@ -200,7 +200,7 @@ export default function PopulerPage() {
                       "0 4px 16px rgba(0,0,0,0.06)";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "#e2ddd5";
+                    e.currentTarget.style.borderColor = "var(--gs-border)";
                     e.currentTarget.style.transform = "translateY(0)";
                     e.currentTarget.style.boxShadow = "none";
                   }}
@@ -211,13 +211,13 @@ export default function PopulerPage() {
                       width: "32px",
                       height: "32px",
                       borderRadius: "10px",
-                      background: i < 3 ? "#e84c2b" : "#f2efe8",
+                      background: i < 3 ? "#e84c2b" : "var(--gs-hover)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontWeight: "800",
                       fontSize: "14px",
-                      color: i < 3 ? "white" : "#6b6860",
+                      color: i < 3 ? "white" : "var(--gs-text-muted)",
                       flexShrink: 0,
                     }}
                   >
@@ -229,7 +229,7 @@ export default function PopulerPage() {
                     <div
                       style={{
                         fontSize: "14px",
-                        color: "#0f0e17",
+                        color: "var(--gs-text)",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
@@ -251,7 +251,7 @@ export default function PopulerPage() {
                         flexWrap: "wrap",
                       }}
                     >
-                      <span style={{ fontSize: "12px", color: "#b4b2a9" }}>
+                      <span style={{ fontSize: "12px", color: "var(--gs-text-hint)" }}>
                         {s.mapel}
                         {!isMobile && ` — ${s.subtopik}`}
                       </span>
@@ -276,10 +276,10 @@ export default function PopulerPage() {
                         gap: "4px",
                         fontSize: "12px",
                         fontWeight: "600",
-                        color: "#0f0e17",
+                        color: "var(--gs-text)",
                       }}
                     >
-                      <Eye size={12} color="#6b6860" />
+                      <Eye size={12} color="var(--gs-text-muted)" />
                       {parseInt(s.views || 0).toLocaleString()}
                     </div>
                     <div
@@ -288,7 +288,7 @@ export default function PopulerPage() {
                         alignItems: "center",
                         gap: "4px",
                         fontSize: "12px",
-                        color: "#6b6860",
+                        color: "var(--gs-text-muted)",
                       }}
                     >
                       <Users size={11} />

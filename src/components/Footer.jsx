@@ -11,10 +11,11 @@ export default function Footer() {
   const year      = new Date().getFullYear();
 
   const links = [
-    { label: "FAQ",            path: "/faq" },
-    { label: "Direktori Soal", path: "/browse" },
-    { label: "Soal Populer",   path: "/populer" },
-    { label: "Changelog",      path: "/changelog" },
+    { label: "FAQ",               path: "/faq" },
+    { label: "Direktori Soal",    path: "/browse" },
+    { label: "Soal Populer",      path: "/populer" },
+    { label: "Changelog",         path: "/changelog" },
+    { label: "Kebijakan Privasi", path: "/privacy" },
   ];
 
   return (

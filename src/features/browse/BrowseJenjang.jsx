@@ -37,7 +37,7 @@ export default function BrowseJenjang() {
   }, []);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#f2efe8" }}>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
       <SEO
         title="Direktori Soal"
         description="Browse semua soal matematika berdasarkan jenjang — SD, SMP, SMA, UTBK, CPNS, dan OSN."
@@ -93,7 +93,7 @@ export default function BrowseJenjang() {
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} style={{
                 height: "68px", borderRadius: "14px",
-                background: "#e2ddd5", opacity: 0.5,
+                background: "var(--gs-border)", opacity: 0.5,
                 animation: "pulse 1.5s infinite",
               }} />
             ))}
@@ -103,15 +103,15 @@ export default function BrowseJenjang() {
         {!loading && !error && (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {jenjang.map((j) => {
-              const { icon: Icon, color } = ICON_MAP[j.slug] || { icon: BookOpen, color: "#6b6860" };
+              const { icon: Icon, color } = ICON_MAP[j.slug] || { icon: BookOpen, color: "var(--gs-text-muted)" };
               return (
                 <div
                   key={j.id}
                   onClick={() => navigate(`/browse/${j.slug}`, { state: { jenjangNama: j.nama, jenjangSlug: j.slug } })}
                   style={{
                     display: "flex", alignItems: "center", gap: "16px",
-                    background: "white", borderRadius: "14px",
-                    border: "1px solid #e2ddd5",
+                    background: "var(--gs-surface)", borderRadius: "14px",
+                    border: "1px solid var(--gs-border)",
                     borderLeft: `3px solid ${color}`,
                     padding: isMobile ? "14px 16px" : "16px 20px",
                     cursor: "pointer",
@@ -140,12 +140,12 @@ export default function BrowseJenjang() {
                     <div style={{
                       fontWeight: "700",
                       fontSize: isMobile ? "15px" : "15.5px",
-                      color: "#0f0e17",
+                      color: "var(--gs-text)",
                     }}>
                       {j.nama}
                     </div>
                   </div>
-                  <ChevronRight size={17} color="#b4b2a9" />
+                  <ChevronRight size={17} color="var(--gs-text-hint)" />
                 </div>
               );
             })}

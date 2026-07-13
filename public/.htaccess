@@ -1,0 +1,19 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Redirect www -> non-www (301)
+  RewriteCond %{HTTP_HOST} ^www\.gudangsoal\.com$ [NC]
+  RewriteRule ^(.*)$ https://gudangsoal.com/$1 [L,R=301]
+
+  # Sitemap — taruh paling atas sebelum kondisi lain
+  RewriteRule ^sitemap\.xml$ sitemap.php [L]
+
+  # Jangan redirect kalau file/folder ada
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  # Jangan redirect request ke /api
+  RewriteCond %{REQUEST_URI} !^/api/
+  # Semua route lain → render.php (inject meta tags per URL, lalu serve index.html)
+  RewriteRule . /render.php [L]
+</IfModule>

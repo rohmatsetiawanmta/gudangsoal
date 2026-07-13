@@ -16,9 +16,9 @@ import SoalPreviewModal from "./SoalPreviewModal";
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const DIFFICULTY = {
-  1: { label: "Easy",   color: "#1a8a6e", bg: "#e4f5f0" },
-  2: { label: "Medium", color: "#854F0B", bg: "#faeeda" },
-  3: { label: "Hard",   color: "#e84c2b", bg: "#fff3f0" },
+  1: { label: "Easy", color: "#1a8a6e", bg: "#e4f5f0" },
+  2: { label: "Med",  color: "#854F0B", bg: "#faeeda" },
+  3: { label: "Hard", color: "#e84c2b", bg: "#fff3f0" },
 };
 
 const TIPE_MAP = {
@@ -36,7 +36,7 @@ const TIPE_MAP = {
 function DifficultyBadge({ level }) {
   const d = DIFFICULTY[level] || DIFFICULTY[1];
   return (
-    <span style={{ fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px", background: d.bg, color: d.color, flexShrink: 0, whiteSpace: "nowrap" }}>
+    <span style={{ fontSize: "10px", fontWeight: "800", padding: "2px 5px", borderRadius: "5px", background: d.bg, color: d.color, flexShrink: 0, whiteSpace: "nowrap" }}>
       {d.label}
     </span>
   );
@@ -649,9 +649,9 @@ export default function AdminSoal() {
       {!isMobile && (
         <div style={{ background: "white", borderRadius: "16px", border: "1px solid #e8e6e0", boxShadow: "0 1px 8px rgba(0,0,0,0.04)", overflow: "visible" }}>
           {/* Table header */}
-          <div style={{ display: "grid", gridTemplateColumns: "36px 44px 72px 52px 1fr 180px 70px 90px 110px 44px", gap: "10px", padding: "10px 20px", background: "#f7f5f0", borderBottom: "1px solid #e8e6e0", alignItems: "center", borderRadius: "16px 16px 0 0" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "32px 58px 1fr 120px 44px 52px 52px 36px", gap: "10px", padding: "10px 20px", background: "#f7f5f0", borderBottom: "1px solid #e8e6e0", alignItems: "center", borderRadius: "16px 16px 0 0" }}>
             <Checkbox checked={allOnPageSelected} indeterminate={someOnPageSelected} onChange={toggleAll} />
-            {["#", "Kode", "Tipe", "Soal", "Subtopik", "Materi", "Sulit", "Status", "Aksi"].map(h => (
+            {["Kode", "Soal", "Subtopik", "Materi", "Level", "Status", "Aksi"].map(h => (
               <div key={h} style={{ fontSize: "11px", fontWeight: "700", color: "#9b9992", textTransform: "uppercase", letterSpacing: ".07em" }}>{h}</div>
             ))}
           </div>
@@ -666,7 +666,7 @@ export default function AdminSoal() {
             <div key={s.id}
               style={{
                 display: "grid",
-                gridTemplateColumns: "36px 44px 72px 52px 1fr 180px 70px 90px 110px 44px",
+                gridTemplateColumns: "32px 58px 1fr 120px 44px 52px 52px 36px",
                 gap: "10px",
                 padding: "12px 20px",
                 borderBottom: i < soal.length - 1 ? "1px solid #f5f3ef" : "none",
@@ -677,18 +677,20 @@ export default function AdminSoal() {
                 transition: "background .1s",
               }}>
               <Checkbox checked={selected.has(s.id)} onChange={() => toggleOne(s.id)} />
-              <div style={{ fontSize: "12px", color: "#c8c6be", fontWeight: "600" }}>{(page-1)*limit+i+1}</div>
               <div style={{ fontSize: "11px", fontWeight: "700", color: "#9b9992", fontFamily: "monospace", letterSpacing: ".04em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {s.kode || "—"}
               </div>
-              <TipeBadge tipe={s.tipe} />
-              <div style={{ fontSize: "13.5px", color: "#0f0e17", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: "400" }}>
-                {s.body.replace(/\$[^$]+\$/g, "[math]").replace(/[*_~`#]/g, "")}
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "7px", minWidth: 0 }}>
+                <div style={{ paddingTop: "1px", flexShrink: 0 }}><TipeBadge tipe={s.tipe} /></div>
+                <div style={{ fontSize: "11px", color: "#0f0e17", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", fontWeight: "400", lineHeight: "1.45" }}>
+                  {s.body.replace(/\$[^$]+\$/g, "[math]").replace(/[*_~`#]/g, "")}
+                </div>
               </div>
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: "12px", color: "#6b6860", fontWeight: "500", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.subtopik}</div>
                 <div style={{ fontSize: "11px", color: "#c8c6be", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: "1px" }}>{s.mapel}</div>
               </div>
+
               <div style={{ position: "relative" }}>
                 {s.materi?.length > 0 ? (
                   <>
@@ -728,7 +730,7 @@ export default function AdminSoal() {
                 )}
               </div>
               <DifficultyBadge level={s.difficulty} />
-              <ToggleSwitch checked={s.is_published == 1} onChange={() => handleTogglePublish(s.id, s.is_published)} loading={publishLoading[s.id]} />
+              <ToggleSwitch checked={s.is_published == 1} onChange={() => handleTogglePublish(s.id, s.is_published)} loading={publishLoading[s.id]} hideLabel />
               <ActionMenu onPreview={() => setPreviewId(s.id)} onSalin={() => handleSalin(s.id)} onEdit={() => window.open(`/admin/soal/edit/${s.id}`, "_blank")} onDelete={() => setDeleteId(s.id)} copying={copying[s.id]} />
             </div>
           ))}

@@ -82,7 +82,7 @@ export default function LatihanDetail() {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          background: "#faf9f6",
+          background: "var(--gs-bg)",
         }}
       >
         <Navbar />
@@ -104,7 +104,7 @@ export default function LatihanDetail() {
                 style={{
                   height: "100px",
                   borderRadius: "14px",
-                  background: "#e2ddd5",
+                  background: "var(--gs-border)",
                   opacity: 0.5,
                   animation: "pulse 1.5s infinite",
                 }}
@@ -123,7 +123,7 @@ export default function LatihanDetail() {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          background: "#faf9f6",
+          background: "var(--gs-bg)",
         }}
       >
         <Navbar />
@@ -154,7 +154,7 @@ export default function LatihanDetail() {
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        background: "#faf9f6",
+        background: "var(--gs-bg)",
       }}
     >
       <SEO
@@ -183,7 +183,7 @@ export default function LatihanDetail() {
             background: "none",
             border: "none",
             cursor: "pointer",
-            color: "#6b6860",
+            color: "var(--gs-text-muted)",
             fontSize: "13px",
             fontFamily: "inherit",
             padding: 0,
@@ -196,9 +196,9 @@ export default function LatihanDetail() {
         {/* Header card */}
         <div
           style={{
-            background: "white",
+            background: "var(--gs-surface)",
             borderRadius: "16px",
-            border: "1px solid #e2ddd5",
+            border: "1px solid var(--gs-border)",
             padding: isMobile ? "20px" : "28px",
             marginBottom: "16px",
             position: "relative",
@@ -212,7 +212,7 @@ export default function LatihanDetail() {
               left: 0,
               right: 0,
               height: "4px",
-              background: attemptHabis ? "#e2ddd5" : "#e84c2b",
+              background: attemptHabis ? "var(--gs-border)" : "#e84c2b",
             }}
           />
 
@@ -224,7 +224,7 @@ export default function LatihanDetail() {
                 width: "52px",
                 height: "52px",
                 borderRadius: "14px",
-                background: attemptHabis ? "#f2efe8" : "#fff3f0",
+                background: attemptHabis ? "var(--gs-hover)" : "#fff3f0",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -233,7 +233,7 @@ export default function LatihanDetail() {
             >
               <BookOpen
                 size={24}
-                color={attemptHabis ? "#b4b2a9" : "#e84c2b"}
+                color={attemptHabis ? "var(--gs-text-hint)" : "#e84c2b"}
               />
             </div>
             <div style={{ flex: 1 }}>
@@ -250,7 +250,7 @@ export default function LatihanDetail() {
                   style={{
                     fontSize: isMobile ? "18px" : "20px",
                     fontWeight: "800",
-                    color: "#0f0e17",
+                    color: "var(--gs-text)",
                     margin: 0,
                   }}
                 >
@@ -275,7 +275,7 @@ export default function LatihanDetail() {
                 <p
                   style={{
                     fontSize: "14px",
-                    color: "#6b6860",
+                    color: "var(--gs-text-muted)",
                     lineHeight: "1.6",
                     margin: 0,
                   }}
@@ -327,9 +327,9 @@ export default function LatihanDetail() {
             <div
               key={label}
               style={{
-                background: "white",
+                background: "var(--gs-surface)",
                 borderRadius: "12px",
-                border: "1px solid #e2ddd5",
+                border: "1px solid var(--gs-border)",
                 padding: "14px 16px",
                 display: "flex",
                 alignItems: "center",
@@ -354,7 +354,7 @@ export default function LatihanDetail() {
                 <div
                   style={{
                     fontSize: "11px",
-                    color: "#b4b2a9",
+                    color: "var(--gs-text-hint)",
                     marginBottom: "2px",
                   }}
                 >
@@ -364,7 +364,7 @@ export default function LatihanDetail() {
                   style={{
                     fontSize: "14px",
                     fontWeight: "700",
-                    color: "#0f0e17",
+                    color: "var(--gs-text)",
                   }}
                 >
                   {value}
@@ -378,9 +378,9 @@ export default function LatihanDetail() {
         {sudahMulai && set.best_persen !== null && (
           <div
             style={{
-              background: "white",
+              background: "var(--gs-surface)",
               borderRadius: "14px",
-              border: "1px solid #e2ddd5",
+              border: "1px solid var(--gs-border)",
               padding: isMobile ? "16px" : "20px",
               marginBottom: "16px",
             }}
@@ -397,7 +397,7 @@ export default function LatihanDetail() {
                 style={{
                   fontSize: "13px",
                   fontWeight: "600",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                 }}
               >
                 Skor Terbaik
@@ -410,7 +410,7 @@ export default function LatihanDetail() {
                   style={{
                     fontSize: "14px",
                     fontWeight: "800",
-                    color: "#0f0e17",
+                    color: "var(--gs-text)",
                   }}
                 >
                   {set.best_persen}%
@@ -420,7 +420,7 @@ export default function LatihanDetail() {
             <div
               style={{
                 height: "8px",
-                background: "#f2efe8",
+                background: "var(--gs-divider)",
                 borderRadius: "4px",
                 overflow: "hidden",
               }}
@@ -445,7 +445,7 @@ export default function LatihanDetail() {
                 display: "flex",
                 justifyContent: "space-between",
                 fontSize: "11px",
-                color: "#b4b2a9",
+                color: "var(--gs-text-hint)",
                 marginTop: "4px",
               }}
             >
@@ -460,9 +460,9 @@ export default function LatihanDetail() {
         {/* Sistem XP */}
         <div
           style={{
-            background: "white",
+            background: "var(--gs-surface)",
             borderRadius: "14px",
-            border: "1px solid #e2ddd5",
+            border: "1px solid var(--gs-border)",
             padding: isMobile ? "16px" : "20px",
             marginBottom: "20px",
           }}
@@ -471,7 +471,7 @@ export default function LatihanDetail() {
             style={{
               fontSize: "13px",
               fontWeight: "600",
-              color: "#0f0e17",
+              color: "var(--gs-text)",
               marginBottom: "12px",
             }}
           >
@@ -491,13 +491,13 @@ export default function LatihanDetail() {
                     gap: "10px",
                     padding: "8px 12px",
                     borderRadius: "8px",
-                    background: isAchieved ? "#e4f5f0" : "#faf9f6",
+                    background: isAchieved ? "#e4f5f0" : "var(--gs-surface-subtle)",
                   }}
                 >
                   <span
                     style={{
                       fontSize: "12px",
-                      color: "#6b6860",
+                      color: "var(--gs-text-muted)",
                       minWidth: "60px",
                     }}
                   >
@@ -507,7 +507,7 @@ export default function LatihanDetail() {
                     style={{
                       flex: 1,
                       height: "6px",
-                      background: "#e2ddd5",
+                      background: "var(--gs-border)",
                       borderRadius: "3px",
                       overflow: "hidden",
                     }}
@@ -526,7 +526,7 @@ export default function LatihanDetail() {
                     style={{
                       fontSize: "12px",
                       fontWeight: "700",
-                      color: tier.xpPersen === 0 ? "#b4b2a9" : "#f5a623",
+                      color: tier.xpPersen === 0 ? "var(--gs-text-hint)" : "#f5a623",
                       minWidth: "50px",
                       textAlign: "right",
                     }}
@@ -539,7 +539,7 @@ export default function LatihanDetail() {
             })}
           </div>
           <div
-            style={{ fontSize: "11px", color: "#b4b2a9", marginTop: "10px" }}
+            style={{ fontSize: "11px", color: "var(--gs-text-hint)", marginTop: "10px" }}
           >
             XP dihitung dari delta skor terbaik antar attempt.
           </div>
@@ -592,10 +592,10 @@ export default function LatihanDetail() {
               style={{
                 padding: "14px",
                 borderRadius: "14px",
-                background: "#f2efe8",
+                background: "var(--gs-hover)",
                 textAlign: "center",
                 fontSize: "14px",
-                color: "#6b6860",
+                color: "var(--gs-text-muted)",
                 fontWeight: "600",
               }}
             >
@@ -609,9 +609,9 @@ export default function LatihanDetail() {
                 width: "100%",
                 padding: "14px",
                 borderRadius: "14px",
-                border: "1px solid #e2ddd5",
-                background: "white",
-                color: "#0f0e17",
+                border: "1px solid var(--gs-border)",
+                background: "var(--gs-surface)",
+                color: "var(--gs-text)",
                 fontSize: "15px",
                 fontWeight: "600",
                 cursor: "pointer",

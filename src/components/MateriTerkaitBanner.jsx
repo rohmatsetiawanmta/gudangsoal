@@ -67,7 +67,7 @@ export default function MateriTerkaitBanner({ subtopikId, subtopikSlug, materi, 
                 <GraduationCap size={14} color="white" />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: "13px", fontWeight: "700", color: "#0f0e17", lineHeight: "1.35" }}>
+                <div style={{ fontSize: "13px", fontWeight: "700", color: "var(--gs-text)", lineHeight: "1.35" }}>
                   <MathRenderer text={materi.judul} />
                 </div>
               </div>

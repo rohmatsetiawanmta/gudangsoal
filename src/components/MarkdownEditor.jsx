@@ -145,7 +145,7 @@ export default function MarkdownEditor({
           alignItems: "center",
           gap: "2px",
           padding: "6px 10px",
-          background: "#f2efe8",
+          background: "var(--gs-hover)",
           borderBottom: "1px solid #e2ddd5",
           flexWrap: "wrap",
         }}
@@ -158,7 +158,7 @@ export default function MarkdownEditor({
                 style={{
                   width: "1px",
                   height: "16px",
-                  background: "#e2ddd5",
+                  background: "var(--gs-border)",
                   margin: "0 4px",
                 }}
               />
@@ -182,11 +182,11 @@ export default function MarkdownEditor({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#6b6860",
+                color: "var(--gs-text-muted)",
                 transition: "background .15s",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "#e2ddd5")
+                (e.currentTarget.style.background = "var(--gs-border)")
               }
               onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
             >
@@ -200,7 +200,7 @@ export default function MarkdownEditor({
               style={{
                 width: "1px",
                 height: "16px",
-                background: "#e2ddd5",
+                background: "var(--gs-border)",
                 margin: "0 4px",
               }}
             />
@@ -221,11 +221,11 @@ export default function MarkdownEditor({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: uploading ? "#b4b2a9" : "#6b6860",
+                color: uploading ? "var(--gs-text-hint)" : "var(--gs-text-muted)",
                 transition: "background .15s",
               }}
               onMouseEnter={(e) => {
-                if (!uploading) e.currentTarget.style.background = "#e2ddd5";
+                if (!uploading) e.currentTarget.style.background = "var(--gs-border)";
               }}
               onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
             >
@@ -235,7 +235,7 @@ export default function MarkdownEditor({
                     width: "12px",
                     height: "12px",
                     border: "2px solid #e2ddd5",
-                    borderTopColor: "#6b6860",
+                    borderTopColor: "var(--gs-text-muted)",
                     borderRadius: "50%",
                     animation: "spin 0.7s linear infinite",
                     display: "block",
@@ -258,7 +258,7 @@ export default function MarkdownEditor({
           <span
             style={{
               fontSize: "11px",
-              color: "#b4b2a9",
+              color: "var(--gs-text-hint)",
               fontFamily: "monospace",
             }}
           >
@@ -280,16 +280,16 @@ export default function MarkdownEditor({
           outline: "none",
           fontSize: "14px",
           fontFamily: "monospace",
-          color: "#0f0e17",
+          color: "var(--gs-text)",
           resize: "vertical",
           lineHeight: "1.7",
-          background: "white",
+          background: "var(--gs-surface)",
         }}
         onFocus={(e) =>
           (e.currentTarget.parentElement.style.borderColor = "#e84c2b")
         }
         onBlur={(e) =>
-          (e.currentTarget.parentElement.style.borderColor = "#e2ddd5")
+          (e.currentTarget.parentElement.style.borderColor = "var(--gs-border)")
         }
       />
 

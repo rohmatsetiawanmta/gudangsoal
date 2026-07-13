@@ -121,7 +121,7 @@ export default function BankPintarGame() {
   // ── Idle ─────────────────────────────────────────────────────────────────────
   if (phase === "idle") {
     return (
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#faf9f6" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
         <SEO title="Bank Pintar" description="Hitung bunga dan cicilan dengan cepat." url="/games/bank-pintar" />
         <Navbar />
         <main style={{ flex: 1, maxWidth: "600px", margin: "0 auto", padding: isMobile ? "32px 20px" : "56px 40px", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "24px" }}>
@@ -132,10 +132,10 @@ export default function BankPintarGame() {
           </div>
 
           <div>
-            <h1 style={{ fontSize: isMobile ? "24px" : "28px", fontWeight: "800", color: "#0f0e17", marginBottom: "8px", letterSpacing: "-0.5px" }}>
+            <h1 style={{ fontSize: isMobile ? "24px" : "28px", fontWeight: "800", color: "var(--gs-text)", marginBottom: "8px", letterSpacing: "-0.5px" }}>
               Bank Pintar
             </h1>
-            <p style={{ fontSize: "15px", color: "#6b6860", lineHeight: "1.6" }}>
+            <p style={{ fontSize: "15px", color: "var(--gs-text-muted)", lineHeight: "1.6" }}>
               Hitung bunga dan cicilan dengan cepat.<br />
               Pilih jawaban yang benar sebelum waktu habis!
             </p>
@@ -164,14 +164,14 @@ export default function BankPintarGame() {
             ].map(({ value, label, color, bg }) => (
               <div key={label} style={{ background: bg, borderRadius: "12px", padding: "14px 10px" }}>
                 <div style={{ fontSize: isMobile ? "20px" : "24px", fontWeight: "800", color }}>{value}</div>
-                <div style={{ fontSize: "11px", color: "#6b6860", marginTop: "4px" }}>{label}</div>
+                <div style={{ fontSize: "11px", color: "var(--gs-text-muted)", marginTop: "4px" }}>{label}</div>
               </div>
             ))}
           </div>
 
           {bestScore > 0 && (
-            <div style={{ fontSize: "13px", color: "#6b6860", background: "#f2efe8", borderRadius: "10px", padding: "10px 20px" }}>
-              Skor terbaik sesi ini: <strong style={{ color: "#0f0e17" }}>{bestScore}</strong>
+            <div style={{ fontSize: "13px", color: "var(--gs-text-muted)", background: "var(--gs-hover)", borderRadius: "10px", padding: "10px 20px" }}>
+              Skor terbaik sesi ini: <strong style={{ color: "var(--gs-text)" }}>{bestScore}</strong>
             </div>
           )}
 
@@ -191,7 +191,7 @@ export default function BankPintarGame() {
   // ── Game Over ─────────────────────────────────────────────────────────────────
   if (phase === "gameover") {
     return (
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#faf9f6" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
         <SEO title="Game Over — Bank Pintar" description="" url="/games/bank-pintar" />
         <Navbar />
         <main style={{ flex: 1, maxWidth: "600px", margin: "0 auto", padding: isMobile ? "32px 20px" : "56px 40px", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "24px" }}>
@@ -201,16 +201,16 @@ export default function BankPintarGame() {
           </div>
 
           <div>
-            <h1 style={{ fontSize: "28px", fontWeight: "800", color: "#0f0e17", marginBottom: "4px" }}>Game Over!</h1>
-            <p style={{ fontSize: "14px", color: "#6b6860" }}>Level tertinggi: {level}</p>
+            <h1 style={{ fontSize: "28px", fontWeight: "800", color: "var(--gs-text)", marginBottom: "4px" }}>Game Over!</h1>
+            <p style={{ fontSize: "14px", color: "var(--gs-text-muted)" }}>Level tertinggi: {level}</p>
           </div>
 
-          <div style={{ background: "white", borderRadius: "16px", border: "1px solid #e2ddd5", padding: "28px 40px", width: "100%" }}>
-            <div style={{ fontSize: "13px", color: "#6b6860", marginBottom: "6px" }}>Skor akhir</div>
-            <div style={{ fontSize: isMobile ? "48px" : "60px", fontWeight: "800", color: "#0f0e17", letterSpacing: "-2px" }}>{score}</div>
+          <div style={{ background: "var(--gs-surface)", borderRadius: "16px", border: "1px solid var(--gs-border)", padding: "28px 40px", width: "100%" }}>
+            <div style={{ fontSize: "13px", color: "var(--gs-text-muted)", marginBottom: "6px" }}>Skor akhir</div>
+            <div style={{ fontSize: isMobile ? "48px" : "60px", fontWeight: "800", color: "var(--gs-text)", letterSpacing: "-2px" }}>{score}</div>
             {bestScore > score && (
-              <div style={{ fontSize: "13px", color: "#6b6860", marginTop: "8px" }}>
-                Terbaik: <strong style={{ color: "#0f0e17" }}>{bestScore}</strong>
+              <div style={{ fontSize: "13px", color: "var(--gs-text-muted)", marginTop: "8px" }}>
+                Terbaik: <strong style={{ color: "var(--gs-text)" }}>{bestScore}</strong>
               </div>
             )}
             {score >= bestScore && bestScore > 0 && (
@@ -222,8 +222,8 @@ export default function BankPintarGame() {
 
           <div style={{ display: "flex", gap: "10px", width: "100%" }}>
             <button onClick={() => setPhase("idle")}
-              style={{ flex: 1, padding: "12px", borderRadius: "12px", border: "1px solid #e2ddd5", background: "white", fontSize: "14px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", color: "#0f0e17", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#f2efe8")}
+              style={{ flex: 1, padding: "12px", borderRadius: "12px", border: "1px solid var(--gs-border)", background: "var(--gs-surface)", fontSize: "14px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", color: "var(--gs-text)", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--gs-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "white")}
             >
               <ChevronLeft size={16} /> Kembali
@@ -246,7 +246,7 @@ export default function BankPintarGame() {
   const typeColor = scenario ? TYPE_COLORS[scenario.type] : TYPE_COLORS.bunga_tunggal;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#faf9f6" }}>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
       <SEO title="Bank Pintar" description="" url="/games/bank-pintar" />
       <Navbar />
 
@@ -256,14 +256,14 @@ export default function BankPintarGame() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", gap: "4px" }}>
             {Array.from({ length: MAX_LIVES }, (_, i) => (
-              <Heart key={i} size={22} color={i < lives ? "#e84c2b" : "#e2ddd5"} fill={i < lives ? "#e84c2b" : "none"} />
+              <Heart key={i} size={22} color={i < lives ? "#e84c2b" : "var(--gs-border)"} fill={i < lives ? "#e84c2b" : "none"} />
             ))}
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "18px", fontWeight: "800", color: "#0f0e17" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "18px", fontWeight: "800", color: "var(--gs-text)" }}>
             <Zap size={16} color="#f5a623" fill="#f5a623" />
             {score}
           </div>
-          <div style={{ fontSize: "12px", fontWeight: "700", color: "#6b6860", background: "#f2efe8", borderRadius: "20px", padding: "5px 12px" }}>
+          <div style={{ fontSize: "12px", fontWeight: "700", color: "var(--gs-text-muted)", background: "var(--gs-hover)", borderRadius: "20px", padding: "5px 12px" }}>
             Level {level}
             {band !== "easy" && (
               <span style={{ marginLeft: "6px", color: band === "hard" ? "#e84c2b" : "#f5a623" }}>
@@ -274,13 +274,13 @@ export default function BankPintarGame() {
         </div>
 
         {/* Timer bar */}
-        <div style={{ width: "100%", height: "6px", background: "#e2ddd5", borderRadius: "3px", overflow: "hidden" }}>
+        <div style={{ width: "100%", height: "6px", background: "var(--gs-border)", borderRadius: "3px", overflow: "hidden" }}>
           <div style={{ height: "100%", width: `${timerPct}%`, background: timerColor, borderRadius: "3px", transition: "width 1s linear, background .3s" }} />
         </div>
 
         {/* Scenario card */}
         {scenario && (
-          <div style={{ background: "white", borderRadius: "16px", border: "1px solid #e2ddd5", padding: isMobile ? "18px" : "24px", display: "flex", flexDirection: "column", gap: "18px" }}>
+          <div style={{ background: "var(--gs-surface)", borderRadius: "16px", border: "1px solid var(--gs-border)", padding: isMobile ? "18px" : "24px", display: "flex", flexDirection: "column", gap: "18px" }}>
 
             {/* Type badge + timer */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -293,14 +293,14 @@ export default function BankPintarGame() {
             </div>
 
             {/* Question */}
-            <p style={{ fontSize: isMobile ? "14px" : "15px", color: "#0f0e17", lineHeight: "1.65", fontWeight: "500", margin: 0 }}>
+            <p style={{ fontSize: isMobile ? "14px" : "15px", color: "var(--gs-text)", lineHeight: "1.65", fontWeight: "500", margin: 0 }}>
               {scenario.question}
             </p>
 
             {/* Choices 2×2 grid */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
               {scenario.choices.map((v) => {
-                let bg = "white", border = "1px solid #e2ddd5", color = "#0f0e17", icon = null;
+                let bg = "var(--gs-surface)", border = "1px solid var(--gs-border)", color = "var(--gs-text)", icon = null;
 
                 if (feedback) {
                   if (v === scenario.correct) {
@@ -310,14 +310,14 @@ export default function BankPintarGame() {
                     bg = "#fff3f0"; border = "1.5px solid #e84c2b"; color = "#e84c2b";
                     icon = <X size={14} />;
                   } else {
-                    bg = "#f7f5f1"; color = "#b4b2a9"; border = "1px solid #e2ddd5";
+                    bg = "var(--gs-surface-subtle)"; color = "var(--gs-text-hint)"; border = "1px solid var(--gs-border)";
                   }
                 }
 
                 return (
                   <button key={v} onClick={() => handleChoice(v)} disabled={!!feedback}
                     style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "14px 10px", borderRadius: "12px", border, background: bg, color, fontSize: isMobile ? "13px" : "14px", fontWeight: "700", cursor: feedback ? "default" : "pointer", fontFamily: "monospace", transition: "all .12s", lineHeight: 1 }}
-                    onMouseEnter={(e) => { if (!feedback) e.currentTarget.style.background = "#f2efe8"; }}
+                    onMouseEnter={(e) => { if (!feedback) e.currentTarget.style.background = "var(--gs-hover)"; }}
                     onMouseLeave={(e) => { if (!feedback) e.currentTarget.style.background = "white"; }}
                   >
                     {icon}{formatChoice(v, scenario?.unit)}
@@ -336,7 +336,7 @@ export default function BankPintarGame() {
                     ? `⏱ Waktu habis!`
                     : `✗ Salah!`}
                 </div>
-                <div style={{ fontSize: "12px", color: "#6b6860", fontFamily: "monospace", lineHeight: 1.5 }}>
+                <div style={{ fontSize: "12px", color: "var(--gs-text-muted)", fontFamily: "monospace", lineHeight: 1.5 }}>
                   {scenario.formula}
                 </div>
               </div>
@@ -344,7 +344,7 @@ export default function BankPintarGame() {
           </div>
         )}
 
-        <p style={{ textAlign: "center", fontSize: "12px", color: "#b4b2a9" }}>
+        <p style={{ textAlign: "center", fontSize: "12px", color: "var(--gs-text-hint)" }}>
           Pilih jawaban sebelum waktu habis · {scenario?.hint}
         </p>
       </main>

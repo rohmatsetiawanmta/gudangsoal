@@ -56,22 +56,22 @@ export default function SoalHariIni({ isMobile }) {
             style={{
               fontSize: isMobile ? "16px" : "18px",
               fontWeight: "800",
-              color: "#0f0e17",
+              color: "var(--gs-text)",
               letterSpacing: "-0.3px",
             }}
           >
             Soal Hari Ini
           </h2>
         </div>
-        <span style={{ fontSize: "12px", color: "#b4b2a9" }}>{today}</span>
+        <span style={{ fontSize: "12px", color: "var(--gs-text-hint)" }}>{today}</span>
       </div>
 
       {/* Card */}
       <div
         style={{
-          background: "white",
+          background: "var(--gs-surface)",
           borderRadius: "16px",
-          border: "1px solid #e2ddd5",
+          border: "1px solid var(--gs-border)",
           overflow: "hidden",
         }}
       >
@@ -92,7 +92,7 @@ export default function SoalHariIni({ isMobile }) {
                     height: "40px",
                     width: "80px",
                     flexShrink: 0,
-                    background: "#f2efe8",
+                    background: "var(--gs-hover)",
                     margin: "8px",
                     borderRadius: "8px",
                     animation: "pulse 1.5s infinite",
@@ -113,7 +113,7 @@ export default function SoalHariIni({ isMobile }) {
                     fontWeight:
                       selectedJenjang === d.jenjang_id ? "700" : "500",
                     color:
-                      selectedJenjang === d.jenjang_id ? "#e84c2b" : "#6b6860",
+                      selectedJenjang === d.jenjang_id ? "#e84c2b" : "var(--gs-text-muted)",
                     borderBottom:
                       selectedJenjang === d.jenjang_id
                         ? "2px solid #e84c2b"
@@ -142,7 +142,7 @@ export default function SoalHariIni({ isMobile }) {
               style={{
                 height: "16px",
                 width: "60px",
-                background: "#f2efe8",
+                background: "var(--gs-hover)",
                 borderRadius: "6px",
                 animation: "pulse 1.5s infinite",
               }}
@@ -150,7 +150,7 @@ export default function SoalHariIni({ isMobile }) {
             <div
               style={{
                 height: "60px",
-                background: "#f2efe8",
+                background: "var(--gs-hover)",
                 borderRadius: "8px",
                 animation: "pulse 1.5s infinite",
               }}
@@ -164,7 +164,7 @@ export default function SoalHariIni({ isMobile }) {
               cursor: "pointer",
               transition: "background .15s",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#faf9f6")}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--gs-surface-subtle)")}
             onMouseLeave={(e) => (e.currentTarget.style.background = "white")}
           >
             {/* Meta */}
@@ -193,7 +193,7 @@ export default function SoalHariIni({ isMobile }) {
                 style={{
                   fontSize: "11px",
                   fontWeight: "700",
-                  color: "#b4b2a9",
+                  color: "var(--gs-text-hint)",
                   fontFamily: "monospace",
                 }}
               >
@@ -205,7 +205,7 @@ export default function SoalHariIni({ isMobile }) {
             <div
               style={{
                 fontSize: "12px",
-                color: "#b4b2a9",
+                color: "var(--gs-text-hint)",
                 marginBottom: "12px",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
@@ -221,7 +221,7 @@ export default function SoalHariIni({ isMobile }) {
             <div
               style={{
                 fontSize: isMobile ? "14px" : "15px",
-                color: "#0f0e17",
+                color: "var(--gs-text)",
                 fontWeight: "500",
                 lineHeight: "1.6",
                 marginBottom: "16px",
@@ -275,7 +275,7 @@ export default function SoalHariIni({ isMobile }) {
             style={{
               padding: "32px",
               textAlign: "center",
-              color: "#b4b2a9",
+              color: "var(--gs-text-hint)",
               fontSize: "13px",
             }}
           >

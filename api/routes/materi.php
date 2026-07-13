@@ -113,9 +113,13 @@ if (preg_match('#^/materi/(\d+)/answer$#', $uri, $m) && $method === 'POST') {
   $jawaban = $q['jawaban'] ?? '';
 
   if ($tipe === 'isian_numerik') {
-    $is_correct = abs(floatval($user_answer) - floatval($jawaban)) < 1e-9;
+    $normNum = fn($s) => str_replace(',', '.', trim($s));
+    $is_correct = abs(floatval($normNum($user_answer)) - floatval($normNum($jawaban))) < 1e-9;
   } elseif ($tipe === 'isian_singkat') {
-    $is_correct = strtolower(trim($user_answer)) === strtolower(trim($jawaban));
+    $u = strtolower(trim($user_answer));
+    $j = strtolower(trim($jawaban));
+    $swap = fn($s) => strtr($s, [','=> '.', '.' => ',']);
+    $is_correct = $u === $j || $swap($u) === $j || $u === $swap($j);
   } else {
     // pilihan_ganda: user sends label (A/B/C); normalize jawaban to label for backward compat
     $optionLabels = ['A', 'B', 'C', 'D', 'E', 'F'];

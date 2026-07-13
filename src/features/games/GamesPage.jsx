@@ -30,7 +30,7 @@ export default function GamesPage() {
   const isMobile = width <= 480;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#faf9f6" }}>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
       <SEO
         title="Games"
         description="Asah kemampuan matematika sambil bermain mini-game seru."
@@ -52,14 +52,14 @@ export default function GamesPage() {
             style={{
               fontSize: isMobile ? "24px" : "28px",
               fontWeight: "800",
-              color: "#0f0e17",
+              color: "var(--gs-text)",
               letterSpacing: "-0.5px",
               marginBottom: "6px",
             }}
           >
             Games
           </h1>
-          <p style={{ fontSize: "15px", color: "#6b6860" }}>
+          <p style={{ fontSize: "15px", color: "var(--gs-text-muted)" }}>
             Asah kemampuan matematika sambil bermain.
           </p>
         </div>
@@ -78,9 +78,9 @@ export default function GamesPage() {
                 key={game.slug}
                 onClick={() => navigate(`/games/${game.slug}`)}
                 style={{
-                  background: "white",
+                  background: "var(--gs-surface)",
                   borderRadius: "16px",
-                  border: "1px solid #e2ddd5",
+                  border: "1px solid var(--gs-border)",
                   padding: "20px",
                   cursor: "pointer",
                   transition: "transform .15s, box-shadow .15s",
@@ -123,13 +123,13 @@ export default function GamesPage() {
                   style={{
                     fontSize: "16px",
                     fontWeight: "700",
-                    color: "#0f0e17",
+                    color: "var(--gs-text)",
                     marginBottom: "6px",
                   }}
                 >
                   {game.title}
                 </div>
-                <div style={{ fontSize: "13px", color: "#6b6860", lineHeight: "1.5" }}>
+                <div style={{ fontSize: "13px", color: "var(--gs-text-muted)", lineHeight: "1.5" }}>
                   {game.description}
                 </div>
               </div>

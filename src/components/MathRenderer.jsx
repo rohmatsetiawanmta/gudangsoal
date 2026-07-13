@@ -30,7 +30,7 @@ export default function MathRenderer({ text = "", block = false }) {
       (_, filename, width) => {
         const url = IMAGE_BASE_URL + filename;
         const w = width ? `width="${width}"` : 'style="max-width:100%"';
-        return `<img src="${url}" ${w} style="height:auto;display:block;margin:8px 0;border-radius:8px;" alt="${filename}" />`;
+        return `<img src="${url}" ${w} style="height:auto;display:block;margin:8px auto;border-radius:8px;" alt="${filename}" />`;
       }
     );
 

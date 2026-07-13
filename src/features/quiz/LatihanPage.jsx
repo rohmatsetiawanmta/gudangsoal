@@ -25,9 +25,9 @@ function QuizCard({ set, isMobile, onClick }) {
     <div
       onClick={onClick}
       style={{
-        background: "white",
+        background: "var(--gs-surface)",
         borderRadius: "16px",
-        border: `1px solid ${attemptHabis ? "#e2ddd5" : "#e2ddd5"}`,
+        border: "1px solid var(--gs-border)",
         padding: isMobile ? "16px" : "20px 24px",
         cursor: "pointer",
         transition: "transform .15s, box-shadow .15s",
@@ -54,7 +54,7 @@ function QuizCard({ set, isMobile, onClick }) {
           left: 0,
           right: 0,
           height: "3px",
-          background: attemptHabis ? "#e2ddd5" : "#e84c2b",
+          background: attemptHabis ? "var(--gs-border)" : "#e84c2b",
           borderRadius: "16px 16px 0 0",
         }}
       />
@@ -66,14 +66,14 @@ function QuizCard({ set, isMobile, onClick }) {
             width: "44px",
             height: "44px",
             borderRadius: "12px",
-            background: attemptHabis ? "#f2efe8" : "#fff3f0",
+            background: attemptHabis ? "var(--gs-hover)" : "#fff3f0",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
           }}
         >
-          <BookOpen size={20} color={attemptHabis ? "#b4b2a9" : "#e84c2b"} />
+          <BookOpen size={20} color={attemptHabis ? "var(--gs-text-hint)" : "#e84c2b"} />
         </div>
 
         {/* Info */}
@@ -91,7 +91,7 @@ function QuizCard({ set, isMobile, onClick }) {
               style={{
                 fontSize: "15px",
                 fontWeight: "700",
-                color: attemptHabis ? "#6b6860" : "#0f0e17",
+                color: attemptHabis ? "var(--gs-text-muted)" : "var(--gs-text)",
                 margin: 0,
               }}
             >
@@ -104,8 +104,8 @@ function QuizCard({ set, isMobile, onClick }) {
                   fontWeight: "700",
                   padding: "2px 7px",
                   borderRadius: "5px",
-                  background: "#f2efe8",
-                  color: "#6b6860",
+                  background: "var(--gs-hover)",
+                  color: "var(--gs-text-muted)",
                 }}
               >
                 Attempt Habis
@@ -131,7 +131,7 @@ function QuizCard({ set, isMobile, onClick }) {
             <p
               style={{
                 fontSize: "13px",
-                color: "#6b6860",
+                color: "var(--gs-text-muted)",
                 marginBottom: "10px",
                 lineHeight: "1.5",
                 overflow: "hidden",
@@ -151,7 +151,7 @@ function QuizCard({ set, isMobile, onClick }) {
                 alignItems: "center",
                 gap: "4px",
                 fontSize: "12px",
-                color: "#6b6860",
+                color: "var(--gs-text-muted)",
               }}
             >
               <BookOpen size={12} />
@@ -163,7 +163,7 @@ function QuizCard({ set, isMobile, onClick }) {
                 alignItems: "center",
                 gap: "4px",
                 fontSize: "12px",
-                color: "#6b6860",
+                color: "var(--gs-text-muted)",
               }}
             >
               <Clock size={12} />
@@ -188,7 +188,7 @@ function QuizCard({ set, isMobile, onClick }) {
                 alignItems: "center",
                 gap: "4px",
                 fontSize: "12px",
-                color: "#6b6860",
+                color: "var(--gs-text-muted)",
               }}
             >
               <RotateCcw size={12} />
@@ -212,7 +212,7 @@ function QuizCard({ set, isMobile, onClick }) {
                 style={{
                   flex: 1,
                   height: "6px",
-                  background: "#f2efe8",
+                  background: "var(--gs-divider)",
                   borderRadius: "3px",
                   overflow: "hidden",
                 }}
@@ -236,7 +236,7 @@ function QuizCard({ set, isMobile, onClick }) {
                 style={{
                   fontSize: "12px",
                   fontWeight: "700",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                   flexShrink: 0,
                 }}
               >
@@ -291,7 +291,7 @@ export default function LatihanPage() {
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        background: "#faf9f6",
+        background: "var(--gs-bg)",
       }}
     >
       <SEO
@@ -316,14 +316,14 @@ export default function LatihanPage() {
             style={{
               fontSize: isMobile ? "24px" : "28px",
               fontWeight: "800",
-              color: "#0f0e17",
+              color: "var(--gs-text)",
               letterSpacing: "-0.5px",
               marginBottom: "8px",
             }}
           >
             Mode Latihan
           </h1>
-          <p style={{ fontSize: "15px", color: "#6b6860" }}>
+          <p style={{ fontSize: "15px", color: "var(--gs-text-muted)" }}>
             Kerjakan set soal dengan timer. Simulasi ujian nyata.
           </p>
           {!isLoggedIn && (
@@ -357,9 +357,9 @@ export default function LatihanPage() {
             style={{
               padding: "6px 14px",
               borderRadius: "8px",
-              border: `1.5px solid ${!filterJenjang ? "#e84c2b" : "#e2ddd5"}`,
-              background: !filterJenjang ? "#fff3f0" : "white",
-              color: !filterJenjang ? "#e84c2b" : "#6b6860",
+              border: `1.5px solid ${!filterJenjang ? "#e84c2b" : "var(--gs-border)"}`,
+              background: !filterJenjang ? "#fff3f0" : "var(--gs-surface)",
+              color: !filterJenjang ? "#e84c2b" : "var(--gs-text-muted)",
               fontSize: "13px",
               fontWeight: "600",
               cursor: "pointer",
@@ -377,10 +377,10 @@ export default function LatihanPage() {
                 padding: "6px 14px",
                 borderRadius: "8px",
                 border: `1.5px solid ${
-                  filterJenjang == j.id ? "#e84c2b" : "#e2ddd5"
+                  filterJenjang == j.id ? "#e84c2b" : "var(--gs-border)"
                 }`,
-                background: filterJenjang == j.id ? "#fff3f0" : "white",
-                color: filterJenjang == j.id ? "#e84c2b" : "#6b6860",
+                background: filterJenjang == j.id ? "#fff3f0" : "var(--gs-surface)",
+                color: filterJenjang == j.id ? "#e84c2b" : "var(--gs-text-muted)",
                 fontSize: "13px",
                 fontWeight: "600",
                 cursor: "pointer",
@@ -402,7 +402,7 @@ export default function LatihanPage() {
                 style={{
                   height: "120px",
                   borderRadius: "16px",
-                  background: "#e2ddd5",
+                  background: "var(--gs-border)",
                   opacity: 0.5,
                   animation: "pulse 1.5s infinite",
                 }}
@@ -412,9 +412,9 @@ export default function LatihanPage() {
           {!loading && sets.length === 0 && (
             <div
               style={{
-                background: "white",
+                background: "var(--gs-surface)",
                 borderRadius: "16px",
-                border: "1px solid #e2ddd5",
+                border: "1px solid var(--gs-border)",
                 padding: "48px",
                 textAlign: "center",
                 display: "flex",
@@ -423,17 +423,17 @@ export default function LatihanPage() {
                 gap: "8px",
               }}
             >
-              <BookOpen size={36} color="#e2ddd5" />
+              <BookOpen size={36} color="var(--gs-border)" />
               <p
                 style={{
                   fontSize: "15px",
                   fontWeight: "600",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                 }}
               >
                 Belum ada set soal
               </p>
-              <p style={{ fontSize: "14px", color: "#6b6860" }}>
+              <p style={{ fontSize: "14px", color: "var(--gs-text-muted)" }}>
                 Set soal latihan akan segera hadir.
               </p>
             </div>

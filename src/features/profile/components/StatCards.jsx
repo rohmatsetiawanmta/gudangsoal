@@ -3,8 +3,8 @@ import { CheckCircle, Flame, Star, Zap } from "lucide-react";
 function StatCard({ icon: Icon, label, value, unit, color, isMobile }) {
   return (
     <div style={{
-      background: "white", borderRadius: "14px",
-      border: "1px solid #e2ddd5", borderLeft: `3px solid ${color}`,
+      background: "var(--gs-surface)", borderRadius: "14px",
+      border: "1px solid var(--gs-border)", borderLeft: `3px solid ${color}`,
       padding: isMobile ? "14px 16px" : "18px 20px",
       display: "flex", alignItems: "center", gap: "12px",
       transition: "box-shadow .15s",
@@ -23,15 +23,15 @@ function StatCard({ icon: Icon, label, value, unit, color, isMobile }) {
         <Icon size={isMobile ? 17 : 20} color={color} />
       </div>
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: "11px", color: "#b4b2a9", marginBottom: "3px", fontWeight: "600", letterSpacing: ".03em" }}>
+        <div style={{ fontSize: "11px", color: "var(--gs-text-hint)", marginBottom: "3px", fontWeight: "600", letterSpacing: ".03em" }}>
           {label}
         </div>
         <div style={{ display: "flex", alignItems: "baseline", gap: "3px" }}>
-          <span style={{ fontSize: isMobile ? "20px" : "24px", fontWeight: "800", color: "#0f0e17", lineHeight: 1 }}>
+          <span style={{ fontSize: isMobile ? "20px" : "24px", fontWeight: "800", color: "var(--gs-text)", lineHeight: 1 }}>
             {value}
           </span>
           {unit && (
-            <span style={{ fontSize: "11px", fontWeight: "600", color: "#b4b2a9" }}>{unit}</span>
+            <span style={{ fontSize: "11px", fontWeight: "600", color: "var(--gs-text-hint)" }}>{unit}</span>
           )}
         </div>
       </div>
@@ -55,19 +55,19 @@ export default function StatCards({ user, stats, isMobile }) {
 
       {stats?.total > 0 && (
         <div style={{
-          background: "white", borderRadius: "14px",
-          border: "1px solid #e2ddd5", borderLeft: "3px solid #1a8a6e",
+          background: "var(--gs-surface)", borderRadius: "14px",
+          border: "1px solid var(--gs-border)", borderLeft: "3px solid #1a8a6e",
           padding: isMobile ? "16px" : "20px 24px",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
             <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#1a8a6e", flexShrink: 0 }} />
-            <span style={{ fontSize: "13px", fontWeight: "700", color: "#0f0e17" }}>Akurasi Keseluruhan</span>
+            <span style={{ fontSize: "13px", fontWeight: "700", color: "var(--gs-text)" }}>Akurasi Keseluruhan</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-            <div style={{ fontSize: "32px", fontWeight: "800", color: "#0f0e17", lineHeight: 1, flexShrink: 0 }}>
+            <div style={{ fontSize: "32px", fontWeight: "800", color: "var(--gs-text)", lineHeight: 1, flexShrink: 0 }}>
               {Math.round((stats.benar / stats.total) * 100)}%
             </div>
-            <div style={{ flex: 1, height: "10px", background: "#f2efe8", borderRadius: "5px", overflow: "hidden" }}>
+            <div style={{ flex: 1, height: "10px", background: "var(--gs-hover)", borderRadius: "5px", overflow: "hidden" }}>
               <div style={{
                 height: "100%",
                 width: `${Math.round((stats.benar / stats.total) * 100)}%`,
@@ -75,8 +75,8 @@ export default function StatCards({ user, stats, isMobile }) {
                 borderRadius: "5px", transition: "width 1s ease",
               }} />
             </div>
-            <div style={{ fontSize: "13px", color: "#6b6860", flexShrink: 0, fontWeight: "600" }}>
-              {stats.benar}<span style={{ color: "#b4b2a9", fontWeight: "400" }}>/{stats.total}</span>
+            <div style={{ fontSize: "13px", color: "var(--gs-text-muted)", flexShrink: 0, fontWeight: "600" }}>
+              {stats.benar}<span style={{ color: "var(--gs-text-hint)", fontWeight: "400" }}>/{stats.total}</span>
             </div>
           </div>
         </div>

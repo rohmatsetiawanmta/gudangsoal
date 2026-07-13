@@ -18,7 +18,7 @@ export default function Breadcrumb({ items = [] }) {
         style={{
           display: "flex",
           alignItems: "center",
-          color: "#6b6860",
+          color: "var(--gs-text-muted)",
           textDecoration: "none",
           padding: "4px",
         }}
@@ -33,13 +33,13 @@ export default function Breadcrumb({ items = [] }) {
             key={i}
             style={{ display: "flex", alignItems: "center", gap: "4px" }}
           >
-            <ChevronRight size={14} color="#b4b2a9" />
+            <ChevronRight size={14} color="var(--gs-text-hint)" />
             {isLast || !item.to ? (
               <span
                 style={{
                   fontSize: "13px",
                   fontWeight: isLast ? "600" : "500",
-                  color: isLast ? "#0f0e17" : "#6b6860",
+                  color: isLast ? "var(--gs-text)" : "var(--gs-text-muted)",
                 }}
               >
                 {item.label}
@@ -51,11 +51,11 @@ export default function Breadcrumb({ items = [] }) {
                 style={{
                   fontSize: "13px",
                   fontWeight: "500",
-                  color: "#6b6860",
+                  color: "var(--gs-text-muted)",
                   textDecoration: "none",
                 }}
-                onMouseEnter={(e) => (e.target.style.color = "#0f0e17")}
-                onMouseLeave={(e) => (e.target.style.color = "#6b6860")}
+                onMouseEnter={(e) => (e.target.style.color = "var(--gs-text)")}
+                onMouseLeave={(e) => (e.target.style.color = "var(--gs-text-muted)")}
               >
                 {item.label}
               </Link>

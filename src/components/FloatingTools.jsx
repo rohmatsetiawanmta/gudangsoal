@@ -77,25 +77,25 @@ function Scratchpad() {
 
   return (
     <div style={{ display:"flex", flexDirection:"column", height:"100%" }}>
-      <div style={{ display:"flex", alignItems:"center", gap:"8px", padding:"10px 14px", borderBottom:"1px solid #f0ede6", flexShrink:0 }}>
+      <div style={{ display:"flex", alignItems:"center", gap:"8px", padding:"10px 14px", borderBottom:"1px solid var(--gs-divider)", flexShrink:0 }}>
         <div style={{ display:"flex", gap:"5px" }}>
           {PEN_COLORS.map(c => (
             <button key={c} onClick={() => { setColor(c); setTool("pen"); }}
               style={{ width:"18px", height:"18px", borderRadius:"50%", background:c, border:"none", cursor:"pointer", flexShrink:0, boxShadow: color===c && tool==="pen" ? `0 0 0 2px white, 0 0 0 3.5px ${c}` : "none" }} />
           ))}
         </div>
-        <div style={{ width:"1px", height:"16px", background:"#e2ddd5" }} />
+        <div style={{ width:"1px", height:"16px", background:"var(--gs-border)" }} />
         <div style={{ display:"flex", gap:"4px" }}>
           {PEN_SIZES.map(s => (
             <button key={s} onClick={() => setSize(s)}
-              style={{ width:"26px", height:"26px", borderRadius:"6px", border:`1.5px solid ${size===s?"#0f0e17":"#e2ddd5"}`, background:size===s?"#f2efe8":"white", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
+              style={{ width:"26px", height:"26px", borderRadius:"6px", border:`1.5px solid ${size===s?"var(--gs-text)":"var(--gs-border)"}`, background:size===s?"var(--gs-hover)":"var(--gs-surface)", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
               <div style={{ width:s*1.8+1, height:s*1.8+1, borderRadius:"50%", background:"#0f0e17" }} />
             </button>
           ))}
         </div>
-        <div style={{ width:"1px", height:"16px", background:"#e2ddd5" }} />
+        <div style={{ width:"1px", height:"16px", background:"var(--gs-border)" }} />
         <button onClick={() => setTool(t => t==="eraser"?"pen":"eraser")}
-          style={{ width:"28px", height:"28px", borderRadius:"7px", border:`1.5px solid ${tool==="eraser"?"#0f0e17":"#e2ddd5"}`, background:tool==="eraser"?"#f2efe8":"white", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", color:"#6b6860" }}>
+          style={{ width:"28px", height:"28px", borderRadius:"7px", border:`1.5px solid ${tool==="eraser"?"var(--gs-text)":"var(--gs-border)"}`, background:tool==="eraser"?"var(--gs-hover)":"var(--gs-surface)", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", color:"var(--gs-text-muted)" }}>
           <Eraser size={13} />
         </button>
         <button onClick={clearCanvas}
@@ -123,10 +123,10 @@ function CalcBtn({ label, onClick, variant="num", wide=false, small=false }) {
            : variant==="eq"  ? (hov?"#cf4426":"#e84c2b")
            : variant==="fn"  ? (hov?"#c5c0b8":"#d4d0c8")
            : variant==="sci" ? (hov?"#ddd9f0":"#ede9f8")
-           :                   (hov?"#e8e4de":"#f2efe8");
+           :                   (hov?"var(--gs-border)":"var(--gs-hover)");
   const fg = (variant==="op"||variant==="eq") ? "white"
            : variant==="sci" ? "#7c3aed"
-           : "#0f0e17";
+           : "var(--gs-text)";
   return (
     <button onClick={onClick}
       onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
@@ -308,10 +308,10 @@ function Timer({ onRunningChange }) {
   return (
     <div style={{ display:"flex", flexDirection:"column", height:"100%", padding:"16px 14px", gap:"12px" }}>
       {/* Mode toggle */}
-      <div style={{ display:"flex", background:"#f2efe8", borderRadius:"8px", padding:"3px", gap:"3px" }}>
+      <div style={{ display:"flex", background:"var(--gs-hover)", borderRadius:"8px", padding:"3px", gap:"3px" }}>
         {["countdown","stopwatch"].map(m => (
           <button key={m} onClick={() => setMode(m)}
-            style={{ flex:1, padding:"6px 0", borderRadius:"6px", border:"none", background:mode===m?"white":"transparent", color:mode===m?"#0f0e17":"#6b6860", fontSize:"12px", fontWeight:"600", cursor:"pointer", fontFamily:"inherit", boxShadow:mode===m?"0 1px 4px rgba(0,0,0,.08)":"none", transition:"all .12s" }}>
+            style={{ flex:1, padding:"6px 0", borderRadius:"6px", border:"none", background:mode===m?"var(--gs-surface)":"transparent", color:mode===m?"var(--gs-text)":"var(--gs-text-muted)", fontSize:"12px", fontWeight:"600", cursor:"pointer", fontFamily:"inherit", boxShadow:mode===m?"0 1px 4px rgba(0,0,0,.08)":"none", transition:"all .12s" }}>
             {m==="countdown" ? "Countdown" : "Stopwatch"}
           </button>
         ))}
@@ -343,7 +343,7 @@ function Timer({ onRunningChange }) {
               const active = presetMin === p && presetSec === 0;
               return (
                 <button key={p} onClick={() => { setPresetMin(p); setPresetSec(0); if (!cdRun) setRemaining(null); }}
-                  style={{ padding:"4px 9px", borderRadius:"7px", border:`1.5px solid ${active?"#e84c2b":"#e2ddd5"}`, background:active?"#fff3f0":"white", color:active?"#e84c2b":"#6b6860", fontSize:"12px", fontWeight:"600", cursor:"pointer", fontFamily:"inherit" }}>
+                  style={{ padding:"4px 9px", borderRadius:"7px", border:`1.5px solid ${active?"#e84c2b":"var(--gs-border)"}`, background:active?"#fff3f0":"var(--gs-surface)", color:active?"#e84c2b":"var(--gs-text-muted)", fontSize:"12px", fontWeight:"600", cursor:"pointer", fontFamily:"inherit" }}>
                   {p}m
                 </button>
               );
@@ -351,19 +351,19 @@ function Timer({ onRunningChange }) {
           </div>
           {/* Custom MM:SS input */}
           <div style={{ display:"flex", alignItems:"center", gap:"6px" }}>
-            <span style={{ fontSize:"12px", color:"#6b6860", whiteSpace:"nowrap" }}>Custom:</span>
+            <span style={{ fontSize:"12px", color:"var(--gs-text-muted)", whiteSpace:"nowrap" }}>Custom:</span>
             <input type="number" min="0" max="999" value={presetMin}
               onChange={e => { const v=Math.max(0,parseInt(e.target.value)||0); setPresetMin(v); if(!cdRun)setRemaining(null); }}
-              style={{ width:"52px", padding:"5px 6px", borderRadius:"7px", border:"1px solid #e2ddd5", fontSize:"13px", fontFamily:"inherit", outline:"none", color:"#0f0e17", textAlign:"center" }}
+              style={{ width:"52px", padding:"5px 6px", borderRadius:"7px", border:"1px solid var(--gs-border)", fontSize:"13px", fontFamily:"inherit", outline:"none", color:"var(--gs-text)", textAlign:"center" }}
               onFocus={e=>e.target.style.borderColor="#e84c2b"}
-              onBlur={e=>e.target.style.borderColor="#e2ddd5"} />
-            <span style={{ fontSize:"13px", color:"#b4b2a9", fontWeight:"700" }}>:</span>
+              onBlur={e=>e.target.style.borderColor="var(--gs-border)"} />
+            <span style={{ fontSize:"13px", color:"var(--gs-text-hint)", fontWeight:"700" }}>:</span>
             <input type="number" min="0" max="59" value={presetSec}
               onChange={e => { const v=Math.min(59,Math.max(0,parseInt(e.target.value)||0)); setPresetSec(v); if(!cdRun)setRemaining(null); }}
-              style={{ width:"42px", padding:"5px 6px", borderRadius:"7px", border:"1px solid #e2ddd5", fontSize:"13px", fontFamily:"inherit", outline:"none", color:"#0f0e17", textAlign:"center" }}
+              style={{ width:"42px", padding:"5px 6px", borderRadius:"7px", border:"1px solid var(--gs-border)", fontSize:"13px", fontFamily:"inherit", outline:"none", color:"var(--gs-text)", textAlign:"center" }}
               onFocus={e=>e.target.style.borderColor="#e84c2b"}
-              onBlur={e=>e.target.style.borderColor="#e2ddd5"} />
-            <span style={{ fontSize:"12px", color:"#6b6860" }}>mm:ss</span>
+              onBlur={e=>e.target.style.borderColor="var(--gs-border)"} />
+            <span style={{ fontSize:"12px", color:"var(--gs-text-muted)" }}>mm:ss</span>
           </div>
         </>
       )}
@@ -377,7 +377,7 @@ function Timer({ onRunningChange }) {
               {cdRun ? <><Pause size={14}/> Jeda</> : <><Play size={14}/> {remaining===null?"Mulai":"Lanjut"}</>}
             </button>
             <button onClick={cdReset}
-              style={{ width:"42px", display:"flex", alignItems:"center", justifyContent:"center", borderRadius:"10px", border:"1px solid #e2ddd5", background:"white", cursor:"pointer", color:"#6b6860" }}>
+              style={{ width:"42px", display:"flex", alignItems:"center", justifyContent:"center", borderRadius:"10px", border:"1px solid var(--gs-border)", background:"white", cursor:"pointer", color:"var(--gs-text-muted)" }}>
               <RotateCcw size={15}/>
             </button>
           </>
@@ -388,7 +388,7 @@ function Timer({ onRunningChange }) {
               {swRun ? <><Pause size={14}/> Jeda</> : <><Play size={14}/> {swElapsed===0?"Mulai":"Lanjut"}</>}
             </button>
             <button onClick={swReset}
-              style={{ width:"42px", display:"flex", alignItems:"center", justifyContent:"center", borderRadius:"10px", border:"1px solid #e2ddd5", background:"white", cursor:"pointer", color:"#6b6860" }}>
+              style={{ width:"42px", display:"flex", alignItems:"center", justifyContent:"center", borderRadius:"10px", border:"1px solid var(--gs-border)", background:"white", cursor:"pointer", color:"var(--gs-text-muted)" }}>
               <RotateCcw size={15}/>
             </button>
           </>
@@ -425,15 +425,15 @@ function Catatan() {
 
   return (
     <div style={{ display:"flex", flexDirection:"column", height:"100%" }}>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"8px 14px", borderBottom:"1px solid #f0ede6", flexShrink:0 }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"8px 14px", borderBottom:"1px solid var(--gs-divider)", flexShrink:0 }}>
         <div style={{ display:"flex", alignItems:"center", gap:"5px" }}>
           {saved
             ? <><Check size={12} color="#1a8a6e"/><span style={{ fontSize:"11px", color:"#1a8a6e", fontWeight:"600" }}>Tersimpan</span></>
-            : <span style={{ fontSize:"11px", color:"#b4b2a9" }}>Menyimpan…</span>
+            : <span style={{ fontSize:"11px", color:"var(--gs-text-hint)" }}>Menyimpan…</span>
           }
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
-          <span style={{ fontSize:"11px", color:"#b4b2a9" }}>{text.length} karakter</span>
+          <span style={{ fontSize:"11px", color:"var(--gs-text-hint)" }}>{text.length} karakter</span>
           <button onClick={handleClear}
             style={{ width:"26px", height:"26px", borderRadius:"7px", border:"1.5px solid #fca5a5", background:"#fff3f0", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", color:"#e84c2b" }}>
             <Trash2 size={11}/>
@@ -442,7 +442,7 @@ function Catatan() {
       </div>
       <textarea value={text} onChange={handleChange}
         placeholder="Tulis catatan, rumus, atau langkah kerja di sini…"
-        style={{ flex:1, border:"none", outline:"none", padding:"14px", fontSize:"13px", fontFamily:"inherit", resize:"none", color:"#0f0e17", lineHeight:"1.7", background:"white" }} />
+        style={{ flex:1, border:"none", outline:"none", padding:"14px", fontSize:"13px", fontFamily:"inherit", resize:"none", color:"var(--gs-text)", lineHeight:"1.7", background:"var(--gs-surface)" }} />
     </div>
   );
 }
@@ -467,13 +467,13 @@ export default function FloatingTools() {
     <>
       {/* Panel */}
       {open && (
-        <div style={{ position:"fixed", bottom:"88px", right:"24px", width:"320px", height:"500px", background:"white", borderRadius:"18px", boxShadow:"0 8px 48px rgba(0,0,0,.16), 0 2px 8px rgba(0,0,0,.06)", border:"1px solid #e2ddd5", display:"flex", flexDirection:"column", zIndex:9000, animation:"ftIn .18s cubic-bezier(.2,.8,.3,1)", transformOrigin:"bottom right" }}>
+        <div style={{ position:"fixed", bottom:"88px", right:"24px", width:"320px", height:"500px", background:"white", borderRadius:"18px", boxShadow:"0 8px 48px rgba(0,0,0,.16), 0 2px 8px rgba(0,0,0,.06)", border:"1px solid var(--gs-border)", display:"flex", flexDirection:"column", zIndex:9000, animation:"ftIn .18s cubic-bezier(.2,.8,.3,1)", transformOrigin:"bottom right" }}>
           {/* Header */}
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"10px 12px", borderBottom:"1px solid #f0ede6", flexShrink:0 }}>
-            <div style={{ display:"flex", gap:"2px", background:"#f2efe8", borderRadius:"8px", padding:"3px" }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"10px 12px", borderBottom:"1px solid var(--gs-divider)", flexShrink:0 }}>
+            <div style={{ display:"flex", gap:"2px", background:"var(--gs-hover)", borderRadius:"8px", padding:"3px" }}>
               {TABS.map(({ id, Icon }) => (
                 <button key={id} onClick={() => setTab(id)} title={id}
-                  style={{ position:"relative", display:"flex", alignItems:"center", justifyContent:"center", width:"34px", height:"28px", borderRadius:"6px", border:"none", background:tab===id?"white":"transparent", color:tab===id?"#0f0e17":"#6b6860", cursor:"pointer", boxShadow:tab===id?"0 1px 4px rgba(0,0,0,.08)":"none", transition:"all .12s" }}>
+                  style={{ position:"relative", display:"flex", alignItems:"center", justifyContent:"center", width:"34px", height:"28px", borderRadius:"6px", border:"none", background:tab===id?"var(--gs-surface)":"transparent", color:tab===id?"var(--gs-text)":"var(--gs-text-muted)", cursor:"pointer", boxShadow:tab===id?"0 1px 4px rgba(0,0,0,.08)":"none", transition:"all .12s" }}>
                   <Icon size={13} />
                   {id==="timer" && timerRun && tab!=="timer" && (
                     <span style={{ position:"absolute", top:"4px", right:"4px", width:"5px", height:"5px", borderRadius:"50%", background:"#e84c2b" }} />
@@ -482,7 +482,7 @@ export default function FloatingTools() {
               ))}
             </div>
             <button onClick={() => setOpen(false)}
-              style={{ width:"28px", height:"28px", borderRadius:"8px", border:"1px solid #e2ddd5", background:"white", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", color:"#6b6860" }}>
+              style={{ width:"28px", height:"28px", borderRadius:"8px", border:"1px solid var(--gs-border)", background:"white", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", color:"var(--gs-text-muted)" }}>
               <X size={13}/>
             </button>
           </div>

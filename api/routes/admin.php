@@ -542,10 +542,13 @@ if (str_starts_with($uri, '/admin/struktur/') && $method === 'DELETE') {
   }
   if (!$id) { http_response_code(400); echo json_encode(['error' => 'id wajib']); exit; }
 
-  $stmt = $pdo->prepare("DELETE FROM $level WHERE id = ?");
-  $stmt->execute([$id]);
-
-  echo json_encode(['message' => ucfirst($level) . ' berhasil dihapus']);
+  try {
+    $pdo->prepare("DELETE FROM $level WHERE id = ?")->execute([$id]);
+    echo json_encode(['message' => ucfirst($level) . ' berhasil dihapus']);
+  } catch (Exception $e) {
+    http_response_code(409);
+    echo json_encode(['error' => 'Tidak bisa dihapus karena masih ada data di bawahnya.']);
+  }
   exit;
 }
 
@@ -1081,6 +1084,32 @@ if ($uri === '/admin/changelog' && $method === 'GET') {
   exit;
 }
 
+// POST /admin/changelog/bulk
+if ($uri === '/admin/changelog/bulk' && $method === 'POST') {
+  $items = $body['items'] ?? [];
+  if (!is_array($items) || count($items) === 0) {
+    http_response_code(400); echo json_encode(['error' => 'items wajib berupa array']); exit;
+  }
+  $stmt = $pdo->prepare('INSERT INTO changelogs (versi, judul, deskripsi, tipe, is_published, released_at, audience) VALUES (?,?,?,?,?,?,?)');
+  $inserted = 0; $errors = [];
+  foreach ($items as $i => $item) {
+    $versi       = trim($item['versi']       ?? '');
+    $judul       = trim($item['judul']       ?? '');
+    $deskripsi   = trim($item['deskripsi']   ?? '');
+    $tipe        = $item['tipe']        ?? 'feature';
+    $is_pub      = isset($item['is_published']) ? (int)$item['is_published'] : 0;
+    $released_at = $item['released_at']  ?? date('Y-m-d');
+    $audience    = $item['audience']     ?? 'all';
+    if (!$versi || !$judul) { $errors[] = "Baris $i: versi dan judul wajib"; continue; }
+    try {
+      $stmt->execute([$versi, $judul, $deskripsi, $tipe, $is_pub, $released_at, $audience]);
+      $inserted++;
+    } catch (Exception $e) { $errors[] = "Baris $i: " . $e->getMessage(); }
+  }
+  echo json_encode(['inserted' => $inserted, 'errors' => $errors]);
+  exit;
+}
+
 // POST /admin/changelog
 if ($uri === '/admin/changelog' && $method === 'POST') {
   $versi        = $body['versi']        ?? null;
@@ -1383,7 +1412,9 @@ if ($uri === '/admin/materi' && $method === 'GET') {
   $stmt = $pdo->prepare("
     SELECT m.id, m.judul, m.is_published, m.urutan, m.views, m.created_at, m.updated_at,
            st.nama AS subtopik, t.nama AS topik,
-           mp.nama AS mapel, sj.nama AS subjenjang, j.nama AS jenjang
+           mp.nama AS mapel, sj.nama AS subjenjang, j.nama AS jenjang,
+           COALESCE(JSON_LENGTH(m.highlights), 0)  AS jumlah_highlights,
+           COALESCE(JSON_LENGTH(m.pertanyaan), 0)  AS jumlah_pertanyaan
     FROM materi m
     JOIN subtopik st ON m.subtopik_id = st.id
     JOIN topik    t  ON st.topik_id   = t.id

@@ -123,7 +123,7 @@ export default function RequestSoalPage() {
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        background: "#faf9f6",
+        background: "var(--gs-bg)",
       }}
     >
       <SEO
@@ -158,14 +158,14 @@ export default function RequestSoalPage() {
               style={{
                 fontSize: isMobile ? "22px" : "24px",
                 fontWeight: "800",
-                color: "#0f0e17",
+                color: "var(--gs-text)",
                 letterSpacing: "-0.5px",
                 marginBottom: "4px",
               }}
             >
               Request Soal
             </h1>
-            <p style={{ fontSize: "14px", color: "#6b6860" }}>
+            <p style={{ fontSize: "14px", color: "var(--gs-text-muted)" }}>
               Kirim soal yang ingin kamu tanyakan. Admin akan mereview dan
               menjawab.
             </p>
@@ -229,7 +229,7 @@ export default function RequestSoalPage() {
           >
             <div
               style={{
-                background: "white",
+                background: "var(--gs-surface)",
                 borderRadius: "16px",
                 padding: isMobile ? "20px" : "28px",
                 maxWidth: "600px",
@@ -250,7 +250,7 @@ export default function RequestSoalPage() {
                   style={{
                     fontSize: "17px",
                     fontWeight: "800",
-                    color: "#0f0e17",
+                    color: "var(--gs-text)",
                   }}
                 >
                   Kirim Request Soal
@@ -261,7 +261,7 @@ export default function RequestSoalPage() {
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    color: "#6b6860",
+                    color: "var(--gs-text-muted)",
                     display: "flex",
                   }}
                 >
@@ -304,7 +304,7 @@ export default function RequestSoalPage() {
                     style={{
                       fontSize: "13px",
                       fontWeight: "600",
-                      color: "#0f0e17",
+                      color: "var(--gs-text)",
                     }}
                   >
                     Soal yang ingin ditanyakan
@@ -330,11 +330,11 @@ export default function RequestSoalPage() {
                     style={{
                       fontSize: "13px",
                       fontWeight: "600",
-                      color: "#0f0e17",
+                      color: "var(--gs-text)",
                     }}
                   >
                     Foto Soal{" "}
-                    <span style={{ fontWeight: "400", color: "#6b6860" }}>
+                    <span style={{ fontWeight: "400", color: "var(--gs-text-muted)" }}>
                       (opsional, maks 2MB)
                     </span>
                   </label>
@@ -349,7 +349,7 @@ export default function RequestSoalPage() {
                           maxWidth: "100%",
                           maxHeight: "200px",
                           borderRadius: "10px",
-                          border: "1px solid #e2ddd5",
+                          border: "1px solid var(--gs-border)",
                           objectFit: "contain",
                         }}
                       />
@@ -383,10 +383,10 @@ export default function RequestSoalPage() {
                         gap: "8px",
                         padding: "20px",
                         borderRadius: "10px",
-                        border: "2px dashed #e2ddd5",
+                        border: "2px dashed var(--gs-border)",
                         cursor: uploadingFoto ? "not-allowed" : "pointer",
                         fontSize: "14px",
-                        color: "#6b6860",
+                        color: "var(--gs-text-muted)",
                         transition: "all .15s",
                       }}
                       onMouseEnter={(e) => {
@@ -396,8 +396,8 @@ export default function RequestSoalPage() {
                         }
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = "#e2ddd5";
-                        e.currentTarget.style.color = "#6b6860";
+                        e.currentTarget.style.borderColor = "var(--gs-border)";
+                        e.currentTarget.style.color = "var(--gs-text-muted)";
                       }}
                     >
                       <input
@@ -426,11 +426,11 @@ export default function RequestSoalPage() {
                     style={{
                       fontSize: "13px",
                       fontWeight: "600",
-                      color: "#0f0e17",
+                      color: "var(--gs-text)",
                     }}
                   >
                     Catatan tambahan{" "}
-                    <span style={{ fontWeight: "400", color: "#6b6860" }}>
+                    <span style={{ fontWeight: "400", color: "var(--gs-text-muted)" }}>
                       (opsional)
                     </span>
                   </label>
@@ -444,16 +444,17 @@ export default function RequestSoalPage() {
                     style={{
                       padding: "10px 14px",
                       borderRadius: "10px",
-                      border: "1px solid #e2ddd5",
+                      border: "1px solid var(--gs-border)",
                       fontSize: "14px",
                       outline: "none",
                       fontFamily: "inherit",
-                      color: "#0f0e17",
+                      color: "var(--gs-text)",
+                      background: "var(--gs-surface)",
                       resize: "none",
                       lineHeight: "1.6",
                     }}
                     onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
-                    onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
+                    onBlur={(e) => (e.target.style.borderColor = "var(--gs-border)")}
                   />
                 </div>
 
@@ -469,13 +470,13 @@ export default function RequestSoalPage() {
                     style={{
                       padding: "9px 20px",
                       borderRadius: "10px",
-                      border: "1px solid #e2ddd5",
-                      background: "white",
+                      border: "1px solid var(--gs-border)",
+                      background: "var(--gs-surface)",
                       fontSize: "14px",
                       fontWeight: "600",
                       cursor: "pointer",
                       fontFamily: "inherit",
-                      color: "#0f0e17",
+                      color: "var(--gs-text)",
                     }}
                   >
                     Batal
@@ -488,9 +489,9 @@ export default function RequestSoalPage() {
                       borderRadius: "10px",
                       border: "none",
                       background:
-                        submitting || !form.body.trim() ? "#e2ddd5" : "#e84c2b",
+                        submitting || !form.body.trim() ? "var(--gs-border)" : "#e84c2b",
                       color:
-                        submitting || !form.body.trim() ? "#b4b2a9" : "white",
+                        submitting || !form.body.trim() ? "var(--gs-text-hint)" : "white",
                       fontSize: "14px",
                       fontWeight: "600",
                       cursor:
@@ -519,7 +520,7 @@ export default function RequestSoalPage() {
                 style={{
                   height: "80px",
                   borderRadius: "14px",
-                  background: "#e2ddd5",
+                  background: "var(--gs-border)",
                   opacity: 0.5,
                   animation: "pulse 1.5s infinite",
                 }}
@@ -529,9 +530,9 @@ export default function RequestSoalPage() {
         ) : requests.length === 0 ? (
           <div
             style={{
-              background: "white",
+              background: "var(--gs-surface)",
               borderRadius: "14px",
-              border: "1px solid #e2ddd5",
+              border: "1px solid var(--gs-border)",
               padding: "48px",
               textAlign: "center",
             }}
@@ -540,13 +541,13 @@ export default function RequestSoalPage() {
               style={{
                 fontSize: "15px",
                 fontWeight: "600",
-                color: "#0f0e17",
+                color: "var(--gs-text)",
                 marginBottom: "8px",
               }}
             >
               Belum ada request soal
             </p>
-            <p style={{ fontSize: "14px", color: "#6b6860" }}>
+            <p style={{ fontSize: "14px", color: "var(--gs-text-muted)" }}>
               Klik tombol "Kirim Soal" untuk mulai.
             </p>
           </div>
@@ -558,9 +559,9 @@ export default function RequestSoalPage() {
               <div
                 key={r.id}
                 style={{
-                  background: "white",
+                  background: "var(--gs-surface)",
                   borderRadius: "14px",
-                  border: "1px solid #e2ddd5",
+                  border: "1px solid var(--gs-border)",
                   overflow: "hidden",
                 }}
               >
@@ -579,7 +580,7 @@ export default function RequestSoalPage() {
                     <div
                       style={{
                         fontSize: "14px",
-                        color: "#0f0e17",
+                        color: "var(--gs-text)",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
@@ -592,7 +593,7 @@ export default function RequestSoalPage() {
                         .slice(0, 80)}
                       ...
                     </div>
-                    <div style={{ fontSize: "12px", color: "#b4b2a9" }}>
+                    <div style={{ fontSize: "12px", color: "var(--gs-text-hint)" }}>
                       {new Date(r.created_at).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "long",
@@ -602,9 +603,9 @@ export default function RequestSoalPage() {
                   </div>
                   <StatusBadge status={r.status} />
                   {expanded === r.id ? (
-                    <ChevronUp size={16} color="#6b6860" />
+                    <ChevronUp size={16} color="var(--gs-text-muted)" />
                   ) : (
-                    <ChevronDown size={16} color="#6b6860" />
+                    <ChevronDown size={16} color="var(--gs-text-muted)" />
                   )}
                 </div>
 
@@ -613,7 +614,7 @@ export default function RequestSoalPage() {
                   <div
                     style={{
                       padding: isMobile ? "0 16px 16px" : "0 20px 20px",
-                      borderTop: "1px solid #f2efe8",
+                      borderTop: "1px solid var(--gs-divider)",
                     }}
                   >
                     <div
@@ -632,13 +633,13 @@ export default function RequestSoalPage() {
                             fontWeight: "700",
                             letterSpacing: ".08em",
                             textTransform: "uppercase",
-                            color: "#6b6860",
+                            color: "var(--gs-text-muted)",
                             marginBottom: "8px",
                           }}
                         >
                           Soal
                         </div>
-                        <div style={{ fontSize: "14px", color: "#0f0e17" }}>
+                        <div style={{ fontSize: "14px", color: "var(--gs-text)" }}>
                           <MathRenderer text={r.body} block />
                         </div>
                       </div>
@@ -652,7 +653,7 @@ export default function RequestSoalPage() {
                               fontWeight: "700",
                               letterSpacing: ".08em",
                               textTransform: "uppercase",
-                              color: "#6b6860",
+                              color: "var(--gs-text-muted)",
                               marginBottom: "8px",
                             }}
                           >
@@ -665,7 +666,7 @@ export default function RequestSoalPage() {
                               maxWidth: "100%",
                               maxHeight: "300px",
                               borderRadius: "10px",
-                              border: "1px solid #e2ddd5",
+                              border: "1px solid var(--gs-border)",
                               objectFit: "contain",
                             }}
                           />
@@ -681,13 +682,13 @@ export default function RequestSoalPage() {
                               fontWeight: "700",
                               letterSpacing: ".08em",
                               textTransform: "uppercase",
-                              color: "#6b6860",
+                              color: "var(--gs-text-muted)",
                               marginBottom: "8px",
                             }}
                           >
                             Catatan
                           </div>
-                          <div style={{ fontSize: "14px", color: "#6b6860" }}>
+                          <div style={{ fontSize: "14px", color: "var(--gs-text-muted)" }}>
                             {r.catatan}
                           </div>
                         </div>
@@ -716,7 +717,7 @@ export default function RequestSoalPage() {
                           >
                             Catatan Admin
                           </div>
-                          <div style={{ fontSize: "14px", color: "#0f0e17" }}>
+                          <div style={{ fontSize: "14px", color: "var(--gs-text)" }}>
                             {r.admin_notes}
                           </div>
                         </div>

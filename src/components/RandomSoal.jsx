@@ -15,7 +15,7 @@ const DIFFICULTY_OPTIONS = [
 function Select({ label, value, onChange, options, disabled }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-      <label style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}>
+      <label style={{ fontSize: "13px", fontWeight: "600", color: "var(--gs-text)" }}>
         {label}
       </label>
       <div style={{ position: "relative" }}>
@@ -27,10 +27,10 @@ function Select({ label, value, onChange, options, disabled }) {
             width: "100%",
             padding: "10px 36px 10px 14px",
             borderRadius: "10px",
-            border: "1px solid #e2ddd5",
+            border: "1px solid var(--gs-border)",
             fontSize: "14px",
-            color: "#0f0e17",
-            background: "white",
+            color: "var(--gs-text)",
+            background: "var(--gs-surface)",
             appearance: "none",
             outline: "none",
             cursor: disabled ? "not-allowed" : "pointer",
@@ -51,7 +51,7 @@ function Select({ label, value, onChange, options, disabled }) {
             right: "12px",
             top: "50%",
             transform: "translateY(-50%)",
-            color: "#6b6860",
+            color: "var(--gs-text-muted)",
             pointerEvents: "none",
           }}
         />
@@ -157,7 +157,7 @@ export default function RandomSoal({ onClose }) {
     >
       <div
         style={{
-          background: "white",
+          background: "var(--gs-surface)",
           borderRadius: "16px",
           padding: isMobile ? "20px" : "28px",
           maxWidth: "420px",
@@ -190,7 +190,7 @@ export default function RandomSoal({ onClose }) {
               <Shuffle size={18} color="#e84c2b" />
             </div>
             <h3
-              style={{ fontSize: "17px", fontWeight: "800", color: "#0f0e17" }}
+              style={{ fontSize: "17px", fontWeight: "800", color: "var(--gs-text)" }}
             >
               Soal Random
             </h3>
@@ -201,7 +201,7 @@ export default function RandomSoal({ onClose }) {
               background: "none",
               border: "none",
               cursor: "pointer",
-              color: "#6b6860",
+              color: "var(--gs-text-muted)",
               display: "flex",
             }}
           >
@@ -212,7 +212,7 @@ export default function RandomSoal({ onClose }) {
         <p
           style={{
             fontSize: "14px",
-            color: "#6b6860",
+            color: "var(--gs-text-muted)",
             marginBottom: "16px",
             lineHeight: "1.6",
           }}
@@ -307,13 +307,13 @@ export default function RandomSoal({ onClose }) {
             style={{
               padding: "11px 20px",
               borderRadius: "10px",
-              border: "1px solid #e2ddd5",
-              background: "white",
+              border: "1px solid var(--gs-border)",
+              background: "var(--gs-surface)",
               fontSize: "14px",
               fontWeight: "600",
               cursor: "pointer",
               fontFamily: "inherit",
-              color: "#0f0e17",
+              color: "var(--gs-text)",
             }}
           >
             Batal

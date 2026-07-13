@@ -33,7 +33,7 @@ export default function BrowseSubtopik() {
   }, [jenjangSlug, subjenjangSlug, mapelSlug, topikSlug]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#f2efe8" }}>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
       <SEO
         title={`${topikNama} — ${mapelNama}`}
         description={`Pilih subtopik ${topikNama} untuk latihan soal ${mapelNama} jenjang ${jenjangNama}.`}
@@ -98,7 +98,7 @@ export default function BrowseSubtopik() {
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} style={{
                 height: "60px", borderRadius: "14px",
-                background: "#e2ddd5", opacity: 0.5, animation: "pulse 1.5s infinite",
+                background: "var(--gs-border)", opacity: 0.5, animation: "pulse 1.5s infinite",
               }} />
             ))}
           </div>
@@ -107,7 +107,7 @@ export default function BrowseSubtopik() {
         {!loading && !error && (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {subtopik.length === 0 && (
-              <div style={{ textAlign: "center", padding: "48px", color: "#6b6860", fontSize: "14px" }}>
+              <div style={{ textAlign: "center", padding: "48px", color: "var(--gs-text-muted)", fontSize: "14px" }}>
                 Belum ada subtopik untuk {topikNama}.
               </div>
             )}
@@ -121,8 +121,8 @@ export default function BrowseSubtopik() {
                     state: { jenjangNama, jenjangSlug, subjenjangNama, subjenjangSlug, mapelNama, mapelSlug, topikNama, topikSlug, subtopikNama: st.nama, subtopikSlug: st.slug },
                   })}
                   style={{
-                    background: "white", borderRadius: "14px",
-                    border: "1px solid #e2ddd5",
+                    background: "var(--gs-surface)", borderRadius: "14px",
+                    border: "1px solid var(--gs-border)",
                     borderLeft: `3px solid ${done ? "#1a8a6e" : "#7c3aed"}`,
                     padding: isMobile ? "14px 16px" : "16px 20px",
                     cursor: "pointer", transition: "transform .15s, box-shadow .15s",
@@ -131,20 +131,20 @@ export default function BrowseSubtopik() {
                   onMouseLeave={(e) => { e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
                 >
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontWeight: "600", fontSize: isMobile ? "14px" : "15px", color: "#0f0e17" }}>
+                    <span style={{ fontWeight: "600", fontSize: isMobile ? "14px" : "15px", color: "var(--gs-text)" }}>
                       {st.nama}
                     </span>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
                       {st.soal_count > 0 && (
-                        <span style={{ fontSize: "11px", color: done ? "#1a8a6e" : "#b4b2a9", fontWeight: done ? "700" : "400" }}>
+                        <span style={{ fontSize: "11px", color: done ? "#1a8a6e" : "var(--gs-text-hint)", fontWeight: done ? "700" : "400" }}>
                           {done ? "Selesai" : `${st.answered_count}/${st.soal_count}`}
                         </span>
                       )}
-                      <ChevronRight size={17} color="#b4b2a9" />
+                      <ChevronRight size={17} color="var(--gs-text-hint)" />
                     </div>
                   </div>
                   {st.soal_count > 0 && (
-                    <div style={{ marginTop: "10px", height: "4px", borderRadius: "2px", background: "#f0ede6", overflow: "hidden" }}>
+                    <div style={{ marginTop: "10px", height: "4px", borderRadius: "2px", background: "var(--gs-divider)", overflow: "hidden" }}>
                       <div style={{
                         height: "100%", borderRadius: "2px",
                         width: `${pct}%`,

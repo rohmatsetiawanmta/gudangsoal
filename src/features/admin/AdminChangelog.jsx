@@ -94,6 +94,40 @@ export default function AdminChangelog() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  const [importOpen, setImportOpen]     = useState(false);
+  const [importJson, setImportJson]     = useState("");
+  const [importParsed, setImportParsed] = useState(null);
+  const [importError, setImportError]   = useState("");
+  const [importing, setImporting]       = useState(false);
+
+  const parseImport = (raw) => {
+    setImportJson(raw);
+    if (!raw.trim()) { setImportParsed(null); setImportError(""); return; }
+    try {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) { setImportError("Harus berupa array [ ... ]"); setImportParsed(null); return; }
+      setImportParsed(parsed);
+      setImportError("");
+    } catch (e) { setImportError("JSON tidak valid: " + e.message); setImportParsed(null); }
+  };
+
+  const handleImport = async () => {
+    if (!importParsed?.length) return;
+    setImporting(true);
+    try {
+      const res = await api.post("/admin/changelog/bulk", { items: importParsed });
+      setImportOpen(false);
+      setImportJson("");
+      setImportParsed(null);
+      fetchChangelogs();
+      if (res.errors?.length) alert(`${res.inserted} berhasil, ${res.errors.length} gagal:\n${res.errors.join("\n")}`);
+    } catch (e) {
+      setImportError(e.error || "Gagal import");
+    } finally {
+      setImporting(false);
+    }
+  };
+
   const fetchChangelogs = () => {
     setLoading(true);
     api
@@ -241,26 +275,24 @@ export default function AdminChangelog() {
             )}
           </div>
 
-          <button
-            onClick={openTambah}
-            style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              gap: "8px",
-              background: "#e84c2b", color: "white",
-              border: "none", borderRadius: "12px",
-              padding: "12px 22px",
-              fontSize: "14px", fontWeight: "700",
-              cursor: "pointer", fontFamily: "inherit",
-              width: isMobile ? "100%" : "auto",
-              flexShrink: 0,
-              boxShadow: "0 4px 16px rgba(232,76,43,.35)",
-              transition: "opacity .15s",
-            }}
-            onMouseEnter={e => e.currentTarget.style.opacity = ".88"}
-            onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-          >
-            <Plus size={16} /> Tambah Entri
-          </button>
+          <div style={{ display: "flex", gap: "8px", width: isMobile ? "100%" : "auto", flexShrink: 0 }}>
+            <button
+              onClick={() => { setImportOpen(true); setImportJson(""); setImportParsed(null); setImportError(""); }}
+              style={{ display: "flex", alignItems: "center", gap: "7px", background: "rgba(255,255,255,.1)", color: "rgba(255,255,255,.85)", border: "1px solid rgba(255,255,255,.15)", borderRadius: "10px", padding: "10px 16px", fontSize: "13.5px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", flex: isMobile ? 1 : "none" }}
+              onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,.18)"}
+              onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,.1)"}
+            >
+              Import JSON
+            </button>
+            <button
+              onClick={openTambah}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", background: "#e84c2b", color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontSize: "13.5px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", flex: isMobile ? 1 : "none", boxShadow: "0 4px 16px rgba(232,76,43,.35)", transition: "opacity .15s" }}
+              onMouseEnter={e => e.currentTarget.style.opacity = ".88"}
+              onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+            >
+              <Plus size={15} /> Tambah Entri
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1006,6 +1038,57 @@ export default function AdminChangelog() {
       )}
 
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>
+
+      {/* ── Import JSON Modal ── */}
+      {importOpen && (
+        <div onClick={e => { if (e.target === e.currentTarget) setImportOpen(false); }}
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, padding: "16px" }}>
+          <div style={{ background: "white", borderRadius: "18px", padding: "28px", maxWidth: "560px", width: "100%", boxShadow: "0 20px 60px rgba(0,0,0,.2)", display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div>
+              <h3 style={{ fontSize: "17px", fontWeight: "800", color: "#0f0e17", margin: "0 0 4px" }}>Import JSON Changelog</h3>
+              <p style={{ fontSize: "12.5px", color: "#6b6860", margin: 0 }}>Paste array JSON — setiap objek butuh <code style={{ background: "#f2efe8", padding: "1px 4px", borderRadius: "4px" }}>versi</code> dan <code style={{ background: "#f2efe8", padding: "1px 4px", borderRadius: "4px" }}>judul</code>.</p>
+            </div>
+
+            <textarea
+              value={importJson}
+              onChange={e => parseImport(e.target.value)}
+              placeholder={'[\n  {\n    "versi": "1.5.0",\n    "judul": "...",\n    "deskripsi": "...",\n    "tipe": "feature",\n    "released_at": "2026-07-08",\n    "audience": "all",\n    "is_published": 0\n  }\n]'}
+              rows={10}
+              style={{ width: "100%", padding: "12px 14px", borderRadius: "10px", border: `1px solid ${importError ? "#fca5a5" : "#e2ddd5"}`, fontSize: "12px", fontFamily: "monospace", color: "#0f0e17", resize: "vertical", outline: "none", boxSizing: "border-box" }}
+            />
+
+            {importError && (
+              <div style={{ fontSize: "12.5px", color: "#e84c2b", background: "#fff3f0", border: "1px solid #fca5a5", borderRadius: "8px", padding: "8px 12px" }}>{importError}</div>
+            )}
+
+            {importParsed?.length > 0 && (
+              <div style={{ border: "1px solid #e2ddd5", borderRadius: "10px", overflow: "hidden" }}>
+                <div style={{ padding: "8px 14px", background: "#f7f5f0", borderBottom: "1px solid #e2ddd5", fontSize: "11px", fontWeight: "700", color: "#6b6860", textTransform: "uppercase", letterSpacing: ".07em" }}>
+                  Preview — {importParsed.length} entri
+                </div>
+                {importParsed.map((item, i) => {
+                  const t = TIPE_CONFIG[item.tipe] || TIPE_CONFIG.feature;
+                  return (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "9px 14px", borderBottom: i < importParsed.length - 1 ? "1px solid #f0ede6" : "none" }}>
+                      <span style={{ fontSize: "11px", fontWeight: "700", color: "#9b9992", fontFamily: "monospace", flexShrink: 0 }}>v{item.versi}</span>
+                      <span style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.judul}</span>
+                      <span style={{ fontSize: "10px", fontWeight: "700", padding: "2px 6px", borderRadius: "5px", background: t.bg, color: t.color, flexShrink: 0 }}>{t.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+              <button onClick={() => setImportOpen(false)} style={{ padding: "9px 20px", borderRadius: "10px", border: "1px solid #e2ddd5", background: "white", fontSize: "14px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", color: "#0f0e17" }}>Batal</button>
+              <button onClick={handleImport} disabled={!importParsed?.length || importing}
+                style={{ padding: "9px 20px", borderRadius: "10px", border: "none", background: importParsed?.length ? "#e84c2b" : "#e2ddd5", color: importParsed?.length ? "white" : "#b4b2a9", fontSize: "14px", fontWeight: "700", cursor: importParsed?.length && !importing ? "pointer" : "not-allowed", fontFamily: "inherit" }}>
+                {importing ? "Menyimpan..." : `Simpan ${importParsed?.length ?? 0} Entri`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

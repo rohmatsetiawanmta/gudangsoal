@@ -9,39 +9,21 @@ import api from "../../lib/api";
 import useWindowWidth from "../../hooks/useWindowWidth";
 
 const TIPE_CONFIG = {
-  feature: { label: "Fitur Baru", color: "#1a8a6e", bg: "#e4f5f0", icon: Zap },
-  improvement: {
-    label: "Peningkatan",
-    color: "#2563eb",
-    bg: "#eff6ff",
-    icon: Wrench,
-  },
-  fix: { label: "Perbaikan", color: "#854F0B", bg: "#faeeda", icon: Bug },
-  breaking: {
-    label: "Breaking",
-    color: "#e84c2b",
-    bg: "#fff3f0",
-    icon: AlertTriangle,
-  },
+  feature:     { label: "Fitur Baru",   color: "#1a8a6e", bg: "#e4f5f0", icon: Zap },
+  improvement: { label: "Peningkatan",  color: "#2563eb", bg: "#eff6ff", icon: Wrench },
+  fix:         { label: "Perbaikan",    color: "#854F0B", bg: "#faeeda", icon: Bug },
+  breaking:    { label: "Breaking",     color: "#e84c2b", bg: "#fff3f0", icon: AlertTriangle },
 };
 
 function TipeBadge({ tipe }) {
   const t = TIPE_CONFIG[tipe] || TIPE_CONFIG.feature;
   const Icon = t.icon;
   return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "5px",
-        fontSize: "11px",
-        fontWeight: "700",
-        padding: "3px 8px",
-        borderRadius: "6px",
-        background: t.bg,
-        color: t.color,
-      }}
-    >
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: "5px",
+      fontSize: "11px", fontWeight: "700", padding: "3px 8px",
+      borderRadius: "6px", background: t.bg, color: t.color,
+    }}>
       <Icon size={11} />
       {t.label}
     </span>
@@ -54,35 +36,29 @@ export default function ChangelogPage() {
   const isMobile = width <= 480;
 
   const [changelogs, setChangelogs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading,    setLoading]    = useState(true);
   const [filterTipe, setFilterTipe] = useState("all");
 
   useEffect(() => {
-    api
-      .get("/changelog")
+    api.get("/changelog")
       .then((data) => setChangelogs(Array.isArray(data) ? data : []))
       .catch(() => setChangelogs([]))
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered =
-    filterTipe === "all"
-      ? changelogs
-      : changelogs.filter((c) => c.tipe === filterTipe);
+  const filtered = filterTipe === "all"
+    ? changelogs
+    : changelogs.filter((c) => c.tipe === filterTipe);
+
   const grouped = filtered.reduce((acc, item) => {
-    if (!acc[item.versi])
-      acc[item.versi] = {
-        versi: item.versi,
-        released_at: item.released_at,
-        items: [],
-      };
+    if (!acc[item.versi]) acc[item.versi] = { versi: item.versi, released_at: item.released_at, items: [] };
     acc[item.versi].items.push(item);
     return acc;
   }, {});
   const versions = Object.values(grouped);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+    <div style={{ minHeight: "100vh", background: "var(--gs-bg)" }}>
       <SEO
         title="Changelog"
         description="Daftar pembaruan dan fitur baru yang dirilis di Gudang Soal."
@@ -90,63 +66,42 @@ export default function ChangelogPage() {
       />
       <Navbar />
 
-      <main
-        style={{
-          maxWidth: "800px",
-          margin: "0 auto",
-          padding: isMobile ? "40px 20px" : "60px 40px",
-        }}
-      >
+      <main style={{ maxWidth: "800px", margin: "0 auto", padding: isMobile ? "40px 20px" : "60px 40px" }}>
         {/* Header */}
         <div style={{ marginBottom: "32px" }}>
-          <h1
-            style={{
-              fontSize: isMobile ? "26px" : "clamp(28px, 4vw, 40px)",
-              fontWeight: "800",
-              color: "#0f0e17",
-              letterSpacing: "-0.5px",
-              marginBottom: "12px",
-            }}
-          >
+          <h1 style={{
+            fontSize: isMobile ? "26px" : "clamp(28px, 4vw, 40px)",
+            fontWeight: "800", color: "var(--gs-text)",
+            letterSpacing: "-0.5px", marginBottom: "12px",
+          }}>
             Changelog
           </h1>
-          <p
-            style={{
-              fontSize: isMobile ? "14px" : "16px",
-              color: "#6b6860",
-              lineHeight: "1.7",
-              marginBottom: "20px",
-            }}
-          >
-            Semua pembaruan, fitur baru, dan perbaikan yang dirilis di Gudang
-            Soal.
+          <p style={{
+            fontSize: isMobile ? "14px" : "16px",
+            color: "var(--gs-text-muted)", lineHeight: "1.7", marginBottom: "20px",
+          }}>
+            Semua pembaruan, fitur baru, dan perbaikan yang dirilis di Gudang Soal.
           </p>
 
           {/* Filter tipe */}
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             {[
-              { value: "all", label: "Semua" },
-              { value: "feature", label: "Fitur Baru" },
+              { value: "all",         label: "Semua" },
+              { value: "feature",     label: "Fitur Baru" },
               { value: "improvement", label: "Peningkatan" },
-              { value: "fix", label: "Perbaikan" },
-              { value: "breaking", label: "Breaking" },
+              { value: "fix",         label: "Perbaikan" },
+              { value: "breaking",    label: "Breaking" },
             ].map((f) => (
               <button
                 key={f.value}
                 onClick={() => setFilterTipe(f.value)}
                 style={{
-                  padding: "6px 14px",
-                  borderRadius: "100px",
-                  border: `1.5px solid ${
-                    filterTipe === f.value ? "#e84c2b" : "#e2ddd5"
-                  }`,
-                  background: filterTipe === f.value ? "#fff3f0" : "white",
-                  color: filterTipe === f.value ? "#e84c2b" : "#6b6860",
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                  transition: "all .15s",
+                  padding: "6px 14px", borderRadius: "100px",
+                  border: `1.5px solid ${filterTipe === f.value ? "#e84c2b" : "var(--gs-border)"}`,
+                  background: filterTipe === f.value ? "#fff3f0" : "var(--gs-surface)",
+                  color: filterTipe === f.value ? "#e84c2b" : "var(--gs-text-muted)",
+                  fontSize: "13px", fontWeight: "600", cursor: "pointer",
+                  fontFamily: "inherit", transition: "all .15s",
                 }}
               >
                 {f.label}
@@ -155,170 +110,98 @@ export default function ChangelogPage() {
           </div>
         </div>
 
-        {/* Loading */}
+        {/* Loading skeleton */}
         {loading && (
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "32px" }}
-          >
+          <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
             {Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  height: "120px",
-                  borderRadius: "14px",
-                  background: "#e2ddd5",
-                  opacity: 0.5,
-                  animation: "pulse 1.5s infinite",
-                }}
-              />
+              <div key={i} style={{
+                height: "120px", borderRadius: "14px",
+                background: "var(--gs-border)", opacity: 0.5,
+                animation: "pulse 1.5s infinite",
+              }} />
             ))}
           </div>
         )}
 
         {/* Empty */}
         {!loading && versions.length === 0 && (
-          <div
-            style={{
-              background: "white",
-              borderRadius: "14px",
-              border: "1px solid #e2ddd5",
-              padding: "48px",
-              textAlign: "center",
-              color: "#6b6860",
-              fontSize: "14px",
-            }}
-          >
+          <div style={{
+            background: "var(--gs-surface)", borderRadius: "14px",
+            border: "1px solid var(--gs-border)",
+            padding: "48px", textAlign: "center",
+            color: "var(--gs-text-muted)", fontSize: "14px",
+          }}>
             Belum ada changelog.
           </div>
         )}
 
         {/* Versions */}
         {!loading && (
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "40px" }}
-          >
+          <div style={{ display: "flex", flexDirection: "column", gap: "40px" }}>
             {versions.map((v, vi) => (
               <div key={v.versi}>
                 {/* Version header */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    marginBottom: "16px",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "20px",
-                      fontWeight: "800",
-                      color: "#0f0e17",
-                    }}
-                  >
+                <div style={{
+                  display: "flex", alignItems: "center", gap: "10px",
+                  marginBottom: "16px", flexWrap: "wrap",
+                }}>
+                  <span style={{ fontSize: "20px", fontWeight: "800", color: "var(--gs-text)" }}>
                     v{v.versi}
                   </span>
                   {vi === 0 && (
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        fontWeight: "700",
-                        padding: "3px 8px",
-                        borderRadius: "6px",
-                        background: "#e84c2b",
-                        color: "white",
-                      }}
-                    >
+                    <span style={{
+                      fontSize: "11px", fontWeight: "700",
+                      padding: "3px 8px", borderRadius: "6px",
+                      background: "#e84c2b", color: "white",
+                    }}>
                       Latest
                     </span>
                   )}
                   {!isMobile && (
-                    <div
-                      style={{ flex: 1, height: "1px", background: "#e2ddd5" }}
-                    />
+                    <div style={{ flex: 1, height: "1px", background: "var(--gs-border)" }} />
                   )}
-                  <span style={{ fontSize: "13px", color: "#b4b2a9" }}>
+                  <span style={{ fontSize: "13px", color: "var(--gs-text-hint)" }}>
                     {new Date(v.released_at).toLocaleDateString("id-ID", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
+                      day: "numeric", month: "long", year: "numeric",
                     })}
                   </span>
                 </div>
 
-                {/* Card grid — 1 kolom di mobile, 2 kolom di desktop */}
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-                    gap: "10px",
-                  }}
-                >
+                {/* Card grid */}
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                  gap: "10px",
+                }}>
                   {v.items.map((item) => {
                     const t = TIPE_CONFIG[item.tipe] || TIPE_CONFIG.feature;
                     const Icon = t.icon;
                     return (
-                      <div
-                        key={item.id}
-                        style={{
-                          background: "white",
-                          borderRadius: "12px",
-                          border: "1px solid #e2ddd5",
-                          padding: "14px",
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "6px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: "26px",
-                              height: "26px",
-                              borderRadius: "7px",
-                              background: t.bg,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              flexShrink: 0,
-                            }}
-                          >
+                      <div key={item.id} style={{
+                        background: "var(--gs-surface)",
+                        borderRadius: "12px",
+                        border: "1px solid var(--gs-border)",
+                        padding: "14px",
+                        display: "flex", flexDirection: "column", gap: "6px",
+                      }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <div style={{
+                            width: "26px", height: "26px", borderRadius: "7px",
+                            background: t.bg,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            flexShrink: 0,
+                          }}>
                             <Icon size={12} color={t.color} />
                           </div>
-                          <span
-                            style={{
-                              fontSize: "12px",
-                              fontWeight: "700",
-                              color: t.color,
-                            }}
-                          >
+                          <span style={{ fontSize: "12px", fontWeight: "700", color: t.color }}>
                             {t.label}
                           </span>
                         </div>
-                        <div
-                          style={{
-                            fontSize: "13px",
-                            fontWeight: "600",
-                            color: "#0f0e17",
-                            lineHeight: "1.4",
-                          }}
-                        >
+                        <div style={{ fontSize: "13px", fontWeight: "600", color: "var(--gs-text)", lineHeight: "1.4" }}>
                           {item.judul}
                         </div>
                         {item.deskripsi && (
-                          <div
-                            style={{
-                              fontSize: "12px",
-                              color: "#6b6860",
-                              lineHeight: "1.6",
-                            }}
-                          >
+                          <div style={{ fontSize: "12px", color: "var(--gs-text-muted)", lineHeight: "1.6" }}>
                             {item.deskripsi}
                           </div>
                         )}
@@ -331,47 +214,24 @@ export default function ChangelogPage() {
           </div>
         )}
 
-        {/* CTA bottom */}
-        <div
-          style={{
-            marginTop: "48px",
-            background: "#0f0e17",
-            borderRadius: "16px",
-            padding: isMobile ? "32px 20px" : "40px",
-            textAlign: "center",
-          }}
-        >
-          <h3
-            style={{
-              fontSize: isMobile ? "18px" : "20px",
-              fontWeight: "800",
-              color: "white",
-              marginBottom: "8px",
-            }}
-          >
+        {/* CTA bottom — intentionally always dark */}
+        <div style={{
+          marginTop: "48px", background: "#0f0e17",
+          borderRadius: "16px", padding: isMobile ? "32px 20px" : "40px",
+          textAlign: "center",
+        }}>
+          <h3 style={{ fontSize: isMobile ? "18px" : "20px", fontWeight: "800", color: "white", marginBottom: "8px" }}>
             Siap mulai belajar?
           </h3>
-          <p
-            style={{
-              fontSize: "14px",
-              color: "rgba(255,255,255,0.6)",
-              marginBottom: "20px",
-            }}
-          >
+          <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.6)", marginBottom: "20px" }}>
             Bergabung gratis dan mulai kerjakan soal matematika.
           </p>
           <button
             onClick={() => navigate("/register")}
             style={{
-              padding: "12px 28px",
-              borderRadius: "10px",
-              border: "none",
-              background: "#e84c2b",
-              color: "white",
-              fontSize: "15px",
-              fontWeight: "700",
-              cursor: "pointer",
-              fontFamily: "inherit",
+              padding: "12px 28px", borderRadius: "10px", border: "none",
+              background: "#e84c2b", color: "white", fontSize: "15px",
+              fontWeight: "700", cursor: "pointer", fontFamily: "inherit",
             }}
           >
             Daftar Gratis

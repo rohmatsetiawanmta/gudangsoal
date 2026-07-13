@@ -1,6 +1,6 @@
 // src/features/admin/AdminMateriBulkImport.jsx
 import { useEffect, useState, useRef, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
   ArrowLeft, Upload, GraduationCap, BookOpen,
@@ -191,9 +191,11 @@ export default function AdminMateriBulkImport() {
   const width     = useWindowWidth();
   const isMobile  = width <= 480;
 
+  const [searchParams] = useSearchParams();
+
   const [struktur, setStruktur]           = useState({ jenjang: [], subjenjang: [], mapel: [], topik: [], subtopik: [] });
   const [loadingStruktur, setLoadingStruktur] = useState(true);
-  const [subtopikId, setSubtopikId]       = useState(null);
+  const [subtopikId, setSubtopikId]       = useState(Number(searchParams.get("subtopik")) || null);
 
   useEffect(() => {
     api.get("/admin/struktur")
@@ -271,7 +273,7 @@ export default function AdminMateriBulkImport() {
           <GraduationCap size={isMobile ? 80 : 110} />
         </div>
         <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: isMobile ? "flex-start" : "center", gap: "16px", flexDirection: isMobile ? "column" : "row" }}>
-          <button onClick={() => navigate("/admin/materi")}
+          <button onClick={() => navigate(subtopikId ? `/admin/materi?subtopik=${subtopikId}` : "/admin/materi")}
             style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "10px", border: "1px solid rgba(255,255,255,.15)", background: "rgba(255,255,255,.08)", color: "rgba(255,255,255,.7)", cursor: "pointer", flexShrink: 0 }}
             onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.15)"; e.currentTarget.style.color = "white"; }}
             onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.08)"; e.currentTarget.style.color = "rgba(255,255,255,.7)"; }}
@@ -317,7 +319,7 @@ export default function AdminMateriBulkImport() {
               style={{ padding: "10px 20px", borderRadius: "10px", border: "1px solid #e2ddd5", background: "white", fontSize: "14px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", color: "#0f0e17" }}>
               Import Lagi
             </button>
-            <button onClick={() => navigate("/admin/materi")}
+            <button onClick={() => navigate(subtopikId ? `/admin/materi?subtopik=${subtopikId}` : "/admin/materi")}
               style={{ padding: "10px 20px", borderRadius: "10px", border: "none", background: "#0f0e17", color: "white", fontSize: "14px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit" }}>
               Lihat Semua Materi
             </button>

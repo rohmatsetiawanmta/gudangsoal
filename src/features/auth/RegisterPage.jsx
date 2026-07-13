@@ -21,7 +21,7 @@ function InputField({
 }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-      <label style={{ fontSize: "14px", fontWeight: "500", color: "#0f0e17" }}>
+      <label style={{ fontSize: "14px", fontWeight: "500", color: "var(--gs-text)" }}>
         {label}
       </label>
       <div style={{ position: "relative" }}>
@@ -32,7 +32,7 @@ function InputField({
             left: "14px",
             top: "50%",
             transform: "translateY(-50%)",
-            color: "#6b6860",
+            color: "var(--gs-text-muted)",
             pointerEvents: "none",
           }}
         />
@@ -53,12 +53,12 @@ function InputField({
             border: "1px solid #e2ddd5",
             fontSize: "14px",
             outline: "none",
-            background: "white",
-            color: "#0f0e17",
+            background: "var(--gs-input-bg)",
+            color: "var(--gs-text)",
             fontFamily: "inherit",
           }}
           onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
-          onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
+          onBlur={(e) => (e.target.style.borderColor = "var(--gs-border)")}
         />
         {rightElement && (
           <div
@@ -137,21 +137,21 @@ export default function RegisterPage() {
       <div>
         <SEO title="Cek Email" description="Konfirmasi email untuk mengaktifkan akun Gudang Soal." url="/register" />
         <Navbar />
-        <div style={{ minHeight: "90vh", display: "flex", alignItems: "center", justifyContent: "center", padding: isMobile ? "32px 20px" : "48px 32px", background: "#faf9f6" }}>
+        <div style={{ minHeight: "90vh", display: "flex", alignItems: "center", justifyContent: "center", padding: isMobile ? "32px 20px" : "48px 32px", background: "var(--gs-bg)" }}>
           <div style={{ width: "100%", maxWidth: "400px", textAlign: "center" }}>
             <div style={{ width: "64px", height: "64px", borderRadius: "20px", background: "#e4f5f0", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
               <CheckCircle size={30} color="#1a8a6e" />
             </div>
-            <h2 style={{ fontSize: "24px", fontWeight: "800", color: "#0f0e17", marginBottom: "10px" }}>
+            <h2 style={{ fontSize: "24px", fontWeight: "800", color: "var(--gs-text)", marginBottom: "10px" }}>
               Cek email kamu!
             </h2>
-            <p style={{ fontSize: "15px", color: "#6b6860", lineHeight: "1.65", marginBottom: "8px" }}>
+            <p style={{ fontSize: "15px", color: "var(--gs-text-muted)", lineHeight: "1.65", marginBottom: "8px" }}>
               Kami mengirim link konfirmasi ke
             </p>
-            <div style={{ display: "inline-block", background: "#f2efe8", border: "1px solid #e2ddd5", borderRadius: "10px", padding: "8px 16px", fontSize: "14px", fontWeight: "700", color: "#0f0e17", marginBottom: "24px" }}>
+            <div style={{ display: "inline-block", background: "var(--gs-hover)", border: "1px solid var(--gs-border)", borderRadius: "10px", padding: "8px 16px", fontSize: "14px", fontWeight: "700", color: "var(--gs-text)", marginBottom: "24px" }}>
               {done.email}
             </div>
-            <p style={{ fontSize: "13px", color: "#b4b2a9", lineHeight: "1.65", marginBottom: "28px" }}>
+            <p style={{ fontSize: "13px", color: "var(--gs-text-hint)", lineHeight: "1.65", marginBottom: "28px" }}>
               Klik link di email untuk mengaktifkan akun.<br />Link berlaku 24 jam.
             </p>
 
@@ -164,13 +164,13 @@ export default function RegisterPage() {
             <button
               onClick={handleResend}
               disabled={resending}
-              style={{ display: "inline-flex", alignItems: "center", gap: "7px", padding: "10px 22px", borderRadius: "10px", border: "1px solid #e2ddd5", background: "white", fontSize: "14px", fontWeight: "600", cursor: resending ? "not-allowed" : "pointer", fontFamily: "inherit", color: "#0f0e17", marginBottom: "16px" }}
+              style={{ display: "inline-flex", alignItems: "center", gap: "7px", padding: "10px 22px", borderRadius: "10px", border: "1px solid #e2ddd5", background: "var(--gs-input-bg)", fontSize: "14px", fontWeight: "600", cursor: resending ? "not-allowed" : "pointer", fontFamily: "inherit", color: "var(--gs-text)", marginBottom: "16px" }}
             >
               <Send size={14} /> {resending ? "Mengirim..." : "Kirim ulang email"}
             </button>
 
             <div>
-              <Link to="/login" style={{ fontSize: "13px", color: "#6b6860", textDecoration: "underline" }}>
+              <Link to="/login" style={{ fontSize: "13px", color: "var(--gs-text-muted)", textDecoration: "underline" }}>
                 Kembali ke halaman login
               </Link>
             </div>
@@ -186,7 +186,7 @@ export default function RegisterPage() {
       type="button"
       onClick={() => setShowPassword(!showPassword)}
       style={{
-        color: "#6b6860",
+        color: "var(--gs-text-muted)",
         background: "none",
         border: "none",
         cursor: "pointer",
@@ -291,7 +291,7 @@ export default function RegisterPage() {
             alignItems: "center",
             justifyContent: "center",
             padding: isMobile ? "32px 20px" : "48px 32px",
-            background: "#faf9f6",
+            background: "var(--gs-bg)",
           }}
         >
           <div style={{ width: "100%", maxWidth: "380px" }}>
@@ -300,13 +300,13 @@ export default function RegisterPage() {
                 style={{
                   fontSize: "26px",
                   fontWeight: "800",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                   marginBottom: "6px",
                 }}
               >
                 Daftar
               </h2>
-              <p style={{ fontSize: "14px", color: "#6b6860" }}>
+              <p style={{ fontSize: "14px", color: "var(--gs-text-muted)" }}>
                 Sudah punya akun?{" "}
                 <Link
                   to="/login"
@@ -432,7 +432,7 @@ export default function RegisterPage() {
                   border: "none",
                   cursor: "pointer",
                   fontSize: "13px",
-                  color: "#6b6860",
+                  color: "var(--gs-text-muted)",
                   fontFamily: "inherit",
                   textDecoration: "underline",
                 }}

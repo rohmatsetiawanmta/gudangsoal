@@ -75,7 +75,7 @@ export default function FeedbackModal({ onClose }) {
     >
       <div
         style={{
-          background: "white",
+          background: "var(--gs-surface)",
           borderRadius: "16px",
           padding: "28px",
           maxWidth: "460px",
@@ -96,7 +96,7 @@ export default function FeedbackModal({ onClose }) {
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <MessageSquarePlus size={20} color="#e84c2b" />
             <h3
-              style={{ fontSize: "17px", fontWeight: "800", color: "#0f0e17" }}
+              style={{ fontSize: "17px", fontWeight: "800", color: "var(--gs-text)" }}
             >
               Kirim Masukan
             </h3>
@@ -107,7 +107,7 @@ export default function FeedbackModal({ onClose }) {
               background: "none",
               border: "none",
               cursor: "pointer",
-              color: "#6b6860",
+              color: "var(--gs-text-muted)",
               display: "flex",
             }}
           >
@@ -136,7 +136,7 @@ export default function FeedbackModal({ onClose }) {
               style={{
                 fontSize: "17px",
                 fontWeight: "700",
-                color: "#0f0e17",
+                color: "var(--gs-text)",
                 marginBottom: "8px",
               }}
             >
@@ -145,7 +145,7 @@ export default function FeedbackModal({ onClose }) {
             <p
               style={{
                 fontSize: "14px",
-                color: "#6b6860",
+                color: "var(--gs-text-muted)",
                 lineHeight: "1.6",
                 marginBottom: "24px",
               }}
@@ -176,7 +176,7 @@ export default function FeedbackModal({ onClose }) {
             <p
               style={{
                 fontSize: "14px",
-                color: "#6b6860",
+                color: "var(--gs-text-muted)",
                 marginBottom: "8px",
               }}
             >
@@ -196,8 +196,8 @@ export default function FeedbackModal({ onClose }) {
                   gap: "14px",
                   padding: "14px 16px",
                   borderRadius: "12px",
-                  border: "1px solid #e2ddd5",
-                  background: "white",
+                  border: "1px solid var(--gs-border)",
+                  background: "var(--gs-surface)",
                   cursor: "pointer",
                   textAlign: "left",
                   fontFamily: "inherit",
@@ -218,19 +218,19 @@ export default function FeedbackModal({ onClose }) {
                     style={{
                       fontSize: "14px",
                       fontWeight: "600",
-                      color: "#0f0e17",
+                      color: "var(--gs-text)",
                       marginBottom: "2px",
                     }}
                   >
                     {k.label}
                   </div>
-                  <div style={{ fontSize: "12px", color: "#6b6860" }}>
+                  <div style={{ fontSize: "12px", color: "var(--gs-text-muted)" }}>
                     {k.desc}
                   </div>
                 </div>
                 <ChevronDown
                   size={16}
-                  color="#b4b2a9"
+                  color="var(--gs-text-hint)"
                   style={{ transform: "rotate(-90deg)", flexShrink: 0 }}
                 />
               </button>
@@ -253,7 +253,7 @@ export default function FeedbackModal({ onClose }) {
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  color: "#6b6860",
+                  color: "var(--gs-text-muted)",
                   fontSize: "13px",
                   fontFamily: "inherit",
                   display: "flex",
@@ -301,7 +301,7 @@ export default function FeedbackModal({ onClose }) {
                 style={{
                   fontSize: "13px",
                   fontWeight: "600",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                 }}
               >
                 Judul
@@ -326,14 +326,14 @@ export default function FeedbackModal({ onClose }) {
                 style={{
                   padding: "10px 14px",
                   borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
+                  border: "1px solid var(--gs-border)",
                   fontSize: "14px",
                   outline: "none",
                   fontFamily: "inherit",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                 }}
                 onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
-                onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--gs-border)")}
               />
             </div>
 
@@ -345,7 +345,7 @@ export default function FeedbackModal({ onClose }) {
                 style={{
                   fontSize: "13px",
                   fontWeight: "600",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                 }}
               >
                 Deskripsi
@@ -370,21 +370,21 @@ export default function FeedbackModal({ onClose }) {
                 style={{
                   padding: "10px 14px",
                   borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
+                  border: "1px solid var(--gs-border)",
                   fontSize: "14px",
                   outline: "none",
                   fontFamily: "inherit",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                   resize: "none",
                   lineHeight: "1.6",
                 }}
                 onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
-                onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--gs-border)")}
               />
               <div
                 style={{
                   fontSize: "12px",
-                  color: "#b4b2a9",
+                  color: "var(--gs-text-hint)",
                   textAlign: "right",
                 }}
               >
@@ -406,13 +406,13 @@ export default function FeedbackModal({ onClose }) {
                 style={{
                   padding: "10px 20px",
                   borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
-                  background: "white",
+                  border: "1px solid var(--gs-border)",
+                  background: "var(--gs-surface)",
                   fontSize: "14px",
                   fontWeight: "600",
                   cursor: "pointer",
                   fontFamily: "inherit",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                 }}
               >
                 Batal

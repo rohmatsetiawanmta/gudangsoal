@@ -21,8 +21,8 @@ const TIPE_CONFIG = {
     label: "Laporan Ditindaklanjuti",
   },
   report_dismissed: {
-    color: "#6b6860",
-    bg: "#f2efe8",
+    color: "var(--gs-text-muted)",
+    bg: "var(--gs-hover)",
     label: "Laporan Ditutup",
   },
   feedback_responded: {
@@ -121,16 +121,16 @@ export default function NotificationBell({ isMobile }) {
           width: "36px",
           height: "36px",
           borderRadius: "10px",
-          border: "1px solid #e2ddd5",
-          background: open ? "#f2efe8" : "none",
+          border: "1px solid var(--gs-border)",
+          background: open ? "var(--gs-hover)" : "none",
           cursor: "pointer",
-          color: "#6b6860",
+          color: "var(--gs-text-muted)",
           transition: "background .15s",
           position: "relative",
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = "#f2efe8")}
+        onMouseEnter={(e) => (e.currentTarget.style.background = "var(--gs-hover)")}
         onMouseLeave={(e) =>
-          (e.currentTarget.style.background = open ? "#f2efe8" : "none")
+          (e.currentTarget.style.background = open ? "var(--gs-hover)" : "none")
         }
       >
         <Bell size={16} />
@@ -174,8 +174,8 @@ export default function NotificationBell({ isMobile }) {
             right: isMobile ? "-80px" : "0",
             width: isMobile ? "calc(100vw - 32px)" : "360px",
             maxWidth: "360px",
-            background: "white",
-            border: "1px solid #e2ddd5",
+            background: "var(--gs-surface)",
+            border: "1px solid var(--gs-border)",
             borderRadius: "14px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
             zIndex: 200,
@@ -193,7 +193,7 @@ export default function NotificationBell({ isMobile }) {
             }}
           >
             <span
-              style={{ fontSize: "14px", fontWeight: "700", color: "#0f0e17" }}
+              style={{ fontSize: "14px", fontWeight: "700", color: "var(--gs-text)" }}
             >
               Notifikasi{" "}
               {unread > 0 && (
@@ -224,12 +224,12 @@ export default function NotificationBell({ isMobile }) {
                   cursor: "pointer",
                   fontSize: "12px",
                   fontWeight: "600",
-                  color: "#6b6860",
+                  color: "var(--gs-text-muted)",
                   fontFamily: "inherit",
                   transition: "color .15s",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#0f0e17")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#6b6860")}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--gs-text)")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--gs-text-muted)")}
               >
                 <CheckCheck size={13} /> Tandai semua dibaca
               </button>
@@ -247,7 +247,7 @@ export default function NotificationBell({ isMobile }) {
                     key={i}
                     style={{
                       height: "72px",
-                      background: i % 2 === 0 ? "white" : "#faf9f6",
+                      background: i % 2 === 0 ? "var(--gs-surface)" : "var(--gs-surface-subtle)",
                       animation: "pulse 1.5s infinite",
                     }}
                   />
@@ -266,8 +266,8 @@ export default function NotificationBell({ isMobile }) {
                   gap: "10px",
                 }}
               >
-                <Inbox size={28} color="#e2ddd5" />
-                <span style={{ fontSize: "13px", color: "#b4b2a9" }}>
+                <Inbox size={28} color="var(--gs-border)" />
+                <span style={{ fontSize: "13px", color: "var(--gs-text-hint)" }}>
                   Belum ada notifikasi.
                 </span>
               </div>
@@ -293,7 +293,7 @@ export default function NotificationBell({ isMobile }) {
                       transition: "background .15s",
                     }}
                     onMouseEnter={(e) =>
-                      (e.currentTarget.style.background = "#faf9f6")
+                      (e.currentTarget.style.background = "var(--gs-surface-subtle)")
                     }
                     onMouseLeave={(e) =>
                       (e.currentTarget.style.background =
@@ -342,7 +342,7 @@ export default function NotificationBell({ isMobile }) {
                         style={{
                           fontSize: "13px",
                           fontWeight: n.is_read == 1 ? "400" : "600",
-                          color: "#0f0e17",
+                          color: "var(--gs-text)",
                           marginBottom: "3px",
                         }}
                       >
@@ -351,7 +351,7 @@ export default function NotificationBell({ isMobile }) {
                       <div
                         style={{
                           fontSize: "12px",
-                          color: "#6b6860",
+                          color: "var(--gs-text-muted)",
                           lineHeight: "1.5",
                           overflow: "hidden",
                           display: "-webkit-box",
@@ -364,7 +364,7 @@ export default function NotificationBell({ isMobile }) {
                       <div
                         style={{
                           fontSize: "11px",
-                          color: "#b4b2a9",
+                          color: "var(--gs-text-hint)",
                           marginTop: "4px",
                         }}
                       >
@@ -385,7 +385,7 @@ export default function NotificationBell({ isMobile }) {
                 textAlign: "center",
               }}
             >
-              <span style={{ fontSize: "12px", color: "#b4b2a9" }}>
+              <span style={{ fontSize: "12px", color: "var(--gs-text-hint)" }}>
                 Menampilkan {notifs.length} notifikasi terbaru
               </span>
             </div>

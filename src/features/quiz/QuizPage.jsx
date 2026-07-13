@@ -34,9 +34,9 @@ function TimerDisplay({ sisaWaktu, isMobile }) {
         gap: "6px",
         padding: "6px 14px",
         borderRadius: "10px",
-        background: isCritical ? "#fff3f0" : isWarning ? "#faeeda" : "#f2efe8",
+        background: isCritical ? "#fff3f0" : isWarning ? "#faeeda" : "var(--gs-hover)",
         border: `1px solid ${
-          isCritical ? "#fca5a5" : isWarning ? "#f5a623" : "#e2ddd5"
+          isCritical ? "#fca5a5" : isWarning ? "#f5a623" : "var(--gs-border)"
         }`,
       }}
     >
@@ -45,7 +45,7 @@ function TimerDisplay({ sisaWaktu, isMobile }) {
           fontSize: isMobile ? "14px" : "16px",
           fontWeight: "800",
           fontFamily: "monospace",
-          color: isCritical ? "#e84c2b" : isWarning ? "#854F0B" : "#0f0e17",
+          color: isCritical ? "#e84c2b" : isWarning ? "#854F0B" : "var(--gs-text)",
         }}
       >
         {String(menit).padStart(2, "0")}:{String(detik).padStart(2, "0")}
@@ -86,13 +86,13 @@ function NavigasiPanel({ soalList, currentIdx, answers, onJump }) {
             width: "28px",
             height: "28px",
             borderRadius: "7px",
-            border: "1px solid #e2ddd5",
-            background: "white",
+            border: "1px solid var(--gs-border)",
+            background: "var(--gs-surface)",
             cursor: navPage === 0 ? "not-allowed" : "pointer",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: navPage === 0 ? "#b4b2a9" : "#6b6860",
+            color: navPage === 0 ? "var(--gs-text-hint)" : "var(--gs-text-muted)",
             flexShrink: 0,
           }}
         >
@@ -123,14 +123,14 @@ function NavigasiPanel({ soalList, currentIdx, answers, onJump }) {
                   height: "30px",
                   borderRadius: "7px",
                   border: `1.5px solid ${
-                    isActive ? "#e84c2b" : isDijawab ? "#1a8a6e" : "#e2ddd5"
+                    isActive ? "#e84c2b" : isDijawab ? "#1a8a6e" : "var(--gs-border)"
                   }`,
                   background: isActive
                     ? "#e84c2b"
                     : isDijawab
                     ? "#e4f5f0"
-                    : "white",
-                  color: isActive ? "white" : isDijawab ? "#1a8a6e" : "#6b6860",
+                    : "var(--gs-surface)",
+                  color: isActive ? "white" : isDijawab ? "#1a8a6e" : "var(--gs-text-muted)",
                   fontSize: "12px",
                   fontWeight: "700",
                   cursor: "pointer",
@@ -151,13 +151,13 @@ function NavigasiPanel({ soalList, currentIdx, answers, onJump }) {
             width: "28px",
             height: "28px",
             borderRadius: "7px",
-            border: "1px solid #e2ddd5",
-            background: "white",
+            border: "1px solid var(--gs-border)",
+            background: "var(--gs-surface)",
             cursor: navPage === totalPages - 1 ? "not-allowed" : "pointer",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: navPage === totalPages - 1 ? "#b4b2a9" : "#6b6860",
+            color: navPage === totalPages - 1 ? "var(--gs-text-hint)" : "var(--gs-text-muted)",
             flexShrink: 0,
           }}
         >
@@ -171,7 +171,7 @@ function NavigasiPanel({ soalList, currentIdx, answers, onJump }) {
           display: "flex",
           gap: "12px",
           fontSize: "11px",
-          color: "#6b6860",
+          color: "var(--gs-text-muted)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -203,8 +203,8 @@ function NavigasiPanel({ soalList, currentIdx, answers, onJump }) {
               width: "10px",
               height: "10px",
               borderRadius: "3px",
-              background: "white",
-              border: "1px solid #e2ddd5",
+              background: "var(--gs-surface)",
+              border: "1px solid var(--gs-border)",
             }}
           />{" "}
           Belum
@@ -432,12 +432,12 @@ export default function QuizPage() {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          background: "#faf9f6",
+          background: "var(--gs-bg)",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <div style={{ fontSize: "14px", color: "#6b6860" }}>Memuat soal...</div>
+        <div style={{ fontSize: "14px", color: "var(--gs-text-muted)" }}>Memuat soal...</div>
       </div>
     );
 
@@ -447,7 +447,7 @@ export default function QuizPage() {
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        background: "#faf9f6",
+        background: "var(--gs-bg)",
       }}
     >
       <SEO
@@ -471,7 +471,7 @@ export default function QuizPage() {
         >
           <div
             style={{
-              background: "white",
+              background: "var(--gs-surface)",
               borderRadius: "16px",
               padding: "28px",
               maxWidth: "400px",
@@ -482,7 +482,7 @@ export default function QuizPage() {
               style={{
                 fontSize: "17px",
                 fontWeight: "800",
-                color: "#0f0e17",
+                color: "var(--gs-text)",
                 marginBottom: "8px",
               }}
             >
@@ -491,7 +491,7 @@ export default function QuizPage() {
             <p
               style={{
                 fontSize: "14px",
-                color: "#6b6860",
+                color: "var(--gs-text-muted)",
                 marginBottom: "6px",
               }}
             >
@@ -500,7 +500,7 @@ export default function QuizPage() {
             <p
               style={{
                 fontSize: "14px",
-                color: "#6b6860",
+                color: "var(--gs-text-muted)",
                 marginBottom: "24px",
               }}
             >
@@ -519,13 +519,13 @@ export default function QuizPage() {
                   flex: 1,
                   padding: "10px",
                   borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
-                  background: "white",
+                  border: "1px solid var(--gs-border)",
+                  background: "var(--gs-surface)",
                   fontSize: "14px",
                   fontWeight: "600",
                   cursor: "pointer",
                   fontFamily: "inherit",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                 }}
               >
                 Selesaikan Sesi
@@ -568,7 +568,7 @@ export default function QuizPage() {
         >
           <div
             style={{
-              background: "white",
+              background: "var(--gs-surface)",
               borderRadius: "16px",
               padding: "28px",
               maxWidth: "400px",
@@ -579,7 +579,7 @@ export default function QuizPage() {
               style={{
                 fontSize: "17px",
                 fontWeight: "800",
-                color: "#0f0e17",
+                color: "var(--gs-text)",
                 marginBottom: "8px",
               }}
             >
@@ -589,7 +589,7 @@ export default function QuizPage() {
               <div
                 style={{
                   fontSize: "14px",
-                  color: "#6b6860",
+                  color: "var(--gs-text-muted)",
                   marginBottom: "8px",
                 }}
               >
@@ -622,13 +622,13 @@ export default function QuizPage() {
                   flex: 1,
                   padding: "10px",
                   borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
-                  background: "white",
+                  border: "1px solid var(--gs-border)",
+                  background: "var(--gs-surface)",
                   fontSize: "14px",
                   fontWeight: "600",
                   cursor: "pointer",
                   fontFamily: "inherit",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                 }}
               >
                 Kembali
@@ -662,8 +662,8 @@ export default function QuizPage() {
       {/* Navbar */}
       <div
         style={{
-          background: "white",
-          borderBottom: "1px solid #e2ddd5",
+          background: "var(--gs-surface)",
+          borderBottom: "1px solid var(--gs-border)",
           padding: `0 ${isMobile ? "16px" : "40px"}`,
           height: "56px",
           display: "flex",
@@ -690,7 +690,7 @@ export default function QuizPage() {
               background: "none",
               border: "none",
               cursor: "pointer",
-              color: "#6b6860",
+              color: "var(--gs-text-muted)",
               display: "flex",
               padding: 0,
               flexShrink: 0,
@@ -717,7 +717,7 @@ export default function QuizPage() {
               style={{
                 fontSize: "13px",
                 fontWeight: "700",
-                color: "#0f0e17",
+                color: "var(--gs-text)",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -761,8 +761,8 @@ export default function QuizPage() {
       {/* Panel navigasi soal — sticky di bawah navbar */}
       <div
         style={{
-          background: "white",
-          borderBottom: "1px solid #f2efe8",
+          background: "var(--gs-surface)",
+          borderBottom: "1px solid var(--gs-divider)",
           padding: isMobile ? "10px 16px" : "10px 40px",
           position: "sticky",
           top: "56px",
@@ -792,9 +792,9 @@ export default function QuizPage() {
         {currentSoal ? (
           <div
             style={{
-              background: "white",
+              background: "var(--gs-surface)",
               borderRadius: "16px",
-              border: "1px solid #e2ddd5",
+              border: "1px solid var(--gs-border)",
               padding: isMobile ? "20px" : "32px",
               display: "flex",
               flexDirection: "column",
@@ -818,7 +818,7 @@ export default function QuizPage() {
                   style={{
                     fontSize: "12px",
                     fontWeight: "700",
-                    color: "#6b6860",
+                    color: "var(--gs-text-muted)",
                   }}
                 >
                   Soal {currentIdx + 1} dari {soalList.length}
@@ -826,7 +826,7 @@ export default function QuizPage() {
                 <span
                   style={{
                     fontSize: "11px",
-                    color: "#b4b2a9",
+                    color: "var(--gs-text-hint)",
                     fontFamily: "monospace",
                   }}
                 >
@@ -858,7 +858,7 @@ export default function QuizPage() {
                     </span>
                   );
                 })()}
-                <span style={{ fontSize: "11px", color: "#b4b2a9" }}>
+                <span style={{ fontSize: "11px", color: "var(--gs-text-hint)" }}>
                   {jumlahDijawab}/{soalList.length} dijawab
                 </span>
               </div>
@@ -868,7 +868,7 @@ export default function QuizPage() {
             <div
               style={{
                 fontSize: isMobile ? "15px" : "17px",
-                color: "#0f0e17",
+                color: "var(--gs-text)",
                 fontWeight: "500",
                 lineHeight: "1.7",
               }}
@@ -893,7 +893,7 @@ export default function QuizPage() {
                 alignItems: "center",
                 justifyContent: "space-between",
                 paddingTop: "12px",
-                borderTop: "1px solid #f2efe8",
+                borderTop: "1px solid var(--gs-divider)",
               }}
             >
               <button
@@ -905,19 +905,19 @@ export default function QuizPage() {
                   gap: "6px",
                   padding: "9px 16px",
                   borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
-                  background: "white",
+                  border: "1px solid var(--gs-border)",
+                  background: "var(--gs-surface)",
                   fontSize: "14px",
                   fontWeight: "600",
                   cursor: currentIdx === 0 ? "not-allowed" : "pointer",
                   fontFamily: "inherit",
-                  color: currentIdx === 0 ? "#b4b2a9" : "#0f0e17",
+                  color: currentIdx === 0 ? "var(--gs-text-hint)" : "var(--gs-text)",
                 }}
               >
                 <ChevronLeft size={15} /> Sebelumnya
               </button>
 
-              <span style={{ fontSize: "12px", color: "#b4b2a9" }}>
+              <span style={{ fontSize: "12px", color: "var(--gs-text-hint)" }}>
                 {currentIdx + 1} / {soalList.length}
               </span>
 
@@ -930,8 +930,8 @@ export default function QuizPage() {
                   gap: "6px",
                   padding: "9px 16px",
                   borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
-                  background: "white",
+                  border: "1px solid var(--gs-border)",
+                  background: "var(--gs-surface)",
                   fontSize: "14px",
                   fontWeight: "600",
                   cursor:
@@ -940,7 +940,7 @@ export default function QuizPage() {
                       : "pointer",
                   fontFamily: "inherit",
                   color:
-                    currentIdx === soalList.length - 1 ? "#b4b2a9" : "#0f0e17",
+                    currentIdx === soalList.length - 1 ? "var(--gs-text-hint)" : "var(--gs-text)",
                 }}
               >
                 Berikutnya <ChevronRight size={15} />
@@ -949,7 +949,7 @@ export default function QuizPage() {
           </div>
         ) : (
           <div
-            style={{ textAlign: "center", padding: "48px", color: "#6b6860" }}
+            style={{ textAlign: "center", padding: "48px", color: "var(--gs-text-muted)" }}
           >
             Soal tidak ditemukan.
           </div>

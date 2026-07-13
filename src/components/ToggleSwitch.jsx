@@ -15,7 +15,7 @@ export default function ToggleSwitch({
           height: "20px",
           borderRadius: "20px",
           flexShrink: 0,
-          background: checked ? "#1a8a6e" : "#e2ddd5",
+          background: checked ? "#1a8a6e" : "var(--gs-border)",
           cursor: loading ? "not-allowed" : "pointer",
           transition: "background .2s",
           opacity: loading ? 0.6 : 1,
@@ -39,7 +39,7 @@ export default function ToggleSwitch({
           style={{
             fontSize: "12px",
             fontWeight: "600",
-            color: checked ? "#1a8a6e" : "#6b6860",
+            color: checked ? "#1a8a6e" : "var(--gs-text-muted)",
             minWidth: "56px",
           }}
         >

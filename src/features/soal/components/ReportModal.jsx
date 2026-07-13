@@ -47,7 +47,7 @@ export default function ReportModal({ kode, onClose, isMobile }) {
     >
       <div
         style={{
-          background: "white",
+          background: "var(--gs-surface)",
           borderRadius: "16px",
           padding: isMobile ? "20px" : "28px",
           maxWidth: "440px",
@@ -67,7 +67,7 @@ export default function ReportModal({ kode, onClose, isMobile }) {
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <Flag size={18} color="#e84c2b" />
             <h3
-              style={{ fontSize: "17px", fontWeight: "800", color: "#0f0e17" }}
+              style={{ fontSize: "17px", fontWeight: "800", color: "var(--gs-text)" }}
             >
               Laporkan Soal
             </h3>
@@ -78,7 +78,7 @@ export default function ReportModal({ kode, onClose, isMobile }) {
               background: "none",
               border: "none",
               cursor: "pointer",
-              color: "#6b6860",
+              color: "var(--gs-text-muted)",
               display: "flex",
             }}
           >
@@ -122,11 +122,11 @@ export default function ReportModal({ kode, onClose, isMobile }) {
 
             <div
               style={{
-                background: "#f2efe8",
+                background: "var(--gs-hover)",
                 borderRadius: "10px",
                 padding: "12px 14px",
                 fontSize: "13px",
-                color: "#6b6860",
+                color: "var(--gs-text-muted)",
               }}
             >
               Soal{" "}
@@ -134,7 +134,7 @@ export default function ReportModal({ kode, onClose, isMobile }) {
                 style={{
                   fontFamily: "monospace",
                   fontWeight: "700",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                 }}
               >
                 #{kode}
@@ -148,7 +148,7 @@ export default function ReportModal({ kode, onClose, isMobile }) {
                 style={{
                   fontSize: "13px",
                   fontWeight: "600",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                 }}
               >
                 Kategori Laporan
@@ -166,10 +166,10 @@ export default function ReportModal({ kode, onClose, isMobile }) {
                       padding: "10px 14px",
                       borderRadius: "10px",
                       border: `1.5px solid ${
-                        form.kategori === k.value ? "#e84c2b" : "#e2ddd5"
+                        form.kategori === k.value ? "#e84c2b" : "var(--gs-border)"
                       }`,
                       background:
-                        form.kategori === k.value ? "#fff3f0" : "white",
+                        form.kategori === k.value ? "#fff3f0" : "var(--gs-surface)",
                       cursor: "pointer",
                       transition: "all .15s",
                     }}
@@ -188,7 +188,7 @@ export default function ReportModal({ kode, onClose, isMobile }) {
                       style={{
                         fontSize: "14px",
                         color:
-                          form.kategori === k.value ? "#e84c2b" : "#0f0e17",
+                          form.kategori === k.value ? "#e84c2b" : "var(--gs-text)",
                         fontWeight: form.kategori === k.value ? "600" : "400",
                       }}
                     >
@@ -206,11 +206,11 @@ export default function ReportModal({ kode, onClose, isMobile }) {
                 style={{
                   fontSize: "13px",
                   fontWeight: "600",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                 }}
               >
                 Deskripsi{" "}
-                <span style={{ fontWeight: "400", color: "#6b6860" }}>
+                <span style={{ fontWeight: "400", color: "var(--gs-text-muted)" }}>
                   (opsional)
                 </span>
               </label>
@@ -224,16 +224,16 @@ export default function ReportModal({ kode, onClose, isMobile }) {
                 style={{
                   padding: "10px 14px",
                   borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
+                  border: "1px solid var(--gs-border)",
                   fontSize: "14px",
                   outline: "none",
                   fontFamily: "inherit",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                   resize: "none",
                   lineHeight: "1.6",
                 }}
                 onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
-                onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--gs-border)")}
               />
             </div>
 
@@ -249,13 +249,13 @@ export default function ReportModal({ kode, onClose, isMobile }) {
                 style={{
                   padding: "9px 20px",
                   borderRadius: "10px",
-                  border: "1px solid #e2ddd5",
-                  background: "white",
+                  border: "1px solid var(--gs-border)",
+                  background: "var(--gs-surface)",
                   fontSize: "14px",
                   fontWeight: "600",
                   cursor: "pointer",
                   fontFamily: "inherit",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                 }}
               >
                 Batal
@@ -267,8 +267,8 @@ export default function ReportModal({ kode, onClose, isMobile }) {
                   padding: "9px 20px",
                   borderRadius: "10px",
                   border: "none",
-                  background: loading || !form.kategori ? "#e2ddd5" : "#e84c2b",
-                  color: loading || !form.kategori ? "#b4b2a9" : "white",
+                  background: loading || !form.kategori ? "var(--gs-border)" : "#e84c2b",
+                  color: loading || !form.kategori ? "var(--gs-text-hint)" : "white",
                   fontSize: "14px",
                   fontWeight: "600",
                   cursor: loading || !form.kategori ? "not-allowed" : "pointer",

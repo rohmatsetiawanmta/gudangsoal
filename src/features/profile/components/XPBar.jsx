@@ -8,9 +8,9 @@ export default function XPBar({ xp, isMobile }) {
   return (
     <div
       style={{
-        background: "white",
+        background: "var(--gs-surface)",
         borderRadius: "14px",
-        border: "1px solid #e2ddd5",
+        border: "1px solid var(--gs-border)",
         padding: isMobile ? "16px" : "20px 24px",
       }}
     >
@@ -41,18 +41,18 @@ export default function XPBar({ xp, isMobile }) {
             }}
           >
             <span
-              style={{ fontSize: "14px", fontWeight: "700", color: "#0f0e17" }}
+              style={{ fontSize: "14px", fontWeight: "700", color: "var(--gs-text)" }}
             >
               Level {level}
             </span>
-            <span style={{ fontSize: "13px", color: "#6b6860" }}>
+            <span style={{ fontSize: "13px", color: "var(--gs-text-muted)" }}>
               {xp.toLocaleString()} XP
             </span>
           </div>
           <div
             style={{
               height: "8px",
-              background: "#f2efe8",
+              background: "var(--gs-hover)",
               borderRadius: "4px",
               overflow: "hidden",
             }}
@@ -67,7 +67,7 @@ export default function XPBar({ xp, isMobile }) {
               }}
             />
           </div>
-          <div style={{ fontSize: "12px", color: "#b4b2a9", marginTop: "4px" }}>
+          <div style={{ fontSize: "12px", color: "var(--gs-text-hint)", marginTop: "4px" }}>
             {(nextXP - xp).toLocaleString()} XP lagi ke Level {level + 1}
           </div>
         </div>

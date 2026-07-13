@@ -31,7 +31,7 @@ export default function VerifyEmailPage() {
   }, [token]);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#faf9f6" }}>
+    <div style={{ minHeight: "100vh", background: "var(--gs-bg)" }}>
       <SEO title="Konfirmasi Email" description="Verifikasi email akun Gudang Soal." url="/verify-email" />
       <Navbar />
 
@@ -42,7 +42,7 @@ export default function VerifyEmailPage() {
               <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
                 <Loader size={40} color="#e84c2b" style={{ animation: "spin 1s linear infinite" }} />
               </div>
-              <p style={{ fontSize: "15px", color: "#6b6860" }}>Memverifikasi email kamu...</p>
+              <p style={{ fontSize: "15px", color: "var(--gs-text-muted)" }}>Memverifikasi email kamu...</p>
             </>
           )}
 
@@ -51,10 +51,10 @@ export default function VerifyEmailPage() {
               <div style={{ width: "64px", height: "64px", borderRadius: "20px", background: "#e4f5f0", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
                 <CheckCircle size={30} color="#1a8a6e" />
               </div>
-              <h2 style={{ fontSize: "22px", fontWeight: "800", color: "#0f0e17", marginBottom: "8px" }}>
+              <h2 style={{ fontSize: "22px", fontWeight: "800", color: "var(--gs-text)", marginBottom: "8px" }}>
                 Email dikonfirmasi!
               </h2>
-              <p style={{ fontSize: "15px", color: "#6b6860", lineHeight: "1.65", marginBottom: "28px" }}>
+              <p style={{ fontSize: "15px", color: "var(--gs-text-muted)", lineHeight: "1.65", marginBottom: "28px" }}>
                 {message}
               </p>
               <Link
@@ -71,10 +71,10 @@ export default function VerifyEmailPage() {
               <div style={{ width: "64px", height: "64px", borderRadius: "20px", background: "#fff3f0", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
                 <XCircle size={30} color="#e84c2b" />
               </div>
-              <h2 style={{ fontSize: "22px", fontWeight: "800", color: "#0f0e17", marginBottom: "8px" }}>
+              <h2 style={{ fontSize: "22px", fontWeight: "800", color: "var(--gs-text)", marginBottom: "8px" }}>
                 Link tidak valid
               </h2>
-              <p style={{ fontSize: "15px", color: "#6b6860", lineHeight: "1.65", marginBottom: "28px" }}>
+              <p style={{ fontSize: "15px", color: "var(--gs-text-muted)", lineHeight: "1.65", marginBottom: "28px" }}>
                 {message}
               </p>
               <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
@@ -86,7 +86,7 @@ export default function VerifyEmailPage() {
                 </Link>
                 <Link
                   to="/register"
-                  style={{ display: "inline-block", background: "white", border: "1px solid #e2ddd5", color: "#0f0e17", fontSize: "14px", fontWeight: "600", padding: "11px 24px", borderRadius: "12px", textDecoration: "none" }}
+                  style={{ display: "inline-block", background: "var(--gs-input-bg)", border: "1px solid #e2ddd5", color: "var(--gs-text)", fontSize: "14px", fontWeight: "600", padding: "11px 24px", borderRadius: "12px", textDecoration: "none" }}
                 >
                   Daftar ulang
                 </Link>

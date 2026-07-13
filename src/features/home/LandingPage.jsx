@@ -75,7 +75,7 @@ export default function LandingPage() {
     loadingStats ? "—" : typeof v === "number" ? v.toLocaleString() + "+" : (v || "—");
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f2efe8", fontFamily: "inherit" }}>
+    <div style={{ minHeight: "100vh", background: "var(--gs-bg)", fontFamily: "inherit" }}>
       <SEO url="/" />
       <Navbar />
 
@@ -216,7 +216,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Fitur ── */}
-      <section style={{ background: "white", borderTop: "1px solid #e8e6e0", borderBottom: "1px solid #e8e6e0" }}>
+      <section style={{ background: "var(--gs-surface)", borderTop: "1px solid var(--gs-border)", borderBottom: "1px solid var(--gs-border)" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto", padding: `${sectionPy} ${px}` }}>
           <div style={{ textAlign: "center", marginBottom: isMobile ? "32px" : "56px" }}>
             <div style={{
@@ -229,13 +229,13 @@ export default function LandingPage() {
             </div>
             <h2 style={{
               fontSize: isMobile ? "22px" : "clamp(24px, 3vw, 36px)",
-              fontWeight: "800", color: "#0f0e17",
+              fontWeight: "800", color: "var(--gs-text)",
               letterSpacing: "-0.5px", marginBottom: "12px",
             }}>
               Semua yang kamu butuhkan untuk belajar
             </h2>
             <p style={{
-              fontSize: "15px", color: "#6b6860",
+              fontSize: "15px", color: "var(--gs-text-muted)",
               maxWidth: "480px", margin: "0 auto", lineHeight: "1.7",
             }}>
               Dirancang untuk membantu pelajar Indonesia berprestasi di ujian dan kompetisi matematika.
@@ -247,7 +247,7 @@ export default function LandingPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               {FITUR.map(({ icon: Icon, label, desc, color }) => (
                 <div key={label} style={{
-                  background: "#faf9f6",
+                  background: "var(--gs-surface-subtle)",
                   borderRadius: "16px",
                   border: "1px solid #e2ddd5",
                   borderLeft: `3px solid ${color}`,
@@ -262,8 +262,8 @@ export default function LandingPage() {
                     <Icon size={20} color={color} />
                   </div>
                   <div>
-                    <div style={{ fontSize: "15px", fontWeight: "700", color: "#0f0e17", marginBottom: "4px" }}>{label}</div>
-                    <div style={{ fontSize: "13px", color: "#6b6860", lineHeight: "1.6" }}>{desc}</div>
+                    <div style={{ fontSize: "15px", fontWeight: "700", color: "var(--gs-text)", marginBottom: "4px" }}>{label}</div>
+                    <div style={{ fontSize: "13px", color: "var(--gs-text-muted)", lineHeight: "1.6" }}>{desc}</div>
                   </div>
                 </div>
               ))}
@@ -307,12 +307,12 @@ export default function LandingPage() {
                         Fitur utama
                       </div>
                       <div style={{
-                        fontSize: "22px", fontWeight: "800", color: "#0f0e17",
+                        fontSize: "22px", fontWeight: "800", color: "var(--gs-text)",
                         letterSpacing: "-0.4px", marginBottom: "14px", lineHeight: 1.2,
                       }}>
                         {label}
                       </div>
-                      <div style={{ fontSize: "14px", color: "#6b6860", lineHeight: "1.75", flex: 1 }}>
+                      <div style={{ fontSize: "14px", color: "var(--gs-text-muted)", lineHeight: "1.75", flex: 1 }}>
                         {desc}
                       </div>
                       <div style={{
@@ -331,7 +331,7 @@ export default function LandingPage() {
               {/* 4 compact cards — 2×2 */}
               {FITUR.slice(1).map(({ icon: Icon, label, desc, color }) => (
                 <div key={label} style={{
-                  background: "#faf9f6",
+                  background: "var(--gs-surface-subtle)",
                   borderRadius: "16px",
                   border: "1px solid #e2ddd5",
                   padding: "22px 24px",
@@ -349,8 +349,8 @@ export default function LandingPage() {
                     <Icon size={20} color={color} />
                   </div>
                   <div>
-                    <div style={{ fontSize: "15px", fontWeight: "700", color: "#0f0e17", marginBottom: "5px" }}>{label}</div>
-                    <div style={{ fontSize: "13px", color: "#6b6860", lineHeight: "1.65" }}>{desc}</div>
+                    <div style={{ fontSize: "15px", fontWeight: "700", color: "var(--gs-text)", marginBottom: "5px" }}>{label}</div>
+                    <div style={{ fontSize: "13px", color: "var(--gs-text-muted)", lineHeight: "1.65" }}>{desc}</div>
                   </div>
                 </div>
               ))}
@@ -373,12 +373,12 @@ export default function LandingPage() {
             </div>
             <h2 style={{
               fontSize: isMobile ? "22px" : "clamp(24px, 3vw, 36px)",
-              fontWeight: "800", color: "#0f0e17",
+              fontWeight: "800", color: "var(--gs-text)",
               letterSpacing: "-0.5px", marginBottom: "10px",
             }}>
               Mulai belajar dalam 3 langkah
             </h2>
-            <p style={{ fontSize: "15px", color: "#6b6860" }}>
+            <p style={{ fontSize: "15px", color: "var(--gs-text-muted)" }}>
               Daftar gratis, pilih topik, dan mulai latihan sekarang.
             </p>
           </div>
@@ -447,14 +447,14 @@ export default function LandingPage() {
                   {/* Title */}
                   <div style={{
                     fontSize: isMobile ? "16px" : "18px",
-                    fontWeight: "800", color: "#0f0e17",
+                    fontWeight: "800", color: "var(--gs-text)",
                     letterSpacing: "-0.3px", marginBottom: "10px",
                   }}>
                     {label}
                   </div>
 
                   {/* Desc */}
-                  <div style={{ fontSize: "13px", color: "#6b6860", lineHeight: "1.75" }}>
+                  <div style={{ fontSize: "13px", color: "var(--gs-text-muted)", lineHeight: "1.75" }}>
                     {desc}
                   </div>
                 </div>

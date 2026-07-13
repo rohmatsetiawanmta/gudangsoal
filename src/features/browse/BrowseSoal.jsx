@@ -75,7 +75,7 @@ export default function BrowseSoal() {
   const pagedSoal  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#f2efe8" }}>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
       {!loading && (
         <SEO
           title={`${subtopikNama} — ${mapelNama}`}
@@ -170,7 +170,7 @@ export default function BrowseSoal() {
                 style={{
                   height: "64px",
                   borderRadius: "14px",
-                  background: "#e2ddd5",
+                  background: "var(--gs-border)",
                   opacity: 0.5,
                   animation: "pulse 1.5s infinite",
                 }}
@@ -189,7 +189,7 @@ export default function BrowseSoal() {
                 </div>
                 <div style={{ display: "flex", gap: "6px" }}>
                   {[
-                    { label: "Semua", val: 0,  color: "#6b6860",  bg: "#f2efe8" },
+                    { label: "Semua", val: 0,  color: "var(--gs-text-muted)",  bg: "var(--gs-hover)" },
                     { label: "Easy",  val: 1,  color: "#1a8a6e",  bg: "#e4f5f0" },
                     { label: "Medium",val: 2,  color: "#854F0B",  bg: "#faeeda" },
                     { label: "Hard",  val: 3,  color: "#e84c2b",  bg: "#fff3f0" },
@@ -197,9 +197,9 @@ export default function BrowseSoal() {
                     <button key={val} onClick={() => { setFilterDiff(v => v === val ? 0 : val); setPage(1); }}
                       style={{
                         padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "600",
-                        border: `1.5px solid ${filterDiff === val ? color : "#e2ddd5"}`,
-                        background: filterDiff === val ? bg : "white",
-                        color: filterDiff === val ? color : "#6b6860",
+                        border: `1.5px solid ${filterDiff === val ? color : "var(--gs-border)"}`,
+                        background: filterDiff === val ? bg : "var(--gs-surface)",
+                        color: filterDiff === val ? color : "var(--gs-text-muted)",
                         cursor: "pointer", fontFamily: "inherit", transition: "all .12s",
                       }}>
                       {label}
@@ -211,7 +211,7 @@ export default function BrowseSoal() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               {filtered.length === 0 && (
-                <div style={{ textAlign: "center", padding: "48px", color: "#6b6860", fontSize: "14px" }}>
+                <div style={{ textAlign: "center", padding: "48px", color: "var(--gs-text-muted)", fontSize: "14px" }}>
                   {soal.length === 0
                     ? `Belum ada soal untuk ${subtopikNama}.`
                     : "Tidak ada soal dengan filter ini."}
@@ -226,32 +226,32 @@ export default function BrowseSoal() {
                     style={{
                       display: "flex", alignItems: "center",
                       gap: isMobile ? "10px" : "14px",
-                      background: "white", borderRadius: "14px",
+                      background: "var(--gs-surface)", borderRadius: "14px",
                       padding: isMobile ? "12px 14px" : "16px 20px",
-                      border: "1px solid #e2ddd5",
-                      borderLeft: s.answered_correct ? "3px solid #1a8a6e" : "1px solid #e2ddd5",
+                      border: "1px solid var(--gs-border)",
+                      borderLeft: s.answered_correct ? "3px solid #1a8a6e" : "1px solid var(--gs-border)",
                       cursor: "pointer",
                       transition: "transform .15s, box-shadow .15s",
                     }}
                     onMouseEnter={(e) => { e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.06)"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
                   >
-                    <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: s.answered_correct ? "#e4f5f0" : "#f2efe8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "700", color: s.answered_correct ? "#1a8a6e" : "#6b6860", flexShrink: 0 }}>
+                    <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: s.answered_correct ? "#e4f5f0" : "var(--gs-hover)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "700", color: s.answered_correct ? "#1a8a6e" : "var(--gs-text-muted)", flexShrink: 0 }}>
                       {s.answered_correct
                         ? <CheckCircle2 size={15} color="#1a8a6e" />
                         : globalIndex}
                     </div>
                     {!isMobile && (
-                      <div style={{ fontSize: "11px", fontWeight: "700", color: "#b4b2a9", fontFamily: "monospace", letterSpacing: ".05em", flexShrink: 0 }}>
+                      <div style={{ fontSize: "11px", fontWeight: "700", color: "var(--gs-text-hint)", fontFamily: "monospace", letterSpacing: ".05em", flexShrink: 0 }}>
                         {s.kode}
                       </div>
                     )}
-                    <div style={{ flex: 1, fontSize: "14px", color: "#0f0e17", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
+                    <div style={{ flex: 1, fontSize: "14px", color: "var(--gs-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
                       {s.body.replace(/\$\$?[^$]+\$\$?/g, "[math]").replace(/[*_~`#]/g, "")}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", flexShrink: 0 }}>
                       <DifficultyBadge level={s.difficulty} />
-                      <ChevronRight size={16} color="#b4b2a9" />
+                      <ChevronRight size={16} color="var(--gs-text-hint)" />
                     </div>
                   </div>
                 );
@@ -265,9 +265,9 @@ export default function BrowseSoal() {
                 <button
                   onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                   disabled={page === 1}
-                  style={{ width: "36px", height: "36px", borderRadius: "10px", border: "1px solid #e2ddd5", background: "white", display: "flex", alignItems: "center", justifyContent: "center", cursor: page === 1 ? "not-allowed" : "pointer", color: page === 1 ? "#d4d0c8" : "#6b6860", transition: "all .15s" }}
-                  onMouseEnter={e => { if (page !== 1) e.currentTarget.style.borderColor = "#0f0e17"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = "#e2ddd5"; }}
+                  style={{ width: "36px", height: "36px", borderRadius: "10px", border: "1px solid var(--gs-border)", background: "var(--gs-surface)", display: "flex", alignItems: "center", justifyContent: "center", cursor: page === 1 ? "not-allowed" : "pointer", color: page === 1 ? "var(--gs-border)" : "var(--gs-text-muted)", transition: "all .15s" }}
+                  onMouseEnter={e => { if (page !== 1) e.currentTarget.style.borderColor = "var(--gs-text)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--gs-border)"; }}
                 >
                   <ChevronLeft size={15} />
                 </button>
@@ -286,14 +286,14 @@ export default function BrowseSoal() {
                   }
                   return pages.map((p, idx) =>
                     p === "..." ? (
-                      <span key={`ellipsis-${idx}`} style={{ width: "36px", textAlign: "center", color: "#b4b2a9", fontSize: "13px" }}>…</span>
+                      <span key={`ellipsis-${idx}`} style={{ width: "36px", textAlign: "center", color: "var(--gs-text-hint)", fontSize: "13px" }}>…</span>
                     ) : (
                       <button
                         key={p}
                         onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                        style={{ width: "36px", height: "36px", borderRadius: "10px", border: `1px solid ${p === page ? "#2563eb" : "#e2ddd5"}`, background: p === page ? "#2563eb" : "white", color: p === page ? "white" : "#0f0e17", fontSize: "13px", fontWeight: p === page ? "700" : "500", cursor: "pointer", transition: "all .15s" }}
+                        style={{ width: "36px", height: "36px", borderRadius: "10px", border: `1px solid ${p === page ? "#2563eb" : "var(--gs-border)"}`, background: p === page ? "#2563eb" : "var(--gs-surface)", color: p === page ? "white" : "var(--gs-text)", fontSize: "13px", fontWeight: p === page ? "700" : "500", cursor: "pointer", transition: "all .15s" }}
                         onMouseEnter={e => { if (p !== page) e.currentTarget.style.borderColor = "#2563eb"; }}
-                        onMouseLeave={e => { if (p !== page) e.currentTarget.style.borderColor = "#e2ddd5"; }}
+                        onMouseLeave={e => { if (p !== page) e.currentTarget.style.borderColor = "var(--gs-border)"; }}
                       >
                         {p}
                       </button>
@@ -305,9 +305,9 @@ export default function BrowseSoal() {
                 <button
                   onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                   disabled={page === totalPages}
-                  style={{ width: "36px", height: "36px", borderRadius: "10px", border: "1px solid #e2ddd5", background: "white", display: "flex", alignItems: "center", justifyContent: "center", cursor: page === totalPages ? "not-allowed" : "pointer", color: page === totalPages ? "#d4d0c8" : "#6b6860", transition: "all .15s" }}
-                  onMouseEnter={e => { if (page !== totalPages) e.currentTarget.style.borderColor = "#0f0e17"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = "#e2ddd5"; }}
+                  style={{ width: "36px", height: "36px", borderRadius: "10px", border: "1px solid var(--gs-border)", background: "var(--gs-surface)", display: "flex", alignItems: "center", justifyContent: "center", cursor: page === totalPages ? "not-allowed" : "pointer", color: page === totalPages ? "var(--gs-border)" : "var(--gs-text-muted)", transition: "all .15s" }}
+                  onMouseEnter={e => { if (page !== totalPages) e.currentTarget.style.borderColor = "var(--gs-text)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--gs-border)"; }}
                 >
                   <ChevronRight size={15} />
                 </button>

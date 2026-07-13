@@ -70,7 +70,7 @@ export default function InvestorPintarGame() {
   // ── IDLE ─────────────────────────────────────────────────────────────────────
   if (phase === "idle") {
     return (
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#faf9f6" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
         <SEO title="Investor Pintar" description="Simulasi investasi 10 tahun." url="/games/investor-pintar" />
         <Navbar />
         <main style={{ flex: 1, maxWidth: "600px", margin: "0 auto", padding: isMobile ? "32px 20px" : "56px 40px", width: "100%", display: "flex", flexDirection: "column", gap: "24px" }}>
@@ -82,24 +82,24 @@ export default function InvestorPintarGame() {
           </div>
 
           <div style={{ textAlign: "center" }}>
-            <h1 style={{ fontSize: isMobile ? "24px" : "28px", fontWeight: "800", color: "#0f0e17", marginBottom: "8px", letterSpacing: "-0.5px" }}>
+            <h1 style={{ fontSize: isMobile ? "24px" : "28px", fontWeight: "800", color: "var(--gs-text)", marginBottom: "8px", letterSpacing: "-0.5px" }}>
               Investor Pintar
             </h1>
-            <p style={{ fontSize: "15px", color: "#6b6860", lineHeight: "1.6" }}>
+            <p style={{ fontSize: "15px", color: "var(--gs-text-muted)", lineHeight: "1.6" }}>
               Mulai dengan <strong>Rp 10.000.000</strong>.<br />
               Buat 5 keputusan investasi selama 10 tahun simulasi.
             </p>
           </div>
 
-          <div style={{ background: "white", borderRadius: "14px", border: "1px solid #e2ddd5", padding: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
-            <div style={{ fontSize: "13px", fontWeight: "700", color: "#0f0e17", marginBottom: "4px" }}>📋 Cara main</div>
+          <div style={{ background: "var(--gs-surface)", borderRadius: "14px", border: "1px solid var(--gs-border)", padding: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ fontSize: "13px", fontWeight: "700", color: "var(--gs-text)", marginBottom: "4px" }}>📋 Cara main</div>
             {[
               "Tiap ronde, pilih 1 dari 3 produk investasi",
               "Modal kamu tumbuh sesuai rumus yang berlaku",
               "Ada event acak yang mempengaruhi return tiap ronde",
               "Setelah 5 ronde, lihat hasil vs strategi konservatif & agresif",
             ].map((s, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px", fontSize: "13px", color: "#6b6860" }}>
+              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px", fontSize: "13px", color: "var(--gs-text-muted)" }}>
                 <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: "#e4f5f0", color: "#1a8a6e", fontWeight: "800", fontSize: "11px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
                 {s}
               </div>
@@ -137,29 +137,29 @@ export default function InvestorPintarGame() {
     const startCap = capital + (event?.capitalBonus || 0);
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#faf9f6" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
         <SEO title="Investor Pintar" description="" url="/games/investor-pintar" />
         <Navbar />
         <main style={{ flex: 1, maxWidth: "600px", margin: "0 auto", padding: isMobile ? "20px 16px" : "36px 40px", width: "100%", display: "flex", flexDirection: "column", gap: "14px" }}>
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ fontSize: "13px", fontWeight: "700", color: "#6b6860" }}>
+            <span style={{ fontSize: "13px", fontWeight: "700", color: "var(--gs-text-muted)" }}>
               Ronde {roundNum} / {TOTAL_ROUNDS}
             </span>
-            <span style={{ fontSize: "12px", color: "#b4b2a9", background: "#f2efe8", padding: "4px 10px", borderRadius: "20px" }}>
+            <span style={{ fontSize: "12px", color: "var(--gs-text-hint)", background: "var(--gs-hover)", padding: "4px 10px", borderRadius: "20px" }}>
               Tahun {simYear(roundNum)}–{simYear(roundNum) + ROUND_YEARS - 1}
             </span>
           </div>
 
-          <div style={{ width: "100%", height: "4px", background: "#e2ddd5", borderRadius: "2px" }}>
+          <div style={{ width: "100%", height: "4px", background: "var(--gs-border)", borderRadius: "2px" }}>
             <div style={{ height: "100%", width: `${((roundNum - 1) / TOTAL_ROUNDS) * 100}%`, background: "#2563eb", borderRadius: "2px", transition: "width .4s" }} />
           </div>
 
-          <div style={{ background: "white", borderRadius: "14px", border: "1px solid #e2ddd5", padding: "16px 20px" }}>
-            <div style={{ fontSize: "11px", color: "#b4b2a9", fontWeight: "600", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "4px" }}>
+          <div style={{ background: "var(--gs-surface)", borderRadius: "14px", border: "1px solid var(--gs-border)", padding: "16px 20px" }}>
+            <div style={{ fontSize: "11px", color: "var(--gs-text-hint)", fontWeight: "600", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "4px" }}>
               Modal kamu
             </div>
-            <div style={{ fontSize: isMobile ? "24px" : "28px", fontWeight: "800", color: "#0f0e17", letterSpacing: "-1px" }}>
+            <div style={{ fontSize: isMobile ? "24px" : "28px", fontWeight: "800", color: "var(--gs-text)", letterSpacing: "-1px" }}>
               {formatRp(capital)}
             </div>
             {capital > STARTING_CAPITAL && (
@@ -179,12 +179,12 @@ export default function InvestorPintarGame() {
               <span style={{ fontSize: "22px", flexShrink: 0, lineHeight: 1.2 }}>{event.emoji}</span>
               <div>
                 <div style={{ fontSize: "13px", fontWeight: "800", color: event.color, marginBottom: "2px" }}>{event.title}</div>
-                <div style={{ fontSize: "12px", color: "#6b6860", lineHeight: 1.5 }}>{event.desc}</div>
+                <div style={{ fontSize: "12px", color: "var(--gs-text-muted)", lineHeight: 1.5 }}>{event.desc}</div>
               </div>
             </div>
           )}
 
-          <div style={{ fontSize: "12px", fontWeight: "600", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".06em" }}>
+          <div style={{ fontSize: "12px", fontWeight: "600", color: "var(--gs-text-hint)", textTransform: "uppercase", letterSpacing: ".06em" }}>
             Pilih investasimu
           </div>
 
@@ -206,20 +206,20 @@ export default function InvestorPintarGame() {
     const isLast   = roundIdx + 1 >= TOTAL_ROUNDS;
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#faf9f6" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
         <SEO title="Investor Pintar" description="" url="/games/investor-pintar" />
         <Navbar />
         <main style={{ flex: 1, maxWidth: "600px", margin: "0 auto", padding: isMobile ? "20px 16px" : "36px 40px", width: "100%", display: "flex", flexDirection: "column", gap: "14px" }}>
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ fontSize: "13px", fontWeight: "700", color: "#6b6860" }}>Ronde {roundNum} selesai</span>
-            <span style={{ fontSize: "12px", color: "#b4b2a9", background: "#f2efe8", padding: "4px 10px", borderRadius: "20px" }}>
+            <span style={{ fontSize: "13px", fontWeight: "700", color: "var(--gs-text-muted)" }}>Ronde {roundNum} selesai</span>
+            <span style={{ fontSize: "12px", color: "var(--gs-text-hint)", background: "var(--gs-hover)", padding: "4px 10px", borderRadius: "20px" }}>
               {simYear(roundNum)}–{simYear(roundNum) + ROUND_YEARS - 1}
             </span>
           </div>
 
           {/* Chosen product result */}
-          <div style={{ background: "white", borderRadius: "16px", border: `2px solid ${isProfit ? "#1a8a6e" : "#e84c2b"}`, padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div style={{ background: "var(--gs-surface)", borderRadius: "16px", border: `2px solid ${isProfit ? "#1a8a6e" : "#e84c2b"}`, padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
               <span style={{ fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px", background: isProfit ? "#e4f5f0" : "#fff3f0", color: isProfit ? "#1a8a6e" : "#e84c2b" }}>
                 ✓ Kamu pilih
@@ -232,16 +232,16 @@ export default function InvestorPintarGame() {
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <span style={{ fontSize: "32px" }}>{chosen.emoji}</span>
               <div>
-                <div style={{ fontWeight: "800", fontSize: "16px", color: "#0f0e17" }}>{chosen.name}</div>
-                <div style={{ fontSize: "13px", color: "#6b6860" }}>{chosen.effectiveRate}%/tahun × {ROUND_YEARS} tahun</div>
+                <div style={{ fontWeight: "800", fontSize: "16px", color: "var(--gs-text)" }}>{chosen.name}</div>
+                <div style={{ fontSize: "13px", color: "var(--gs-text-muted)" }}>{chosen.effectiveRate}%/tahun × {ROUND_YEARS} tahun</div>
               </div>
             </div>
 
             <div style={{ background: isProfit ? "#e4f5f0" : "#fff3f0", borderRadius: "10px", padding: "14px 16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "14px", color: "#6b6860" }}>{formatRp(capitalBefore)}</span>
-                <span style={{ color: "#b4b2a9", fontWeight: "700" }}>→</span>
-                <span style={{ fontSize: isMobile ? "20px" : "22px", fontWeight: "800", color: "#0f0e17", letterSpacing: "-0.5px" }}>{formatRp(capitalAfter)}</span>
+                <span style={{ fontSize: "14px", color: "var(--gs-text-muted)" }}>{formatRp(capitalBefore)}</span>
+                <span style={{ color: "var(--gs-text-hint)", fontWeight: "700" }}>→</span>
+                <span style={{ fontSize: isMobile ? "20px" : "22px", fontWeight: "800", color: "var(--gs-text)", letterSpacing: "-0.5px" }}>{formatRp(capitalAfter)}</span>
               </div>
               <div style={{ fontSize: "14px", fontWeight: "700", color: isProfit ? "#1a8a6e" : "#e84c2b", marginTop: "4px" }}>
                 {isProfit ? "+" : ""}{formatRp(chosen.result.profit)}
@@ -255,24 +255,24 @@ export default function InvestorPintarGame() {
 
           {/* Other options */}
           <div>
-            <div style={{ fontSize: "12px", fontWeight: "600", color: "#b4b2a9", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "8px" }}>
+            <div style={{ fontSize: "12px", fontWeight: "600", color: "var(--gs-text-hint)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "8px" }}>
               Pilihan lain
             </div>
             {others.map(p => {
               const diff = p.result.finalValue - capitalAfter;
               return (
-                <div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "white", borderRadius: "10px", border: "1px solid #e2ddd5", padding: "11px 14px", marginBottom: "6px" }}>
+                <div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--gs-surface)", borderRadius: "10px", border: "1px solid var(--gs-border)", padding: "11px 14px", marginBottom: "6px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <span style={{ fontSize: "18px" }}>{p.emoji}</span>
                     <div>
-                      <div style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}>{p.name}</div>
+                      <div style={{ fontSize: "13px", fontWeight: "600", color: "var(--gs-text)" }}>{p.name}</div>
                       <span style={{ fontSize: "11px", padding: "1px 6px", borderRadius: "4px", background: p.typeBg, color: p.typeColor, fontWeight: "700" }}>
                         {p.typeLabel} {p.effectiveRate}%
                       </span>
                     </div>
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    <div style={{ fontSize: "14px", fontWeight: "700", color: "#0f0e17" }}>{formatRp(p.result.finalValue)}</div>
+                    <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--gs-text)" }}>{formatRp(p.result.finalValue)}</div>
                     {diff !== 0 && (
                       <div style={{ fontSize: "11px", fontWeight: "600", color: diff > 0 ? "#e84c2b" : "#1a8a6e" }}>
                         {diff > 0 ? `+${formatRp(diff)} lebih` : `${formatRp(Math.abs(diff))} kurang`}
@@ -308,7 +308,7 @@ export default function InvestorPintarGame() {
     const maxVal             = Math.max(finalCapital, conservativeResult, aggressiveResult);
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#faf9f6" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
         <SEO title="Hasil Investor Pintar" description="" url="/games/investor-pintar" />
         <Navbar />
         <main style={{ flex: 1, maxWidth: "600px", margin: "0 auto", padding: isMobile ? "20px 16px" : "36px 40px", width: "100%", display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -318,16 +318,16 @@ export default function InvestorPintarGame() {
               {grade.grade}
             </div>
             <div>
-              <div style={{ fontSize: isMobile ? "22px" : "26px", fontWeight: "800", color: "#0f0e17", letterSpacing: "-0.5px" }}>Investasi Selesai!</div>
+              <div style={{ fontSize: isMobile ? "22px" : "26px", fontWeight: "800", color: "var(--gs-text)", letterSpacing: "-0.5px" }}>Investasi Selesai!</div>
               <div style={{ fontSize: "15px", color: grade.color, fontWeight: "700", marginTop: "2px" }}>{grade.label}</div>
             </div>
           </div>
 
-          <div style={{ background: "white", borderRadius: "16px", border: "1px solid #e2ddd5", padding: "20px", textAlign: "center" }}>
-            <div style={{ fontSize: "12px", color: "#b4b2a9", fontWeight: "600", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "6px" }}>
+          <div style={{ background: "var(--gs-surface)", borderRadius: "16px", border: "1px solid var(--gs-border)", padding: "20px", textAlign: "center" }}>
+            <div style={{ fontSize: "12px", color: "var(--gs-text-hint)", fontWeight: "600", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "6px" }}>
               Net Worth Akhir · 2025–{simYear(TOTAL_ROUNDS) + ROUND_YEARS - 1}
             </div>
-            <div style={{ fontSize: isMobile ? "32px" : "40px", fontWeight: "800", color: "#0f0e17", letterSpacing: "-1.5px" }}>
+            <div style={{ fontSize: isMobile ? "32px" : "40px", fontWeight: "800", color: "var(--gs-text)", letterSpacing: "-1.5px" }}>
               {formatRp(finalCapital)}
             </div>
             <div style={{ fontSize: "14px", fontWeight: "700", color: "#1a8a6e", marginTop: "4px" }}>
@@ -336,8 +336,8 @@ export default function InvestorPintarGame() {
           </div>
 
           {/* Comparison bars */}
-          <div style={{ background: "white", borderRadius: "14px", border: "1px solid #e2ddd5", padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
-            <div style={{ fontSize: "13px", fontWeight: "700", color: "#0f0e17" }}>Perbandingan Strategi</div>
+          <div style={{ background: "var(--gs-surface)", borderRadius: "14px", border: "1px solid var(--gs-border)", padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+            <div style={{ fontSize: "13px", fontWeight: "700", color: "var(--gs-text)" }}>Perbandingan Strategi</div>
             {[
               { label: "Kamu",                               value: finalCapital,       color: grade.color, bg: grade.bg,    emoji: "🎯" },
               { label: "Konservatif (selalu Deposito)",      value: conservativeResult, color: "#1a8a6e",   bg: "#e4f5f0",  emoji: "🏦" },
@@ -345,10 +345,10 @@ export default function InvestorPintarGame() {
             ].map(({ label, value, color, emoji }) => (
               <div key={label}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
-                  <span style={{ fontSize: "12px", color: "#6b6860" }}>{emoji} {label}</span>
+                  <span style={{ fontSize: "12px", color: "var(--gs-text-muted)" }}>{emoji} {label}</span>
                   <span style={{ fontSize: "13px", fontWeight: "700", color }}>{formatRp(value)}</span>
                 </div>
-                <div style={{ width: "100%", height: "8px", background: "#f2efe8", borderRadius: "4px" }}>
+                <div style={{ width: "100%", height: "8px", background: "var(--gs-hover)", borderRadius: "4px" }}>
                   <div style={{ height: "100%", width: `${(value / maxVal) * 100}%`, background: color, borderRadius: "4px" }} />
                 </div>
               </div>
@@ -356,11 +356,11 @@ export default function InvestorPintarGame() {
           </div>
 
           {/* History table */}
-          <div style={{ background: "white", borderRadius: "14px", border: "1px solid #e2ddd5", overflow: "hidden" }}>
-            <div style={{ padding: "14px 20px", borderBottom: "1px solid #f0ede6", fontSize: "13px", fontWeight: "700", color: "#0f0e17" }}>
+          <div style={{ background: "var(--gs-surface)", borderRadius: "14px", border: "1px solid var(--gs-border)", overflow: "hidden" }}>
+            <div style={{ padding: "14px 20px", borderBottom: "1px solid #f0ede6", fontSize: "13px", fontWeight: "700", color: "var(--gs-text)" }}>
               Perjalanan Investasi
             </div>
-            <div style={{ padding: "12px 20px", borderBottom: "1px solid #f0ede6", display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#b4b2a9" }}>
+            <div style={{ padding: "12px 20px", borderBottom: "1px solid #f0ede6", display: "flex", justifyContent: "space-between", fontSize: "12px", color: "var(--gs-text-hint)" }}>
               <span>Mulai (2025)</span><span>{formatRp(STARTING_CAPITAL)}</span>
             </div>
             {history.map((h, i) => (
@@ -368,17 +368,17 @@ export default function InvestorPintarGame() {
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
                   <span style={{ fontSize: "16px", flexShrink: 0 }}>{h.chosen.emoji}</span>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: "12px", fontWeight: "600", color: "#0f0e17", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    <div style={{ fontSize: "12px", fontWeight: "600", color: "var(--gs-text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                       R{h.roundNum} · {h.chosen.name}
                     </div>
-                    <div style={{ fontSize: "11px", color: "#b4b2a9" }}>
+                    <div style={{ fontSize: "11px", color: "var(--gs-text-hint)" }}>
                       {simYear(h.roundNum)}–{simYear(h.roundNum) + ROUND_YEARS - 1}
                       {h.event ? ` · ${h.event.emoji} ${h.event.title}` : ""}
                     </div>
                   </div>
                 </div>
                 <div style={{ textAlign: "right", flexShrink: 0 }}>
-                  <div style={{ fontSize: "13px", fontWeight: "700", color: "#0f0e17" }}>{formatRp(h.capitalAfter)}</div>
+                  <div style={{ fontSize: "13px", fontWeight: "700", color: "var(--gs-text)" }}>{formatRp(h.capitalAfter)}</div>
                   <div style={{ fontSize: "11px", fontWeight: "600", color: h.chosen.result.profit >= 0 ? "#1a8a6e" : "#e84c2b" }}>
                     {h.chosen.result.profit >= 0 ? "+" : ""}{formatRp(h.chosen.result.profit)}
                   </div>
@@ -390,8 +390,8 @@ export default function InvestorPintarGame() {
           <div style={{ display: "flex", gap: "10px" }}>
             <button
               onClick={() => setPhase("idle")}
-              style={{ flex: 1, padding: "12px", borderRadius: "12px", border: "1px solid #e2ddd5", background: "white", fontSize: "14px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", color: "#0f0e17", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
-              onMouseEnter={e => (e.currentTarget.style.background = "#f2efe8")}
+              style={{ flex: 1, padding: "12px", borderRadius: "12px", border: "1px solid var(--gs-border)", background: "var(--gs-surface)", fontSize: "14px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", color: "var(--gs-text)", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--gs-hover)")}
               onMouseLeave={e => (e.currentTarget.style.background = "white")}
             >
               <ChevronLeft size={16} /> Menu
@@ -426,9 +426,9 @@ function ProductCard({ product: p, onPick, isMobile }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: "white",
+        background: "var(--gs-surface)",
         borderRadius: "14px",
-        border: `1.5px solid ${hovered ? p.typeColor : "#e2ddd5"}`,
+        border: `1.5px solid ${hovered ? p.typeColor : "var(--gs-border)"}`,
         padding: isMobile ? "14px" : "16px",
         cursor: "pointer",
         transition: "border-color .15s, box-shadow .15s",
@@ -439,7 +439,7 @@ function ProductCard({ product: p, onPick, isMobile }) {
         <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
           <span style={{ fontSize: "26px", flexShrink: 0 }}>{p.emoji}</span>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontWeight: "700", fontSize: "14px", color: "#0f0e17" }}>{p.name}</div>
+            <div style={{ fontWeight: "700", fontSize: "14px", color: "var(--gs-text)" }}>{p.name}</div>
             <div style={{ display: "flex", gap: "6px", marginTop: "3px", flexWrap: "wrap" }}>
               <span style={{ fontSize: "11px", fontWeight: "700", padding: "2px 7px", borderRadius: "5px", background: p.typeBg, color: p.typeColor }}>{p.typeLabel}</span>
               <span style={{ fontSize: "11px", fontWeight: "600", color: p.riskColor }}>Risiko: {p.riskLabel}</span>
@@ -450,16 +450,16 @@ function ProductCard({ product: p, onPick, isMobile }) {
           <div style={{ fontSize: isMobile ? "20px" : "22px", fontWeight: "800", color: p.typeColor, letterSpacing: "-0.5px" }}>
             {p.effectiveRate}%
           </div>
-          <div style={{ fontSize: "11px", color: "#b4b2a9" }}>/ tahun</div>
+          <div style={{ fontSize: "11px", color: "var(--gs-text-hint)" }}>/ tahun</div>
         </div>
       </div>
 
-      <div style={{ fontSize: "12px", color: "#6b6860", margin: "10px 0 12px", lineHeight: 1.5 }}>{p.desc}</div>
+      <div style={{ fontSize: "12px", color: "var(--gs-text-muted)", margin: "10px 0 12px", lineHeight: 1.5 }}>{p.desc}</div>
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#faf9f6", borderRadius: "8px", padding: "10px 12px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--gs-bg)", borderRadius: "8px", padding: "10px 12px" }}>
         <div>
-          <div style={{ fontSize: "11px", color: "#b4b2a9", marginBottom: "2px" }}>Estimasi setelah 2 tahun</div>
-          <div style={{ fontSize: "15px", fontWeight: "800", color: "#0f0e17" }}>{formatRp(p.result.finalValue)}</div>
+          <div style={{ fontSize: "11px", color: "var(--gs-text-hint)", marginBottom: "2px" }}>Estimasi setelah 2 tahun</div>
+          <div style={{ fontSize: "15px", fontWeight: "800", color: "var(--gs-text)" }}>{formatRp(p.result.finalValue)}</div>
           <div style={{ fontSize: "12px", fontWeight: "600", color: isNegative ? "#e84c2b" : "#1a8a6e" }}>
             {isNegative ? "" : "+"}{formatRp(p.result.profit)}
           </div>

@@ -10,6 +10,9 @@ import {
   Eye,
   Bookmark,
   BookmarkCheck,
+  Users,
+  BarChart2,
+  TrendingUp,
 } from "lucide-react";
 import MathRenderer from "../../components/MathRenderer";
 import Breadcrumb from "../../components/Breadcrumb";
@@ -34,6 +37,88 @@ import {
   addBookmark,
   removeBookmark,
 } from "../bookmark/bookmarkApi";
+
+// ── Soal Stats Card ───────────────────────────────────────────────────────────
+
+function SoalStatsCard({ stats, isMobile }) {
+  const { total_attempt, total_benar, akurasi } = stats;
+  const total_salah = total_attempt - total_benar;
+
+  const diffColor  = akurasi >= 70 ? "#1a8a6e" : akurasi >= 40 ? "#f5a623" : "#e84c2b";
+  const diffBg     = akurasi >= 70 ? "#e4f5f0" : akurasi >= 40 ? "#fef9ee" : "#fff3f0";
+  const diffLabel  = akurasi >= 70 ? "Mudah"   : akurasi >= 40 ? "Sedang"  : "Susah";
+
+  return (
+    <div style={{
+      background: "var(--gs-surface)", borderRadius: "14px",
+      border: "1px solid var(--gs-border)",
+      borderLeft: "3px solid #2563eb",
+      padding: isMobile ? "16px" : "20px 24px",
+      marginTop: "12px",
+    }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+        <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: "#eff6ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <BarChart2 size={14} color="#2563eb" />
+        </div>
+        <span style={{ fontSize: "13px", fontWeight: "700", color: "var(--gs-text)" }}>Statistik Soal</span>
+        <span style={{ marginLeft: "auto", fontSize: "11px", fontWeight: "700", padding: "3px 10px", borderRadius: "99px", background: diffBg, color: diffColor }}>
+          {diffLabel}
+        </span>
+      </div>
+
+      {/* Stats row */}
+      <div style={{ display: "flex", gap: isMobile ? "12px" : "24px", marginBottom: "14px", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+          <div style={{ width: "24px", height: "24px", borderRadius: "7px", background: "var(--gs-hover)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Users size={12} color="var(--gs-text-muted)" />
+          </div>
+          <div>
+            <div style={{ fontSize: "15px", fontWeight: "800", color: "var(--gs-text)", lineHeight: 1 }}>
+              {total_attempt.toLocaleString("id-ID")}
+            </div>
+            <div style={{ fontSize: "11px", color: "var(--gs-text-hint)", marginTop: "2px" }}>pengerjaan</div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+          <div style={{ width: "24px", height: "24px", borderRadius: "7px", background: "#e4f5f0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Check size={12} color="#1a8a6e" />
+          </div>
+          <div>
+            <div style={{ fontSize: "15px", fontWeight: "800", color: "#1a8a6e", lineHeight: 1 }}>
+              {total_benar.toLocaleString("id-ID")}
+            </div>
+            <div style={{ fontSize: "11px", color: "var(--gs-text-hint)", marginTop: "2px" }}>jawaban benar</div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+          <div style={{ width: "24px", height: "24px", borderRadius: "7px", background: "#fff3f0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <TrendingUp size={12} color="#e84c2b" />
+          </div>
+          <div>
+            <div style={{ fontSize: "15px", fontWeight: "800", color: diffColor, lineHeight: 1 }}>
+              {akurasi}%
+            </div>
+            <div style={{ fontSize: "11px", color: "var(--gs-text-hint)", marginTop: "2px" }}>tingkat keberhasilan</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Accuracy bar */}
+      <div>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
+          <span style={{ fontSize: "11px", color: "#1a8a6e", fontWeight: "600" }}>Benar {total_benar.toLocaleString("id-ID")}</span>
+          <span style={{ fontSize: "11px", color: "#e84c2b", fontWeight: "600" }}>Salah {total_salah.toLocaleString("id-ID")}</span>
+        </div>
+        <div style={{ height: "7px", borderRadius: "99px", background: "#fff3f0", overflow: "hidden" }}>
+          <div style={{ height: "100%", width: `${akurasi}%`, background: diffColor, borderRadius: "99px", transition: "width .6s ease" }} />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function SoalDetail() {
   const { kode } = useParams();
@@ -264,15 +349,15 @@ export default function SoalDetail() {
             height: "32px",
             borderRadius: "8px",
             border: `1px solid ${
-              active ? activeBorder : hovered ? hoverBorder : "#e2ddd5"
+              active ? activeBorder : hovered ? hoverBorder : "var(--gs-border)"
             }`,
-            background: active ? activeBg : "white",
+            background: active ? activeBg : "var(--gs-surface)",
             cursor: disabled ? "not-allowed" : "pointer",
             color: active
               ? activeColor
               : hovered
               ? hoverColor
-              : color || "#6b6860",
+              : color || "var(--gs-text-muted)",
             transition: "all .15s",
             opacity: disabled ? 0.5 : 1,
             flexShrink: 0,
@@ -327,7 +412,7 @@ export default function SoalDetail() {
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        background: "#faf9f6",
+        background: "var(--gs-bg)",
       }}
     >
       {soal && (
@@ -420,7 +505,7 @@ export default function SoalDetail() {
                   flex: 1,
                   height: "400px",
                   borderRadius: "14px",
-                  background: "#e2ddd5",
+                  background: "var(--gs-border)",
                   opacity: 0.5,
                   animation: "pulse 1.5s infinite",
                 }}
@@ -458,9 +543,9 @@ export default function SoalDetail() {
             {/* Panel Soal */}
             <div
               style={{
-                background: "white",
+                background: "var(--gs-surface)",
                 borderRadius: "16px",
-                border: "1px solid #e2ddd5",
+                border: "1px solid var(--gs-border)",
                 padding: isMobile ? "20px" : "32px",
                 display: "flex",
                 flexDirection: "column",
@@ -484,7 +569,7 @@ export default function SoalDetail() {
                       fontWeight: "700",
                       letterSpacing: ".08em",
                       textTransform: "uppercase",
-                      color: "#6b6860",
+                      color: "var(--gs-text-muted)",
                     }}
                   >
                     {mapelNama || "Soal"}
@@ -492,7 +577,7 @@ export default function SoalDetail() {
                   <span
                     style={{
                       fontSize: "12px",
-                      color: "#b4b2a9",
+                      color: "var(--gs-text-hint)",
                       fontFamily: "monospace",
                     }}
                   >
@@ -507,7 +592,7 @@ export default function SoalDetail() {
                       display: "flex",
                       alignItems: "center",
                       gap: "4px",
-                      color: "#b4b2a9",
+                      color: "var(--gs-text-hint)",
                       fontSize: "12px",
                     }}
                   >
@@ -522,7 +607,7 @@ export default function SoalDetail() {
               <div
                 style={{
                   fontSize: isMobile ? "15px" : "17px",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                   fontWeight: "500",
                 }}
               >
@@ -550,8 +635,8 @@ export default function SoalDetail() {
                         flex: 1,
                         padding: "12px",
                         borderRadius: "12px",
-                        background: isChosenValid() ? "#e84c2b" : "#e2ddd5",
-                        color: isChosenValid() ? "white" : "#b4b2a9",
+                        background: isChosenValid() ? "#e84c2b" : "var(--gs-border)",
+                        color: isChosenValid() ? "white" : "var(--gs-text-hint)",
                         border: "none",
                         fontWeight: "700",
                         fontSize: "15px",
@@ -572,9 +657,9 @@ export default function SoalDetail() {
                         flex: 1,
                         padding: "12px",
                         borderRadius: "12px",
-                        background: "white",
-                        color: "#0f0e17",
-                        border: "1px solid #e2ddd5",
+                        background: "var(--gs-surface)",
+                        color: "var(--gs-text)",
+                        border: "1px solid var(--gs-border)",
                         fontWeight: "600",
                         fontSize: "15px",
                         cursor: "pointer",
@@ -594,7 +679,7 @@ export default function SoalDetail() {
                   alignItems: "center",
                   justifyContent: "space-between",
                   paddingTop: "12px",
-                  borderTop: "1px solid #f2efe8",
+                  borderTop: "1px solid var(--gs-divider)",
                 }}
               >
                 {/* Kiri: Kembali */}
@@ -607,7 +692,7 @@ export default function SoalDetail() {
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    color: "#6b6860",
+                    color: "var(--gs-text-muted)",
                     fontSize: "13px",
                     fontFamily: "inherit",
                     padding: 0,
@@ -662,7 +747,7 @@ export default function SoalDetail() {
                   <IconButton
                     onClick={() => setReportOpen(true)}
                     title="Laporkan soal"
-                    color="#b4b2a9"
+                    color="var(--gs-text-hint)"
                     hoverColor="#e84c2b"
                     hoverBorder="#fca5a5"
                   >
@@ -675,9 +760,9 @@ export default function SoalDetail() {
             {/* Panel Pembahasan */}
             <div
               style={{
-                background: "white",
+                background: "var(--gs-surface)",
                 borderRadius: "16px",
-                border: "1px solid #e2ddd5",
+                border: "1px solid var(--gs-border)",
                 padding: isMobile ? "20px" : "32px",
                 position: isMobile ? "static" : "sticky",
                 top: "24px",
@@ -693,6 +778,11 @@ export default function SoalDetail() {
               />
             </div>
           </div>
+
+          {/* Stats Card — hidden for now */}
+          {false && soal.stats && (
+            <SoalStatsCard stats={soal.stats} isMobile={isMobile} />
+          )}
           </>
         )}
       </main>

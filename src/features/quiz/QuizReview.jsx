@@ -69,12 +69,12 @@ export default function QuizReview() {
         style={{
           display: "flex",
           minHeight: "100vh",
-          background: "#faf9f6",
+          background: "var(--gs-bg)",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <div style={{ fontSize: "14px", color: "#6b6860" }}>Memuat...</div>
+        <div style={{ fontSize: "14px", color: "var(--gs-text-muted)" }}>Memuat...</div>
       </div>
     );
 
@@ -84,7 +84,7 @@ export default function QuizReview() {
         style={{
           display: "flex",
           minHeight: "100vh",
-          background: "#faf9f6",
+          background: "var(--gs-bg)",
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -111,7 +111,7 @@ export default function QuizReview() {
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        background: "#faf9f6",
+        background: "var(--gs-bg)",
       }}
     >
       <Helmet>
@@ -121,7 +121,7 @@ export default function QuizReview() {
       {/* Navbar */}
       <div
         style={{
-          background: "white",
+          background: "var(--gs-surface)",
           borderBottom: "1px solid #e2ddd5",
           padding: `0 ${isMobile ? "16px" : "40px"}`,
           height: "56px",
@@ -148,7 +148,7 @@ export default function QuizReview() {
               background: "none",
               border: "none",
               cursor: "pointer",
-              color: "#6b6860",
+              color: "var(--gs-text-muted)",
               display: "flex",
               padding: 0,
               flexShrink: 0,
@@ -175,7 +175,7 @@ export default function QuizReview() {
               style={{
                 fontSize: "13px",
                 fontWeight: "700",
-                color: "#0f0e17",
+                color: "var(--gs-text)",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -185,7 +185,7 @@ export default function QuizReview() {
             </span>
           )}
         </div>
-        <span style={{ fontSize: "13px", color: "#6b6860", flexShrink: 0 }}>
+        <span style={{ fontSize: "13px", color: "var(--gs-text-muted)", flexShrink: 0 }}>
           {currentIdx + 1} / {soalFiltered.length}
         </span>
       </div>
@@ -193,7 +193,7 @@ export default function QuizReview() {
       {/* Panel filter + navigasi nomor — sticky */}
       <div
         style={{
-          background: "white",
+          background: "var(--gs-surface)",
           borderBottom: "1px solid #f2efe8",
           padding: isMobile ? "10px 16px" : "10px 40px",
           position: "sticky",
@@ -228,10 +228,10 @@ export default function QuizReview() {
                 padding: "5px 12px",
                 borderRadius: "8px",
                 border: `1.5px solid ${
-                  filter === f.value ? "#e84c2b" : "#e2ddd5"
+                  filter === f.value ? "#e84c2b" : "var(--gs-border)"
                 }`,
-                background: filter === f.value ? "#fff3f0" : "white",
-                color: filter === f.value ? "#e84c2b" : "#6b6860",
+                background: filter === f.value ? "#fff3f0" : "var(--gs-surface)",
+                color: filter === f.value ? "#e84c2b" : "var(--gs-text-muted)",
                 fontSize: "12px",
                 fontWeight: "600",
                 cursor: "pointer",
@@ -314,7 +314,7 @@ export default function QuizReview() {
             {/* Panel soal */}
             <div
               style={{
-                background: "white",
+                background: "var(--gs-surface)",
                 borderRadius: "16px",
                 border: "1px solid #e2ddd5",
                 padding: isMobile ? "20px" : "28px",
@@ -342,7 +342,7 @@ export default function QuizReview() {
                       fontWeight: "700",
                       letterSpacing: ".08em",
                       textTransform: "uppercase",
-                      color: "#6b6860",
+                      color: "var(--gs-text-muted)",
                     }}
                   >
                     {currentSoal.mapel || "Soal"}
@@ -350,7 +350,7 @@ export default function QuizReview() {
                   <span
                     style={{
                       fontSize: "12px",
-                      color: "#b4b2a9",
+                      color: "var(--gs-text-hint)",
                       fontFamily: "monospace",
                     }}
                   >
@@ -360,7 +360,7 @@ export default function QuizReview() {
                 <div
                   style={{ display: "flex", alignItems: "center", gap: "8px" }}
                 >
-                  <span style={{ fontSize: "11px", color: "#b4b2a9" }}>
+                  <span style={{ fontSize: "11px", color: "var(--gs-text-hint)" }}>
                     {DURASI_FORMAT(currentSoal.waktu_detik || 0)}
                   </span>
                   <DifficultyBadge level={currentSoal.difficulty} />
@@ -376,7 +376,7 @@ export default function QuizReview() {
               <div
                 style={{
                   fontSize: isMobile ? "15px" : "17px",
-                  color: "#0f0e17",
+                  color: "var(--gs-text)",
                   fontWeight: "500",
                   lineHeight: "1.7",
                 }}
@@ -413,18 +413,18 @@ export default function QuizReview() {
                     gap: "6px",
                     padding: "8px 14px",
                     borderRadius: "10px",
-                    border: "1px solid #e2ddd5",
-                    background: "white",
+                    border: "1px solid var(--gs-border)",
+                    background: "var(--gs-surface)",
                     fontSize: "13px",
                     fontWeight: "600",
                     cursor: currentIdx === 0 ? "not-allowed" : "pointer",
                     fontFamily: "inherit",
-                    color: currentIdx === 0 ? "#b4b2a9" : "#0f0e17",
+                    color: currentIdx === 0 ? "var(--gs-text-hint)" : "var(--gs-text)",
                   }}
                 >
                   <ChevronLeft size={14} /> Sebelumnya
                 </button>
-                <span style={{ fontSize: "12px", color: "#b4b2a9" }}>
+                <span style={{ fontSize: "12px", color: "var(--gs-text-hint)" }}>
                   {currentIdx + 1} / {soalFiltered.length}
                 </span>
                 <button
@@ -441,7 +441,7 @@ export default function QuizReview() {
                     padding: "8px 14px",
                     borderRadius: "10px",
                     border: "1px solid #e2ddd5",
-                    background: "white",
+                    background: "var(--gs-surface)",
                     fontSize: "13px",
                     fontWeight: "600",
                     cursor:
@@ -451,8 +451,8 @@ export default function QuizReview() {
                     fontFamily: "inherit",
                     color:
                       currentIdx === soalFiltered.length - 1
-                        ? "#b4b2a9"
-                        : "#0f0e17",
+                        ? "var(--gs-text-hint)"
+                        : "var(--gs-text)",
                   }}
                 >
                   Berikutnya <ChevronRight size={14} />
@@ -478,7 +478,7 @@ export default function QuizReview() {
           </div>
         ) : (
           <div
-            style={{ textAlign: "center", padding: "48px", color: "#6b6860" }}
+            style={{ textAlign: "center", padding: "48px", color: "var(--gs-text-muted)" }}
           >
             Tidak ada soal.
           </div>

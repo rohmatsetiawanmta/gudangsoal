@@ -32,7 +32,7 @@ export default function BrowseTopik() {
   }, [jenjangSlug, subjenjangSlug, mapelSlug]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#f2efe8" }}>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
       <SEO
         title={`${mapelNama} — ${subjenjangNama}`}
         description={`Pilih topik ${mapelNama} untuk latihan soal matematika jenjang ${jenjangNama}.`}
@@ -96,7 +96,7 @@ export default function BrowseTopik() {
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} style={{
                 height: "60px", borderRadius: "14px",
-                background: "#e2ddd5", opacity: 0.5, animation: "pulse 1.5s infinite",
+                background: "var(--gs-border)", opacity: 0.5, animation: "pulse 1.5s infinite",
               }} />
             ))}
           </div>
@@ -105,7 +105,7 @@ export default function BrowseTopik() {
         {!loading && !error && (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {topik.length === 0 && (
-              <div style={{ textAlign: "center", padding: "48px", color: "#6b6860", fontSize: "14px" }}>
+              <div style={{ textAlign: "center", padding: "48px", color: "var(--gs-text-muted)", fontSize: "14px" }}>
                 Belum ada topik untuk {mapelNama}.
               </div>
             )}
@@ -117,8 +117,8 @@ export default function BrowseTopik() {
                 })}
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
-                  background: "white", borderRadius: "14px",
-                  border: "1px solid #e2ddd5",
+                  background: "var(--gs-surface)", borderRadius: "14px",
+                  border: "1px solid var(--gs-border)",
                   borderLeft: "3px solid #1a8a6e",
                   padding: isMobile ? "14px 16px" : "16px 20px",
                   cursor: "pointer", transition: "transform .15s, box-shadow .15s",
@@ -126,10 +126,10 @@ export default function BrowseTopik() {
                 onMouseEnter={(e) => { e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.06)"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
               >
-                <span style={{ fontWeight: "600", fontSize: isMobile ? "14px" : "15px", color: "#0f0e17" }}>
+                <span style={{ fontWeight: "600", fontSize: isMobile ? "14px" : "15px", color: "var(--gs-text)" }}>
                   {t.nama}
                 </span>
-                <ChevronRight size={17} color="#b4b2a9" />
+                <ChevronRight size={17} color="var(--gs-text-hint)" />
               </div>
             ))}
           </div>

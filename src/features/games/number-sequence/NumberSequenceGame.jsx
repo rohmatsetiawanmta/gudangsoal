@@ -117,7 +117,7 @@ export default function NumberSequenceGame() {
   // ── Idle screen ──────────────────────────────────────────────
   if (phase === "idle") {
     return (
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#faf9f6" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
         <SEO title="Number Sequence" description="Tebak angka berikutnya dari pola deret." url="/games/number-sequence" />
         <Navbar />
         <main
@@ -138,7 +138,7 @@ export default function NumberSequenceGame() {
             style={{
               fontSize: isMobile ? "40px" : "52px",
               fontWeight: "800",
-              color: "#0f0e17",
+              color: "var(--gs-text)",
               letterSpacing: "-1px",
               fontFamily: "monospace",
             }}
@@ -146,10 +146,10 @@ export default function NumberSequenceGame() {
             1, 2, 3, <span style={{ color: "#e84c2b" }}>?</span>
           </div>
           <div>
-            <h1 style={{ fontSize: isMobile ? "22px" : "26px", fontWeight: "800", color: "#0f0e17", marginBottom: "8px" }}>
+            <h1 style={{ fontSize: isMobile ? "22px" : "26px", fontWeight: "800", color: "var(--gs-text)", marginBottom: "8px" }}>
               Number Sequence
             </h1>
-            <p style={{ fontSize: "15px", color: "#6b6860", lineHeight: "1.6" }}>
+            <p style={{ fontSize: "15px", color: "var(--gs-text-muted)", lineHeight: "1.6" }}>
               Tebak angka berikutnya dari pola deret.<br />
               Jawab cepat untuk bonus skor!
             </p>
@@ -178,7 +178,7 @@ export default function NumberSequenceGame() {
                 }}
               >
                 <div style={{ fontSize: isMobile ? "20px" : "24px", fontWeight: "800", color }}>{value}</div>
-                <div style={{ fontSize: "11px", color: "#6b6860", marginTop: "4px" }}>{label}</div>
+                <div style={{ fontSize: "11px", color: "var(--gs-text-muted)", marginTop: "4px" }}>{label}</div>
               </div>
             ))}
           </div>
@@ -187,13 +187,13 @@ export default function NumberSequenceGame() {
             <div
               style={{
                 fontSize: "13px",
-                color: "#6b6860",
-                background: "#f2efe8",
+                color: "var(--gs-text-muted)",
+                background: "var(--gs-hover)",
                 borderRadius: "10px",
                 padding: "10px 20px",
               }}
             >
-              Skor terbaik sesi ini: <strong style={{ color: "#0f0e17" }}>{bestScore}</strong>
+              Skor terbaik sesi ini: <strong style={{ color: "var(--gs-text)" }}>{bestScore}</strong>
             </div>
           )}
 
@@ -227,7 +227,7 @@ export default function NumberSequenceGame() {
   // ── Game Over screen ──────────────────────────────────────────
   if (phase === "gameover") {
     return (
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#faf9f6" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
         <SEO title="Game Over — Number Sequence" description="" url="/games/number-sequence" />
         <Navbar />
         <main
@@ -259,28 +259,28 @@ export default function NumberSequenceGame() {
           </div>
 
           <div>
-            <h1 style={{ fontSize: "28px", fontWeight: "800", color: "#0f0e17", marginBottom: "4px" }}>
+            <h1 style={{ fontSize: "28px", fontWeight: "800", color: "var(--gs-text)", marginBottom: "4px" }}>
               Game Over!
             </h1>
-            <p style={{ fontSize: "14px", color: "#6b6860" }}>Level tertinggi: {level}</p>
+            <p style={{ fontSize: "14px", color: "var(--gs-text-muted)" }}>Level tertinggi: {level}</p>
           </div>
 
           <div
             style={{
-              background: "white",
+              background: "var(--gs-surface)",
               borderRadius: "16px",
-              border: "1px solid #e2ddd5",
+              border: "1px solid var(--gs-border)",
               padding: "28px 40px",
               width: "100%",
             }}
           >
-            <div style={{ fontSize: "13px", color: "#6b6860", marginBottom: "6px" }}>Skor akhir</div>
-            <div style={{ fontSize: isMobile ? "48px" : "60px", fontWeight: "800", color: "#0f0e17", letterSpacing: "-2px" }}>
+            <div style={{ fontSize: "13px", color: "var(--gs-text-muted)", marginBottom: "6px" }}>Skor akhir</div>
+            <div style={{ fontSize: isMobile ? "48px" : "60px", fontWeight: "800", color: "var(--gs-text)", letterSpacing: "-2px" }}>
               {score}
             </div>
             {bestScore > score && (
-              <div style={{ fontSize: "13px", color: "#6b6860", marginTop: "8px" }}>
-                Terbaik: <strong style={{ color: "#0f0e17" }}>{bestScore}</strong>
+              <div style={{ fontSize: "13px", color: "var(--gs-text-muted)", marginTop: "8px" }}>
+                Terbaik: <strong style={{ color: "var(--gs-text)" }}>{bestScore}</strong>
               </div>
             )}
             {score >= bestScore && bestScore > 0 && (
@@ -308,19 +308,19 @@ export default function NumberSequenceGame() {
                 flex: 1,
                 padding: "12px",
                 borderRadius: "12px",
-                border: "1px solid #e2ddd5",
-                background: "white",
+                border: "1px solid var(--gs-border)",
+                background: "var(--gs-surface)",
                 fontSize: "14px",
                 fontWeight: "600",
                 cursor: "pointer",
                 fontFamily: "inherit",
-                color: "#0f0e17",
+                color: "var(--gs-text)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 gap: "6px",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#f2efe8")}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--gs-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "white")}
             >
               <ChevronLeft size={16} /> Kembali
@@ -357,7 +357,7 @@ export default function NumberSequenceGame() {
 
   // ── Playing screen ────────────────────────────────────────────
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#faf9f6" }}>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
       <SEO title="Number Sequence" description="" url="/games/number-sequence" />
       <Navbar />
 
@@ -381,7 +381,7 @@ export default function NumberSequenceGame() {
               <Heart
                 key={i}
                 size={22}
-                color={i < lives ? "#e84c2b" : "#e2ddd5"}
+                color={i < lives ? "#e84c2b" : "var(--gs-border)"}
                 fill={i < lives ? "#e84c2b" : "none"}
               />
             ))}
@@ -395,7 +395,7 @@ export default function NumberSequenceGame() {
               gap: "5px",
               fontSize: "18px",
               fontWeight: "800",
-              color: "#0f0e17",
+              color: "var(--gs-text)",
             }}
           >
             <Zap size={16} color="#f5a623" fill="#f5a623" />
@@ -407,8 +407,8 @@ export default function NumberSequenceGame() {
             style={{
               fontSize: "12px",
               fontWeight: "700",
-              color: "#6b6860",
-              background: "#f2efe8",
+              color: "var(--gs-text-muted)",
+              background: "var(--gs-hover)",
               borderRadius: "20px",
               padding: "5px 12px",
             }}
@@ -422,7 +422,7 @@ export default function NumberSequenceGame() {
           style={{
             width: "100%",
             height: "6px",
-            background: "#e2ddd5",
+            background: "var(--gs-border)",
             borderRadius: "3px",
             overflow: "hidden",
           }}
@@ -442,9 +442,9 @@ export default function NumberSequenceGame() {
         {question && (
           <div
             style={{
-              background: "white",
+              background: "var(--gs-surface)",
               borderRadius: "16px",
-              border: "1px solid #e2ddd5",
+              border: "1px solid var(--gs-border)",
               padding: isMobile ? "20px" : "28px",
               display: "flex",
               flexDirection: "column",
@@ -463,7 +463,7 @@ export default function NumberSequenceGame() {
                 style={{
                   fontSize: "11px",
                   fontWeight: "700",
-                  color: "#b4b2a9",
+                  color: "var(--gs-text-hint)",
                   textTransform: "uppercase",
                   letterSpacing: "0.5px",
                 }}
@@ -511,7 +511,7 @@ export default function NumberSequenceGame() {
                 style={{
                   fontSize: isMobile ? "28px" : "36px",
                   fontWeight: "800",
-                  color: "#e2ddd5",
+                  color: "var(--gs-border)",
                   padding: "0 4px",
                 }}
               >
@@ -552,17 +552,17 @@ export default function NumberSequenceGame() {
                   autoComplete="off"
                   style={{
                     flex: 1,
-                    border: "1px solid #e2ddd5",
+                    border: "1px solid var(--gs-border)",
                     borderRadius: "10px",
                     padding: "12px 14px",
                     fontSize: "18px",
                     fontWeight: "700",
                     fontFamily: "inherit",
-                    color: "#0f0e17",
+                    color: "var(--gs-text)",
                     outline: "none",
                   }}
                   onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
-                  onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
+                  onBlur={(e) => (e.target.style.borderColor = "var(--gs-border)")}
                 />
                 <button
                   type="submit"
@@ -588,7 +588,7 @@ export default function NumberSequenceGame() {
           </div>
         )}
 
-        <p style={{ textAlign: "center", fontSize: "12px", color: "#b4b2a9" }}>
+        <p style={{ textAlign: "center", fontSize: "12px", color: "var(--gs-text-hint)" }}>
           Tekan Enter untuk menjawab
         </p>
       </main>

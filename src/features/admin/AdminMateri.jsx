@@ -1,10 +1,10 @@
 // src/features/admin/AdminMateri.jsx
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Plus, Search, Pencil, Trash2, BookOpen, GraduationCap,
   X, Loader2, ChevronLeft, ChevronRight, Upload, Download,
-  Save, GripVertical,
+  Save, GripVertical, ExternalLink,
 } from "lucide-react";
 import api from "../../lib/api";
 import useWindowWidth from "../../hooks/useWindowWidth";
@@ -178,7 +178,7 @@ function SubtopikFilter({ struktur, filterSubtopikId, onChange }) {
 
 // ── MateriRow (table row) ─────────────────────────────────────────────────────
 
-function MateriRow({ item, selected, onToggle, onEdit, onDelete, isMobile, reorderMode, isDragging, isDragOver, dragOverPos, onDragStart, onDragOver, onDrop, onDragEnd }) {
+function MateriRow({ item, selected, onToggle, onEdit, onDelete, onView, isMobile, reorderMode, isDragging, isDragOver, dragOverPos, onDragStart, onDragOver, onDrop, onDragEnd }) {
   const published = Number(item.is_published) === 1;
   const accentColor = selected ? "#1a8a6e" : published ? "#1a8a6e" : "#f5a623";
   return (
@@ -229,8 +229,20 @@ function MateriRow({ item, selected, onToggle, onEdit, onDelete, isMobile, reord
               <div style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {item.judul}
               </div>
-              <div style={{ fontSize: "11px", color: "#b4b2a9", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {[item.topik, item.subtopik].filter(Boolean).join(" › ")}
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px", flexWrap: "wrap" }}>
+                <div style={{ fontSize: "11px", color: "#b4b2a9", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {[item.topik, item.subtopik].filter(Boolean).join(" › ")}
+                </div>
+                {item.jumlah_highlights > 0 && (
+                  <span style={{ fontSize: "10px", fontWeight: "700", padding: "1px 6px", borderRadius: "5px", background: "#eff6ff", color: "#2563eb", whiteSpace: "nowrap", flexShrink: 0 }}>
+                    {item.jumlah_highlights} highlight
+                  </span>
+                )}
+                {item.jumlah_pertanyaan > 0 && (
+                  <span style={{ fontSize: "10px", fontWeight: "700", padding: "1px 6px", borderRadius: "5px", background: "#fef9ee", color: "#b45309", whiteSpace: "nowrap", flexShrink: 0 }}>
+                    {item.jumlah_pertanyaan} soal
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -244,8 +256,15 @@ function MateriRow({ item, selected, onToggle, onEdit, onDelete, isMobile, reord
         </td>
 
         {/* Actions */}
-        <td style={{ padding: "10px 12px 10px 0", borderBottom: "1px solid #f0ede6", whiteSpace: "nowrap", width: "72px" }}>
+        <td style={{ padding: "10px 12px 10px 0", borderBottom: "1px solid #f0ede6", whiteSpace: "nowrap", width: "100px" }}>
           <div style={{ display: "flex", gap: "5px", justifyContent: "flex-end" }}>
+            <button onClick={() => onView(item)}
+              style={{ width: "28px", height: "28px", borderRadius: "7px", border: "1px solid #bfdbfe", background: "#eff6ff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#2563eb", transition: "all .15s" }}
+              title="Lihat halaman publik"
+              onMouseEnter={e => e.currentTarget.style.background = "#dbeafe"}
+              onMouseLeave={e => e.currentTarget.style.background = "#eff6ff"}>
+              <ExternalLink size={12} />
+            </button>
             <button onClick={() => onEdit(item)}
               style={{ width: "28px", height: "28px", borderRadius: "7px", border: "1px solid #e2ddd5", background: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b6860", transition: "all .15s" }}
               onMouseEnter={e => { e.currentTarget.style.background = "#f2efe8"; e.currentTarget.style.borderColor = "#0f0e17"; }}
@@ -281,8 +300,21 @@ function StrukturTreePanel({ struktur, filterSubtopikId, onChange, countKey = "j
   const color    = LEVEL_COLOR[current.level];
 
   useEffect(() => {
-    if (!filterSubtopikId) setStack([{ level: "root", item: null }]);
-  }, [filterSubtopikId]);
+    if (!filterSubtopikId) { setStack([{ level: "root", item: null }]); return; }
+    if (!struktur.subtopik.length) return;
+    const st      = struktur.subtopik.find(s => s.id == filterSubtopikId); if (!st) return;
+    const topik   = struktur.topik.find(t => t.id == st.topik_id);         if (!topik) return;
+    const mapel   = struktur.mapel.find(m => m.id == topik.mapel_id);      if (!mapel) return;
+    const subj    = struktur.subjenjang.find(s => s.id == mapel.subjenjang_id); if (!subj) return;
+    const jenjang = struktur.jenjang.find(j => j.id == subj.jenjang_id);   if (!jenjang) return;
+    setStack([
+      { level: "root",       item: null    },
+      { level: "jenjang",    item: jenjang },
+      { level: "subjenjang", item: subj    },
+      { level: "mapel",      item: mapel   },
+      { level: "topik",      item: topik   },
+    ]);
+  }, [filterSubtopikId, struktur]);
 
   const getChildren = ({ level, item }) => {
     const pid = item?.id;
@@ -363,6 +395,17 @@ export default function AdminMateri() {
   const width     = useWindowWidth();
   const isMobile  = width <= 480;
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const updateParams = (updates) =>
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      Object.entries(updates).forEach(([k, v]) => {
+        if (v == null || v === "" || v === 1) next.delete(k);
+        else next.set(k, String(v));
+      });
+      return next;
+    }, { replace: true });
+
   // Structure for subtopik filter
   const [struktur, setStruktur] = useState({ jenjang: [], subjenjang: [], mapel: [], topik: [], subtopik: [] });
   useEffect(() => {
@@ -374,11 +417,11 @@ export default function AdminMateri() {
   const [total, setTotal]             = useState(0);
   const [publishedCount, setPublishedCount] = useState(0);
   const [draftCount, setDraftCount]   = useState(0);
-  const [page, setPage]               = useState(1);
-  const [search, setSearch]           = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [filterPublished, setFilterPublished] = useState("");
-  const [filterSubtopikId, setFilterSubtopikId] = useState(null);
+  const page             = Number(searchParams.get("page"))    || 1;
+  const filterPublished  = searchParams.get("pub")             || "";
+  const filterSubtopikId = Number(searchParams.get("subtopik")) || null;
+  const [search,          setSearch]          = useState(searchParams.get("q") || "");
+  const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get("q") || "");
 
   // Single delete
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -438,7 +481,7 @@ export default function AdminMateri() {
   const handleSearchChange = useCallback(val => {
     setSearch(val);
     clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => { setDebouncedSearch(val); setPage(1); }, 350);
+    debounceRef.current = setTimeout(() => { setDebouncedSearch(val); updateParams({ q: val, page: null }); }, 350);
   }, []);
 
   const fetchData = useCallback(async () => {
@@ -609,7 +652,7 @@ export default function AdminMateri() {
                 onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.1)"; e.currentTarget.style.color = "rgba(255,255,255,.85)"; }}>
                 <Download size={14} /> {exporting ? "Mengunduh..." : "Export JSON"}
               </button>
-              <button onClick={() => navigate("/admin/materi/bulk-import")}
+              <button onClick={() => navigate(filterSubtopikId ? `/admin/materi/bulk-import?subtopik=${filterSubtopikId}` : "/admin/materi/bulk-import")}
                 style={{ display: "flex", alignItems: "center", gap: "7px", background: "rgba(255,255,255,.1)", color: "rgba(255,255,255,.85)", border: "1px solid rgba(255,255,255,.15)", borderRadius: "10px", padding: "10px 16px", fontSize: "13.5px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit" }}
                 onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.18)"; e.currentTarget.style.color = "white"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.1)"; e.currentTarget.style.color = "rgba(255,255,255,.85)"; }}>
@@ -639,7 +682,7 @@ export default function AdminMateri() {
           <StrukturTreePanel
             struktur={struktur}
             filterSubtopikId={filterSubtopikId}
-            onChange={id => { setFilterSubtopikId(id); setPage(1); }}
+            onChange={id => { updateParams({ subtopik: id || null, page: null }); }}
             countKey="jumlah_materi"
           />
         )}
@@ -661,7 +704,7 @@ export default function AdminMateri() {
         </div>
         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
           {FILTER_OPTIONS.map(opt => (
-            <button key={opt.value} onClick={() => { setFilterPublished(opt.value); setPage(1); }}
+            <button key={opt.value} onClick={() => { updateParams({ pub: opt.value, page: null }); }}
               style={{ padding: "9px 14px", borderRadius: "10px", fontSize: "13px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", transition: "all .15s", border: filterPublished === opt.value ? "1px solid #0f0e17" : "1px solid #e2ddd5", background: filterPublished === opt.value ? "#0f0e17" : "white", color: filterPublished === opt.value ? "white" : "#6b6860" }}>
               {opt.label}
             </button>
@@ -676,7 +719,7 @@ export default function AdminMateri() {
           <SubtopikFilter
             struktur={struktur}
             filterSubtopikId={filterSubtopikId}
-            onChange={id => { setFilterSubtopikId(id); setPage(1); }}
+            onChange={id => { updateParams({ subtopik: id || null, page: null }); }}
           />
         )}
         {reorderMode && (
@@ -745,7 +788,7 @@ export default function AdminMateri() {
                 <th style={{ padding: "10px 12px 10px 0", borderBottom: "1px solid #e2ddd5", textAlign: "left", fontSize: "11px", fontWeight: "700", color: "#6b6860", textTransform: "uppercase", letterSpacing: ".06em", width: "90px" }}>
                   Status
                 </th>
-                <th style={{ padding: "10px 12px 10px 0", borderBottom: "1px solid #e2ddd5", width: "72px" }} />
+                <th style={{ padding: "10px 12px 10px 0", borderBottom: "1px solid #e2ddd5", width: "100px" }} />
               </tr>
             </thead>
             <tbody>
@@ -756,6 +799,7 @@ export default function AdminMateri() {
                   selected={selected.has(item.id)}
                   onToggle={() => toggleOne(item.id)}
                   isMobile={isMobile}
+                  onView={i => window.open(`/materi/${i.id}`, "_blank")}
                   onEdit={i => window.open(`/admin/materi/edit/${i.id}`, "_blank")}
                   onDelete={i => setDeleteTarget(i)}
                   reorderMode={reorderMode}
@@ -780,11 +824,11 @@ export default function AdminMateri() {
             {(page - 1) * LIMIT + 1}–{Math.min(page * LIMIT, total)} dari {total}
           </span>
           <div style={{ display: "flex", gap: "6px" }}>
-            <button onClick={() => setPage(p => p - 1)} disabled={page === 1}
+            <button onClick={() => updateParams({ page: page - 1 })} disabled={page === 1}
               style={{ width: "34px", height: "34px", borderRadius: "9px", border: "1px solid #e2ddd5", background: "white", cursor: page === 1 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: page === 1 ? "#d4d0c8" : "#6b6860" }}>
               <ChevronLeft size={15} />
             </button>
-            <button onClick={() => setPage(p => p + 1)} disabled={page === totalPages}
+            <button onClick={() => updateParams({ page: page + 1 })} disabled={page === totalPages}
               style={{ width: "34px", height: "34px", borderRadius: "9px", border: "1px solid #e2ddd5", background: "white", cursor: page === totalPages ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: page === totalPages ? "#d4d0c8" : "#6b6860" }}>
               <ChevronRight size={15} />
             </button>
