@@ -9,12 +9,18 @@
 #
 # API excludes: vendor/, .env, *.sql
 # SMTP_PASS dibaca dari .env (tidak ikut ter-upload)
+#
+# Server config dibaca dari deploy.env (gitignored) — lihat deploy.env.example
 
-SSH_USER="u848421989"
-SSH_HOST="46.202.186.157"
-SSH_PORT="65002"
-SSH_KEY="$HOME/.ssh/gudangsoal"
-REMOTE_DIR="/home/u848421989/domains/gudangsoal.com/public_html"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE="$SCRIPT_DIR/deploy.env"
+
+if [ ! -f "$ENV_FILE" ]; then
+  echo "✗ $ENV_FILE tidak ditemukan. Copy deploy.env.example ke deploy.env dan isi dengan nilai asli." >&2
+  exit 1
+fi
+source "$ENV_FILE"
+
 SSH_OPTS="-i $SSH_KEY -o StrictHostKeyChecking=no -o BatchMode=yes"
 
 DEPLOY_FRONTEND=true
