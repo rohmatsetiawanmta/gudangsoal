@@ -3,8 +3,12 @@
 
 // GET /browse/jenjang
 if ($uri === '/browse/jenjang' && $method === 'GET') {
+  $ck = cache_key('browse:jenjang');
+  if ($hit = cache_get($ck)) { echo json_encode($hit); exit; }
   $stmt = $pdo->query('SELECT * FROM jenjang WHERE is_published = 1 ORDER BY urutan ASC, id ASC');
-  echo json_encode($stmt->fetchAll());
+  $result = $stmt->fetchAll();
+  cache_set($ck, $result, 600, 'browse:jenjang');
+  echo json_encode($result);
   exit;
 }
 
@@ -16,6 +20,8 @@ if ($uri === '/browse/subjenjang' && $method === 'GET') {
     echo json_encode(['error' => 'jenjang_slug wajib diisi']);
     exit;
   }
+  $ck = cache_key('browse:subjenjang', [$jenjang_slug]);
+  if ($hit = cache_get($ck)) { echo json_encode($hit); exit; }
   $stmt = $pdo->prepare('
     SELECT sj.* FROM subjenjang sj
     JOIN jenjang j ON sj.jenjang_id = j.id
@@ -23,7 +29,9 @@ if ($uri === '/browse/subjenjang' && $method === 'GET') {
     ORDER BY sj.urutan ASC, sj.id ASC
   ');
   $stmt->execute([$jenjang_slug]);
-  echo json_encode($stmt->fetchAll());
+  $result = $stmt->fetchAll();
+  cache_set($ck, $result, 600, 'browse:subjenjang');
+  echo json_encode($result);
   exit;
 }
 
@@ -36,6 +44,8 @@ if ($uri === '/browse/mapel' && $method === 'GET') {
     echo json_encode(['error' => 'jenjang_slug dan subjenjang_slug wajib diisi']);
     exit;
   }
+  $ck = cache_key('browse:mapel', [$jenjang_slug, $subjenjang_slug]);
+  if ($hit = cache_get($ck)) { echo json_encode($hit); exit; }
   $stmt = $pdo->prepare('
     SELECT m.* FROM mapel m
     JOIN subjenjang sj ON m.subjenjang_id = sj.id
@@ -45,7 +55,9 @@ if ($uri === '/browse/mapel' && $method === 'GET') {
     ORDER BY m.urutan ASC, m.id ASC
   ');
   $stmt->execute([$jenjang_slug, $subjenjang_slug]);
-  echo json_encode($stmt->fetchAll());
+  $result = $stmt->fetchAll();
+  cache_set($ck, $result, 600, 'browse:mapel');
+  echo json_encode($result);
   exit;
 }
 
@@ -59,6 +71,8 @@ if ($uri === '/browse/topik' && $method === 'GET') {
     echo json_encode(['error' => 'jenjang_slug, subjenjang_slug, dan mapel_slug wajib diisi']);
     exit;
   }
+  $ck = cache_key('browse:topik', [$jenjang_slug, $subjenjang_slug, $mapel_slug]);
+  if ($hit = cache_get($ck)) { echo json_encode($hit); exit; }
   $stmt = $pdo->prepare('
     SELECT t.* FROM topik t
     JOIN mapel m ON t.mapel_id = m.id
@@ -70,7 +84,9 @@ if ($uri === '/browse/topik' && $method === 'GET') {
     ORDER BY t.urutan ASC, t.id ASC
   ');
   $stmt->execute([$jenjang_slug, $subjenjang_slug, $mapel_slug]);
-  echo json_encode($stmt->fetchAll());
+  $result = $stmt->fetchAll();
+  cache_set($ck, $result, 600, 'browse:topik');
+  echo json_encode($result);
   exit;
 }
 
@@ -87,6 +103,11 @@ if ($uri === '/browse/subtopik' && $method === 'GET') {
   }
   $authUser = getAuthUser();
   $user_id  = $authUser ? $authUser['id'] : 0;
+  // Cache only for guests — answered_count is user-specific
+  $ck = $user_id === 0
+    ? cache_key('browse:subtopik', [$jenjang_slug, $subjenjang_slug, $mapel_slug, $topik_slug])
+    : null;
+  if ($ck && ($hit = cache_get($ck))) { echo json_encode($hit); exit; }
   $stmt = $pdo->prepare('
     SELECT st.*,
       COUNT(DISTINCT s.id) AS soal_count,
@@ -110,6 +131,7 @@ if ($uri === '/browse/subtopik' && $method === 'GET') {
     $r['soal_count']    = (int) $r['soal_count'];
     $r['answered_count'] = (int) $r['answered_count'];
   }
+  if ($ck) cache_set($ck, $rows, 300, 'browse:subtopik');
   echo json_encode($rows);
   exit;
 }
@@ -126,27 +148,49 @@ if ($uri === '/browse/soal' && $method === 'GET') {
     echo json_encode(['error' => 'Semua slug wajib diisi']);
     exit;
   }
-  $stmt = $pdo->prepare('
-    SELECT s.id, s.kode, s.body, s.options, s.difficulty FROM soal s
-    JOIN subtopik st ON s.subtopik_id = st.id
-    JOIN topik t ON st.topik_id = t.id
-    JOIN mapel m ON t.mapel_id = m.id
-    JOIN subjenjang sj ON m.subjenjang_id = sj.id
-    JOIN jenjang j ON sj.jenjang_id = j.id
-    WHERE j.slug = ? AND sj.slug = ? AND m.slug = ? AND t.slug = ? AND st.slug = ?
-      AND j.is_published = 1 AND sj.is_published = 1 AND m.is_published = 1
-      AND t.is_published = 1 AND st.is_published = 1 AND s.is_published = 1
-      AND s.is_exclusive = 0
-    ORDER BY s.created_at ASC
-  ');
-  $stmt->execute([$jenjang_slug, $subjenjang_slug, $mapel_slug, $topik_slug, $subtopik_slug]);
-  $soal = $stmt->fetchAll();
-  foreach ($soal as &$s) {
-    $s['options'] = json_decode($s['options']);
-    $s['answered_correct'] = false;
+
+  // Cache soal list + meta (static parts) — answered_correct is resolved fresh per user
+  $ck = cache_key('browse:soal', [$jenjang_slug, $subjenjang_slug, $mapel_slug, $topik_slug, $subtopik_slug]);
+  $cached = cache_get($ck);
+  if ($cached) {
+    $soal = $cached['soal'];
+    $meta = $cached['meta'];
+  } else {
+    $stmt = $pdo->prepare('
+      SELECT s.id, s.kode, s.body, s.options, s.difficulty FROM soal s
+      JOIN subtopik st ON s.subtopik_id = st.id
+      JOIN topik t ON st.topik_id = t.id
+      JOIN mapel m ON t.mapel_id = m.id
+      JOIN subjenjang sj ON m.subjenjang_id = sj.id
+      JOIN jenjang j ON sj.jenjang_id = j.id
+      WHERE j.slug = ? AND sj.slug = ? AND m.slug = ? AND t.slug = ? AND st.slug = ?
+        AND j.is_published = 1 AND sj.is_published = 1 AND m.is_published = 1
+        AND t.is_published = 1 AND st.is_published = 1 AND s.is_published = 1
+        AND s.is_exclusive = 0
+      ORDER BY s.created_at ASC
+    ');
+    $stmt->execute([$jenjang_slug, $subjenjang_slug, $mapel_slug, $topik_slug, $subtopik_slug]);
+    $soal = $stmt->fetchAll();
+    foreach ($soal as &$s) {
+      $s['options'] = json_decode($s['options']);
+      $s['answered_correct'] = false;
+    }
+    $metaStmt = $pdo->prepare('
+      SELECT j.nama AS jenjang, sj.nama AS subjenjang, m.nama AS mapel, t.nama AS topik, st.nama AS subtopik
+      FROM subtopik st
+      JOIN topik t ON st.topik_id = t.id
+      JOIN mapel m ON t.mapel_id = m.id
+      JOIN subjenjang sj ON m.subjenjang_id = sj.id
+      JOIN jenjang j ON sj.jenjang_id = j.id
+      WHERE j.slug = ? AND sj.slug = ? AND m.slug = ? AND t.slug = ? AND st.slug = ?
+      LIMIT 1
+    ');
+    $metaStmt->execute([$jenjang_slug, $subjenjang_slug, $mapel_slug, $topik_slug, $subtopik_slug]);
+    $meta = $metaStmt->fetch() ?: (object)[];
+    cache_set($ck, ['soal' => $soal, 'meta' => $meta], 300, 'browse:soal');
   }
 
-  // Bulk answered status for logged-in user
+  // Bulk answered status — always fresh, lightweight query
   $authUser = getAuthUser();
   if ($authUser && !empty($soal)) {
     $kodes = array_column($soal, 'kode');
@@ -163,19 +207,6 @@ if ($uri === '/browse/soal' && $method === 'GET') {
     }
   }
 
-  $metaStmt = $pdo->prepare('
-    SELECT j.nama AS jenjang, sj.nama AS subjenjang, m.nama AS mapel, t.nama AS topik, st.nama AS subtopik
-    FROM subtopik st
-    JOIN topik t ON st.topik_id = t.id
-    JOIN mapel m ON t.mapel_id = m.id
-    JOIN subjenjang sj ON m.subjenjang_id = sj.id
-    JOIN jenjang j ON sj.jenjang_id = j.id
-    WHERE j.slug = ? AND sj.slug = ? AND m.slug = ? AND t.slug = ? AND st.slug = ?
-    LIMIT 1
-  ');
-  $metaStmt->execute([$jenjang_slug, $subjenjang_slug, $mapel_slug, $topik_slug, $subtopik_slug]);
-  $meta = $metaStmt->fetch() ?: (object)[];
-
   echo json_encode(['soal' => $soal, 'meta' => $meta]);
   exit;
 }
@@ -189,11 +220,16 @@ if ($uri === '/browse/soal/detail' && $method === 'GET') {
     exit;
   }
 
-  // Increment views
+  // Increment views counter + track in soal_views for analytics
   $pdo->prepare('UPDATE soal SET views = views + 1 WHERE kode = ?')->execute([$kode]);
+  $authUser = getAuthUser();
+  $pdo->prepare('INSERT INTO soal_views (soal_id, user_id) SELECT id, ? FROM soal WHERE kode = ?')
+      ->execute([$authUser ? $authUser['id'] : null, $kode]);
 
   $stmt = $pdo->prepare('
     SELECT s.*,
+           (SELECT COUNT(*) FROM soal_views  WHERE soal_id = s.id) AS view_count,
+           (SELECT COUNT(*) FROM soal_shares WHERE soal_id = s.id) AS share_count,
            st.nama as subtopik_nama, st.slug as subtopik_slug,
            t.nama  as topik_nama,    t.slug  as topik_slug,
            m.nama  as mapel_nama,    m.slug  as mapel_slug,
@@ -253,6 +289,42 @@ if ($uri === '/browse/soal/detail' && $method === 'GET') {
   ];
 
   echo json_encode($soal);
+  exit;
+}
+
+// POST /soal/share  — record share event and return updated share_count
+if ($uri === '/soal/share' && $method === 'POST') {
+  $body     = json_decode(file_get_contents('php://input'), true);
+  $kode     = $body['kode']     ?? null;
+  $platform = $body['platform'] ?? null;
+
+  if (!$kode || !in_array($platform, ['whatsapp', 'telegram', 'facebook', 'twitter', 'threads', 'email', 'copy'])) {
+    http_response_code(400);
+    echo json_encode(['error' => 'parameter tidak valid']);
+    exit;
+  }
+
+  $soalStmt = $pdo->prepare('SELECT id FROM soal WHERE kode = ? AND is_published = 1');
+  $soalStmt->execute([$kode]);
+  $soal = $soalStmt->fetch();
+
+  if (!$soal) {
+    http_response_code(404);
+    echo json_encode(['error' => 'soal tidak ditemukan']);
+    exit;
+  }
+
+  $authUser = getAuthUser();
+  $user_id  = $authUser ? $authUser['id'] : null;
+  $ip       = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? null;
+
+  $pdo->prepare('INSERT INTO soal_shares (soal_id, user_id, platform, ip_address) VALUES (?, ?, ?, ?)')
+      ->execute([$soal['id'], $user_id, $platform, $ip]);
+
+  $cntStmt = $pdo->prepare('SELECT COUNT(*) FROM soal_shares WHERE soal_id = ?');
+  $cntStmt->execute([$soal['id']]);
+
+  echo json_encode(['share_count' => (int) $cntStmt->fetchColumn()]);
   exit;
 }
 
@@ -611,8 +683,17 @@ if ($uri === '/browse/materi' && $method === 'GET' && (isset($_GET['subtopik_id'
   if (isset($_GET['subtopik_id'])) {
     $subtopik_id = (int) $_GET['subtopik_id'];
   } else {
-    $slugStmt = $pdo->prepare('SELECT id FROM subtopik WHERE slug = ?');
-    $slugStmt->execute([$_GET['subtopik_slug']]);
+    if (isset($_GET['topik_slug'])) {
+      $slugStmt = $pdo->prepare('
+        SELECT st.id FROM subtopik st
+        JOIN topik t ON st.topik_id = t.id
+        WHERE st.slug = ? AND t.slug = ?
+      ');
+      $slugStmt->execute([$_GET['subtopik_slug'], $_GET['topik_slug']]);
+    } else {
+      $slugStmt = $pdo->prepare('SELECT id FROM subtopik WHERE slug = ?');
+      $slugStmt->execute([$_GET['subtopik_slug']]);
+    }
     $subtopik_id = (int) ($slugStmt->fetchColumn() ?: 0);
     if (!$subtopik_id) { echo json_encode([]); exit; }
   }

@@ -95,10 +95,11 @@ if ($uri === '/admin/soal' && $method === 'GET') {
   exit;
 }
 
-// GET /admin/soal/detail?id=1
+// GET /admin/soal/detail?id=1  atau  ?kode=A6E5M9
 if ($uri === '/admin/soal/detail' && $method === 'GET') {
-  $id = $_GET['id'] ?? null;
-  if (!$id) { http_response_code(400); echo json_encode(['error' => 'id wajib']); exit; }
+  $id   = $_GET['id']   ?? null;
+  $kode = $_GET['kode'] ?? null;
+  if (!$id && !$kode) { http_response_code(400); echo json_encode(['error' => 'id atau kode wajib']); exit; }
 
   $stmt = $pdo->prepare('
   SELECT s.*,
@@ -111,9 +112,9 @@ if ($uri === '/admin/soal/detail' && $method === 'GET') {
   JOIN mapel m ON t.mapel_id = m.id
   JOIN subjenjang sj ON m.subjenjang_id = sj.id
   JOIN jenjang j ON sj.jenjang_id = j.id
-  WHERE s.id = ?
+  WHERE ' . ($id ? 's.id = ?' : 's.kode = ?') . '
 ');
-  $stmt->execute([$id]);
+  $stmt->execute([$id ?: $kode]);
   $soal = $stmt->fetch();
 
   if (!$soal) { http_response_code(404); echo json_encode(['error' => 'Soal tidak ditemukan']); exit; }
@@ -448,6 +449,7 @@ if (str_starts_with($uri, '/admin/struktur/') && $method === 'POST' && $uri !== 
     $stmt->execute([$topik_id, $nama, $slug]);
   }
 
+  cache_bust_prefix('browse:');
   http_response_code(201);
   echo json_encode([
     'id'      => $pdo->lastInsertId(),
@@ -503,6 +505,7 @@ if ($uri === '/admin/struktur/bulk-topik' && $method === 'POST') {
     }
   }
 
+  cache_bust_prefix('browse:');
   echo json_encode(['inserted_topik' => $inserted_topik, 'inserted_subtopik' => $inserted_subtopik, 'errors' => $errors]);
   exit;
 }
@@ -527,6 +530,7 @@ if (str_starts_with($uri, '/admin/struktur/') && $method === 'PUT') {
   $stmt = $pdo->prepare("UPDATE $level SET nama = ?, slug = ? WHERE id = ?");
   $stmt->execute([$nama, $slug, $id]);
 
+  cache_bust_prefix('browse:');
   echo json_encode(['message' => ucfirst($level) . ' berhasil diupdate']);
   exit;
 }
@@ -544,6 +548,7 @@ if (str_starts_with($uri, '/admin/struktur/') && $method === 'DELETE') {
 
   try {
     $pdo->prepare("DELETE FROM $level WHERE id = ?")->execute([$id]);
+    cache_bust_prefix('browse:');
     echo json_encode(['message' => ucfirst($level) . ' berhasil dihapus']);
   } catch (Exception $e) {
     http_response_code(409);
@@ -572,10 +577,45 @@ if (str_starts_with($uri, '/admin/publish/') && $method === 'PUT') {
   $stmt->execute([$id]);
   $status = $stmt->fetchColumn();
 
+  if ($level !== 'soal') cache_bust_prefix('browse:');
   echo json_encode([
     'is_published' => (bool) $status,
     'message'      => $status ? ucfirst($level) . ' dipublish' : ucfirst($level) . ' di-unpublish',
   ]);
+  exit;
+}
+
+// PUT /admin/set-status/:level?id=X  body: { status: 'draft' | 'coming_soon' | 'published' }
+if (str_starts_with($uri, '/admin/set-status/') && $method === 'PUT') {
+  $level   = str_replace('/admin/set-status/', '', $uri);
+  $id      = $_GET['id'] ?? null;
+  $allowed = ['jenjang', 'subjenjang', 'mapel', 'topik', 'subtopik'];
+  $body    = json_decode(file_get_contents('php://input'), true);
+  $status  = $body['status'] ?? null;
+
+  if (!in_array($level, $allowed)) {
+    http_response_code(400); echo json_encode(['error' => 'Level tidak valid']); exit;
+  }
+  if (!$id) {
+    http_response_code(400); echo json_encode(['error' => 'id wajib']); exit;
+  }
+  if (!in_array($status, ['draft', 'coming_soon', 'published'])) {
+    http_response_code(400); echo json_encode(['error' => 'status tidak valid']); exit;
+  }
+
+  if ($status === 'draft') {
+    $pdo->prepare("UPDATE $level SET is_published=0, is_coming_soon=0 WHERE id=?")->execute([$id]);
+  } elseif ($status === 'coming_soon') {
+    $pdo->prepare("UPDATE $level SET is_published=1, is_coming_soon=1 WHERE id=?")->execute([$id]);
+  } else {
+    $pdo->prepare("UPDATE $level SET is_published=1, is_coming_soon=0 WHERE id=?")->execute([$id]);
+  }
+
+  $row = $pdo->prepare("SELECT is_published, is_coming_soon FROM $level WHERE id=?");
+  $row->execute([$id]);
+  $r = $row->fetch();
+  cache_bust_prefix('browse:');
+  echo json_encode(['is_published' => (int)$r['is_published'], 'is_coming_soon' => (int)$r['is_coming_soon']]);
   exit;
 }
 
@@ -780,7 +820,7 @@ if ($uri === '/admin/users' && $method === 'GET') {
 
   if ($search) {
     $stmt = $pdo->prepare('
-      SELECT id, name, email, role, xp, streak, soal_streak, created_at
+      SELECT id, name, email, role, xp, streak, soal_streak, created_at, email_verified, verified_at
       FROM users
       WHERE (name LIKE ? OR email LIKE ?)
       ORDER BY created_at DESC
@@ -792,7 +832,7 @@ if ($uri === '/admin/users' && $method === 'GET') {
     $totalStmt->execute(["%$search%", "%$search%"]);
   } else {
     $stmt = $pdo->prepare('
-      SELECT id, name, email, role, xp, streak, soal_streak, created_at
+      SELECT id, name, email, role, xp, streak, soal_streak, created_at, email_verified, verified_at
       FROM users
       ORDER BY created_at DESC
       LIMIT ' . $limit . ' OFFSET ' . $offset . '
@@ -1350,6 +1390,190 @@ if ($uri === '/admin/soal/salin' && $method === 'POST') {
 }
 
 // ==================
+// SOAL VIEWS
+// ==================
+
+// GET /admin/soal/views/raw
+if ($uri === '/admin/soal/views/raw' && $method === 'GET') {
+  $page   = max(1, (int)($_GET['page']  ?? 1));
+  $limit  = min(100, max(5, (int)($_GET['limit'] ?? 10)));
+  $days   = isset($_GET['days']) ? (int)$_GET['days'] : 30;
+  $offset = ($page - 1) * $limit;
+  $since  = $days > 0 ? date('Y-m-d H:i:s', strtotime("-{$days} days")) : '1970-01-01 00:00:00';
+
+  $stmt = $pdo->prepare("
+    SELECT sv.id, sv.viewed_at,
+           s.id AS soal_id, s.kode AS soal_kode, s.difficulty,
+           SUBSTRING(s.body, 1, 80) AS soal_preview,
+           st.nama AS subtopik, mp.nama AS mapel,
+           u.id AS user_id, u.name AS user_name, u.email AS user_email
+    FROM soal_views sv
+    JOIN soal s ON sv.soal_id = s.id
+    JOIN subtopik st ON s.subtopik_id = st.id
+    JOIN topik     t ON st.topik_id   = t.id
+    JOIN mapel    mp ON t.mapel_id    = mp.id
+    LEFT JOIN users u ON sv.user_id = u.id
+    WHERE sv.viewed_at >= ?
+    ORDER BY sv.viewed_at DESC
+    LIMIT $limit OFFSET $offset
+  ");
+  $stmt->execute([$since]);
+
+  $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM soal_views WHERE viewed_at >= ?");
+  $totalStmt->execute([$since]);
+
+  echo json_encode([
+    'data'  => $stmt->fetchAll(),
+    'total' => (int) $totalStmt->fetchColumn(),
+    'page'  => $page,
+    'limit' => $limit,
+  ]);
+  exit;
+}
+
+// GET /admin/soal/views
+if ($uri === '/admin/soal/views' && $method === 'GET') {
+  $days  = isset($_GET['days']) ? (int)$_GET['days'] : 30;
+  $since = $days > 0 ? date('Y-m-d H:i:s', strtotime("-{$days} days")) : '1970-01-01 00:00:00';
+
+  $total     = (int) $pdo->query("SELECT COUNT(*) FROM soal_views")->fetchColumn();
+  $today     = (int) $pdo->query("SELECT COUNT(*) FROM soal_views WHERE viewed_at >= CURDATE()")->fetchColumn();
+  $week      = (int) $pdo->query("SELECT COUNT(*) FROM soal_views WHERE viewed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)")->fetchColumn();
+  $month     = (int) $pdo->query("SELECT COUNT(*) FROM soal_views WHERE viewed_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")->fetchColumn();
+  $anonymous = (int) $pdo->query("SELECT COUNT(*) FROM soal_views WHERE user_id IS NULL")->fetchColumn();
+  $logged_in = $total - $anonymous;
+
+  $topStmt = $pdo->prepare("
+    SELECT s.id, s.kode, s.difficulty,
+           st.nama AS subtopik, mp.nama AS mapel,
+           COUNT(sv.id) AS views_in_range,
+           (SELECT COUNT(*) FROM soal_views WHERE soal_id = s.id) AS views_total
+    FROM soal_views sv
+    JOIN soal s ON sv.soal_id = s.id
+    JOIN subtopik st ON s.subtopik_id = st.id
+    JOIN topik     t ON st.topik_id   = t.id
+    JOIN mapel    mp ON t.mapel_id    = mp.id
+    WHERE sv.viewed_at >= ?
+    GROUP BY s.id, s.kode, s.difficulty, st.nama, mp.nama
+    ORDER BY views_in_range DESC
+    LIMIT 50
+  ");
+  $topStmt->execute([$since]);
+
+  $dailyStmt = $pdo->prepare("
+    SELECT DATE(viewed_at) AS date,
+           COUNT(*) AS total,
+           SUM(CASE WHEN user_id IS NULL THEN 1 ELSE 0 END) AS anonymous,
+           SUM(CASE WHEN user_id IS NOT NULL THEN 1 ELSE 0 END) AS logged_in
+    FROM soal_views
+    WHERE viewed_at >= ?
+    GROUP BY DATE(viewed_at)
+    ORDER BY date ASC
+  ");
+  $dailyStmt->execute([$since]);
+
+  echo json_encode([
+    'summary' => compact('total', 'today', 'week', 'month', 'anonymous', 'logged_in'),
+    'top'     => $topStmt->fetchAll(),
+    'daily'   => $dailyStmt->fetchAll(),
+  ]);
+  exit;
+}
+
+// GET /admin/soal/shares  — summary + top soal + daily breakdown
+if ($uri === '/admin/soal/shares' && $method === 'GET') {
+  $days  = isset($_GET['days']) ? (int)$_GET['days'] : 30;
+  $since = $days > 0 ? date('Y-m-d H:i:s', strtotime("-{$days} days")) : '1970-01-01 00:00:00';
+
+  $total     = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares")->fetchColumn();
+  $today     = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE created_at >= CURDATE()")->fetchColumn();
+  $week      = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)")->fetchColumn();
+  $whatsapp  = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE platform = 'whatsapp'")->fetchColumn();
+  $telegram  = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE platform = 'telegram'")->fetchColumn();
+  $facebook  = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE platform = 'facebook'")->fetchColumn();
+  $twitter   = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE platform = 'twitter'")->fetchColumn();
+  $threads   = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE platform = 'threads'")->fetchColumn();
+  $email     = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE platform = 'email'")->fetchColumn();
+  $copy      = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE platform = 'copy'")->fetchColumn();
+
+  $topStmt = $pdo->prepare("
+    SELECT s.id, s.kode, s.difficulty,
+           st.nama AS subtopik, mp.nama AS mapel,
+           COUNT(sh.id) AS shares_in_range,
+           (SELECT COUNT(*) FROM soal_shares WHERE soal_id = s.id) AS shares_total
+    FROM soal_shares sh
+    JOIN soal s ON sh.soal_id = s.id
+    JOIN subtopik st ON s.subtopik_id = st.id
+    JOIN topik     t ON st.topik_id   = t.id
+    JOIN mapel    mp ON t.mapel_id    = mp.id
+    WHERE sh.created_at >= ?
+    GROUP BY s.id, s.kode, s.difficulty, st.nama, mp.nama
+    ORDER BY shares_in_range DESC
+    LIMIT 50
+  ");
+  $topStmt->execute([$since]);
+
+  $dailyStmt = $pdo->prepare("
+    SELECT DATE(created_at) AS date,
+           COUNT(*) AS total,
+           SUM(CASE WHEN platform = 'whatsapp' THEN 1 ELSE 0 END) AS whatsapp,
+           SUM(CASE WHEN platform = 'twitter'  THEN 1 ELSE 0 END) AS twitter,
+           SUM(CASE WHEN platform = 'threads'  THEN 1 ELSE 0 END) AS threads,
+           SUM(CASE WHEN platform = 'copy'     THEN 1 ELSE 0 END) AS copy
+    FROM soal_shares
+    WHERE created_at >= ?
+    GROUP BY DATE(created_at)
+    ORDER BY date ASC
+  ");
+  $dailyStmt->execute([$since]);
+
+  echo json_encode([
+    'summary' => compact('total', 'today', 'week', 'whatsapp', 'telegram', 'facebook', 'twitter', 'threads', 'email', 'copy'),
+    'top'     => $topStmt->fetchAll(),
+    'daily'   => $dailyStmt->fetchAll(),
+  ]);
+  exit;
+}
+
+// GET /admin/soal/shares/raw  — paginated raw share log
+if (str_starts_with($uri, '/admin/soal/shares/raw') && $method === 'GET') {
+  $days   = isset($_GET['days'])  ? (int)$_GET['days']  : 30;
+  $page   = isset($_GET['page'])  ? (int)$_GET['page']  : 1;
+  $limit  = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
+  $offset = ($page - 1) * $limit;
+  $since  = $days > 0 ? date('Y-m-d H:i:s', strtotime("-{$days} days")) : '1970-01-01 00:00:00';
+
+  $stmt = $pdo->prepare("
+    SELECT sh.id, sh.platform, sh.created_at,
+           s.id AS soal_id, s.kode AS soal_kode, s.difficulty,
+           SUBSTRING(s.body, 1, 80) AS soal_preview,
+           st.nama AS subtopik, mp.nama AS mapel,
+           u.id AS user_id, u.name AS user_name, u.email AS user_email
+    FROM soal_shares sh
+    JOIN soal s ON sh.soal_id = s.id
+    JOIN subtopik st ON s.subtopik_id = st.id
+    JOIN topik     t ON st.topik_id   = t.id
+    JOIN mapel    mp ON t.mapel_id    = mp.id
+    LEFT JOIN users u ON sh.user_id = u.id
+    WHERE sh.created_at >= ?
+    ORDER BY sh.created_at DESC
+    LIMIT $limit OFFSET $offset
+  ");
+  $stmt->execute([$since]);
+
+  $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM soal_shares WHERE created_at >= ?");
+  $totalStmt->execute([$since]);
+
+  echo json_encode([
+    'data'  => $stmt->fetchAll(),
+    'total' => (int) $totalStmt->fetchColumn(),
+    'page'  => $page,
+    'limit' => $limit,
+  ]);
+  exit;
+}
+
+// ==================
 // MATERI
 // ==================
 
@@ -1410,7 +1634,8 @@ if ($uri === '/admin/materi' && $method === 'GET') {
     : 'm.updated_at DESC, m.id DESC';
 
   $stmt = $pdo->prepare("
-    SELECT m.id, m.judul, m.is_published, m.urutan, m.views, m.created_at, m.updated_at,
+    SELECT m.id, m.judul, m.is_published, m.urutan, m.created_at, m.updated_at,
+           (SELECT COUNT(*) FROM materi_views WHERE materi_id = m.id) AS views,
            st.nama AS subtopik, t.nama AS topik,
            mp.nama AS mapel, sj.nama AS subjenjang, j.nama AS jenjang,
            COALESCE(JSON_LENGTH(m.highlights), 0)  AS jumlah_highlights,
@@ -1437,6 +1662,95 @@ if ($uri === '/admin/materi' && $method === 'GET') {
     'limit'           => $limit,
     'published_count' => (int) $pdo->query('SELECT COUNT(*) FROM materi WHERE is_published = 1')->fetchColumn(),
     'draft_count'     => (int) $pdo->query('SELECT COUNT(*) FROM materi WHERE is_published = 0')->fetchColumn(),
+  ]);
+  exit;
+}
+
+// GET /admin/materi/views/raw — raw per-row data dari materi_views
+if ($uri === '/admin/materi/views/raw' && $method === 'GET') {
+  $page  = max(1, (int)($_GET['page']  ?? 1));
+  $limit = min(100, max(10, (int)($_GET['limit'] ?? 50)));
+  $days  = isset($_GET['days']) ? (int)$_GET['days'] : 30;
+  $offset = ($page - 1) * $limit;
+  $since = $days > 0
+    ? date('Y-m-d H:i:s', strtotime("-{$days} days"))
+    : '1970-01-01 00:00:00';
+
+  $stmt = $pdo->prepare("
+    SELECT mv.id, mv.viewed_at,
+           m.id   AS materi_id, m.judul AS materi_judul,
+           u.id   AS user_id,   u.name  AS user_name,  u.email AS user_email
+    FROM materi_views mv
+    JOIN materi m ON mv.materi_id = m.id
+    LEFT JOIN users u ON mv.user_id = u.id
+    WHERE mv.viewed_at >= ?
+    ORDER BY mv.viewed_at DESC
+    LIMIT $limit OFFSET $offset
+  ");
+  $stmt->execute([$since]);
+
+  $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM materi_views WHERE viewed_at >= ?");
+  $totalStmt->execute([$since]);
+
+  echo json_encode([
+    'data'  => $stmt->fetchAll(),
+    'total' => (int) $totalStmt->fetchColumn(),
+    'page'  => $page,
+    'limit' => $limit,
+  ]);
+  exit;
+}
+
+// GET /admin/materi/views — analytics views dari materi_views
+if ($uri === '/admin/materi/views' && $method === 'GET') {
+  $days = isset($_GET['days']) ? (int)$_GET['days'] : 30;
+  $since = $days > 0
+    ? date('Y-m-d H:i:s', strtotime("-{$days} days"))
+    : '1970-01-01 00:00:00';
+
+  // Summary stats
+  $total      = (int) $pdo->query("SELECT COUNT(*) FROM materi_views")->fetchColumn();
+  $today      = (int) $pdo->query("SELECT COUNT(*) FROM materi_views WHERE viewed_at >= CURDATE()")->fetchColumn();
+  $week       = (int) $pdo->query("SELECT COUNT(*) FROM materi_views WHERE viewed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)")->fetchColumn();
+  $month      = (int) $pdo->query("SELECT COUNT(*) FROM materi_views WHERE viewed_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")->fetchColumn();
+  $anonymous  = (int) $pdo->query("SELECT COUNT(*) FROM materi_views WHERE user_id IS NULL")->fetchColumn();
+  $logged_in  = $total - $anonymous;
+
+  // Top materi by views dalam range
+  $topStmt = $pdo->prepare("
+    SELECT m.id, m.judul, m.is_published,
+           st.nama AS subtopik, mp.nama AS mapel,
+           COUNT(mv.id) AS views_in_range,
+           (SELECT COUNT(*) FROM materi_views WHERE materi_id = m.id) AS views_total
+    FROM materi_views mv
+    JOIN materi m ON mv.materi_id = m.id
+    JOIN subtopik st ON m.subtopik_id = st.id
+    JOIN topik     t ON st.topik_id   = t.id
+    JOIN mapel    mp ON t.mapel_id    = mp.id
+    WHERE mv.viewed_at >= ?
+    GROUP BY m.id, m.judul, m.is_published, st.nama, mp.nama
+    ORDER BY views_in_range DESC
+    LIMIT 50
+  ");
+  $topStmt->execute([$since]);
+
+  // Daily views (last N days)
+  $dailyStmt = $pdo->prepare("
+    SELECT DATE(viewed_at) AS date,
+           COUNT(*) AS total,
+           SUM(CASE WHEN user_id IS NULL THEN 1 ELSE 0 END) AS anonymous,
+           SUM(CASE WHEN user_id IS NOT NULL THEN 1 ELSE 0 END) AS logged_in
+    FROM materi_views
+    WHERE viewed_at >= ?
+    GROUP BY DATE(viewed_at)
+    ORDER BY date ASC
+  ");
+  $dailyStmt->execute([$since]);
+
+  echo json_encode([
+    'summary' => compact('total', 'today', 'week', 'month', 'anonymous', 'logged_in'),
+    'top'     => $topStmt->fetchAll(),
+    'daily'   => $dailyStmt->fetchAll(),
   ]);
   exit;
 }
@@ -1597,5 +1911,467 @@ if ($uri === '/admin/materi' && $method === 'DELETE') {
   if (!$id) { http_response_code(400); echo json_encode(['error' => 'id wajib']); exit; }
   $pdo->prepare('DELETE FROM materi WHERE id = ?')->execute([$id]);
   echo json_encode(['message' => 'Materi berhasil dihapus']);
+  exit;
+}
+
+// GET /admin/materi/shares  — summary + top materi + daily breakdown
+if ($uri === '/admin/materi/shares' && $method === 'GET') {
+  $days = (int) ($_GET['days'] ?? 30);
+  $since = $days > 0 ? "DATE_SUB(NOW(), INTERVAL {$days} DAY)" : "'1970-01-01'";
+
+  $total    = (int) $pdo->query("SELECT COUNT(*) FROM materi_shares")->fetchColumn();
+  $today    = (int) $pdo->query("SELECT COUNT(*) FROM materi_shares WHERE created_at >= CURDATE()")->fetchColumn();
+  $week     = (int) $pdo->query("SELECT COUNT(*) FROM materi_shares WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)")->fetchColumn();
+  $whatsapp = (int) $pdo->query("SELECT COUNT(*) FROM materi_shares WHERE platform = 'whatsapp'")->fetchColumn();
+  $telegram = (int) $pdo->query("SELECT COUNT(*) FROM materi_shares WHERE platform = 'telegram'")->fetchColumn();
+  $facebook = (int) $pdo->query("SELECT COUNT(*) FROM materi_shares WHERE platform = 'facebook'")->fetchColumn();
+  $twitter  = (int) $pdo->query("SELECT COUNT(*) FROM materi_shares WHERE platform = 'twitter'")->fetchColumn();
+  $threads  = (int) $pdo->query("SELECT COUNT(*) FROM materi_shares WHERE platform = 'threads'")->fetchColumn();
+  $email    = (int) $pdo->query("SELECT COUNT(*) FROM materi_shares WHERE platform = 'email'")->fetchColumn();
+  $copy     = (int) $pdo->query("SELECT COUNT(*) FROM materi_shares WHERE platform = 'copy'")->fetchColumn();
+
+  $top = $pdo->query("
+    SELECT m.id, m.judul,
+           mp.nama AS mapel, st.nama AS subtopik,
+           COUNT(sh.id) AS shares_in_range,
+           (SELECT COUNT(*) FROM materi_shares WHERE materi_id = m.id) AS shares_total
+    FROM materi_shares sh
+    JOIN materi m ON sh.materi_id = m.id
+    JOIN subtopik st ON m.subtopik_id = st.id
+    JOIN topik t ON st.topik_id = t.id
+    JOIN mapel mp ON t.mapel_id = mp.id
+    WHERE sh.created_at >= {$since}
+    GROUP BY m.id, m.judul, mp.nama, st.nama
+    ORDER BY shares_in_range DESC
+    LIMIT 20
+  ")->fetchAll();
+
+  $daily = $pdo->query("
+    SELECT DATE(created_at) AS date, COUNT(*) AS total
+    FROM materi_shares
+    WHERE created_at >= {$since}
+    GROUP BY DATE(created_at)
+    ORDER BY date ASC
+  ")->fetchAll();
+
+  echo json_encode([
+    'summary' => compact('total', 'today', 'week', 'whatsapp', 'telegram', 'facebook', 'twitter', 'threads', 'email', 'copy'),
+    'top'     => $top,
+    'daily'   => $daily,
+  ]);
+  exit;
+}
+
+// GET /admin/materi/shares/raw  — paginated raw share log
+if (str_starts_with($uri, '/admin/materi/shares/raw') && $method === 'GET') {
+  $days   = (int) ($_GET['days']  ?? 30);
+  $page   = max(1, (int) ($_GET['page']  ?? 1));
+  $limit  = max(1, min(100, (int) ($_GET['limit'] ?? 10)));
+  $offset = ($page - 1) * $limit;
+  $since  = $days > 0 ? "DATE_SUB(NOW(), INTERVAL {$days} DAY)" : "'1970-01-01'";
+
+  $data = $pdo->query("
+    SELECT sh.id, sh.created_at, sh.platform, sh.ip_address,
+           m.id AS materi_id, m.judul AS materi_judul,
+           mp.nama AS mapel, st.nama AS subtopik,
+           u.name AS user_name
+    FROM materi_shares sh
+    JOIN materi m ON sh.materi_id = m.id
+    JOIN subtopik st ON m.subtopik_id = st.id
+    JOIN topik t ON st.topik_id = t.id
+    JOIN mapel mp ON t.mapel_id = mp.id
+    LEFT JOIN users u ON sh.user_id = u.id
+    WHERE sh.created_at >= {$since}
+    ORDER BY sh.created_at DESC
+    LIMIT {$limit} OFFSET {$offset}
+  ")->fetchAll();
+
+  $since_val = $days > 0 ? date('Y-m-d H:i:s', strtotime("-{$days} days")) : '1970-01-01';
+  $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM materi_shares WHERE created_at >= ?");
+  $totalStmt->execute([$since_val]);
+  $total = (int) $totalStmt->fetchColumn();
+
+  echo json_encode(['data' => $data, 'total' => $total]);
+  exit;
+}
+
+// ── Feature Roadmap (Backlog) ─────────────────────────────────────────────────
+
+// GET /admin/roadmap
+if ($uri === '/admin/roadmap' && $method === 'GET') {
+
+  $status   = $_GET['status']   ?? '';
+  $category = $_GET['category'] ?? '';
+  $priority = $_GET['priority'] ?? '';
+
+  $where = ['1=1'];
+  $params = [];
+  if ($status)   { $where[] = 'status = ?';   $params[] = $status; }
+  if ($category) { $where[] = 'category = ?'; $params[] = $category; }
+  if ($priority) { $where[] = 'priority = ?'; $params[] = $priority; }
+
+  $sql = 'SELECT * FROM feature_roadmap WHERE ' . implode(' AND ', $where)
+       . ' ORDER BY FIELD(status,"discovery","idea","planned","in_progress","hold","done","cancelled"), FIELD(priority,"high","medium","low"), id DESC';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  echo json_encode($stmt->fetchAll());
+  exit;
+}
+
+// POST /admin/roadmap
+if ($uri === '/admin/roadmap' && $method === 'POST') {
+
+  $title       = trim($body['title']       ?? '');
+  $description = trim($body['description'] ?? '');
+  $category    = $body['category'] ?? 'lainnya';
+  $priority    = $body['priority'] ?? 'medium';
+  $status      = $body['status']   ?? 'idea';
+  $notes       = trim($body['notes'] ?? '');
+
+  if (!$title) { http_response_code(400); echo json_encode(['error' => 'title wajib']); exit; }
+
+  $stmt = $pdo->prepare('INSERT INTO feature_roadmap (title, description, category, priority, status, notes) VALUES (?, ?, ?, ?, ?, ?)');
+  $stmt->execute([$title, $description ?: null, $category, $priority, $status, $notes ?: null]);
+  $id = (int) $pdo->lastInsertId();
+
+  $row = $pdo->prepare('SELECT * FROM feature_roadmap WHERE id = ?');
+  $row->execute([$id]);
+  echo json_encode($row->fetch());
+  exit;
+}
+
+// PUT /admin/roadmap/:id
+if (preg_match('#^/admin/roadmap/(\d+)$#', $uri, $m) && $method === 'PUT') {
+
+  $id = (int) $m[1];
+  $title       = trim($body['title']       ?? '');
+  $description = trim($body['description'] ?? '');
+  $category    = $body['category'] ?? 'lainnya';
+  $priority    = $body['priority'] ?? 'medium';
+  $status      = $body['status']   ?? 'idea';
+  $notes       = trim($body['notes'] ?? '');
+
+  if (!$title) { http_response_code(400); echo json_encode(['error' => 'title wajib']); exit; }
+
+  $pdo->prepare('UPDATE feature_roadmap SET title=?, description=?, category=?, priority=?, status=?, notes=? WHERE id=?')
+      ->execute([$title, $description ?: null, $category, $priority, $status, $notes ?: null, $id]);
+
+  $row = $pdo->prepare('SELECT * FROM feature_roadmap WHERE id = ?');
+  $row->execute([$id]);
+  echo json_encode($row->fetch());
+  exit;
+}
+
+// PATCH /admin/roadmap/:id/status
+if (preg_match('#^/admin/roadmap/(\d+)/status$#', $uri, $m) && $method === 'PATCH') {
+
+  $id     = (int) $m[1];
+  $status = $body['status'] ?? '';
+  $valid  = ['discovery', 'idea', 'planned', 'in_progress', 'done', 'cancelled', 'hold'];
+  if (!in_array($status, $valid)) { http_response_code(400); echo json_encode(['error' => 'status tidak valid']); exit; }
+
+  $pdo->prepare('UPDATE feature_roadmap SET status=? WHERE id=?')->execute([$status, $id]);
+  echo json_encode(['ok' => true]);
+  exit;
+}
+
+// DELETE /admin/roadmap/:id
+if (preg_match('#^/admin/roadmap/(\d+)$#', $uri, $m) && $method === 'DELETE') {
+
+  $id = (int) $m[1];
+  $pdo->prepare('DELETE FROM feature_roadmap WHERE id=?')->execute([$id]);
+  echo json_encode(['ok' => true]);
+  exit;
+}
+
+// ── BUG LIST ─────────────────────────────────────────────────────────────────
+
+// GET /admin/bugs
+if ($uri === '/admin/bugs' && $method === 'GET') {
+  $where  = ['1=1'];
+  $params = [];
+  if (!empty($_GET['status']))   { $where[] = 'status = ?';   $params[] = $_GET['status']; }
+  if (!empty($_GET['severity'])) { $where[] = 'severity = ?'; $params[] = $_GET['severity']; }
+  if (!empty($_GET['category'])) { $where[] = 'category = ?'; $params[] = $_GET['category']; }
+  $sql  = 'SELECT * FROM bugs WHERE ' . implode(' AND ', $where)
+        . ' ORDER BY FIELD(status,"open","in_progress","fixed","wontfix"), FIELD(severity,"critical","high","medium","low"), id DESC';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  echo json_encode($stmt->fetchAll());
+  exit;
+}
+
+// POST /admin/bugs
+if ($uri === '/admin/bugs' && $method === 'POST') {
+  $title       = trim($body['title']    ?? '');
+  $description = trim($body['description'] ?? '');
+  $steps       = trim($body['steps']    ?? '');
+  $severity    = $body['severity']  ?? 'medium';
+  $status      = $body['status']    ?? 'open';
+  $category    = $body['category']  ?? 'lainnya';
+  $notes       = trim($body['notes'] ?? '');
+  if (!$title) { http_response_code(400); echo json_encode(['error' => 'title required']); exit; }
+  $stmt = $pdo->prepare('INSERT INTO bugs (title, description, steps, severity, status, category, notes) VALUES (?, ?, ?, ?, ?, ?, ?)');
+  $stmt->execute([$title, $description ?: null, $steps ?: null, $severity, $status, $category, $notes ?: null]);
+  $id = $pdo->lastInsertId();
+  echo json_encode($pdo->query("SELECT * FROM bugs WHERE id = $id")->fetch());
+  exit;
+}
+
+// PUT /admin/bugs/:id
+if (preg_match('#^/admin/bugs/(\d+)$#', $uri, $m) && $method === 'PUT') {
+  $id          = (int) $m[1];
+  $title       = trim($body['title']    ?? '');
+  $description = trim($body['description'] ?? '');
+  $steps       = trim($body['steps']    ?? '');
+  $severity    = $body['severity']  ?? 'medium';
+  $status      = $body['status']    ?? 'open';
+  $category    = $body['category']  ?? 'lainnya';
+  $notes       = trim($body['notes'] ?? '');
+  if (!$title) { http_response_code(400); echo json_encode(['error' => 'title required']); exit; }
+  $pdo->prepare('UPDATE bugs SET title=?, description=?, steps=?, severity=?, status=?, category=?, notes=? WHERE id=?')
+      ->execute([$title, $description ?: null, $steps ?: null, $severity, $status, $category, $notes ?: null, $id]);
+  echo json_encode($pdo->query("SELECT * FROM bugs WHERE id = $id")->fetch());
+  exit;
+}
+
+// PATCH /admin/bugs/:id/status
+if (preg_match('#^/admin/bugs/(\d+)/status$#', $uri, $m) && $method === 'PATCH') {
+  $id     = (int) $m[1];
+  $status = $body['status'] ?? '';
+  $valid  = ['open', 'in_progress', 'fixed', 'wontfix'];
+  if (!in_array($status, $valid)) { http_response_code(400); echo json_encode(['error' => 'status tidak valid']); exit; }
+  $pdo->prepare('UPDATE bugs SET status=? WHERE id=?')->execute([$status, $id]);
+  echo json_encode(['ok' => true]);
+  exit;
+}
+
+// DELETE /admin/bugs/:id
+if (preg_match('#^/admin/bugs/(\d+)$#', $uri, $m) && $method === 'DELETE') {
+  $id = (int) $m[1];
+  $pdo->prepare('DELETE FROM bugs WHERE id=?')->execute([$id]);
+  echo json_encode(['ok' => true]);
+  exit;
+}
+
+// ── WHITEBOARD SESSIONS ──────────────────────────────────────────────────────
+
+// GET /admin/whiteboard
+if ($uri === '/admin/whiteboard' && $method === 'GET') {
+  $stmt = $pdo->query('
+    SELECT id, title, created_at, updated_at, JSON_LENGTH(content) AS object_count
+    FROM whiteboard_sessions
+    ORDER BY updated_at DESC
+  ');
+  echo json_encode($stmt->fetchAll());
+  exit;
+}
+
+// POST /admin/whiteboard
+if ($uri === '/admin/whiteboard' && $method === 'POST') {
+  $title = trim($body['title'] ?? '');
+  if (!$title) { http_response_code(400); echo json_encode(['error' => 'title wajib']); exit; }
+
+  $stmt = $pdo->prepare('INSERT INTO whiteboard_sessions (title, content) VALUES (?, ?)');
+  $stmt->execute([$title, json_encode([])]);
+  $id = (int) $pdo->lastInsertId();
+
+  $row = $pdo->prepare('SELECT id, title, created_at, updated_at, JSON_LENGTH(content) AS object_count FROM whiteboard_sessions WHERE id = ?');
+  $row->execute([$id]);
+  echo json_encode($row->fetch());
+  exit;
+}
+
+// GET /admin/whiteboard/:id
+if (preg_match('#^/admin/whiteboard/(\d+)$#', $uri, $m) && $method === 'GET') {
+  $id = (int) $m[1];
+  $stmt = $pdo->prepare('SELECT id, title, content, background, created_at, updated_at FROM whiteboard_sessions WHERE id = ?');
+  $stmt->execute([$id]);
+  $row = $stmt->fetch();
+  if (!$row) { http_response_code(404); echo json_encode(['error' => 'Session tidak ditemukan']); exit; }
+  $row['content'] = $row['content'] ? json_decode($row['content']) : [];
+  echo json_encode($row);
+  exit;
+}
+
+// PUT /admin/whiteboard/:id
+if (preg_match('#^/admin/whiteboard/(\d+)$#', $uri, $m) && $method === 'PUT') {
+  $id = (int) $m[1];
+  $body = $body ?? [];
+
+  $fields = [];
+  $params = [];
+  if (array_key_exists('title', $body)) {
+    $title = trim($body['title'] ?? '');
+    if (!$title) { http_response_code(400); echo json_encode(['error' => 'title wajib']); exit; }
+    $fields[] = 'title = ?';
+    $params[] = $title;
+  }
+  if (array_key_exists('content', $body)) {
+    $fields[] = 'content = ?';
+    $params[] = json_encode($body['content']);
+  }
+  if (array_key_exists('background', $body)) {
+    $bg = $body['background'] ?? 'plain';
+    if (!in_array($bg, ['plain', 'dots', 'grid'])) { http_response_code(400); echo json_encode(['error' => 'background tidak valid']); exit; }
+    $fields[] = 'background = ?';
+    $params[] = $bg;
+  }
+  if (!$fields) { http_response_code(400); echo json_encode(['error' => 'Tidak ada perubahan']); exit; }
+
+  $params[] = $id;
+  $pdo->prepare('UPDATE whiteboard_sessions SET ' . implode(', ', $fields) . ' WHERE id = ?')->execute($params);
+
+  $row = $pdo->prepare('SELECT id, title, created_at, updated_at, JSON_LENGTH(content) AS object_count FROM whiteboard_sessions WHERE id = ?');
+  $row->execute([$id]);
+  echo json_encode($row->fetch());
+  exit;
+}
+
+// DELETE /admin/whiteboard/:id
+if (preg_match('#^/admin/whiteboard/(\d+)$#', $uri, $m) && $method === 'DELETE') {
+  $id = (int) $m[1];
+  $pdo->prepare('DELETE FROM whiteboard_sessions WHERE id = ?')->execute([$id]);
+  echo json_encode(['ok' => true]);
+  exit;
+}
+
+// GET /admin/whiteboard/by-soal-kode?kode=W7OOUZ
+// Find or create a whiteboard session pre-attached to the given soal kode.
+if ($uri === '/admin/whiteboard/by-soal-kode' && $method === 'GET') {
+  $kode = trim($_GET['kode'] ?? '');
+  if (!$kode) { http_response_code(400); echo json_encode(['error' => 'kode wajib']); exit; }
+
+  // Resolve kode → soal id
+  $soalStmt = $pdo->prepare('SELECT id, kode FROM soal WHERE kode = ?');
+  $soalStmt->execute([$kode]);
+  $soal = $soalStmt->fetch();
+  if (!$soal) { http_response_code(404); echo json_encode(['error' => 'Soal tidak ditemukan']); exit; }
+  $soalId = (int) $soal['id'];
+
+  // Look for an existing session whose first page references this soal
+  $findStmt = $pdo->prepare("
+    SELECT id, title, created_at, updated_at
+    FROM whiteboard_sessions
+    WHERE JSON_EXTRACT(content, '$[0].soalId') = ?
+    ORDER BY updated_at DESC
+    LIMIT 1
+  ");
+  $findStmt->execute([$soalId]);
+  $existing = $findStmt->fetch();
+
+  if ($existing) {
+    echo json_encode($existing);
+    exit;
+  }
+
+  // Create a new session with the soal pre-attached to page 1
+  $title   = 'Pembahasan: ' . $soal['kode'];
+  $content = json_encode([[
+    'elements' => [],
+    'soalId'   => $soalId,
+  ]]);
+  $ins = $pdo->prepare('INSERT INTO whiteboard_sessions (title, content) VALUES (?, ?)');
+  $ins->execute([$title, $content]);
+  $newId = (int) $pdo->lastInsertId();
+
+  $row = $pdo->prepare('SELECT id, title, created_at, updated_at FROM whiteboard_sessions WHERE id = ?');
+  $row->execute([$newId]);
+  echo json_encode($row->fetch());
+  exit;
+}
+
+// ── ACTIVE USERS ANALYTICS ───────────────────────────────────────────────────
+
+// GET /admin/analytics/active-users
+if ($uri === '/admin/analytics/active-users' && $method === 'GET') {
+
+  $activityUnion = "
+    SELECT user_id, DATE(created_at) AS d FROM sessions
+    UNION ALL
+    SELECT user_id, DATE(created_at) AS d FROM materi_sessions
+    UNION ALL
+    SELECT user_id, DATE(viewed_at)  AS d FROM soal_views WHERE user_id IS NOT NULL
+  ";
+
+  // Daily — last 30 days (fill gaps with 0)
+  $daily = [];
+  $rows  = $pdo->query("
+    SELECT d AS date, COUNT(DISTINCT user_id) AS users
+    FROM ($activityUnion) a
+    WHERE d >= DATE_SUB(CURDATE(), INTERVAL 29 DAY)
+    GROUP BY d ORDER BY d ASC
+  ")->fetchAll();
+  $dailyMap = array_column($rows, 'users', 'date');
+  for ($i = 29; $i >= 0; $i--) {
+    $date    = date('Y-m-d', strtotime("-$i days"));
+    $daily[] = ['date' => $date, 'users' => (int)($dailyMap[$date] ?? 0)];
+  }
+
+  // Weekly — last 12 weeks
+  $weekly = [];
+  $rows   = $pdo->query("
+    SELECT YEARWEEK(d, 1) AS wk, MIN(d) AS week_start, COUNT(DISTINCT user_id) AS users
+    FROM ($activityUnion) a
+    WHERE d >= DATE_SUB(CURDATE(), INTERVAL 12 WEEK)
+    GROUP BY wk ORDER BY wk ASC
+  ")->fetchAll();
+  $weeklyMap = array_column($rows, 'users', 'wk');
+  $weeklyStarts = array_column($rows, 'week_start', 'wk');
+  for ($i = 11; $i >= 0; $i--) {
+    $wk         = date('oW', strtotime("-$i weeks")); // ISO year+week
+    $weekStart  = date('Y-m-d', strtotime("-$i weeks Monday"));
+    $weekly[]   = ['week' => $weekStart, 'users' => (int)($weeklyMap[$wk] ?? 0)];
+  }
+
+  // Monthly — last 12 months
+  $monthly = [];
+  $rows    = $pdo->query("
+    SELECT DATE_FORMAT(d, '%Y-%m') AS mo, COUNT(DISTINCT user_id) AS users
+    FROM ($activityUnion) a
+    WHERE d >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+    GROUP BY mo ORDER BY mo ASC
+  ")->fetchAll();
+  $monthlyMap = array_column($rows, 'users', 'mo');
+  for ($i = 11; $i >= 0; $i--) {
+    $mo        = date('Y-m', strtotime("-$i months"));
+    $monthly[] = ['month' => $mo, 'users' => (int)($monthlyMap[$mo] ?? 0)];
+  }
+
+  // Avg sessions per active user per day (last 30 days) — attempts only, no views
+  $attemptsUnion = "
+    SELECT user_id, DATE(created_at) AS d FROM sessions
+    UNION ALL
+    SELECT user_id, DATE(created_at) AS d FROM materi_sessions
+  ";
+  $sessRows = $pdo->query("
+    SELECT d, COUNT(*) AS sessions, COUNT(DISTINCT user_id) AS users
+    FROM ($attemptsUnion) a
+    WHERE d >= DATE_SUB(CURDATE(), INTERVAL 29 DAY)
+    GROUP BY d
+  ")->fetchAll();
+  $sessMap = [];
+  foreach ($sessRows as $r) $sessMap[$r['d']] = $r['sessions'] > 0 ? round($r['sessions'] / $r['users'], 1) : 0;
+  $avgSessionsPerUser = [];
+  for ($i = 29; $i >= 0; $i--) {
+    $date               = date('Y-m-d', strtotime("-$i days"));
+    $avgSessionsPerUser[] = ['date' => $date, 'avg' => (float)($sessMap[$date] ?? 0)];
+  }
+
+  // New registrations per day (last 30 days)
+  $regRows = $pdo->query("
+    SELECT DATE(created_at) AS date, COUNT(*) AS count
+    FROM users
+    WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 29 DAY)
+    GROUP BY DATE(created_at)
+  ")->fetchAll();
+  $regMap = array_column($regRows, 'count', 'date');
+  $registrations = [];
+  for ($i = 29; $i >= 0; $i--) {
+    $date            = date('Y-m-d', strtotime("-$i days"));
+    $registrations[] = ['date' => $date, 'count' => (int)($regMap[$date] ?? 0)];
+  }
+
+  echo json_encode(compact('daily', 'weekly', 'monthly', 'registrations', 'avgSessionsPerUser'));
   exit;
 }

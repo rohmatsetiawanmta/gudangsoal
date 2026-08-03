@@ -468,7 +468,8 @@ export default function AdminMateri() {
   const [dragOverPos, setDragOverPos]   = useState(null); // "top" | "bottom"
 
   const reorderMode = !!filterSubtopikId;
-  const LIMIT = reorderMode ? 200 : 20;
+  const [limitBase, setLimitBase] = useState(10);
+  const LIMIT = reorderMode ? 200 : limitBase;
   const totalPages = reorderMode ? 1 : Math.ceil(total / LIMIT);
 
   const displayItems = reorderMode ? (reorderItems ?? items) : items;
@@ -818,21 +819,29 @@ export default function AdminMateri() {
       )}
 
       {/* ── Pagination (hidden in reorder mode) ── */}
-      {!reorderMode && totalPages > 1 && (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "20px", padding: "12px 0", marginBottom: selected.size > 0 ? "80px" : "0" }}>
-          <span style={{ fontSize: "13px", color: "#6b6860" }}>
-            {(page - 1) * LIMIT + 1}–{Math.min(page * LIMIT, total)} dari {total}
-          </span>
-          <div style={{ display: "flex", gap: "6px" }}>
-            <button onClick={() => updateParams({ page: page - 1 })} disabled={page === 1}
-              style={{ width: "34px", height: "34px", borderRadius: "9px", border: "1px solid #e2ddd5", background: "white", cursor: page === 1 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: page === 1 ? "#d4d0c8" : "#6b6860" }}>
-              <ChevronLeft size={15} />
-            </button>
-            <button onClick={() => updateParams({ page: page + 1 })} disabled={page === totalPages}
-              style={{ width: "34px", height: "34px", borderRadius: "9px", border: "1px solid #e2ddd5", background: "white", cursor: page === totalPages ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: page === totalPages ? "#d4d0c8" : "#6b6860" }}>
-              <ChevronRight size={15} />
-            </button>
+      {!reorderMode && (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "20px", padding: "12px 0", marginBottom: selected.size > 0 ? "80px" : "0", flexWrap: "wrap", gap: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ fontSize: "13px", color: "#6b6860" }}>
+              {total > 0 ? `${(page - 1) * LIMIT + 1}–${Math.min(page * LIMIT, total)} dari ${total}` : `Halaman ${page} dari ${totalPages || 1}`}
+            </span>
+            <select value={limitBase} onChange={e => { setLimitBase(Number(e.target.value)); updateParams({ page: null }); }}
+              style={{ fontSize: "12px", padding: "5px 8px", borderRadius: "8px", border: "1px solid #e2ddd5", background: "white", color: "#6b6860", cursor: "pointer", fontFamily: "inherit" }}>
+              {[10, 25, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
           </div>
+          {totalPages > 1 && (
+            <div style={{ display: "flex", gap: "6px" }}>
+              <button onClick={() => updateParams({ page: page - 1 })} disabled={page === 1}
+                style={{ width: "34px", height: "34px", borderRadius: "9px", border: "1px solid #e2ddd5", background: "white", cursor: page === 1 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: page === 1 ? "#d4d0c8" : "#6b6860" }}>
+                <ChevronLeft size={15} />
+              </button>
+              <button onClick={() => updateParams({ page: page + 1 })} disabled={page === totalPages}
+                style={{ width: "34px", height: "34px", borderRadius: "9px", border: "1px solid #e2ddd5", background: "white", cursor: page === totalPages ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: page === totalPages ? "#d4d0c8" : "#6b6860" }}>
+                <ChevronRight size={15} />
+              </button>
+            </div>
+          )}
         </div>
       )}
         </div>{/* end right column */}

@@ -87,7 +87,7 @@ export default function AdminSoalRequests() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
 
-  const limit = 20;
+  const [limit, setLimit] = useState(10);
 
   const fetchRequests = () => {
     setLoading(true);
@@ -107,7 +107,7 @@ export default function AdminSoalRequests() {
   }, [filterStatus]);
   useEffect(() => {
     fetchRequests();
-  }, [page, filterStatus]);
+  }, [page, limit, filterStatus]);
 
   const openModal = (type, request) => {
     setModal({ type, request });
@@ -581,66 +581,31 @@ export default function AdminSoalRequests() {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginTop: "20px",
-          }}
-        >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "20px", flexWrap: "wrap", gap: "8px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <span style={{ fontSize: "13px", color: "#6b6860" }}>
-            {isMobile
-              ? `${page} / ${totalPages}`
-              : `Halaman ${page} dari ${totalPages}`}
+            {isMobile ? `${page} / ${totalPages || 1}` : `Halaman ${page} dari ${totalPages || 1}`}
           </span>
+          <select value={limit} onChange={e => { setLimit(Number(e.target.value)); setPage(1); }}
+            style={{ fontSize: "12px", padding: "5px 8px", borderRadius: "8px", border: "1px solid #e2ddd5", background: "white", color: "#6b6860", cursor: "pointer", fontFamily: "inherit" }}>
+            {[10, 25, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
+          </select>
+        </div>
+        {totalPages > 1 && (
           <div style={{ display: "flex", gap: "8px" }}>
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                padding: isMobile ? "8px 12px" : "8px 14px",
-                borderRadius: "8px",
-                border: "1px solid #e2ddd5",
-                background: "white",
-                fontSize: "13px",
-                fontWeight: "500",
-                cursor: page === 1 ? "not-allowed" : "pointer",
-                color: page === 1 ? "#b4b2a9" : "#0f0e17",
-                fontFamily: "inherit",
-              }}
-            >
+            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
+              style={{ display: "flex", alignItems: "center", gap: "4px", padding: isMobile ? "8px 12px" : "8px 14px", borderRadius: "8px", border: "1px solid #e2ddd5", background: "white", fontSize: "13px", fontWeight: "500", cursor: page === 1 ? "not-allowed" : "pointer", color: page === 1 ? "#b4b2a9" : "#0f0e17", fontFamily: "inherit" }}>
               <ChevronLeft size={14} />
               {!isMobile && "Sebelumnya"}
             </button>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                padding: isMobile ? "8px 12px" : "8px 14px",
-                borderRadius: "8px",
-                border: "1px solid #e2ddd5",
-                background: "white",
-                fontSize: "13px",
-                fontWeight: "500",
-                cursor: page === totalPages ? "not-allowed" : "pointer",
-                color: page === totalPages ? "#b4b2a9" : "#0f0e17",
-                fontFamily: "inherit",
-              }}
-            >
+            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+              style={{ display: "flex", alignItems: "center", gap: "4px", padding: isMobile ? "8px 12px" : "8px 14px", borderRadius: "8px", border: "1px solid #e2ddd5", background: "white", fontSize: "13px", fontWeight: "500", cursor: page === totalPages ? "not-allowed" : "pointer", color: page === totalPages ? "#b4b2a9" : "#0f0e17", fontFamily: "inherit" }}>
               {!isMobile && "Berikutnya"}
               <ChevronRight size={14} />
             </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Modal Detail */}
       {modal?.type === "detail" && (

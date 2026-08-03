@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft, GraduationCap, Save, Plus, Trash2,
-  BookOpen, AlignLeft, Check, X, Brain,
+  BookOpen, AlignLeft, Check, X, Brain, Download,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import api from "../../lib/api";
@@ -419,6 +419,25 @@ export default function AdminMateriForm() {
     }));
   };
 
+  const handleExportJson = () => {
+    const data = [{
+      id:           isEdit ? Number(id) : undefined,
+      judul:        form.judul,
+      konten:       form.konten,
+      highlights:   form.highlights,
+      is_published: form.is_published,
+      urutan:       form.urutan,
+    }];
+    if (!isEdit) delete data[0].id;
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = `materi-${form.judul.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase() || id}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -429,10 +448,13 @@ export default function AdminMateriForm() {
     try {
       if (isEdit) {
         await api.put(`/admin/materi?id=${id}`, form);
+        window.close();
+        // fallback jika tab tidak bisa ditutup (dibuka langsung via URL)
+        navigate("/admin/materi");
       } else {
         await api.post("/admin/materi", form);
+        navigate("/admin/materi");
       }
-      navigate("/admin/materi");
     } catch (err) {
       setError(err.error || "Terjadi kesalahan");
     } finally {
@@ -491,7 +513,27 @@ export default function AdminMateriForm() {
             </h1>
           </div>
 
-          <div style={{ width: isMobile ? "100%" : "auto" }}>
+          <div style={{ display: "flex", gap: "8px", width: isMobile ? "100%" : "auto" }}>
+            {isEdit && (
+              <button
+                type="button"
+                onClick={handleExportJson}
+                style={{
+                  display: "flex", alignItems: "center", gap: "6px",
+                  padding: "10px 16px", borderRadius: "10px",
+                  border: "1px solid rgba(255,255,255,.15)",
+                  background: "rgba(255,255,255,.1)",
+                  color: "rgba(255,255,255,.85)",
+                  fontSize: "13.5px", fontWeight: "600",
+                  cursor: "pointer", fontFamily: "inherit",
+                  whiteSpace: "nowrap",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.18)"; e.currentTarget.style.color = "white"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.1)"; e.currentTarget.style.color = "rgba(255,255,255,.85)"; }}
+              >
+                <Download size={14} /> Export JSON
+              </button>
+            )}
             <AdminMateriImport setForm={setForm} isMobile={isMobile} />
           </div>
         </div>

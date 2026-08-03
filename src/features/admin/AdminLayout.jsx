@@ -4,7 +4,7 @@ import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, FolderTree, LogOut, ChevronRight,
   PanelLeftClose, PanelLeftOpen, Users, Flag, Inbox,
-  ScrollText, Menu, X, MessageCircle, Dumbbell, GraduationCap,
+  ScrollText, Menu, X, MessageCircle, Dumbbell, GraduationCap, BarChart2, Share2, Map, Bug, Activity, PenTool,
 } from "lucide-react";
 import { useAuthStore } from "../auth/authStore";
 import useWindowWidth from "../../hooks/useWindowWidth";
@@ -15,11 +15,15 @@ import useWindowWidth from "../../hooks/useWindowWidth";
 const MENU = [
   { type: "link", to: "/admin",          label: "Dashboard",       icon: LayoutDashboard, end: true },
 
-  { type: "section", label: "Konten" },
-  { type: "link", to: "/admin/struktur", label: "Kelola Struktur", icon: FolderTree },
-  { type: "link", to: "/admin/soal",     label: "Kelola Soal",     icon: BookOpen },
-  { type: "link", to: "/admin/latihan",  label: "Kelola Latihan",  icon: Dumbbell },
-  { type: "link", to: "/admin/materi",   label: "Kelola Materi",   icon: GraduationCap },
+  { type: "section", label: "Kelola" },
+  { type: "link", to: "/admin/struktur", label: "Struktur", icon: FolderTree },
+  { type: "link", to: "/admin/soal",     label: "Soal",     icon: BookOpen,      end: true, activeFor: ["/admin/soal/tambah", "/admin/soal/edit", "/admin/soal/bulk-import"] },
+  { type: "link", to: "/admin/materi",   label: "Materi",   icon: GraduationCap, end: true, activeFor: ["/admin/materi/tambah", "/admin/materi/edit", "/admin/materi/bulk-import"] },
+  { type: "link", to: "/admin/latihan",  label: "Latihan",  icon: Dumbbell },
+  { type: "section", label: "Analitik" },
+  { type: "link", to: "/admin/views",        label: "Views",        icon: BarChart2 },
+  { type: "link", to: "/admin/shares",       label: "Shares",       icon: Share2 },
+  { type: "link", to: "/admin/active-users", label: "Active Users", icon: Activity },
 
   { type: "section", label: "Komunitas" },
   { type: "link", to: "/admin/users",        label: "Kelola User",   icon: Users },
@@ -29,30 +33,38 @@ const MENU = [
 
   { type: "section", label: "Sistem" },
   { type: "link", to: "/admin/changelog", label: "Changelog", icon: ScrollText },
+  { type: "link", to: "/admin/roadmap",   label: "Roadmap",   icon: Map },
+  { type: "link", to: "/admin/bugs",      label: "Bug List",  icon: Bug },
+  { type: "link", to: "/admin/whiteboard",label: "Whiteboard",icon: PenTool },
 ];
 
 // ── SidebarLink ───────────────────────────────────────────────────────────────
 
-function SidebarLink({ to, label, icon: Icon, end, collapsed, onClick }) {
+function SidebarLink({ to, label, icon: Icon, end, activeFor, collapsed, onClick }) {
+  const location = useLocation();
   const [hovered, setHovered] = useState(false);
+  const extraActive = activeFor?.some(p => location.pathname.startsWith(p)) ?? false;
   return (
     <NavLink to={to} end={end} onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       title={collapsed ? label : undefined}
-      style={({ isActive }) => ({
-        display: "flex", alignItems: "center",
-        gap: collapsed ? 0 : "10px",
-        padding: "9px 10px",
-        borderRadius: "10px",
-        textDecoration: "none",
-        fontSize: "13.5px",
-        fontWeight: "500",
-        transition: "all .15s",
-        justifyContent: collapsed ? "center" : "flex-start",
-        background: isActive ? "rgba(232,76,43,0.15)" : hovered ? "rgba(255,255,255,0.06)" : "transparent",
-        color: isActive ? "#e84c2b" : hovered ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.6)",
-      })}>
+      style={({ isActive }) => {
+        const active = isActive || extraActive;
+        return {
+          display: "flex", alignItems: "center",
+          gap: collapsed ? 0 : "10px",
+          padding: "9px 10px",
+          borderRadius: "10px",
+          textDecoration: "none",
+          fontSize: "13.5px",
+          fontWeight: "500",
+          transition: "all .15s",
+          justifyContent: collapsed ? "center" : "flex-start",
+          background: active ? "rgba(232,76,43,0.15)" : hovered ? "rgba(255,255,255,0.06)" : "transparent",
+          color: active ? "#e84c2b" : hovered ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.6)",
+        };
+      }}>
       <Icon size={17} />
       {!collapsed && label}
     </NavLink>
@@ -68,6 +80,58 @@ function SectionLabel({ label, collapsed }) {
   return (
     <div style={{ padding: "10px 10px 4px", fontSize: "10px", fontWeight: "700", color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: ".1em" }}>
       {label}
+    </div>
+  );
+}
+
+// ── SidebarGroup (collapsible) ────────────────────────────────────────────────
+
+function SidebarGroup({ label, icon: Icon, children: groupChildren, collapsed, onClick }) {
+  const location = useLocation();
+  const isChildActive = groupChildren.some(child => {
+    const direct = child.end ? location.pathname === child.to : location.pathname.startsWith(child.to);
+    const extra = child.activeFor?.some(p => location.pathname.startsWith(p)) ?? false;
+    return direct || extra;
+  });
+  const [open, setOpen] = useState(isChildActive);
+  useEffect(() => { if (isChildActive) setOpen(true); }, [location.pathname]);
+
+  if (collapsed) {
+    return groupChildren.map(child => (
+      <SidebarLink key={child.to} {...child} collapsed={true} onClick={onClick} />
+    ));
+  }
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display: "flex", alignItems: "center", gap: "10px",
+          padding: "9px 10px", borderRadius: "10px", width: "100%",
+          border: "none", background: isChildActive ? "rgba(232,76,43,0.1)" : "transparent",
+          color: isChildActive ? "#e84c2b" : "rgba(255,255,255,0.6)",
+          cursor: "pointer", fontSize: "13.5px", fontWeight: "500",
+          fontFamily: "inherit", textAlign: "left", transition: "all .15s",
+        }}
+        onMouseEnter={e => {
+          if (!isChildActive) { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.color = "rgba(255,255,255,0.9)"; }
+        }}
+        onMouseLeave={e => {
+          if (!isChildActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "rgba(255,255,255,0.6)"; }
+        }}
+      >
+        <Icon size={17} />
+        <span style={{ flex: 1 }}>{label}</span>
+        <ChevronRight size={13} style={{ transform: open ? "rotate(90deg)" : "none", transition: "transform .2s", opacity: 0.5, flexShrink: 0 }} />
+      </button>
+      {open && (
+        <div style={{ marginLeft: "8px", borderLeft: "1px solid rgba(255,255,255,0.08)", paddingLeft: "4px", marginBottom: "2px" }}>
+          {groupChildren.map(child => (
+            <SidebarLink key={child.to} {...child} collapsed={false} onClick={onClick} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -102,11 +166,17 @@ export default function AdminLayout() {
     if (location.pathname.startsWith("/admin/reports"))          return "Laporan Soal";
     if (location.pathname.startsWith("/admin/soal-requests"))    return "Request Soal";
     if (location.pathname.startsWith("/admin/changelog"))        return "Changelog";
+    if (location.pathname.startsWith("/admin/roadmap"))          return "Roadmap";
+    if (location.pathname.startsWith("/admin/bugs"))            return "Bug List";
+    if (location.pathname.startsWith("/admin/whiteboard"))       return "Whiteboard";
+    if (location.pathname.startsWith("/admin/active-users"))    return "Active Users";
     if (location.pathname.startsWith("/admin/feedback"))         return "Masukan User";
     if (location.pathname.startsWith("/admin/latihan"))          return "Kelola Latihan";
     if (location.pathname.startsWith("/admin/materi/tambah"))   return "Tambah Materi";
     if (location.pathname.startsWith("/admin/materi/edit"))     return "Edit Materi";
     if (location.pathname.startsWith("/admin/materi"))          return "Kelola Materi";
+    if (location.pathname.startsWith("/admin/views"))           return "Views";
+    if (location.pathname.startsWith("/admin/shares"))          return "Shares";
     return "Panel";
   };
 
@@ -138,6 +208,8 @@ export default function AdminLayout() {
           {MENU.map((item, i) =>
             item.type === "section"
               ? <SectionLabel key={i} label={item.label} collapsed={isCollapsed} />
+              : item.type === "group"
+              ? <SidebarGroup key={i} {...item} collapsed={isCollapsed} onClick={isDrawer ? () => setDrawerOpen(false) : undefined} />
               : <SidebarLink key={item.to} {...item} collapsed={isCollapsed} onClick={isDrawer ? () => setDrawerOpen(false) : undefined} />
           )}
         </nav>

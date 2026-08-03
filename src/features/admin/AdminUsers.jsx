@@ -10,6 +10,8 @@ import {
   Eye,
   Crown,
   Users,
+  CheckCircle,
+  Clock,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import api from "../../lib/api";
@@ -30,6 +32,29 @@ function RoleBadge({ role }) {
       {role === "admin" ? "Admin" : "User"}
     </span>
   );
+}
+
+function VerifiedBadge({ verified }) {
+  return verified ? (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px", background: "#e4f5f0", color: "#1a8a6e" }}>
+      <CheckCircle size={11} /> Verified
+    </span>
+  ) : (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px", background: "#fef9ee", color: "#f5a623" }}>
+      <Clock size={11} /> Unverified
+    </span>
+  );
+}
+
+function fmtDate(val) {
+  if (!val) return "—";
+  // Parse MySQL "YYYY-MM-DD HH:MM:SS" without timezone conversion
+  const [datePart, timePart] = val.split(" ");
+  const [y, m, d] = datePart.split("-").map(Number);
+  const months = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+  const date = `${d} ${months[m - 1]} ${y}`;
+  if (!timePart) return date;
+  return `${date}, ${timePart}`;
 }
 
 function Modal({ title, onClose, children }) {
@@ -106,7 +131,7 @@ export default function AdminUsers() {
   const [detail, setDetail] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
-  const limit = 20;
+  const [limit, setLimit] = useState(10);
 
   const fetchUsers = () => {
     setLoading(true);
@@ -122,7 +147,7 @@ export default function AdminUsers() {
 
   useEffect(() => {
     fetchUsers();
-  }, [page, search]);
+  }, [page, limit, search]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -397,14 +422,14 @@ export default function AdminUsers() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "40px 1fr 1fr 80px 80px 80px 100px",
+              gridTemplateColumns: "40px 1fr 1fr 80px 90px 110px 110px 100px",
               gap: "16px",
               padding: "12px 20px",
               background: "#f2efe8",
               borderBottom: "1px solid #e2ddd5",
             }}
           >
-            {["#", "Nama", "Email", "Role", "XP", "Streak", "Aksi"].map((h) => (
+            {["#", "Nama", "Email", "Role", "Status", "Daftar", "Verifikasi", "Aksi"].map((h) => (
               <div
                 key={h}
                 style={{
@@ -439,7 +464,7 @@ export default function AdminUsers() {
                 key={u.id}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "40px 1fr 1fr 80px 80px 80px 100px",
+                  gridTemplateColumns: "40px 1fr 1fr 80px 90px 110px 110px 100px",
                   gap: "16px",
                   padding: "14px 20px",
                   borderBottom: "1px solid #f2efe8",
@@ -499,18 +524,9 @@ export default function AdminUsers() {
                   {u.email}
                 </div>
                 <RoleBadge role={u.role} />
-                <div
-                  style={{
-                    fontSize: "13px",
-                    fontWeight: "600",
-                    color: "#f5a623",
-                  }}
-                >
-                  {parseInt(u.xp || 0).toLocaleString()}
-                </div>
-                <div style={{ fontSize: "13px", color: "#6b6860" }}>
-                  {u.streak || 0} hari
-                </div>
+                <VerifiedBadge verified={u.email_verified == 1} />
+                <div style={{ fontSize: "12px", color: "#6b6860" }}>{fmtDate(u.created_at)}</div>
+                <div style={{ fontSize: "12px", color: "#6b6860" }}>{fmtDate(u.verified_at)}</div>
                 <ActionButtons u={u} />
               </div>
             ))}
@@ -632,25 +648,9 @@ export default function AdminUsers() {
                   >
                     {u.email}
                   </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "12px",
-                        fontWeight: "600",
-                        color: "#f5a623",
-                      }}
-                    >
-                      {parseInt(u.xp || 0).toLocaleString()} XP
-                    </span>
-                    <span style={{ fontSize: "12px", color: "#b4b2a9" }}>
-                      {u.streak || 0} hari streak
-                    </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                    <VerifiedBadge verified={u.email_verified == 1} />
+                    <span style={{ fontSize: "11px", color: "#b4b2a9" }}>Daftar {fmtDate(u.created_at)}</span>
                   </div>
                 </div>
 
@@ -662,66 +662,32 @@ export default function AdminUsers() {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginTop: "20px",
-          }}
-        >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "20px", flexWrap: "wrap", gap: "8px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <span style={{ fontSize: "13px", color: "#6b6860" }}>
-            {isMobile
-              ? `${page} / ${totalPages}`
-              : `Halaman ${page} dari ${totalPages}`}
+            {isMobile ? `${page} / ${totalPages || 1}` : `Halaman ${page} dari ${totalPages || 1}`}
           </span>
+          <select value={limit} onChange={e => { setLimit(Number(e.target.value)); setPage(1); }}
+            style={{ fontSize: "12px", padding: "5px 8px", borderRadius: "8px", border: "1px solid #e2ddd5", background: "white", color: "#6b6860", cursor: "pointer", fontFamily: "inherit" }}>
+            {[10, 25, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
+          </select>
+        </div>
+        {totalPages > 1 && (
           <div style={{ display: "flex", gap: "8px" }}>
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                padding: isMobile ? "8px 12px" : "8px 14px",
-                borderRadius: "8px",
-                border: "1px solid #e2ddd5",
-                background: "white",
-                fontSize: "13px",
-                fontWeight: "500",
-                cursor: page === 1 ? "not-allowed" : "pointer",
-                color: page === 1 ? "#b4b2a9" : "#0f0e17",
-                fontFamily: "inherit",
-              }}
-            >
+            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
+              style={{ display: "flex", alignItems: "center", gap: "4px", padding: isMobile ? "8px 12px" : "8px 14px", borderRadius: "8px", border: "1px solid #e2ddd5", background: "white", fontSize: "13px", fontWeight: "500", cursor: page === 1 ? "not-allowed" : "pointer", color: page === 1 ? "#b4b2a9" : "#0f0e17", fontFamily: "inherit" }}>
               <ChevronLeft size={14} />
               {!isMobile && "Sebelumnya"}
             </button>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                padding: isMobile ? "8px 12px" : "8px 14px",
-                borderRadius: "8px",
-                border: "1px solid #e2ddd5",
-                background: "white",
-                fontSize: "13px",
-                fontWeight: "500",
-                cursor: page === totalPages ? "not-allowed" : "pointer",
-                color: page === totalPages ? "#b4b2a9" : "#0f0e17",
-                fontFamily: "inherit",
-              }}
+            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+              style={{ display: "flex", alignItems: "center", gap: "4px", padding: isMobile ? "8px 12px" : "8px 14px", borderRadius: "8px", border: "1px solid #e2ddd5", background: "white", fontSize: "13px", fontWeight: "500", cursor: page === totalPages ? "not-allowed" : "pointer", color: page === totalPages ? "#b4b2a9" : "#0f0e17", fontFamily: "inherit" }}
             >
               {!isMobile && "Berikutnya"}
               <ChevronRight size={14} />
             </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Modal Edit */}
       {modal?.type === "edit" && (
@@ -1191,11 +1157,7 @@ export default function AdminUsers() {
                 }}
               >
                 Bergabung sejak{" "}
-                {new Date(detail.user.created_at).toLocaleDateString("id-ID", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
+                {fmtDate(detail.user.created_at)}
               </div>
             </div>
           ) : (

@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import api from "../../lib/api";
-import ToggleSwitch from "../../components/ToggleSwitch";
 import useWindowWidth from "../../hooks/useWindowWidth";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -32,6 +31,48 @@ const LEVELS = [
   { key: "topik",     label: "Topik",      parentKey: "mapel",     parentIdCol: "mapel_id",    color: "#1a8a6e", icon: Hash },
   { key: "subtopik",  label: "Subtopik",   parentKey: "topik",     parentIdCol: "topik_id",    color: "#7c3aed", icon: Tag },
 ];
+
+// ── StatusPill ────────────────────────────────────────────────────────────────
+
+const STATUS_STATES = [
+  { key: "draft",       label: "Draft",   color: "#6b6860", activeColor: "#6b6860", activeBg: "#f2efe8", activeBorder: "#d4d0c8" },
+  { key: "coming_soon", label: "Segera",  color: "#b4b2a9", activeColor: "#854F0B", activeBg: "#fef9ee", activeBorder: "#fde68a" },
+  { key: "published",   label: "Live",    color: "#b4b2a9", activeColor: "#1a8a6e", activeBg: "#e4f5f0", activeBorder: "#9FE1CB" },
+];
+
+function StatusPill({ status, onChange, loading }) {
+  return (
+    <div style={{ display: "flex", borderRadius: "8px", border: "1px solid #e2ddd5", overflow: "hidden", opacity: loading ? 0.5 : 1, pointerEvents: loading ? "none" : "auto" }}>
+      {STATUS_STATES.map((s, i) => {
+        const active = status === s.key;
+        return (
+          <button key={s.key} onClick={(e) => { e.stopPropagation(); onChange(s.key); }}
+            style={{
+              padding: "5px 9px", fontSize: "11px", fontWeight: "700", border: "none",
+              borderRight: i < 2 ? "1px solid #e2ddd5" : "none",
+              background: active ? s.activeBg : "white",
+              color: active ? s.activeColor : s.color,
+              cursor: "pointer", fontFamily: "inherit", transition: "all .12s",
+            }}>
+            {s.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function getItemStatus(item) {
+  if (item.is_published == 0) return "draft";
+  if (item.is_coming_soon == 1) return "coming_soon";
+  return "published";
+}
+
+function statusBorderColor(item, levelColor) {
+  if (item.is_published == 0) return "#e2ddd5";
+  if (item.is_coming_soon == 1) return "#f5a623";
+  return levelColor;
+}
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
 
@@ -328,18 +369,17 @@ export default function AdminStruktur() {
   const handleBack   = () => { if (stack.length > 1) setStack((s) => s.slice(0, -1)); };
   const handleGoTo   = (i) => setStack((s) => s.slice(0, i + 1));
 
-  const handleTogglePublish = async (e, item) => {
-    e.stopPropagation();
+  const handleSetStatus = async (item, status) => {
     setPublishLoading((p) => ({ ...p, [item.id]: true }));
     try {
-      const res = await api.put(`/admin/publish/${currentStack.level}?id=${item.id}`);
+      const res = await api.put(`/admin/set-status/${currentStack.level}?id=${item.id}`, { status });
       setAllData((prev) => ({
         ...prev,
         [currentStack.level]: prev[currentStack.level].map((i) =>
-          i.id === item.id ? { ...i, is_published: res.is_published ? 1 : 0 } : i
+          i.id === item.id ? { ...i, is_published: res.is_published, is_coming_soon: res.is_coming_soon } : i
         ),
       }));
-    } catch { alert("Gagal mengubah status publish"); }
+    } catch { alert("Gagal mengubah status"); }
     finally { setPublishLoading((p) => ({ ...p, [item.id]: false })); }
   };
 
@@ -671,7 +711,7 @@ export default function AdminStruktur() {
               borderBottom: i < currentItems.length - 1 ? "1px solid #f5f3ef" : "none",
               cursor: !isLastLevel ? "pointer" : "default",
               transition: "background .12s",
-              borderLeft: `3px solid ${item.is_published == 1 ? currentLevel?.color : "#e2ddd5"}`,
+              borderLeft: `3px solid ${statusBorderColor(item, currentLevel?.color)}`,
             }}
             onClick={() => !isLastLevel && handleDrillDown(item)}
             onMouseEnter={(e) => { if (!isLastLevel) e.currentTarget.style.background = "#faf9f6"; }}
@@ -695,7 +735,7 @@ export default function AdminStruktur() {
                   </div>
                 </div>
                 <div onClick={(e) => e.stopPropagation()} style={{ display: "flex", alignItems: "center", gap: "5px", flexShrink: 0 }}>
-                  <ToggleSwitch checked={item.is_published == 1} onChange={(e) => handleTogglePublish(e, item)} loading={publishLoading[item.id]} hideLabel />
+                  <StatusPill status={getItemStatus(item)} onChange={(s) => handleSetStatus(item, s)} loading={publishLoading[item.id]} />
                   <button onClick={(e) => { e.stopPropagation(); openEdit(item); }}
                     style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1px solid #e2ddd5", background: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b6860" }}>
                     <Pencil size={13} />
@@ -778,7 +818,7 @@ export default function AdminStruktur() {
 
                 {/* Actions */}
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
-                  <ToggleSwitch checked={item.is_published == 1} onChange={(e) => handleTogglePublish(e, item)} loading={publishLoading[item.id]} />
+                  <StatusPill status={getItemStatus(item)} onChange={(s) => handleSetStatus(item, s)} loading={publishLoading[item.id]} />
                   <button
                     onClick={() => openEdit(item)}
                     style={{ width: "30px", height: "30px", borderRadius: "8px", border: "1px solid #e8e6e0", background: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b6860", transition: "all .12s" }}

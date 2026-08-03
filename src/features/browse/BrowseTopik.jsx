@@ -4,6 +4,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { ChevronRight, BookOpen } from "lucide-react";
 import Breadcrumb from "../../components/Breadcrumb";
 import { getTopik } from "./browseApi";
+import ComingSoonModal from "./ComingSoonModal";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
@@ -23,6 +24,7 @@ export default function BrowseTopik() {
   const [topik,   setTopik]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState("");
+  const [comingSoonModal, setComingSoonModal] = useState(null);
 
   useEffect(() => {
     getTopik(jenjangSlug, subjenjangSlug, mapelSlug)
@@ -61,23 +63,21 @@ export default function BrowseTopik() {
           marginBottom: "20px",
           position: "relative", overflow: "hidden",
         }}>
-          <div style={{
-            position: "absolute", right: isMobile ? "-10px" : "24px", top: "50%",
-            transform: "translateY(-50%)", opacity: 0.05,
-            pointerEvents: "none", color: "white",
-          }}>
-            <BookOpen size={isMobile ? 80 : 110} />
-          </div>
+
           <div style={{ position: "relative", zIndex: 1 }}>
             <h1 style={{
               fontSize: isMobile ? "22px" : "26px", fontWeight: "800",
-              color: "white", letterSpacing: "-0.5px", margin: "0 0 8px",
+              color: "white", letterSpacing: "-0.5px", margin: "0 0 10px",
             }}>
               {mapelNama}
             </h1>
-            <p style={{ fontSize: "14px", color: "rgba(255,255,255,.5)", margin: 0 }}>
-              {subjenjangNama} · {jenjangNama} · Pilih topik
-            </p>
+            {!loading && topik.length > 0 && (
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: "rgba(255,255,255,.8)", background: "rgba(255,255,255,.1)" }}>
+                  {topik.length} Topik
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -95,7 +95,7 @@ export default function BrowseTopik() {
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} style={{
-                height: "60px", borderRadius: "14px",
+                height: "68px", borderRadius: "14px",
                 background: "var(--gs-border)", opacity: 0.5, animation: "pulse 1.5s infinite",
               }} />
             ))}
@@ -112,24 +112,32 @@ export default function BrowseTopik() {
             {topik.map((t) => (
               <div
                 key={t.id}
-                onClick={() => navigate(`/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}/${t.slug}`, {
+                onClick={() => t.is_coming_soon == 1 ? setComingSoonModal(t) : navigate(`/browse/${jenjangSlug}/${subjenjangSlug}/${mapelSlug}/${t.slug}`, {
                   state: { jenjangNama, jenjangSlug, subjenjangNama, subjenjangSlug, mapelNama, mapelSlug, topikNama: t.nama, topikSlug: t.slug },
                 })}
                 style={{
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  display: "flex", alignItems: "center", gap: "14px",
                   background: "var(--gs-surface)", borderRadius: "14px",
                   border: "1px solid var(--gs-border)",
-                  borderLeft: "3px solid #1a8a6e",
+                  borderLeft: `3px solid ${t.is_coming_soon == 1 ? "#f5a623" : "#1a8a6e"}`,
                   padding: isMobile ? "14px 16px" : "16px 20px",
                   cursor: "pointer", transition: "transform .15s, box-shadow .15s",
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.06)"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
               >
-                <span style={{ fontWeight: "600", fontSize: isMobile ? "14px" : "15px", color: "var(--gs-text)" }}>
-                  {t.nama}
-                </span>
-                <ChevronRight size={17} color="var(--gs-text-hint)" />
+                <div style={{
+                  width: isMobile ? "36px" : "40px", height: isMobile ? "36px" : "40px",
+                  borderRadius: "10px", background: "rgba(26,138,110,.1)",
+                  display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                }}>
+                  <BookOpen size={isMobile ? 17 : 19} color="#1a8a6e" />
+                </div>
+                <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ fontWeight: "600", fontSize: isMobile ? "14px" : "15px", color: "var(--gs-text)" }}>{t.nama}</span>
+                  {t.is_coming_soon == 1 && <span style={{ fontSize: "10px", fontWeight: "700", padding: "2px 7px", borderRadius: "5px", background: "#fef9ee", color: "#f5a623", border: "1px solid #fde68a", flexShrink: 0 }}>Segera</span>}
+                </div>
+                <ChevronRight size={17} color={t.is_coming_soon == 1 ? "#f5a623" : "var(--gs-text-hint)"} />
               </div>
             ))}
           </div>
@@ -138,6 +146,7 @@ export default function BrowseTopik() {
 
       <Footer />
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>
+      <ComingSoonModal item={comingSoonModal} onClose={() => setComingSoonModal(null)} />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 // src/features/admin/soal-form/index.jsx
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Eye, EyeOff, AlertCircle, ArrowLeft, Save, PlusCircle } from "lucide-react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Eye, EyeOff, AlertCircle, ArrowLeft, Save, PlusCircle, Globe, EyeOff as Unpublish } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import api from "../../../lib/api";
 import useWindowWidth from "../../../hooks/useWindowWidth";
@@ -70,7 +70,11 @@ export default function AdminSoalForm() {
   const width = useWindowWidth();
   const isMobile = width <= 480;
 
-  const [form, setForm] = useState(defaultForm);
+  const [searchParams] = useSearchParams();
+  const [form, setForm] = useState({
+    ...defaultForm,
+    ...((!isEdit && searchParams.get("subtopik")) ? { subtopik_id: searchParams.get("subtopik") } : {}),
+  });
   const [struktur, setStruktur] = useState({
     jenjang: [],
     subjenjang: [],
@@ -89,6 +93,8 @@ export default function AdminSoalForm() {
   const [error, setError] = useState("");
   const [showPreview, setShowPreview] = useState(false);
   const [materiList, setMateriList] = useState([]);
+  const [isPublished, setIsPublished] = useState(false);
+  const [publishLoading, setPublishLoading] = useState(false);
 
   // Load struktur
   useEffect(() => {
@@ -114,6 +120,7 @@ export default function AdminSoalForm() {
           answer = obj;
         }
 
+        setIsPublished(data.is_published == 1);
         setForm({
           subtopik_id: data.subtopik_id,
           tipe: data.tipe || "pilihan_ganda",
@@ -184,6 +191,18 @@ export default function AdminSoalForm() {
     return null;
   };
 
+  const handleTogglePublish = async () => {
+    setPublishLoading(true);
+    try {
+      const res = await api.put(`/admin/publish/soal?id=${id}`);
+      setIsPublished(res.is_published);
+    } catch {
+      alert("Gagal mengubah status publikasi");
+    } finally {
+      setPublishLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -198,10 +217,12 @@ export default function AdminSoalForm() {
     try {
       if (isEdit) {
         await api.put(`/admin/soal?id=${id}`, form);
+        window.close();
+        navigate("/admin/soal");
       } else {
         await api.post("/admin/soal", form);
+        navigate("/admin/soal");
       }
-      navigate("/admin/soal");
     } catch (err) {
       setError(err.error || "Terjadi kesalahan");
     } finally {
@@ -266,7 +287,7 @@ export default function AdminSoalForm() {
               <h1 style={{
                 fontSize: isMobile ? "20px" : "22px",
                 fontWeight: "800", color: "white",
-                letterSpacing: "-0.4px", margin: 0,
+                letterSpacing: "-0.4px", margin: "0 0 8px",
               }}>
                 {isEdit ? "Edit Soal" : "Tambah Soal"}
               </h1>
@@ -422,6 +443,28 @@ export default function AdminSoalForm() {
             >
               Batal
             </button>
+            {isEdit && (
+              <button
+                type="button"
+                onClick={handleTogglePublish}
+                disabled={publishLoading}
+                style={{
+                  display: "flex", alignItems: "center", gap: "7px",
+                  padding: "11px 20px", borderRadius: "10px",
+                  border: isPublished ? "1px solid #d4d0c8" : "none",
+                  background: isPublished ? "white" : "#1a8a6e",
+                  color: isPublished ? "#6b6860" : "white",
+                  fontSize: "14px", fontWeight: "600",
+                  cursor: publishLoading ? "not-allowed" : "pointer",
+                  fontFamily: "inherit", opacity: publishLoading ? 0.7 : 1,
+                  transition: "all .15s",
+                }}
+                onMouseEnter={e => { if (!publishLoading) { e.currentTarget.style.background = isPublished ? "#f2efe8" : "#157a5e"; e.currentTarget.style.borderColor = isPublished ? "#0f0e17" : "transparent"; } }}
+                onMouseLeave={e => { e.currentTarget.style.background = isPublished ? "white" : "#1a8a6e"; e.currentTarget.style.borderColor = isPublished ? "#d4d0c8" : "transparent"; }}
+              >
+                {publishLoading ? "..." : isPublished ? <><Unpublish size={14} /> Unpublish</> : <><Globe size={14} /> Publish</>}
+              </button>
+            )}
             <button
               type="submit"
               disabled={loading}

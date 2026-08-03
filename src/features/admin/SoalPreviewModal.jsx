@@ -7,7 +7,7 @@ import { DIFFICULTY_MAP, TIPE_SOAL } from "./soal-form/constants";
 import { normalizeMenjodohkan } from "../soal/soalUtils";
 import useWindowWidth from "../../hooks/useWindowWidth";
 
-function DifficultyBadge({ level }) {
+export function DifficultyBadge({ level }) {
   const d = DIFFICULTY_MAP[level] || DIFFICULTY_MAP[1];
   return (
     <span
@@ -25,14 +25,14 @@ function DifficultyBadge({ level }) {
   );
 }
 
-function AnswerPreview({ soal }) {
+export function AnswerPreview({ soal, hideAnswer = false }) {
   const { tipe, options, answer } = soal;
 
   if (tipe === "pilihan_ganda") {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
         {options?.map((opt) => {
-          const isAns = answer === opt.label;
+          const isAns = !hideAnswer && answer === opt.label;
           return (
             <div
               key={opt.label}
@@ -106,7 +106,7 @@ function AnswerPreview({ soal }) {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
         {options?.map((opt) => {
-          const isAns = Array.isArray(answer) && answer.includes(opt.label);
+          const isAns = !hideAnswer && Array.isArray(answer) && answer.includes(opt.label);
           return (
             <div
               key={opt.label}

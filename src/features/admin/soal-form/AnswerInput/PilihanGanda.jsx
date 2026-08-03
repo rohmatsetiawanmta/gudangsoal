@@ -96,10 +96,11 @@ export default function PilihanGanda({ form, setForm }) {
             >
               {opt.label}
             </div>
-            <input
+            <textarea
               value={opt.text}
               onChange={(e) => handleOptionChange(i, e.target.value)}
               placeholder={`Pilihan ${opt.label}`}
+              rows={2}
               style={{
                 flex: 1,
                 padding: "10px 14px",
@@ -109,6 +110,8 @@ export default function PilihanGanda({ form, setForm }) {
                 outline: "none",
                 fontFamily: "inherit",
                 color: "#0f0e17",
+                resize: "vertical",
+                lineHeight: "1.5",
               }}
               onFocus={(e) => (e.target.style.borderColor = "#e84c2b")}
               onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}

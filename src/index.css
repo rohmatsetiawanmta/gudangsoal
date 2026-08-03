@@ -92,6 +92,14 @@ h3 {
   list-style-type: disc;
 }
 
+.math-content ul ul {
+  list-style-type: circle;
+}
+
+.math-content ul ul ul {
+  list-style-type: square;
+}
+
 .math-content ol {
   list-style-type: decimal;
 }
@@ -142,8 +150,9 @@ h3 {
   display: block;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  min-width: 100%;
-  margin: 12px 0;
+  width: max-content;
+  max-width: 100%;
+  margin: 12px auto;
   font-size: 14px;
 }
 

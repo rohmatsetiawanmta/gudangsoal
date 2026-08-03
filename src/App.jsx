@@ -41,7 +41,14 @@ import AdminUsers from "./features/admin/AdminUsers";
 import AdminReports from "./features/admin/AdminReports";
 import AdminSoalRequests from "./features/admin/AdminSoalRequests";
 import AdminChangelog from "./features/admin/AdminChangelog";
+import AdminRoadmap from "./features/admin/AdminRoadmap";
+import AdminBugList from "./features/admin/AdminBugList";
+import AdminActiveUsers from "./features/admin/AdminActiveUsers";
 import AdminFeedback from "./features/admin/AdminFeedback";
+import AdminWhiteboard from "./features/admin/AdminWhiteboard";
+import AdminThumbnail from "./features/admin/AdminThumbnail";
+import AdminWhiteboardSession from "./features/admin/AdminWhiteboardSession";
+import AdminWhiteboardBySoal from "./features/admin/AdminWhiteboardBySoal";
 
 import AdminQuiz from "./features/admin/AdminQuiz";
 import AdminQuizForm from "./features/admin/AdminQuizForm";
@@ -63,6 +70,8 @@ import AdminSoalBulkImportPage from "./features/admin/AdminSoalBulkImportPage";
 import MateriDetail from "./features/materi/MateriDetail";
 import MateriList from "./features/materi/MateriList";
 import AdminMateriBulkImport from "./features/admin/AdminMateriBulkImport";
+import AdminViews from "./features/admin/AdminViews";
+import AdminShares from "./features/admin/AdminShares";
 
 export default function App() {
   const { isLoggedIn, checkSessionExpiry } = useAuthStore();
@@ -132,6 +141,8 @@ export default function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
           <Route path="soal" element={<AdminSoal />} />
+          <Route path="views" element={<AdminViews />} />
+          <Route path="shares" element={<AdminShares />} />
           <Route path="soal/tambah" element={<AdminSoalForm />} />
           <Route path="soal/edit/:id" element={<AdminSoalForm />} />
           <Route path="soal/bulk-import" element={<AdminSoalBulkImportPage />} />
@@ -140,6 +151,13 @@ export default function App() {
           <Route path="reports" element={<AdminReports />} />
           <Route path="soal-requests" element={<AdminSoalRequests />} />
           <Route path="changelog" element={<AdminChangelog />} />
+          <Route path="roadmap" element={<AdminRoadmap />} />
+          <Route path="bugs"         element={<AdminBugList />} />
+          <Route path="whiteboard"   element={<AdminWhiteboard />} />
+          <Route path="thumbnail"    element={<AdminThumbnail />} />
+          <Route path="whiteboard/:sessionId" element={<AdminWhiteboardSession />} />
+          <Route path="whiteboard/by-question/:kode" element={<AdminWhiteboardBySoal />} />
+          <Route path="active-users" element={<AdminActiveUsers />} />
           <Route path="feedback" element={<AdminFeedback />} />
 
           <Route path="latihan" element={<AdminQuiz />} />

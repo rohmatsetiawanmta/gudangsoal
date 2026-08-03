@@ -6,7 +6,9 @@ if (preg_match('#^/materi/(\d+)$#', $uri, $m) && $method === 'GET') {
   $id = (int) $m[1];
 
   $stmt = $pdo->prepare("
-    SELECT m.id, m.judul, m.konten, m.highlights, m.pertanyaan, m.urutan, m.views,
+    SELECT m.id, m.judul, m.konten, m.highlights, m.pertanyaan, m.urutan,
+           (SELECT COUNT(*) FROM materi_views  WHERE materi_id = m.id) AS views,
+           (SELECT COUNT(*) FROM materi_shares WHERE materi_id = m.id) AS share_count,
            m.created_at, m.updated_at,
            st.nama AS subtopik, st.id AS subtopik_id, st.slug AS subtopik_slug,
            t.nama  AS topik,    t.id  AS topik_id,    t.slug  AS topik_slug,
@@ -60,8 +62,13 @@ if (preg_match('#^/materi/(\d+)$#', $uri, $m) && $method === 'GET') {
 
 // POST /materi/:id/view  — increment views (fire-and-forget)
 if (preg_match('#^/materi/(\d+)/view$#', $uri, $m) && $method === 'POST') {
-  $id = (int) $m[1];
-  $pdo->prepare('UPDATE materi SET views = views + 1 WHERE id = ? AND is_published = 1')->execute([$id]);
+  $id      = (int) $m[1];
+  $auth    = getAuthUser();
+  $user_id = $auth ? $auth['id'] : null;
+
+  // Insert into tracking table (user_id = NULL for anonymous)
+  $pdo->prepare('INSERT INTO materi_views (materi_id, user_id) VALUES (?, ?)')->execute([$id, $user_id]);
+
   echo json_encode(['ok' => true]);
   exit;
 }
@@ -197,6 +204,33 @@ if (preg_match('#^/materi/(\d+)/answer$#', $uri, $m) && $method === 'POST') {
   }
 
   echo json_encode(['is_correct' => (bool) $is_correct, 'xp_earned' => $xpEarned, 'first_time' => !$existing]);
+  exit;
+}
+
+// POST /materi/:id/share  — record share event
+if (preg_match('#^/materi/(\d+)/share$#', $uri, $m) && $method === 'POST') {
+  $id       = (int) $m[1];
+  $body     = json_decode(file_get_contents('php://input'), true);
+  $platform = $body['platform'] ?? null;
+
+  if (!in_array($platform, ['whatsapp', 'telegram', 'facebook', 'twitter', 'threads', 'email', 'copy'])) {
+    http_response_code(400); echo json_encode(['error' => 'platform tidak valid']); exit;
+  }
+
+  $exists = $pdo->prepare('SELECT id FROM materi WHERE id = ? AND is_published = 1');
+  $exists->execute([$id]);
+  if (!$exists->fetch()) { http_response_code(404); echo json_encode(['error' => 'Materi tidak ditemukan']); exit; }
+
+  $authUser = getAuthUser();
+  $user_id  = $authUser ? $authUser['id'] : null;
+  $ip       = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? null;
+
+  $pdo->prepare('INSERT INTO materi_shares (materi_id, user_id, platform, ip_address) VALUES (?, ?, ?, ?)')
+      ->execute([$id, $user_id, $platform, $ip]);
+
+  $cnt = $pdo->prepare('SELECT COUNT(*) FROM materi_shares WHERE materi_id = ?');
+  $cnt->execute([$id]);
+  echo json_encode(['share_count' => (int) $cnt->fetchColumn()]);
   exit;
 }
 

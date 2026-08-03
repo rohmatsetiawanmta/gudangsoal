@@ -116,7 +116,7 @@ if ($uri === '/auth/verify-email' && $method === 'GET') {
   }
 
   $stmt = $pdo->prepare(
-    'UPDATE users SET email_verified = 1, verification_token = NULL, verification_expires_at = NULL WHERE id = ?'
+    'UPDATE users SET email_verified = 1, verified_at = NOW(), verification_token = NULL, verification_expires_at = NULL WHERE id = ?'
   );
   $stmt->execute([$user['id']]);
 

@@ -129,6 +129,14 @@ export default function LokasiSoal({
             value={query}
             onChange={e => { setQuery(e.target.value); setOpen(true); }}
             onFocus={() => setOpen(true)}
+            onKeyDown={e => {
+              if (e.key === "Enter" && open && results.length > 0) {
+                e.preventDefault();
+                handleSelect(results[0]);
+              } else if (e.key === "Escape") {
+                setOpen(false);
+              }
+            }}
             placeholder={loadingStruktur ? "Memuat data..." : "Cari subtopik..."}
             disabled={loadingStruktur}
             style={{

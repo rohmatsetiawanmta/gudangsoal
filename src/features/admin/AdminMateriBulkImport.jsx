@@ -209,11 +209,45 @@ export default function AdminMateriBulkImport() {
   const [parseSnippet, setParseSnippet] = useState("");
   const [items,        setItems]        = useState(null);
 
+  const fixLatexBackslashes = (raw) => {
+    // Process each JSON string value character-by-character:
+    // - Valid JSON escapes (\\ \" \n \r \t \b \f \/ \uXXXX) are preserved as-is
+    // - Single backslashes before LaTeX commands (\sqrt, \frac, etc.) are doubled to \\
+    // - Literal control characters (raw newlines/tabs) are escaped to \n / \t
+    return raw.replace(/"((?:[^"\\]|\\[\s\S])*)"/g, (_, inner) => {
+      let fixed = "";
+      let i = 0;
+      while (i < inner.length) {
+        const c = inner[i];
+        if (c === "\\") {
+          const next = inner[i + 1];
+          if (next !== undefined && '"\\\/nrtbf'.includes(next)) {
+            fixed += c + next; i += 2;
+          } else if (next === "u" && /[0-9a-fA-F]{4}/.test(inner.slice(i + 2, i + 6))) {
+            fixed += inner.slice(i, i + 6); i += 6;
+          } else {
+            fixed += "\\\\"; i++;
+          }
+        } else if (c.charCodeAt(0) < 0x20) {
+          if      (c === "\n") fixed += "\\n";
+          else if (c === "\r") fixed += "\\r";
+          else if (c === "\t") fixed += "\\t";
+          else fixed += `\\u${c.charCodeAt(0).toString(16).padStart(4, "0")}`;
+          i++;
+        } else {
+          fixed += c; i++;
+        }
+      }
+      return `"${fixed}"`;
+    });
+  };
+
   const handleParse = () => {
     setParseError(""); setParseSnippet(""); setItems(null);
     if (!jsonInput.trim()) { setParseError("Paste JSON array dulu"); return; }
     try {
       let text = jsonInput.trim().replace(/```json/gi, "").replace(/```/g, "").trim();
+      text = fixLatexBackslashes(text);
       const parsed = JSON.parse(text);
       if (!Array.isArray(parsed)) { setParseError("JSON harus berupa array [...], bukan object {...}"); return; }
       if (parsed.length === 0)    { setParseError("Array kosong"); return; }

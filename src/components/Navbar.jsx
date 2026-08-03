@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Search, X, BookOpen, User, LogOut, ChevronDown,
   LayoutDashboard, Warehouse, Flame, Shuffle, MessageSquarePlus,
-  TrendingUp, Menu, Zap, GraduationCap, Lightbulb, Moon, Sun,
+  TrendingUp, Menu, Zap, GraduationCap, Lightbulb,
 } from "lucide-react";
 import { useAuthStore } from "../features/auth/authStore";
 import RandomSoal from "./RandomSoal";
@@ -28,7 +28,6 @@ export default function Navbar() {
   const width     = useWindowWidth();
   const isMobile  = width <= 480;
   const { user, isLoggedIn, logout } = useAuthStore();
-  const { isDark, toggle } = useTheme();
 
   const [searchOpen,   setSearchOpen]   = useState(false);
   const [searchQuery,  setSearchQuery]  = useState("");
@@ -213,15 +212,6 @@ export default function Navbar() {
             </button>
           )}
 
-          {/* Dark mode toggle */}
-          {!isMobile && (
-            <button onClick={toggle} title={isDark ? "Mode terang" : "Mode gelap"} style={iconBtnStyle}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--gs-hover)"; e.currentTarget.style.color = "var(--gs-text)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--gs-text-muted)"; }}
-            >
-              {isDark ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
-          )}
 
           {/* Notifikasi */}
           {!isMobile && isLoggedIn && <NotificationBell isMobile={false} />}
@@ -458,15 +448,6 @@ export default function Navbar() {
                         onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
                       >
                         <MessageSquarePlus size={15} color="var(--gs-text-muted)" /> Kirim Masukan
-                      </button>
-                      <button onClick={toggle} style={menuItemStyle}
-                        onMouseEnter={(e) => (e.currentTarget.style.background = "var(--gs-hover)")}
-                        onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
-                      >
-                        {isDark
-                          ? <><Sun size={15} color="var(--gs-text-muted)" /> Mode Terang</>
-                          : <><Moon size={15} color="var(--gs-text-muted)" /> Mode Gelap</>
-                        }
                       </button>
                     </div>
 

@@ -327,7 +327,7 @@ export default function PembahasanPanel({
           >
             Pembahasan
           </div>
-          <div style={{ fontSize: "15px", color: "var(--gs-text)" }}>
+          <div style={{ fontSize: "14px", color: "var(--gs-text)" }}>
             <MathRenderer text={soal.explanation} block />
           </div>
         </div>

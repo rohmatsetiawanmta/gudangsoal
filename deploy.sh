@@ -36,12 +36,13 @@ if $DEPLOY_FRONTEND; then
 
   echo "→ Uploading frontend..."
   scp $SSH_OPTS -P $SSH_PORT dist/index.html                     $SSH_USER@$SSH_HOST:$REMOTE_DIR/index.html
-  scp $SSH_OPTS -P $SSH_PORT dist/assets/index-*.js              $SSH_USER@$SSH_HOST:$REMOTE_DIR/assets/
-  scp $SSH_OPTS -P $SSH_PORT dist/assets/index-*.css             $SSH_USER@$SSH_HOST:$REMOTE_DIR/assets/
+  rsync -az -e "ssh -p $SSH_PORT $SSH_OPTS" dist/assets/         $SSH_USER@$SSH_HOST:$REMOTE_DIR/assets/
   scp $SSH_OPTS -P $SSH_PORT dist/robots.txt                     $SSH_USER@$SSH_HOST:$REMOTE_DIR/robots.txt
   scp $SSH_OPTS -P $SSH_PORT dist/.htaccess                      $SSH_USER@$SSH_HOST:$REMOTE_DIR/.htaccess
   scp $SSH_OPTS -P $SSH_PORT sitemap.php                         $SSH_USER@$SSH_HOST:$REMOTE_DIR/sitemap.php
   scp $SSH_OPTS -P $SSH_PORT render.php                          $SSH_USER@$SSH_HOST:$REMOTE_DIR/render.php
+  echo "→ Fixing permissions..."
+  ssh $SSH_OPTS -p $SSH_PORT $SSH_USER@$SSH_HOST "chmod 644 $REMOTE_DIR/index.html $REMOTE_DIR/robots.txt $REMOTE_DIR/.htaccess $REMOTE_DIR/sitemap.php $REMOTE_DIR/render.php && find $REMOTE_DIR/assets -type f -exec chmod 644 {} + && find $REMOTE_DIR/assets -type d -exec chmod 755 {} +"
   echo "✓ Frontend selesai!"
 fi
 
@@ -52,6 +53,8 @@ if $DEPLOY_API; then
     --exclude '.env' \
     --exclude '*.sql' \
     api/ $SSH_USER@$SSH_HOST:$REMOTE_DIR/api/
+  echo "→ Fixing permissions..."
+  ssh $SSH_OPTS -p $SSH_PORT $SSH_USER@$SSH_HOST "find $REMOTE_DIR/api -type f -exec chmod 644 {} + && find $REMOTE_DIR/api -type d -exec chmod 755 {} +"
   echo "✓ API selesai! (vendor/, .env, *.sql dilewati)"
 fi
 

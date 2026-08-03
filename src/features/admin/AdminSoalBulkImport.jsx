@@ -1,5 +1,6 @@
 // src/features/admin/AdminSoalBulkImport.jsx
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Search, X, ChevronRight, Upload, Trash2, ChevronDown, ChevronUp,
   CheckCircle2, AlertCircle, Loader2, Plus, FileText, Eye,
@@ -514,8 +515,9 @@ function SectionCard({ num, title, subtitle, children }) {
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function AdminSoalBulkImport({ struktur }) {
+  const [searchParams] = useSearchParams();
   const [step, setStep]           = useState("import"); // import | review | done
-  const [subtopikId, setSubtopikId] = useState("");
+  const [subtopikId, setSubtopikId] = useState(searchParams.get("subtopik") || "");
   const [jsonInput, setJsonInput] = useState("");
   const [parseError, setParseError]   = useState("");
   const [parseSnippet, setParseSnippet] = useState("");

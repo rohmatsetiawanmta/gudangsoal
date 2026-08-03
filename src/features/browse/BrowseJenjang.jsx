@@ -6,6 +6,7 @@ import {
   ChevronRight, BookOpen,
 } from "lucide-react";
 import { getJenjang } from "./browseApi";
+import ComingSoonModal from "./ComingSoonModal";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
@@ -28,6 +29,7 @@ export default function BrowseJenjang() {
   const [jenjang, setJenjang] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState("");
+  const [comingSoonModal, setComingSoonModal] = useState(null);
 
   useEffect(() => {
     getJenjang()
@@ -58,23 +60,21 @@ export default function BrowseJenjang() {
           marginBottom: "20px",
           position: "relative", overflow: "hidden",
         }}>
-          <div style={{
-            position: "absolute", right: isMobile ? "-10px" : "24px", top: "50%",
-            transform: "translateY(-50%)", opacity: 0.05,
-            pointerEvents: "none", color: "white",
-          }}>
-            <BookOpen size={isMobile ? 80 : 110} />
-          </div>
+
           <div style={{ position: "relative", zIndex: 1 }}>
             <h1 style={{
               fontSize: isMobile ? "22px" : "26px", fontWeight: "800",
-              color: "white", letterSpacing: "-0.5px", margin: "0 0 8px",
+              color: "white", letterSpacing: "-0.5px", margin: "0 0 10px",
             }}>
               Direktori Soal
             </h1>
-            <p style={{ fontSize: "14px", color: "rgba(255,255,255,.5)", margin: 0 }}>
-              Pilih jenjang pendidikan atau jenis ujian untuk mulai latihan.
-            </p>
+            {!loading && jenjang.length > 0 && (
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: "rgba(255,255,255,.8)", background: "rgba(255,255,255,.1)" }}>
+                  {jenjang.length} Jenjang
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -107,12 +107,12 @@ export default function BrowseJenjang() {
               return (
                 <div
                   key={j.id}
-                  onClick={() => navigate(`/browse/${j.slug}`, { state: { jenjangNama: j.nama, jenjangSlug: j.slug } })}
+                  onClick={() => j.is_coming_soon == 1 ? setComingSoonModal(j) : navigate(`/browse/${j.slug}`, { state: { jenjangNama: j.nama, jenjangSlug: j.slug } })}
                   style={{
                     display: "flex", alignItems: "center", gap: "16px",
                     background: "var(--gs-surface)", borderRadius: "14px",
                     border: "1px solid var(--gs-border)",
-                    borderLeft: `3px solid ${color}`,
+                    borderLeft: `3px solid ${j.is_coming_soon == 1 ? "#f5a623" : color}`,
                     padding: isMobile ? "14px 16px" : "16px 20px",
                     cursor: "pointer",
                     transition: "box-shadow .15s, transform .15s",
@@ -137,15 +137,16 @@ export default function BrowseJenjang() {
                     <Icon size={isMobile ? 19 : 21} color={color} />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{
-                      fontWeight: "700",
-                      fontSize: isMobile ? "15px" : "15.5px",
-                      color: "var(--gs-text)",
-                    }}>
-                      {j.nama}
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span style={{ fontWeight: "700", fontSize: isMobile ? "15px" : "15.5px", color: "var(--gs-text)" }}>
+                        {j.nama}
+                      </span>
+                      {j.is_coming_soon == 1 && (
+                        <span style={{ fontSize: "10px", fontWeight: "700", padding: "2px 7px", borderRadius: "5px", background: "#fef9ee", color: "#f5a623", border: "1px solid #fde68a", flexShrink: 0 }}>Segera</span>
+                      )}
                     </div>
                   </div>
-                  <ChevronRight size={17} color="var(--gs-text-hint)" />
+                  <ChevronRight size={17} color={j.is_coming_soon ? "#f5a623" : "var(--gs-text-hint)"} />
                 </div>
               );
             })}
@@ -155,6 +156,7 @@ export default function BrowseJenjang() {
 
       <Footer />
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }`}</style>
+      <ComingSoonModal item={comingSoonModal} onClose={() => setComingSoonModal(null)} />
     </div>
   );
 }

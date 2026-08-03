@@ -1,6 +1,6 @@
 // src/features/admin/AdminSoal.jsx
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Plus, Search, Pencil, Trash2,
   ChevronLeft, ChevronRight, Eye, Copy, Loader2, FileJson,
@@ -166,8 +166,21 @@ function StrukturTreePanel({ struktur, filterSubtopikId, onChange, countKey = "j
   const color   = LEVEL_COLOR_S[current.level];
 
   useEffect(() => {
-    if (!filterSubtopikId) setStack([{ level: "root", item: null }]);
-  }, [filterSubtopikId]);
+    if (!filterSubtopikId) { setStack([{ level: "root", item: null }]); return; }
+    if (!struktur.subtopik.length) return;
+    const st      = struktur.subtopik.find(s => s.id == filterSubtopikId); if (!st) return;
+    const topik   = struktur.topik.find(t => t.id == st.topik_id);         if (!topik) return;
+    const mapel   = struktur.mapel.find(m => m.id == topik.mapel_id);      if (!mapel) return;
+    const subj    = struktur.subjenjang.find(s => s.id == mapel.subjenjang_id); if (!subj) return;
+    const jenjang = struktur.jenjang.find(j => j.id == subj.jenjang_id);   if (!jenjang) return;
+    setStack([
+      { level: "root",       item: null    },
+      { level: "jenjang",    item: jenjang },
+      { level: "subjenjang", item: subj    },
+      { level: "mapel",      item: mapel   },
+      { level: "topik",      item: topik   },
+    ]);
+  }, [filterSubtopikId, struktur]);
 
   const getChildren = ({ level, item }) => {
     const pid = item?.id;
@@ -377,13 +390,28 @@ export default function AdminSoal() {
   const width    = useWindowWidth();
   const isMobile = width <= 480;
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const updateParams = (updates) =>
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      Object.entries(updates).forEach(([k, v]) => {
+        if (v == null || v === "" || v === 1) next.delete(k);
+        else next.set(k, String(v));
+      });
+      return next;
+    }, { replace: true });
+
+  const page             = Number(searchParams.get("page"))    || 1;
+  const filterSubtopikId = Number(searchParams.get("subtopik")) || null;
+  const filterSearch     = searchParams.get("q")    || "";
+  const filterDiff       = searchParams.get("diff") || "";
+  const filterPub        = searchParams.get("pub")  || "";
+  const filters          = { search: filterSearch, difficulty: filterDiff, published: filterPub };
+
   const [soal, setSoal]       = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchInput, setSearchInput] = useState("");
-  const [filters, setFilters] = useState({ search: "", difficulty: "", published: "" });
-  const [filterSubtopikId, setFilterSubtopikId] = useState(null);
+  const [searchInput, setSearchInput] = useState(searchParams.get("q") || "");
   const [struktur, setStruktur] = useState({ jenjang: [], subjenjang: [], mapel: [], topik: [], subtopik: [] });
-  const [page, setPage]       = useState(1);
   const [total, setTotal]     = useState(0);
   const [counts, setCounts]   = useState({ published: 0, draft: 0 });
   const [deleteId, setDeleteId]     = useState(null);
@@ -396,7 +424,7 @@ export default function AdminSoal() {
   const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
   const [openMateriId, setOpenMateriId] = useState(null);
 
-  const limit = 20;
+  const [limit, setLimit] = useState(10);
   const currentIds = soal.map(s => s.id);
   const allOnPageSelected = currentIds.length > 0 && currentIds.every(id => selected.has(id));
   const someOnPageSelected = currentIds.some(id => selected.has(id)) && !allOnPageSelected;
@@ -405,10 +433,10 @@ export default function AdminSoal() {
     setLoading(true);
     const params = new URLSearchParams({
       page, limit,
-      ...(filters.search     && { search:     filters.search }),
-      ...(filters.difficulty && { difficulty: filters.difficulty }),
-      ...(filters.published  !== "" && { published: filters.published }),
-      ...(filterSubtopikId   && { subtopik_id: filterSubtopikId }),
+      ...(filterSearch && { search:     filterSearch }),
+      ...(filterDiff   && { difficulty: filterDiff }),
+      ...(filterPub !== "" && { published: filterPub }),
+      ...(filterSubtopikId && { subtopik_id: filterSubtopikId }),
     });
     api.get(`/admin/soal?${params}`)
       .then(data => {
@@ -418,11 +446,10 @@ export default function AdminSoal() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [page, filters, filterSubtopikId]);
+  }, [page, limit, filterSearch, filterDiff, filterPub, filterSubtopikId]);
 
   useEffect(() => { fetchSoal(); }, [fetchSoal]);
-  useEffect(() => { setSelected(new Set()); }, [page, filters, filterSubtopikId]);
-  useEffect(() => { setPage(1); }, [filterSubtopikId]);
+  useEffect(() => { setSelected(new Set()); }, [page, filterSearch, filterDiff, filterPub, filterSubtopikId]);
 
   useEffect(() => {
     api.get("/admin/struktur").then(d => setStruktur(d)).catch(() => {});
@@ -435,18 +462,27 @@ export default function AdminSoal() {
     return () => { clearTimeout(t); document.removeEventListener("click", close); };
   }, [openMateriId]);
 
-  // debounced search
+  // debounced search — only write to URL when value actually changed
+  const searchInputRef = useRef(searchInput);
   useEffect(() => {
+    const prev = searchInputRef.current;
+    searchInputRef.current = searchInput;
     const t = setTimeout(() => {
-      setPage(1);
-      setFilters(f => ({ ...f, search: searchInput }));
+      if (searchInput === prev && searchInput === (filterSearch)) return;
+      setSearchParams(p => {
+        const next = new URLSearchParams(p);
+        if (searchInput) next.set("q", searchInput); else next.delete("q");
+        next.delete("page");
+        return next;
+      }, { replace: true });
     }, 380);
     return () => clearTimeout(t);
-  }, [searchInput]);
+  }, [searchInput]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setFilter = (key, value) => {
-    setPage(1);
-    setFilters(f => ({ ...f, [key]: f[key] === value ? "" : value }));
+    const paramKey = key === "difficulty" ? "diff" : key === "published" ? "pub" : key;
+    const current  = searchParams.get(paramKey) || "";
+    updateParams({ [paramKey]: current === value ? null : value, page: null });
   };
 
   const toggleOne = id => setSelected(prev => {
@@ -507,9 +543,7 @@ export default function AdminSoal() {
 
   const clearFilters = () => {
     setSearchInput("");
-    setFilters({ search: "", difficulty: "", published: "" });
-    setFilterSubtopikId(null);
-    setPage(1);
+    setSearchParams({}, { replace: true });
   };
 
   // Page numbers to show
@@ -572,13 +606,13 @@ export default function AdminSoal() {
           </div>
 
           <div style={{ display: "flex", gap: "8px", width: isMobile ? "100%" : "auto", flexShrink: 0 }}>
-            <button onClick={() => navigate("/admin/soal/bulk-import")}
+            <button onClick={() => navigate(filterSubtopikId ? `/admin/soal/bulk-import?subtopik=${filterSubtopikId}` : "/admin/soal/bulk-import")}
               style={{ display: "flex", alignItems: "center", gap: "7px", background: "rgba(255,255,255,.1)", color: "rgba(255,255,255,.85)", border: "1px solid rgba(255,255,255,.15)", borderRadius: "10px", padding: "10px 16px", fontSize: "13.5px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", flex: isMobile ? 1 : "none", justifyContent: "center", transition: "all .15s" }}
               onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.18)"; e.currentTarget.style.color = "white"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.1)"; e.currentTarget.style.color = "rgba(255,255,255,.85)"; }}>
               <FileJson size={15} /> Bulk Import
             </button>
-            <button onClick={() => navigate("/admin/soal/tambah")}
+            <button onClick={() => navigate(filterSubtopikId ? `/admin/soal/tambah?subtopik=${filterSubtopikId}` : "/admin/soal/tambah")}
               style={{ display: "flex", alignItems: "center", gap: "7px", background: "#e84c2b", color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontSize: "13.5px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", flex: isMobile ? 1 : "none", justifyContent: "center", boxShadow: "0 4px 16px rgba(232,76,43,.35)", transition: "opacity .15s" }}
               onMouseEnter={e => e.currentTarget.style.opacity = ".88"}
               onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
@@ -594,7 +628,7 @@ export default function AdminSoal() {
           <StrukturTreePanel
             struktur={struktur}
             filterSubtopikId={filterSubtopikId}
-            onChange={id => { setFilterSubtopikId(id); setPage(1); }}
+            onChange={id => { updateParams({ subtopik: id || null, page: null }); }}
             countKey="jumlah_soal"
           />
         )}
@@ -634,7 +668,7 @@ export default function AdminSoal() {
           <FilterChip label="Hard"   active={filters.difficulty === "3"} color="#e84c2b" onClick={() => setFilter("difficulty", "3")} />
           <div style={{ width: "1px", height: "16px", background: "#e8e6e0" }} />
           {/* Subtopik (mobile only — desktop pakai tree panel) */}
-          {isMobile && <SubtopikFilter struktur={struktur} filterSubtopikId={filterSubtopikId} onChange={setFilterSubtopikId} />}
+          {isMobile && <SubtopikFilter struktur={struktur} filterSubtopikId={filterSubtopikId} onChange={id => updateParams({ subtopik: id || null, page: null })} />}
           {/* Clear all */}
           {hasFilters && (
             <button onClick={clearFilters}
@@ -824,13 +858,19 @@ export default function AdminSoal() {
       )}
 
       {/* ── Pagination ── */}
-      {totalPages > 1 && (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "18px", marginBottom: selected.size > 0 ? "80px" : "0" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "18px", marginBottom: selected.size > 0 ? "80px" : "0", flexWrap: "wrap", gap: "8px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <span style={{ fontSize: "12.5px", color: "#9b9992" }}>
-            {(page-1)*limit+1}–{Math.min(page*limit, total)} dari {total.toLocaleString()}
+            {total > 0 ? `${(page-1)*limit+1}–${Math.min(page*limit, total)} dari ${total.toLocaleString()}` : `Halaman ${page} dari ${totalPages || 1}`}
           </span>
+          <select value={limit} onChange={e => { setLimit(Number(e.target.value)); updateParams({ page: null }); }}
+            style={{ fontSize: "12px", padding: "5px 8px", borderRadius: "8px", border: "1px solid #e2ddd5", background: "white", color: "#6b6860", cursor: "pointer", fontFamily: "inherit" }}>
+            {[10, 25, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
+          </select>
+        </div>
+        {totalPages > 1 && (
           <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
-            <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1}
+            <button onClick={() => updateParams({ page: page - 1 })} disabled={page === 1}
               style={{ width: "32px", height: "32px", borderRadius: "8px", border: "1px solid #e8e6e0", background: "white", cursor: page === 1 ? "not-allowed" : "pointer", color: page === 1 ? "#e2ddd5" : "#6b6860", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ChevronLeft size={14} />
             </button>
@@ -838,7 +878,7 @@ export default function AdminSoal() {
               n === "…" ? (
                 <span key={`ellipsis-${i}`} style={{ width: "32px", textAlign: "center", fontSize: "13px", color: "#c8c6be" }}>…</span>
               ) : (
-                <button key={n} onClick={() => setPage(n)}
+                <button key={n} onClick={() => updateParams({ page: n })}
                   style={{ width: "32px", height: "32px", borderRadius: "8px", border: n === page ? "none" : "1px solid #e8e6e0", background: n === page ? "#0f0e17" : "white", color: n === page ? "white" : "#6b6860", fontSize: "13px", fontWeight: n === page ? "700" : "500", cursor: "pointer", fontFamily: "inherit" }}>
                   {n}
                 </button>
@@ -847,13 +887,13 @@ export default function AdminSoal() {
             {isMobile && (
               <span style={{ fontSize: "13px", color: "#6b6860", padding: "0 8px", fontWeight: "600" }}>{page} / {totalPages}</span>
             )}
-            <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page === totalPages}
+            <button onClick={() => updateParams({ page: page + 1 })} disabled={page === totalPages}
               style={{ width: "32px", height: "32px", borderRadius: "8px", border: "1px solid #e8e6e0", background: "white", cursor: page === totalPages ? "not-allowed" : "pointer", color: page === totalPages ? "#e2ddd5" : "#6b6860", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ChevronRight size={14} />
             </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
         </div>{/* end right column */}
       </div>{/* end two-column wrapper */}
 
