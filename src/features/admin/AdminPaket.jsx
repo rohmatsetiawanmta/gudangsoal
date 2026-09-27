@@ -16,7 +16,7 @@ const JENIS_LABEL = {
   lainnya:      "Lainnya",
 };
 const JENIS_COLOR = {
-  olimpiade:    { color: "#7c3aed", bg: "rgba(124,58,237,.1)" },
+  olimpiade:    { color: "#e84c2b", bg: "rgba(232,76,43,.1)" },
   un:           { color: "#2563eb", bg: "rgba(37,99,235,.1)" },
   utbk:         { color: "#f5a623", bg: "rgba(245,166,35,.1)" },
   seleksi:      { color: "#e84c2b", bg: "rgba(232,76,43,.1)" },
@@ -138,8 +138,8 @@ export default function AdminPaket() {
         </div>
       ) : list.length === 0 ? (
         <div style={{ background: "white", borderRadius: "16px", border: "1px solid #e2ddd5", padding: "60px 48px", textAlign: "center" }}>
-          <div style={{ width: "56px", height: "56px", borderRadius: "16px", background: "#f3f0ff", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-            <Package size={26} color="#7c3aed" />
+          <div style={{ width: "56px", height: "56px", borderRadius: "16px", background: "#fff3f0", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <Package size={26} color="#e84c2b" />
           </div>
           <div style={{ fontSize: "15px", fontWeight: "700", color: "#0f0e17", marginBottom: "6px" }}>Belum ada paket soal</div>
           <p style={{ fontSize: "13px", color: "#6b6860", marginBottom: "20px" }}>Buat paket pertama seperti OSK 2025, UTBK 2024, dll.</p>
