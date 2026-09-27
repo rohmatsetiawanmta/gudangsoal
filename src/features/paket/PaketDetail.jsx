@@ -142,7 +142,7 @@ export default function PaketDetail() {
       />
       <Navbar />
 
-      <main style={{ flex: 1, maxWidth: "760px", width: "100%", margin: "0 auto", padding: isMobile ? "20px 16px 48px" : "32px 24px 64px" }}>
+      <main style={{ flex: 1, maxWidth: view === "soal" && !isMobile ? "1040px" : "760px", width: "100%", margin: "0 auto", padding: isMobile ? "20px 16px 48px" : "32px 24px 64px" }}>
 
         {/* Header */}
         <div style={{
@@ -248,110 +248,107 @@ export default function PaketDetail() {
           const isCorrect     = alreadyOk || (isSubmit && checkCorrect(soal.tipe, chosen, soal.answer));
           const showPemb      = !!showPembahasan[soal.id];
 
+          const pembShown = isSubmit || alreadyOk || showPemb;
+
           return (
             <div>
-              {/* Nomor & navigasi */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                <div style={{ fontSize: "13px", fontWeight: "600", color: "var(--gs-text-muted)" }}>
-                  Soal {soal.urutan} dari {soalList.length}
-                </div>
-                <div style={{ display: "flex", gap: "6px" }}>
-                  <button onClick={() => goToSoal(currentIdx - 1)} disabled={currentIdx === 0} style={{ width: "34px", height: "34px", borderRadius: "9px", border: "1px solid var(--gs-border)", background: "var(--gs-surface)", cursor: currentIdx === 0 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: currentIdx === 0 ? "var(--gs-border)" : "var(--gs-text-muted)" }}>
-                    <ChevronLeft size={15} />
-                  </button>
-                  <button onClick={() => goToSoal(currentIdx + 1)} disabled={currentIdx === soalList.length - 1} style={{ width: "34px", height: "34px", borderRadius: "9px", border: "1px solid var(--gs-border)", background: "var(--gs-surface)", cursor: currentIdx === soalList.length - 1 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: currentIdx === soalList.length - 1 ? "var(--gs-border)" : "var(--gs-text-muted)" }}>
-                    <ChevronRight size={15} />
-                  </button>
-                </div>
+              {/* Nomor soal */}
+              <div style={{ fontSize: "13px", fontWeight: "600", color: "var(--gs-text-muted)", marginBottom: "16px" }}>
+                Soal {soal.urutan} dari {soalList.length}
               </div>
 
-              {/* Soal card */}
-              <div style={{ background: "var(--gs-surface)", borderRadius: "16px", border: "1px solid var(--gs-border)", borderLeft: "3px solid #7c3aed", overflow: "hidden", marginBottom: "12px" }}>
-                {/* Meta */}
-                <div style={{ padding: "12px 20px", borderBottom: "1px solid var(--gs-divider)", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "99px", background: "#f3f0ff", color: "#7c3aed" }}>
-                    #{soal.urutan}
-                  </span>
-                  {soal.mapel && <span style={{ fontSize: "12px", color: "var(--gs-text-hint)" }}>{soal.mapel}</span>}
-                  {soal.subtopik && <span style={{ fontSize: "12px", color: "var(--gs-text-hint)" }}>· {soal.subtopik}</span>}
-                  {soal.difficulty && (
-                    <span style={{ fontSize: "11px", fontWeight: "700", color: DIFF_COLOR[soal.difficulty], marginLeft: "auto" }}>
-                      {DIFF_LABEL[soal.difficulty]}
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "20px", alignItems: "start" }}>
+                {/* Panel Soal + Jawaban */}
+                <div style={{ background: "var(--gs-surface)", borderRadius: "16px", border: "1px solid var(--gs-border)", padding: isMobile ? "20px" : "32px", display: "flex", flexDirection: "column", gap: "20px" }}>
+                  {/* Meta */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "99px", background: "#f3f0ff", color: "#7c3aed" }}>
+                      #{soal.urutan}
                     </span>
-                  )}
-                </div>
+                    {soal.mapel && <span style={{ fontSize: "12px", color: "var(--gs-text-hint)" }}>{soal.mapel}</span>}
+                    {soal.subtopik && <span style={{ fontSize: "12px", color: "var(--gs-text-hint)" }}>· {soal.subtopik}</span>}
+                    {soal.difficulty && (
+                      <span style={{ fontSize: "11px", fontWeight: "700", color: DIFF_COLOR[soal.difficulty], marginLeft: "auto" }}>
+                        {DIFF_LABEL[soal.difficulty]}
+                      </span>
+                    )}
+                  </div>
 
-                {/* Body */}
-                <div style={{ padding: "20px", fontSize: "15px", lineHeight: "1.75", color: "var(--gs-text)" }}>
-                  <MathRenderer text={soal.body} block />
-                </div>
-              </div>
+                  {/* Body */}
+                  <div style={{ fontSize: isMobile ? "14px" : "15px", lineHeight: "1.75", color: "var(--gs-text)", fontWeight: "500" }}>
+                    <MathRenderer text={soal.body} block />
+                  </div>
 
-              {/* Jawaban */}
-              <div style={{ background: "var(--gs-surface)", borderRadius: "16px", border: "1px solid var(--gs-border)", borderLeft: "3px solid #e84c2b", padding: "20px", marginBottom: "12px" }}>
-                <JawabanInput
-                  soal={soal}
-                  chosen={chosen}
-                  setChosen={(val) => {
-                    if (isSubmit) return;
-                    setAnswers((a) => ({ ...a, [soal.id]: val }));
-                  }}
-                  submitted={isSubmit}
-                  alreadyCorrect={alreadyOk}
-                  isCorrect={isCorrect}
-                />
-              </div>
-
-              {/* Action buttons */}
-              {!isSubmit && !alreadyOk && (
-                <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
-                  <button
-                    onClick={handleSubmit}
-                    disabled={!chosen && soal.tipe === "pilihan_ganda"}
-                    style={{
-                      flex: 1, padding: "12px", borderRadius: "12px", border: "none",
-                      background: "#e84c2b", color: "white", fontSize: "14px",
-                      fontWeight: "700", cursor: "pointer", fontFamily: "inherit",
-                      boxShadow: "0 4px 14px rgba(232,76,43,.3)",
-                    }}
-                  >
-                    <Check size={15} style={{ verticalAlign: "middle", marginRight: "6px" }} />
-                    Periksa Jawaban
-                  </button>
-                  {soal.explanation && (
-                    <button
-                      onClick={handleShowPembahasan}
-                      style={{ padding: "12px 16px", borderRadius: "12px", border: "1px solid var(--gs-border)", background: "var(--gs-surface)", color: "var(--gs-text-muted)", fontSize: "13px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: "6px" }}
-                    >
-                      <Eye size={14} /> Lihat Pembahasan
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* Pembahasan */}
-              {(isSubmit || alreadyOk || showPemb) && soal.explanation && (
-                <div style={{ marginBottom: "12px" }}>
-                  <PembahasanPanel
+                  {/* Jawaban */}
+                  <JawabanInput
                     soal={soal}
-                    submitted={isSubmit || alreadyOk || showPemb}
-                    isCorrect={isCorrect}
+                    chosen={chosen}
+                    setChosen={(val) => {
+                      if (isSubmit) return;
+                      setAnswers((a) => ({ ...a, [soal.id]: val }));
+                    }}
+                    submitted={isSubmit}
                     alreadyCorrect={alreadyOk}
-                    user={user}
-                    isMobile={isMobile}
+                    isCorrect={isCorrect}
                   />
-                </div>
-              )}
 
-              {/* Result banner */}
-              {isSubmit && (
-                <div style={{ padding: "14px 18px", borderRadius: "12px", border: `1px solid ${isCorrect ? "#6ee7b7" : "#fca5a5"}`, background: isCorrect ? "#e4f5f0" : "#fff3f0", fontSize: "14px", fontWeight: "700", color: isCorrect ? "#1a8a6e" : "#b91c1c", textAlign: "center", marginBottom: "16px" }}>
-                  {isCorrect ? "✓ Benar!" : "✗ Kurang tepat"}
+                  {/* Result banner */}
+                  {isSubmit && (
+                    <div style={{ padding: "12px 16px", borderRadius: "12px", border: `1px solid ${isCorrect ? "#6ee7b7" : "#fca5a5"}`, background: isCorrect ? "#e4f5f0" : "#fff3f0", fontSize: "14px", fontWeight: "700", color: isCorrect ? "#1a8a6e" : "#b91c1c", textAlign: "center" }}>
+                      {isCorrect ? "✓ Benar!" : "✗ Kurang tepat"}
+                    </div>
+                  )}
+
+                  {/* Action buttons */}
+                  {!isSubmit && !alreadyOk && (
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <button
+                        onClick={handleSubmit}
+                        disabled={!chosen && soal.tipe === "pilihan_ganda"}
+                        style={{
+                          flex: 1, padding: "12px", borderRadius: "12px", border: "none",
+                          background: "#e84c2b", color: "white", fontSize: "15px",
+                          fontWeight: "700", cursor: "pointer", fontFamily: "inherit",
+                          transition: "all .15s",
+                        }}
+                      >
+                        <Check size={15} style={{ verticalAlign: "middle", marginRight: "6px" }} />
+                        Periksa Jawaban
+                      </button>
+                      {soal.explanation && (
+                        <button
+                          onClick={handleShowPembahasan}
+                          style={{ padding: "12px 16px", borderRadius: "12px", border: "1px solid var(--gs-border)", background: "var(--gs-surface)", color: "var(--gs-text-muted)", fontSize: "13px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}
+                        >
+                          <Eye size={14} /> Lihat Pembahasan
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
-              )}
+
+                {/* Panel Pembahasan */}
+                <div style={{ background: "var(--gs-surface)", borderRadius: "16px", border: "1px solid var(--gs-border)", padding: isMobile ? "20px" : "32px", position: isMobile ? "static" : "sticky", top: "24px" }}>
+                  {soal.explanation ? (
+                    <PembahasanPanel
+                      soal={soal}
+                      submitted={pembShown}
+                      isCorrect={isCorrect}
+                      alreadyCorrect={alreadyOk}
+                      forceShow={showPemb}
+                      user={user}
+                      isMobile={isMobile}
+                    />
+                  ) : (
+                    <div style={{ textAlign: "center", padding: isMobile ? "32px 16px" : "48px 24px", color: "var(--gs-text-hint)", fontSize: "14px" }}>
+                      Tidak ada pembahasan untuk soal ini.
+                    </div>
+                  )}
+                </div>
+              </div>
 
               {/* Prev / Next nav */}
-              <div style={{ display: "flex", gap: "8px", justifyContent: "space-between", marginTop: "8px" }}>
+              <div style={{ display: "flex", gap: "8px", justifyContent: "space-between", marginTop: "20px" }}>
                 <button
                   onClick={() => goToSoal(currentIdx - 1)}
                   disabled={currentIdx === 0}
