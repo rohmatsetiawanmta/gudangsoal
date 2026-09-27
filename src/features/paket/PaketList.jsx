@@ -17,7 +17,7 @@ const JENIS_LABEL = {
   lainnya:       "Lainnya",
 };
 const JENIS_COLOR = {
-  olimpiade:     { color: "#7c3aed", bg: "rgba(124,58,237,.12)" },
+  olimpiade:     { color: "#e84c2b", bg: "rgba(232,76,43,.12)" },
   un:            { color: "#2563eb", bg: "rgba(37,99,235,.12)" },
   utbk:          { color: "#f5a623", bg: "rgba(245,166,35,.12)" },
   seleksi:       { color: "#e84c2b", bg: "rgba(232,76,43,.12)" },
@@ -109,8 +109,8 @@ export default function PaketList() {
 
         {!loading && !error && list.length === 0 && (
           <div style={{ background: "var(--gs-surface)", borderRadius: "16px", border: "1px solid var(--gs-border)", padding: "60px 48px", textAlign: "center" }}>
-            <div style={{ width: "56px", height: "56px", borderRadius: "16px", background: "#f3f0ff", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-              <Package size={26} color="#7c3aed" />
+            <div style={{ width: "56px", height: "56px", borderRadius: "16px", background: "#fff3f0", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+              <Package size={26} color="#e84c2b" />
             </div>
             <div style={{ fontSize: "15px", fontWeight: "700", color: "var(--gs-text)", marginBottom: "6px" }}>Belum ada paket soal</div>
             <p style={{ fontSize: "13px", color: "var(--gs-text-muted)", margin: 0 }}>Paket soal sedang disiapkan.</p>

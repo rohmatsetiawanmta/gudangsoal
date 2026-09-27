@@ -226,8 +226,13 @@ function MateriRow({ item, selected, onToggle, onEdit, onDelete, onView, isMobil
               </div>
             )}
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {item.judul}
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ fontSize: "10px", fontWeight: "700", padding: "1px 6px", borderRadius: "5px", background: "#f2efe8", color: "#6b6860", flexShrink: 0 }}>
+                  #{item.id}
+                </span>
+                <div style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {item.judul}
+                </div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px", flexWrap: "wrap" }}>
                 <div style={{ fontSize: "11px", color: "#b4b2a9", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -693,7 +698,7 @@ export default function AdminMateri() {
       <div style={{ display: "flex", gap: "10px", marginBottom: "12px", flexWrap: "wrap" }}>
         <div style={{ position: "relative", flex: 1, minWidth: "200px" }}>
           <Search size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#b4b2a9", pointerEvents: "none" }} />
-          <input type="text" placeholder="Cari judul materi..." value={search}
+          <input type="text" placeholder="Cari judul / ID materi..." value={search}
             onChange={e => handleSearchChange(e.target.value)}
             style={{ width: "100%", paddingLeft: "36px", paddingRight: search ? "36px" : "12px", paddingTop: "9px", paddingBottom: "9px", border: "1px solid #e2ddd5", borderRadius: "10px", fontSize: "13.5px", fontFamily: "inherit", outline: "none", background: "white", color: "#0f0e17", boxSizing: "border-box" }} />
           {search && (

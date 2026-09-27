@@ -1883,7 +1883,10 @@ if ($uri === '/admin/materi' && $method === 'GET') {
 
   $where  = [];
   $params = [];
-  if ($search)              { $where[] = 'm.judul LIKE ?';     $params[] = "%$search%"; }
+  if ($search) {
+    if (ctype_digit($search)) { $where[] = '(m.judul LIKE ? OR m.id = ?)'; $params[] = "%$search%"; $params[] = (int) $search; }
+    else                      { $where[] = 'm.judul LIKE ?';               $params[] = "%$search%"; }
+  }
   if ($subtopik_id !== null){ $where[] = 'm.subtopik_id = ?'; $params[] = $subtopik_id; }
   if ($published !== null)  { $where[] = 'm.is_published = ?'; $params[] = $published; }
   $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';

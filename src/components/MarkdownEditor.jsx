@@ -9,8 +9,11 @@ import {
   Minus,
   Image,
   Table,
+  Eye,
+  X,
 } from "lucide-react";
 import api from "../lib/api";
+import MathRenderer from "./MathRenderer";
 
 const TOOLS = [
   { icon: Bold, label: "Bold", wrap: ["**", "**"], default: "teks tebal" },
@@ -44,6 +47,7 @@ export default function MarkdownEditor({
   const ref = useRef(null);
   const fileRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const insertFormat = (wrap, defaultText) => {
     const el = ref.current;
@@ -254,7 +258,7 @@ export default function MarkdownEditor({
             />
           </>
         )}
-        <div style={{ marginLeft: "auto" }}>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "10px" }}>
           <span
             style={{
               fontSize: "11px",
@@ -264,6 +268,21 @@ export default function MarkdownEditor({
           >
             $LaTeX$ • $$display$$
           </span>
+          <button
+            type="button"
+            onClick={() => setShowPreview(true)}
+            style={{
+              display: "flex", alignItems: "center", gap: "5px",
+              padding: "4px 10px", borderRadius: "6px",
+              border: "1px solid var(--gs-border)", background: "var(--gs-surface)",
+              color: "var(--gs-text-muted)", fontSize: "11.5px", fontWeight: "600",
+              cursor: "pointer", fontFamily: "inherit", flexShrink: 0,
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--gs-hover)"; e.currentTarget.style.color = "var(--gs-text)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "var(--gs-surface)"; e.currentTarget.style.color = "var(--gs-text-muted)"; }}
+          >
+            <Eye size={12} /> Preview
+          </button>
         </div>
       </div>
 
@@ -292,6 +311,35 @@ export default function MarkdownEditor({
           (e.currentTarget.parentElement.style.borderColor = "var(--gs-border)")
         }
       />
+
+      {showPreview && (
+        <div
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, padding: "16px" }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowPreview(false); }}
+        >
+          <div style={{ background: "var(--gs-surface)", borderRadius: "18px", width: "100%", maxWidth: "700px", maxHeight: "85vh", display: "flex", flexDirection: "column", boxShadow: "0 20px 60px rgba(0,0,0,.2)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid var(--gs-border)", flexShrink: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", fontWeight: "700", color: "var(--gs-text)" }}>
+                <Eye size={16} color="#e84c2b" /> Preview
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPreview(false)}
+                style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1px solid var(--gs-border)", background: "var(--gs-surface)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gs-text-muted)" }}
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <div style={{ padding: "20px 24px", overflowY: "auto", fontSize: "15px", lineHeight: "1.75", color: "var(--gs-text)" }}>
+              {value?.trim() ? (
+                <MathRenderer text={value} block />
+              ) : (
+                <p style={{ color: "var(--gs-text-hint)", fontSize: "13px" }}>Belum ada konten untuk di-preview.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>

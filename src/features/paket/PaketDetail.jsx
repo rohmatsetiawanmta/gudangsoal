@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  ChevronLeft, ChevronRight, Package, List, Check, Eye,
+  ChevronLeft, ChevronRight, Package, List, Check, RotateCcw,
 } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -23,8 +23,68 @@ const JENIS_LABEL = {
 const DIFF_LABEL = { 1: "Mudah", 2: "Sedang", 3: "Sulit" };
 const DIFF_COLOR = { 1: "#1a8a6e", 2: "#854F0B", 3: "#e84c2b" };
 
+const NAV_WINDOW = 10;
+
+function SoalNumberNav({ soalList, currentIdx, submitted, alreadyCorrect, answers, onJump }) {
+  const total     = soalList.length;
+  const navStart  = Math.floor(currentIdx / NAV_WINDOW) * NAV_WINDOW;
+  const navEnd    = Math.min(navStart + NAV_WINDOW, total);
+  const hasPrev   = navStart > 0;
+  const hasNext   = navEnd < total;
+
+  const btnBase = {
+    width: "32px", height: "32px", borderRadius: "9px",
+    fontSize: "12.5px", fontWeight: "700", cursor: "pointer",
+    fontFamily: "inherit", flexShrink: 0,
+    display: "flex", alignItems: "center", justifyContent: "center",
+  };
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "16px", flexWrap: "wrap" }}>
+      <button
+        onClick={() => onJump(navStart - NAV_WINDOW)}
+        disabled={!hasPrev}
+        style={{ ...btnBase, border: "1px solid var(--gs-border)", background: "var(--gs-surface)", color: hasPrev ? "var(--gs-text-muted)" : "var(--gs-border)", cursor: hasPrev ? "pointer" : "not-allowed" }}
+      >
+        <ChevronLeft size={14} />
+      </button>
+
+      {soalList.slice(navStart, navEnd).map((soal, i) => {
+        const idx        = navStart + i;
+        const isCurrent  = idx === currentIdx;
+        const isSubmit   = !!submitted[soal.id];
+        const isCorrect  = !!alreadyCorrect[soal.id] || (isSubmit && checkCorrect(soal.tipe, answers[soal.id], soal.answer));
+        const [bg, color, border] = isCurrent
+          ? ["#e84c2b", "white", "#e84c2b"]
+          : isCorrect
+          ? ["#e4f5f0", "#1a8a6e", "#bfe8dc"]
+          : isSubmit
+          ? ["#fef9ee", "#f5a623", "#fbe5b8"]
+          : ["var(--gs-surface)", "var(--gs-text-muted)", "var(--gs-border)"];
+        return (
+          <button
+            key={soal.id}
+            onClick={() => onJump(idx)}
+            style={{ ...btnBase, border: `1px solid ${border}`, background: bg, color }}
+          >
+            {soal.urutan}
+          </button>
+        );
+      })}
+
+      <button
+        onClick={() => onJump(navEnd)}
+        disabled={!hasNext}
+        style={{ ...btnBase, border: "1px solid var(--gs-border)", background: "var(--gs-surface)", color: hasNext ? "var(--gs-text-muted)" : "var(--gs-border)", cursor: hasNext ? "pointer" : "not-allowed" }}
+      >
+        <ChevronRight size={14} />
+      </button>
+    </div>
+  );
+}
+
 export default function PaketDetail() {
-  const { id }   = useParams();
+  const { id, urutan } = useParams();
   const navigate = useNavigate();
   const width    = useWindowWidth();
   const isMobile = width <= 480;
@@ -35,15 +95,14 @@ export default function PaketDetail() {
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState("");
 
-  // View: "list" | "soal"
-  const [view,        setView]        = useState("list");
-  const [currentIdx,  setCurrentIdx]  = useState(0);
+  // View "soal" kalau URL punya :urutan (/paket/:id/soal/:urutan), selain itu "list"
+  const view       = urutan ? "soal" : "list";
+  const currentIdx = urutan ? soalList.findIndex((s) => String(s.urutan) === urutan) : -1;
 
   // Per-soal state
   const [answers,        setAnswers]        = useState({}); // { soalId: chosen }
   const [submitted,      setSubmitted]      = useState({}); // { soalId: bool }
   const [alreadyCorrect, setAlreadyCorrect] = useState({}); // { soalId: bool }
-  const [showPembahasan, setShowPembahasan] = useState({}); // { soalId: bool }
 
   useEffect(() => {
     api.get(`/paket/${id}`)
@@ -69,17 +128,26 @@ export default function PaketDetail() {
         setAnswers(initAnswers);
         setSubmitted(initSubmitted);
         setAlreadyCorrect(initAlready);
+        // :urutan di URL tapi tidak cocok soal manapun di paket ini → balik ke daftar
+        if (urutan && !soal.some((s) => String(s.urutan) === urutan)) {
+          navigate(`/paket/${id}`, { replace: true });
+        }
       })
       .catch(() => setError("Paket tidak ditemukan atau belum dipublikasikan."))
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const currentSoal = soalList[currentIdx] ?? null;
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [urutan]);
+
+  const currentSoal = currentIdx >= 0 ? soalList[currentIdx] ?? null : null;
 
   const goToSoal = (idx) => {
-    setCurrentIdx(idx);
-    setView("soal");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const target = soalList[idx];
+    if (!target) return;
+    navigate(`/paket/${id}/soal/${target.urutan}`);
   };
 
   const handleSubmit = async () => {
@@ -100,10 +168,11 @@ export default function PaketDetail() {
     }
   };
 
-  const handleShowPembahasan = () => {
+  const handleRetry = () => {
     if (!currentSoal) return;
-    setSubmitted((s) => ({ ...s, [currentSoal.id]: true }));
-    setShowPembahasan((s) => ({ ...s, [currentSoal.id]: true }));
+    const soal = currentSoal;
+    setAnswers((a) => ({ ...a, [soal.id]: initChosen(soal.tipe) }));
+    setSubmitted((s) => ({ ...s, [soal.id]: false }));
   };
 
   if (loading) return (
@@ -122,7 +191,7 @@ export default function PaketDetail() {
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px", textAlign: "center" }}>
         <div>
           <div style={{ fontSize: "15px", fontWeight: "700", color: "var(--gs-text)", marginBottom: "8px" }}>{error || "Paket tidak ditemukan"}</div>
-          <button onClick={() => navigate("/paket")} style={{ fontSize: "13px", color: "#7c3aed", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
+          <button onClick={() => navigate("/paket")} style={{ fontSize: "13px", color: "#e84c2b", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
             ← Kembali ke daftar paket
           </button>
         </div>
@@ -138,7 +207,7 @@ export default function PaketDetail() {
       <SEO
         title={`${paket.nama}${paket.tahun ? ` ${paket.tahun}` : ""}`}
         description={paket.deskripsi || `${soalList.length} soal dari ${paket.nama}`}
-        url={`/paket/${id}`}
+        url={urutan ? `/paket/${id}/soal/${urutan}` : `/paket/${id}`}
       />
       <Navbar />
 
@@ -157,7 +226,7 @@ export default function PaketDetail() {
           <div style={{ position: "relative", zIndex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
               <button
-                onClick={() => view === "soal" ? setView("list") : navigate("/paket")}
+                onClick={() => view === "soal" ? navigate(`/paket/${id}`) : navigate("/paket")}
                 style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "32px", height: "32px", borderRadius: "9px", border: "1px solid rgba(255,255,255,.15)", background: "rgba(255,255,255,.08)", color: "rgba(255,255,255,.7)", cursor: "pointer" }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,.15)"; e.currentTarget.style.color = "white"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,.08)"; e.currentTarget.style.color = "rgba(255,255,255,.7)"; }}
@@ -189,7 +258,7 @@ export default function PaketDetail() {
               </div>
               {view === "soal" && (
                 <button
-                  onClick={() => setView("list")}
+                  onClick={() => navigate(`/paket/${id}`)}
                   style={{ display: "flex", alignItems: "center", gap: "6px", background: "rgba(255,255,255,.1)", color: "rgba(255,255,255,.85)", border: "1px solid rgba(255,255,255,.15)", borderRadius: "9px", padding: "8px 14px", fontSize: "13px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit" }}
                 >
                   <List size={14} /> Daftar Soal
@@ -213,14 +282,14 @@ export default function PaketDetail() {
                     display: "flex", alignItems: "center", gap: "12px",
                     background: "var(--gs-surface)", borderRadius: "13px",
                     border: "1px solid var(--gs-border)",
-                    borderLeft: `3px solid ${isCorrect ? "#1a8a6e" : isAnswered ? "#f5a623" : "#7c3aed"}`,
+                    borderLeft: `3px solid ${isCorrect ? "#1a8a6e" : isAnswered ? "#f5a623" : "#e84c2b"}`,
                     padding: isMobile ? "12px 14px" : "14px 18px",
                     cursor: "pointer", transition: "box-shadow .15s",
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,.06)"}
                   onMouseLeave={(e) => e.currentTarget.style.boxShadow = "none"}
                 >
-                  <div style={{ width: "32px", height: "32px", borderRadius: "9px", background: isCorrect ? "#e4f5f0" : isAnswered ? "#fef9ee" : "#f3f0ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "13px", fontWeight: "800", color: isCorrect ? "#1a8a6e" : isAnswered ? "#f5a623" : "#7c3aed" }}>
+                  <div style={{ width: "32px", height: "32px", borderRadius: "9px", background: isCorrect ? "#e4f5f0" : isAnswered ? "#fef9ee" : "#fff3f0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "13px", fontWeight: "800", color: isCorrect ? "#1a8a6e" : isAnswered ? "#f5a623" : "#e84c2b" }}>
                     {isCorrect ? <Check size={15} /> : soal.urutan}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -246,23 +315,25 @@ export default function PaketDetail() {
           const isSubmit      = !!submitted[soal.id];
           const alreadyOk     = !!alreadyCorrect[soal.id];
           const isCorrect     = alreadyOk || (isSubmit && checkCorrect(soal.tipe, chosen, soal.answer));
-          const showPemb      = !!showPembahasan[soal.id];
-
-          const pembShown = isSubmit || alreadyOk || showPemb;
 
           return (
             <div>
-              {/* Nomor soal */}
-              <div style={{ fontSize: "13px", fontWeight: "600", color: "var(--gs-text-muted)", marginBottom: "16px" }}>
-                Soal {soal.urutan} dari {soalList.length}
-              </div>
+              {/* Navigasi nomor soal */}
+              <SoalNumberNav
+                soalList={soalList}
+                currentIdx={currentIdx}
+                submitted={submitted}
+                alreadyCorrect={alreadyCorrect}
+                answers={answers}
+                onJump={goToSoal}
+              />
 
               <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "20px", alignItems: "start" }}>
                 {/* Panel Soal + Jawaban */}
                 <div style={{ background: "var(--gs-surface)", borderRadius: "16px", border: "1px solid var(--gs-border)", padding: isMobile ? "20px" : "32px", display: "flex", flexDirection: "column", gap: "20px" }}>
                   {/* Meta */}
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                    <span style={{ fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "99px", background: "#f3f0ff", color: "#7c3aed" }}>
+                    <span style={{ fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "99px", background: "#fff3f0", color: "#e84c2b" }}>
                       #{soal.urutan}
                     </span>
                     {soal.mapel && <span style={{ fontSize: "12px", color: "var(--gs-text-hint)" }}>{soal.mapel}</span>}
@@ -292,37 +363,39 @@ export default function PaketDetail() {
                     isCorrect={isCorrect}
                   />
 
-                  {/* Result banner */}
-                  {isSubmit && (
-                    <div style={{ padding: "12px 16px", borderRadius: "12px", border: `1px solid ${isCorrect ? "#6ee7b7" : "#fca5a5"}`, background: isCorrect ? "#e4f5f0" : "#fff3f0", fontSize: "14px", fontWeight: "700", color: isCorrect ? "#1a8a6e" : "#b91c1c", textAlign: "center" }}>
-                      {isCorrect ? "✓ Benar!" : "✗ Kurang tepat"}
-                    </div>
-                  )}
-
                   {/* Action buttons */}
-                  {!isSubmit && !alreadyOk && (
+                  {!alreadyOk && (
                     <div style={{ display: "flex", gap: "10px" }}>
-                      <button
-                        onClick={handleSubmit}
-                        disabled={!chosen && soal.tipe === "pilihan_ganda"}
-                        style={{
-                          flex: 1, padding: "12px", borderRadius: "12px", border: "none",
-                          background: "#e84c2b", color: "white", fontSize: "15px",
-                          fontWeight: "700", cursor: "pointer", fontFamily: "inherit",
-                          transition: "all .15s",
-                        }}
-                      >
-                        <Check size={15} style={{ verticalAlign: "middle", marginRight: "6px" }} />
-                        Periksa Jawaban
-                      </button>
-                      {soal.explanation && (
+                      {!isSubmit ? (
                         <button
-                          onClick={handleShowPembahasan}
-                          style={{ padding: "12px 16px", borderRadius: "12px", border: "1px solid var(--gs-border)", background: "var(--gs-surface)", color: "var(--gs-text-muted)", fontSize: "13px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}
+                          onClick={handleSubmit}
+                          disabled={!chosen && soal.tipe === "pilihan_ganda"}
+                          style={{
+                            flex: 1, padding: "12px", borderRadius: "12px", border: "none",
+                            background: "#e84c2b", color: "white", fontSize: "15px",
+                            fontWeight: "700", cursor: "pointer", fontFamily: "inherit",
+                            transition: "all .15s",
+                            display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+                          }}
                         >
-                          <Eye size={14} /> Lihat Pembahasan
+                          <Check size={15} />
+                          Periksa Jawaban
                         </button>
-                      )}
+                      ) : !isCorrect ? (
+                        <button
+                          onClick={handleRetry}
+                          style={{
+                            flex: 1, padding: "12px", borderRadius: "12px",
+                            border: "1px solid var(--gs-border)", background: "var(--gs-surface)",
+                            color: "var(--gs-text)", fontSize: "15px", fontWeight: "700",
+                            cursor: "pointer", fontFamily: "inherit",
+                            display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+                          }}
+                        >
+                          <RotateCcw size={15} />
+                          Coba Lagi
+                        </button>
+                      ) : null}
                     </div>
                   )}
                 </div>
@@ -332,10 +405,9 @@ export default function PaketDetail() {
                   {soal.explanation ? (
                     <PembahasanPanel
                       soal={soal}
-                      submitted={pembShown}
+                      submitted={isSubmit || alreadyOk}
                       isCorrect={isCorrect}
                       alreadyCorrect={alreadyOk}
-                      forceShow={showPemb}
                       user={user}
                       isMobile={isMobile}
                     />
@@ -359,13 +431,13 @@ export default function PaketDetail() {
                 {currentIdx < soalList.length - 1 ? (
                   <button
                     onClick={() => goToSoal(currentIdx + 1)}
-                    style={{ flex: 1, padding: "11px", borderRadius: "12px", border: "none", background: "#7c3aed", color: "white", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+                    style={{ flex: 1, padding: "11px", borderRadius: "12px", border: "none", background: "#e84c2b", color: "white", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                   >
                     Berikutnya <ChevronRight size={14} />
                   </button>
                 ) : (
                   <button
-                    onClick={() => setView("list")}
+                    onClick={() => navigate(`/paket/${id}`)}
                     style={{ flex: 1, padding: "11px", borderRadius: "12px", border: "none", background: "#1a8a6e", color: "white", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }}
                   >
                     Lihat Semua Soal

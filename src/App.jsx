@@ -143,6 +143,7 @@ export default function App() {
       <Route path="/materi/:id" element={<MateriDetail />} />
       <Route path="/paket" element={<PaketList />} />
       <Route path="/paket/:id" element={<PaketDetail />} />
+      <Route path="/paket/:id/soal/:urutan" element={<PaketDetail />} />
       <Route path="/latihan" element={<LatihanPage />} />
       <Route path="/latihan/:id" element={<LatihanDetail />} />
       <Route path="/latihan/:id/quiz" element={<QuizPage />} />
