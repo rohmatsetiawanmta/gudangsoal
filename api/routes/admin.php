@@ -167,7 +167,7 @@ if ($uri === '/admin/soal' && $method === 'GET') {
   $where  = ['s.is_exclusive = 0'];
   $params = [];
 
-  if ($search)                 { $where[] = 's.body LIKE ?';         $params[] = "%$search%"; }
+  if ($search)                 { $where[] = '(s.body LIKE ? OR s.kode LIKE ?)'; $params[] = "%$search%"; $params[] = "%$search%"; }
   if ($difficulty !== null)    { $where[] = 's.difficulty = ?';      $params[] = $difficulty; }
   if ($published  !== null)    { $where[] = 's.is_published = ?';    $params[] = $published;  }
   if ($subtopik_id !== null)   { $where[] = 's.subtopik_id = ?';    $params[] = $subtopik_id; }

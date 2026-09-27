@@ -134,7 +134,7 @@ function BulkBar({ count, onDelete, onClear }) {
 
 // ── Filter chip ───────────────────────────────────────────────────────────────
 
-function FilterChip({ label, active, color = "#e84c2b", onClick, count }) {
+export function FilterChip({ label, active, color = "#e84c2b", onClick, count }) {
   return (
     <button onClick={onClick}
       style={{
@@ -251,7 +251,7 @@ function StrukturTreePanel({ struktur, filterSubtopikId, onChange, countKey = "j
 
 // ── SubtopikFilter ────────────────────────────────────────────────────────────
 
-function SubtopikFilter({ struktur, filterSubtopikId, onChange }) {
+export function SubtopikFilter({ struktur, filterSubtopikId, onChange }) {
   const [query, setQuery]   = useState("");
   const [open, setOpen]     = useState(false);
   const ref                 = useRef(null);
