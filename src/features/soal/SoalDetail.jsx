@@ -7,6 +7,7 @@ import {
   Flag,
   Share2,
   PenTool,
+  Pencil,
   Check,
   Eye,
   Bookmark,
@@ -16,6 +17,7 @@ import {
   TrendingUp,
   Mail,
   X,
+  Tag,
 } from "lucide-react";
 
 import MathRenderer from "../../components/MathRenderer";
@@ -24,6 +26,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
 import useWindowWidth from "../../hooks/useWindowWidth";
+import { usePresence } from "../../hooks/usePresence";
 import { getSoalDetail, getSoalStatus } from "./soalApi";
 import { saveSession } from "../profile/profileApi";
 import { useAuthStore } from "../auth/authStore";
@@ -189,6 +192,7 @@ function SoalStatsCard({ stats, isMobile }) {
 
 export default function SoalDetail() {
   const { kode } = useParams();
+  const activeCount = usePresence(`soal/${kode}`);
   const { state } = useLocation();
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -334,7 +338,7 @@ export default function SoalDetail() {
           difficulty: soal.difficulty,
           is_correct: isCorrect ? 1 : 0,
         });
-      } catch {}
+      } catch { /* diabaikan: best-effort, boleh gagal senyap */ }
     }
     try {
       const data = await getSoalDetail(kode);
@@ -342,7 +346,7 @@ export default function SoalDetail() {
         ...data,
         answer: normalizeAnswer(data.tipe, data.answer),
       });
-    } catch {}
+    } catch { /* diabaikan: best-effort, boleh gagal senyap */ }
   };
 
   const soalUrl    = `https://gudangsoal.com/soal/${kode}`;
@@ -355,7 +359,7 @@ export default function SoalDetail() {
     try {
       const json = await api.post("/soal/share", { kode, platform });
       if (json.share_count !== undefined) setShareCount(json.share_count);
-    } catch {}
+    } catch { /* diabaikan: best-effort, boleh gagal senyap */ }
   };
 
   const handleCopy = () => {
@@ -385,7 +389,7 @@ export default function SoalDetail() {
         await addBookmark(soal.id);
         setBookmarked(true);
       }
-    } catch {
+    } catch { /* diabaikan: best-effort, boleh gagal senyap */
     } finally {
       setBookmarkLoading(false);
     }
@@ -552,61 +556,71 @@ export default function SoalDetail() {
               <h1 style={{ fontSize: isMobile ? "21px" : "26px", fontWeight: "800", color: "white", letterSpacing: "-0.5px", margin: "0 0 14px", lineHeight: 1.25 }}>
                 Soal {subtopikNama || topikNama || mapelNama || `#${kode}`}
               </h1>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
-                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
-                  {jenjangNama && (
-                    <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: "#6ee7b7", background: "rgba(110,231,183,.12)" }}>
-                      {jenjangNama}
-                    </span>
-                  )}
-                  {mapelNama && (
-                    <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: "rgba(255,255,255,.7)", background: "rgba(255,255,255,.1)" }}>
-                      {mapelNama}
-                    </span>
-                  )}
-                  <span style={{ fontSize: "11px", fontWeight: "600", padding: "3px 9px", borderRadius: "6px", color: "rgba(255,255,255,.4)", background: "rgba(255,255,255,.06)", fontFamily: "monospace", letterSpacing: ".04em" }}>
-                    #{kode}
+              {/* Baris 1 — info chips */}
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center", marginBottom: "10px" }}>
+                {jenjangNama && (
+                  <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: "#6ee7b7", background: "rgba(110,231,183,.12)" }}>
+                    {jenjangNama}
                   </span>
-                  {soal.difficulty && (() => {
-                    const d = soal.difficulty;
-                    const [c, bg] = d === "easy" ? ["#6ee7b7","rgba(110,231,183,.12)"] : d === "hard" ? ["#fca5a5","rgba(252,165,165,.12)"] : ["#fcd34d","rgba(252,211,77,.12)"];
-                    const label = d === "easy" ? "Mudah" : d === "hard" ? "Sulit" : "Sedang";
-                    return <span key="diff" style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: c, background: bg }}>{label}</span>;
-                  })()}
+                )}
+                {mapelNama && (
+                  <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: "rgba(255,255,255,.7)", background: "rgba(255,255,255,.1)" }}>
+                    {mapelNama}
+                  </span>
+                )}
+                {soal.difficulty && (() => {
+                  const d = soal.difficulty;
+                  const [c, bg] = d === "easy" ? ["#6ee7b7","rgba(110,231,183,.12)"] : d === "hard" ? ["#fca5a5","rgba(252,165,165,.12)"] : ["#fcd34d","rgba(252,211,77,.12)"];
+                  const label = d === "easy" ? "Mudah" : d === "hard" ? "Sulit" : "Sedang";
+                  return <span key="diff" style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: c, background: bg }}>{label}</span>;
+                })()}
+              </div>
+
+              {/* Baris 2 — stats + actions */}
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "8px", background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.1)" }}>
+                  <Eye size={13} color="rgba(255,255,255,.5)" />
+                  <span style={{ fontSize: "12px", fontWeight: "600", color: "rgba(255,255,255,.6)" }}>
+                    {parseInt(soal.view_count ?? soal.views ?? 0).toLocaleString()}
+                  </span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "8px", background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.1)" }}>
-                    <Eye size={13} color="rgba(255,255,255,.5)" />
-                    <span style={{ fontSize: "12px", fontWeight: "600", color: "rgba(255,255,255,.6)" }}>
-                      {parseInt(soal.view_count ?? soal.views ?? 0).toLocaleString()}
+                {activeCount > 0 && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "5px 12px", borderRadius: "8px", background: "rgba(110,231,183,.15)", border: "1px solid rgba(110,231,183,.3)" }}>
+                    <span className="presence-dot" />
+                    <span style={{ fontSize: "12px", fontWeight: "600", color: "#6ee7b7" }}>
+                      {isMobile ? activeCount : `${activeCount} orang sedang mengerjakan`}
                     </span>
                   </div>
-                  <button
-                    onClick={() => setShareOpen(true)}
-                    title="Bagikan"
-                    style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "8px", background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.1)", cursor: "pointer", fontFamily: "inherit" }}
-                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.13)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.07)"; }}
-                  >
-                    <Share2 size={13} color="rgba(255,255,255,.5)" />
-                    {shareCount > 0 && <span style={{ fontSize: "12px", fontWeight: "600", color: "rgba(255,255,255,.6)" }}>{shareCount.toLocaleString("id-ID")}</span>}
-                  </button>
-                  {user && (
-                    <ActionBtn
-                      onClick={handleBookmark}
-                      icon={bookmarked ? BookmarkCheck : Bookmark}
-                      title={bookmarked ? "Hapus bookmark" : "Simpan soal"}
-                      active={bookmarked}
-                      activeColor="#e84c2b"
-                      activeBg="#fff3f0"
-                      activeBorder="#fca5a5"
-                    />
-                  )}
-                  <ActionBtn onClick={() => setReportOpen(true)} icon={Flag} title="Laporkan soal" danger />
-                  {user?.role === "admin" && (
+                )}
+                <div style={{ width: "1px", height: "16px", background: "rgba(255,255,255,.12)", margin: "0 2px" }} />
+                <button
+                  onClick={() => setShareOpen(true)}
+                  title="Bagikan"
+                  style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "8px", background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.1)", cursor: "pointer", fontFamily: "inherit" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.13)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.07)"; }}
+                >
+                  <Share2 size={13} color="rgba(255,255,255,.5)" />
+                  {shareCount > 0 && <span style={{ fontSize: "12px", fontWeight: "600", color: "rgba(255,255,255,.6)" }}>{shareCount.toLocaleString("id-ID")}</span>}
+                </button>
+                {user && (
+                  <ActionBtn
+                    onClick={handleBookmark}
+                    icon={bookmarked ? BookmarkCheck : Bookmark}
+                    title={bookmarked ? "Hapus bookmark" : "Simpan soal"}
+                    active={bookmarked}
+                    activeColor="#e84c2b"
+                    activeBg="#fff3f0"
+                    activeBorder="#fca5a5"
+                  />
+                )}
+                <ActionBtn onClick={() => setReportOpen(true)} icon={Flag} title="Laporkan soal" danger />
+                {user?.role === "admin" && (
+                  <>
+                    <ActionBtn onClick={() => navigate(`/admin/soal/edit/${soal.id}`)} icon={Pencil} title="Edit soal ini" />
                     <ActionBtn onClick={() => navigate(`/admin/whiteboard/by-question/${kode}`)} icon={PenTool} title="Buka whiteboard soal ini" />
-                  )}
-                </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -631,6 +645,23 @@ export default function SoalDetail() {
                 gap: "20px",
               }}
             >
+              {/* Tags */}
+              {soal.tags && soal.tags.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                  {soal.tags.map((tag, i) => (
+                    <span key={i} style={{
+                      display: "inline-flex", alignItems: "center", gap: "5px",
+                      padding: "3px 10px", borderRadius: "99px",
+                      background: "var(--gs-bg)", border: "1px solid var(--gs-border)",
+                      fontSize: "11px", fontWeight: "600", color: "var(--gs-text-muted)",
+                    }}>
+                      <Tag size={9} />
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               {/* Body */}
               <div
                 style={{

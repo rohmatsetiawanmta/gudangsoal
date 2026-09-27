@@ -194,6 +194,7 @@ export default function LandingPage() {
             }}>
               {[
                 { value: stats?.total_soal, label: "Soal tersedia" },
+                { value: stats?.total_materi, label: "Materi tersedia" },
                 { value: stats?.total_subtopik, label: "Subtopik" },
                 { value: stats?.total_jenjang, label: "Jenjang" },
               ].map((s) => (
@@ -391,7 +392,7 @@ export default function LandingPage() {
             {[
               {
                 step: "01", label: "Daftar gratis",
-                desc: "Buat akun dalam hitungan detik. Tidak perlu kartu kredit.",
+                desc: "Daftar dalam hitungan detik, langsung bisa latihan.",
                 icon: Users, color: "#e84c2b",
               },
               {
@@ -494,7 +495,7 @@ export default function LandingPage() {
             }}>
               <CheckCircle size={13} color="#6ee7b7" />
               <span style={{ fontSize: "13px", fontWeight: "600", color: "#6ee7b7" }}>
-                Gratis selamanya
+                Mulai gratis sekarang
               </span>
             </div>
 
@@ -510,7 +511,7 @@ export default function LandingPage() {
               color: "rgba(255,255,255,.5)",
               marginBottom: "32px", lineHeight: "1.7",
             }}>
-              Bergabung dengan Gudang Soal. Gratis, tanpa syarat.
+              Bergabung dengan ribuan pelajar di Gudang Soal.
             </p>
             <button
               onClick={() => navigate("/register")}

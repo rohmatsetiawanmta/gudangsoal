@@ -1,12 +1,16 @@
 // src/features/admin/AdminSoalImport.jsx
 import { useState } from "react";
-import { Upload, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Upload, X, Loader } from "lucide-react";
+import api from "../../lib/api";
 
 export default function AdminSoalImport({ setForm, isMobile }) {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [jsonInput, setJsonInput] = useState("");
   const [error, setError] = useState("");
   const [snippet, setSnippet] = useState("");
+  const [validating, setValidating] = useState(false);
 
   const parseDifficulty = (val) => {
     if (val === undefined || val === null) return null;
@@ -25,7 +29,26 @@ export default function AdminSoalImport({ setForm, isMobile }) {
     return VALID_TIPE.includes(v) ? v : null;
   };
 
-  const handleImport = () => {
+  const buildFormFields = (parsed, fallback = {}) => {
+    const difficulty = parseDifficulty(parsed.difficulty);
+    const tipe = parseTipe(parsed.tipe);
+    let explanation = parsed.explanation || "";
+    if (typeof explanation === "object" && explanation !== null) {
+      explanation = JSON.stringify(explanation);
+    }
+    return {
+      body: parsed.body,
+      options: parsed.options,
+      answer: parsed.answer,
+      explanation,
+      tipe: tipe || fallback.tipe || "pilihan_ganda",
+      difficulty: difficulty !== null ? difficulty : (fallback.difficulty ?? 1),
+      video_url: parsed.video_url || fallback.video_url || "",
+      materi_ids: Array.isArray(parsed.materi_ids) ? parsed.materi_ids : (fallback.materi_ids || []),
+    };
+  };
+
+  const handleImport = async () => {
     setError("");
     setSnippet("");
     if (!jsonInput.trim()) {
@@ -43,16 +66,48 @@ export default function AdminSoalImport({ setForm, isMobile }) {
         setError("JSON tidak lengkap — harus ada body, options, dan answer");
         return;
       }
-      const difficulty = parseDifficulty(parsed.difficulty);
-      const tipe = parseTipe(parsed.tipe);
+
+      // === Mode: Edit (ada id DAN kode) ===
+      if (parsed.id && parsed.kode) {
+        setValidating(true);
+        try {
+          const data = await api.get(`/admin/soal/detail?id=${parsed.id}`);
+          if (data.kode !== String(parsed.kode)) {
+            setError(
+              `Kode tidak cocok — soal ID ${parsed.id} di database punya kode "${data.kode}", bukan "${parsed.kode}"`
+            );
+            return;
+          }
+          // Valid → navigate ke edit page dengan import data di state
+          navigate(`/admin/soal/edit/${parsed.id}`, {
+            state: { importData: buildFormFields(parsed) },
+          });
+          setOpen(false);
+          setJsonInput("");
+        } catch (e) {
+          const status = e?.status || e?.response?.status;
+          if (status === 404) {
+            setError(`Soal dengan ID ${parsed.id} tidak ditemukan di database`);
+          } else {
+            setError("Gagal validasi soal — " + (e?.error || e?.message || "error tidak diketahui"));
+          }
+        } finally {
+          setValidating(false);
+        }
+        return;
+      }
+
+      // === Mode: Tambah baru (tidak ada id/kode) ===
+      const fields = buildFormFields(parsed);
       setForm((f) => ({
         ...f,
-        body: parsed.body,
-        options: parsed.options,
-        answer: parsed.answer,
-        explanation: parsed.explanation || "",
-        ...(difficulty !== null && { difficulty }),
-        ...(tipe !== null && { tipe }),
+        body: fields.body,
+        options: fields.options,
+        answer: fields.answer,
+        explanation: fields.explanation,
+        ...(fields.tipe !== "pilihan_ganda" && { tipe: fields.tipe }),
+        difficulty: fields.difficulty,
+        ...(fields.materi_ids.length > 0 && { materi_ids: fields.materi_ids }),
       }));
       setOpen(false);
       setJsonInput("");
@@ -305,23 +360,24 @@ export default function AdminSoalImport({ setForm, isMobile }) {
               <button
                 type="button"
                 onClick={handleImport}
-                disabled={!jsonInput.trim()}
+                disabled={!jsonInput.trim() || validating}
                 style={{
                   padding: "9px 20px",
                   borderRadius: "10px",
                   border: "none",
-                  background: !jsonInput.trim() ? "#e2ddd5" : "#0f0e17",
-                  color: !jsonInput.trim() ? "#b4b2a9" : "white",
+                  background: !jsonInput.trim() || validating ? "#e2ddd5" : "#0f0e17",
+                  color: !jsonInput.trim() || validating ? "#b4b2a9" : "white",
                   fontSize: "14px",
                   fontWeight: "600",
-                  cursor: !jsonInput.trim() ? "not-allowed" : "pointer",
+                  cursor: !jsonInput.trim() || validating ? "not-allowed" : "pointer",
                   fontFamily: "inherit",
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
                 }}
               >
-                <Upload size={15} /> Import ke Form
+                {validating ? <Loader size={15} style={{ animation: "spin 0.7s linear infinite" }} /> : <Upload size={15} />}
+                {validating ? "Memvalidasi..." : "Import ke Form"}
               </button>
             </div>
           </div>

@@ -12,6 +12,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.3.0",
     "axios": "^1.7.0",
+    "firebase": "^12.18.0",
     "katex": "^0.16.9",
     "lucide-react": "^0.483.0",
     "marked": "^18.0.4",

@@ -1,7 +1,7 @@
 // src/features/admin/soal-form/index.jsx
 import { useEffect, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Eye, EyeOff, AlertCircle, ArrowLeft, Save, PlusCircle, Globe, EyeOff as Unpublish } from "lucide-react";
+import { useNavigate, useParams, useSearchParams, useLocation } from "react-router-dom";
+import { Eye, EyeOff, AlertCircle, ArrowLeft, Save, PlusCircle, Globe, EyeOff as Unpublish, Tag, X } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import api from "../../../lib/api";
 import useWindowWidth from "../../../hooks/useWindowWidth";
@@ -66,6 +66,7 @@ const TIPE_ANSWER_LABEL = {
 export default function AdminSoalForm() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const location = useLocation();
   const isEdit = !!id;
   const width = useWindowWidth();
   const isMobile = width <= 480;
@@ -95,6 +96,7 @@ export default function AdminSoalForm() {
   const [materiList, setMateriList] = useState([]);
   const [isPublished, setIsPublished] = useState(false);
   const [publishLoading, setPublishLoading] = useState(false);
+  const [tagInput, setTagInput] = useState("");
 
   // Load struktur
   useEffect(() => {
@@ -111,33 +113,34 @@ export default function AdminSoalForm() {
     api
       .get(`/admin/soal/detail?id=${id}`)
       .then((data) => {
-        let answer = data.answer;
-        if (data.tipe === "menjodohkan" && Array.isArray(answer)) {
+        const imp = location.state?.importData;
+
+        // Use import data for content fields if present, else use DB data
+        const tipe = imp?.tipe ?? data.tipe ?? "pilihan_ganda";
+        let answer = imp?.answer ?? data.answer;
+        if (tipe === "menjodohkan" && Array.isArray(answer)) {
           const obj = {};
-          answer.forEach((rIdx, lIdx) => {
-            obj[String(lIdx)] = String(rIdx);
-          });
+          answer.forEach((rIdx, lIdx) => { obj[String(lIdx)] = String(rIdx); });
           answer = obj;
         }
 
         setIsPublished(data.is_published == 1);
         setForm({
-          subtopik_id: data.subtopik_id,
-          tipe: data.tipe || "pilihan_ganda",
-          body: data.body,
-          options: data.options,
-          answer: answer,
-          explanation: data.explanation || "",
-          difficulty: data.difficulty,
-          video_url: data.video_url || "",
+          subtopik_id:           data.subtopik_id,
+          tipe,
+          body:                  imp?.body ?? data.body,
+          options:               imp?.options ?? data.options,
+          answer,
+          explanation:           imp?.explanation ?? data.explanation ?? "",
+          difficulty:            imp?.difficulty ?? data.difficulty,
+          video_url:             imp?.video_url ?? data.video_url ?? "",
           is_public_explanation: data.is_public_explanation ?? 0,
-          materi_ids: Array.isArray(data.materi_ids) ? data.materi_ids : [],
+          materi_ids:            imp ? (Array.isArray(imp.materi_ids) ? imp.materi_ids : []) : (Array.isArray(data.materi_ids) ? data.materi_ids : []),
+          tags:                  imp ? (Array.isArray(imp.tags) ? imp.tags : []) : (Array.isArray(data.tags) ? data.tags : []),
         });
 
         // Reconstruct selected dari subtopik_id
-        const subtopik = struktur.subtopik.find(
-          (s) => s.id == data.subtopik_id
-        );
+        const subtopik = struktur.subtopik.find((s) => s.id == data.subtopik_id);
         if (!subtopik) return;
         const topik = struktur.topik.find((t) => t.id == subtopik.topik_id);
         if (!topik) return;
@@ -151,6 +154,9 @@ export default function AdminSoalForm() {
           mapel: mapel.id,
           topik: topik.id,
         });
+
+        // Clear import state so refresh doesn't re-apply it
+        if (imp) navigate(location.pathname, { replace: true, state: null });
       })
       .catch(() => setError("Gagal memuat soal"));
   }, [id, struktur.subtopik.length]);
@@ -158,8 +164,8 @@ export default function AdminSoalForm() {
   // Fetch materi saat subtopik_id berubah
   useEffect(() => {
     if (!form.subtopik_id) { setMateriList([]); return; }
-    api.get(`/browse/materi?subtopik_id=${form.subtopik_id}`)
-      .then(data => setMateriList(Array.isArray(data) ? data : []))
+    api.get(`/admin/materi?subtopik_id=${form.subtopik_id}&limit=100`)
+      .then(data => setMateriList(Array.isArray(data?.data) ? data.data : []))
       .catch(() => setMateriList([]));
   }, [form.subtopik_id]);
 
@@ -404,6 +410,73 @@ export default function AdminSoalForm() {
               </div>
             </SectionCard>
           )}
+
+          {/* Tags */}
+          <SectionCard label="Tags" accent="#7c3aed" isMobile={isMobile}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <p style={{ fontSize: "12px", color: "#6b6860", margin: 0 }}>
+                Tambah tag seperti "OSK SMA 2025", "UTBK 2024", "OSN Matematika". Enter atau koma untuk konfirmasi.
+              </p>
+              {/* Chip list */}
+              {(form.tags || []).length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                  {(form.tags || []).map((tag, i) => (
+                    <span key={i} style={{
+                      display: "inline-flex", alignItems: "center", gap: "5px",
+                      padding: "4px 10px", borderRadius: "99px",
+                      background: "#ede9fe", border: "1px solid #c4b5fd",
+                      fontSize: "12px", fontWeight: "600", color: "#6d28d9",
+                    }}>
+                      <Tag size={10} />
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, tags: f.tags.filter((_, j) => j !== i) }))}
+                        style={{ background: "none", border: "none", cursor: "pointer", padding: "0 0 0 2px", lineHeight: 1, color: "#7c3aed", display: "flex", alignItems: "center" }}
+                      >
+                        <X size={11} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              {/* Input */}
+              <div style={{ display: "flex", gap: "8px" }}>
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={e => setTagInput(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === "Enter" || e.key === ",") {
+                      e.preventDefault();
+                      const val = tagInput.trim().replace(/,$/, "");
+                      if (val && !(form.tags || []).includes(val)) {
+                        setForm(f => ({ ...f, tags: [...(f.tags || []), val] }));
+                      }
+                      setTagInput("");
+                    } else if (e.key === "Backspace" && !tagInput && (form.tags || []).length > 0) {
+                      setForm(f => ({ ...f, tags: f.tags.slice(0, -1) }));
+                    }
+                  }}
+                  placeholder="Ketik tag lalu Enter..."
+                  style={{
+                    flex: 1, padding: "9px 12px", borderRadius: "9px",
+                    border: "1.5px solid #e2ddd5", fontSize: "13px",
+                    fontFamily: "inherit", outline: "none",
+                  }}
+                  onFocus={e => e.target.style.borderColor = "#7c3aed"}
+                  onBlur={e => {
+                    e.target.style.borderColor = "#e2ddd5";
+                    const val = tagInput.trim().replace(/,$/, "");
+                    if (val && !(form.tags || []).includes(val)) {
+                      setForm(f => ({ ...f, tags: [...(f.tags || []), val] }));
+                      setTagInput("");
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </SectionCard>
 
           {/* Mobile: toggle preview */}
           {isMobile && (

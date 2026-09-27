@@ -30,6 +30,8 @@ if (str_starts_with($uri, '/auth/')) {
   require 'routes/browse.php';
 } elseif (str_starts_with($uri, '/admin/quiz')) {
   require 'routes/quiz.php';
+} elseif (str_starts_with($uri, '/admin/paket')) {
+  require 'routes/admin.php';
 } elseif (str_starts_with($uri, '/admin/')) {
   require 'routes/admin.php';
 } elseif (str_starts_with($uri, '/profile')) {
@@ -54,7 +56,11 @@ if (str_starts_with($uri, '/auth/')) {
   require 'routes/game.php';
 } elseif (str_starts_with($uri, '/materi')) {
   require 'routes/materi.php';
+} elseif (str_starts_with($uri, '/paket')) {
+  require 'routes/paket.php';
 } elseif (str_starts_with($uri, '/soal')) {
+  require 'routes/browse.php';
+} elseif ($uri === '/settings') {
   require 'routes/browse.php';
 } else {
   http_response_code(404);

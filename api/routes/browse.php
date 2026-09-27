@@ -266,6 +266,7 @@ if ($uri === '/browse/soal/detail' && $method === 'GET') {
     $soal['materi_terkait'] = [];
   }
   unset($soal['materi_ids']);
+  $soal['tags'] = $soal['tags'] ? json_decode($soal['tags']) : [];
 
   // Stats soal
   $stmt = $pdo->prepare('
@@ -494,12 +495,14 @@ if ($uri === '/browse/stats' && $method === 'GET') {
   $totalUser     = $pdo->query('SELECT COUNT(*) FROM users WHERE role = "user"')->fetchColumn();
   $totalJenjang  = $pdo->query('SELECT COUNT(*) FROM jenjang WHERE is_published = 1')->fetchColumn();
   $totalSubtopik = $pdo->query('SELECT COUNT(*) FROM subtopik WHERE is_published = 1')->fetchColumn();
+  $totalMateri   = $pdo->query('SELECT COUNT(*) FROM materi WHERE is_published = 1')->fetchColumn();
 
   echo json_encode([
     'total_soal'     => (int) $totalSoal,
     'total_user'     => (int) $totalUser,
     'total_jenjang'  => (int) $totalJenjang,
     'total_subtopik' => (int) $totalSubtopik,
+    'total_materi'   => (int) $totalMateri,
   ]);
   exit;
 }
@@ -770,5 +773,14 @@ if ($uri === '/browse/materi/list' && $method === 'GET') {
     'page'  => $page,
     'limit' => $limit,
   ]);
+  exit;
+}
+
+// GET /settings — public site settings (menu visibility, etc.)
+if ($uri === '/settings' && $method === 'GET') {
+  $rows = $pdo->query("SELECT `key`, `value` FROM site_settings")->fetchAll();
+  $out = [];
+  foreach ($rows as $r) $out[$r['key']] = (bool)(int)$r['value'];
+  echo json_encode($out);
   exit;
 }

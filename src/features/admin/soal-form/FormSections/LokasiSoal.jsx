@@ -2,6 +2,22 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Search, X, ChevronRight } from "lucide-react";
 
+const Crumb = ({ text, dim }) => (
+  <span style={{ fontSize: "11px", color: dim ? "#b4b2a9" : "#6b6860", fontWeight: dim ? 400 : 500 }}>
+    {text}
+  </span>
+);
+
+const Breadcrumb = ({ st, large }) => (
+  <div style={{ display: "flex", alignItems: "center", gap: "4px", flexWrap: "wrap" }}>
+    {st.jenjang?.nama  && <><Crumb text={st.jenjang.nama} dim /><ChevronRight size={10} color="#d4d0c8" /></>}
+    {st.subj?.nama     && <><Crumb text={st.subj.nama}    dim /><ChevronRight size={10} color="#d4d0c8" /></>}
+    {st.mapel?.nama    && <><Crumb text={st.mapel.nama}   dim /><ChevronRight size={10} color="#d4d0c8" /></>}
+    {st.topik?.nama    && <><Crumb text={st.topik.nama}   dim /><ChevronRight size={10} color="#d4d0c8" /></>}
+    <span style={{ fontSize: large ? "14px" : "12px", fontWeight: "700", color: "#0f0e17" }}>{st.nama}</span>
+  </div>
+);
+
 export default function LokasiSoal({
   form,
   setForm,
@@ -87,22 +103,6 @@ export default function LokasiSoal({
     setQuery("");
     setTimeout(() => inputRef.current?.focus(), 50);
   };
-
-  const Crumb = ({ text, dim }) => (
-    <span style={{ fontSize: "11px", color: dim ? "#b4b2a9" : "#6b6860", fontWeight: dim ? 400 : 500 }}>
-      {text}
-    </span>
-  );
-
-  const Breadcrumb = ({ st, large }) => (
-    <div style={{ display: "flex", alignItems: "center", gap: "4px", flexWrap: "wrap" }}>
-      {st.jenjang?.nama  && <><Crumb text={st.jenjang.nama} dim /><ChevronRight size={10} color="#d4d0c8" /></>}
-      {st.subj?.nama     && <><Crumb text={st.subj.nama}    dim /><ChevronRight size={10} color="#d4d0c8" /></>}
-      {st.mapel?.nama    && <><Crumb text={st.mapel.nama}   dim /><ChevronRight size={10} color="#d4d0c8" /></>}
-      {st.topik?.nama    && <><Crumb text={st.topik.nama}   dim /><ChevronRight size={10} color="#d4d0c8" /></>}
-      <span style={{ fontSize: large ? "14px" : "12px", fontWeight: "700", color: "#0f0e17" }}>{st.nama}</span>
-    </div>
-  );
 
   return (
     <div>

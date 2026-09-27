@@ -24,6 +24,7 @@ export default function MathRenderer({ text = "", block = false }) {
 
   useEffect(() => {
     if (!ref.current || !text) return;
+    if (typeof text !== "string") return;
 
     // 1. Parse custom image syntax [FILENAME|width] atau [FILENAME]
     let processed = text.replace(

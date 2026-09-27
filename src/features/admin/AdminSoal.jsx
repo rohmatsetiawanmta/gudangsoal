@@ -3,8 +3,8 @@ import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Plus, Search, Pencil, Trash2,
-  ChevronLeft, ChevronRight, Eye, Copy, Loader2, FileJson,
-  MoreHorizontal, X, BookOpen, Filter,
+  ChevronLeft, ChevronRight, Eye, Copy, Loader2, FileJson, Download,
+  MoreHorizontal, X, BookOpen, Filter, Tag,
 } from "lucide-react";
 import api from "../../lib/api";
 import MathRenderer from "../../components/MathRenderer";
@@ -423,11 +423,36 @@ export default function AdminSoal() {
   const [bulkDeleting, setBulkDeleting]     = useState(false);
   const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
   const [openMateriId, setOpenMateriId] = useState(null);
+  const [exporting, setExporting]     = useState(false);
+  const [exportError, setExportError] = useState("");
 
   const [limit, setLimit] = useState(10);
   const currentIds = soal.map(s => s.id);
   const allOnPageSelected = currentIds.length > 0 && currentIds.every(id => selected.has(id));
   const someOnPageSelected = currentIds.some(id => selected.has(id)) && !allOnPageSelected;
+
+  const handleExport = async () => {
+    setExporting(true); setExportError("");
+    try {
+      const params = new URLSearchParams({
+        ...(filterSubtopikId && { subtopik_id: filterSubtopikId }),
+        ...(filterSearch     && { search:      filterSearch }),
+        ...(filterDiff       && { difficulty:  filterDiff }),
+        ...(filterPub !== "" && { published:   filterPub }),
+      });
+      const data = await api.get(`/admin/soal/export?${params}`);
+      if (!data?.length) { setExportError("Tidak ada soal yang cocok dengan filter saat ini."); return; }
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      const subtopikNama = struktur.subtopik.find(s => s.id == filterSubtopikId)?.nama;
+      a.download = subtopikNama ? `soal-${subtopikNama.toLowerCase().replace(/\s+/g, "-")}.json` : "soal-export.json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch(e) {
+      setExportError(e?.error || e?.message || "Gagal export.");
+    } finally { setExporting(false); }
+  };
 
   const fetchSoal = useCallback(() => {
     setLoading(true);
@@ -506,7 +531,7 @@ export default function AdminSoal() {
       setDeleteId(null);
       setSelected(prev => { const n = new Set(prev); n.delete(deleteId); return n; });
       fetchSoal();
-    } catch {} finally { setDeleting(false); }
+    } catch { /* diabaikan: best-effort, boleh gagal senyap */ } finally { setDeleting(false); }
   };
 
   const handleBulkDelete = async () => {
@@ -606,6 +631,12 @@ export default function AdminSoal() {
           </div>
 
           <div style={{ display: "flex", gap: "8px", width: isMobile ? "100%" : "auto", flexShrink: 0 }}>
+            <button onClick={handleExport} disabled={exporting}
+              style={{ display: "flex", alignItems: "center", gap: "7px", background: "rgba(255,255,255,.1)", color: "rgba(255,255,255,.85)", border: "1px solid rgba(255,255,255,.15)", borderRadius: "10px", padding: "10px 16px", fontSize: "13.5px", fontWeight: "600", cursor: exporting ? "not-allowed" : "pointer", fontFamily: "inherit", flex: isMobile ? 1 : "none", justifyContent: "center", transition: "all .15s", opacity: exporting ? 0.6 : 1 }}
+              onMouseEnter={e => { if (!exporting) { e.currentTarget.style.background = "rgba(255,255,255,.18)"; e.currentTarget.style.color = "white"; }}}
+              onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.1)"; e.currentTarget.style.color = "rgba(255,255,255,.85)"; }}>
+              <Download size={14} /> {exporting ? "Mengunduh..." : "Export JSON"}
+            </button>
             <button onClick={() => navigate(filterSubtopikId ? `/admin/soal/bulk-import?subtopik=${filterSubtopikId}` : "/admin/soal/bulk-import")}
               style={{ display: "flex", alignItems: "center", gap: "7px", background: "rgba(255,255,255,.1)", color: "rgba(255,255,255,.85)", border: "1px solid rgba(255,255,255,.15)", borderRadius: "10px", padding: "10px 16px", fontSize: "13.5px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", flex: isMobile ? 1 : "none", justifyContent: "center", transition: "all .15s" }}
               onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.18)"; e.currentTarget.style.color = "white"; }}
@@ -621,6 +652,13 @@ export default function AdminSoal() {
           </div>
         </div>
       </div>
+
+      {exportError && (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", background: "#fff3f0", border: "1px solid #fca5a5", borderRadius: "10px", padding: "10px 16px", marginBottom: "16px" }}>
+          <span style={{ fontSize: "13px", color: "#b91c1c", fontWeight: "500" }}>{exportError}</span>
+          <button onClick={() => setExportError("")} style={{ background: "none", border: "none", cursor: "pointer", color: "#b91c1c", display: "flex", padding: 0, flexShrink: 0 }}><X size={14} /></button>
+        </div>
+      )}
 
       {/* ── Two-column: Tree + Content ── */}
       <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
@@ -847,6 +885,11 @@ export default function AdminSoal() {
                   <span style={{ fontSize: "10.5px", fontWeight: "700", padding: "2px 7px", borderRadius: "5px", background: s.is_published == 1 ? "#e4f5f0" : "#f2efe8", color: s.is_published == 1 ? "#1a8a6e" : "#9b9992" }}>
                     {s.is_published == 1 ? "Published" : "Draft"}
                   </span>
+                  {s.tags && s.tags.map((tag, ti) => (
+                    <span key={ti} style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", fontWeight: "600", padding: "2px 6px", borderRadius: "5px", background: "#ede9fe", color: "#6d28d9" }}>
+                      <Tag size={8} />{tag}
+                    </span>
+                  ))}
                   <div style={{ flex: 1 }} />
                   <ToggleSwitch checked={s.is_published == 1} onChange={() => handleTogglePublish(s.id, s.is_published)} loading={publishLoading[s.id]} hideLabel />
                   <ActionMenu onPreview={() => setPreviewId(s.id)} onSalin={() => handleSalin(s.id)} onEdit={() => window.open(`/admin/soal/edit/${s.id}`, "_blank")} onDelete={() => setDeleteId(s.id)} copying={copying[s.id]} />

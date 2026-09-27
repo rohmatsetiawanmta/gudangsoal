@@ -43,6 +43,16 @@ function parseItem(raw) {
 }
 
 // ── Subtopik search picker (same logic as LokasiSoal, green theme) ────────────
+const Crumb = ({ st }) => (
+  <div style={{ display: "flex", alignItems: "center", gap: "4px", flexWrap: "wrap" }}>
+    {st.jenjang?.nama && <><span style={{ fontSize: "11px", color: "#b4b2a9" }}>{st.jenjang.nama}</span><ChevronRight size={10} color="#d4d0c8" /></>}
+    {st.subj?.nama    && <><span style={{ fontSize: "11px", color: "#b4b2a9" }}>{st.subj.nama}</span><ChevronRight size={10} color="#d4d0c8" /></>}
+    {st.mapel?.nama   && <><span style={{ fontSize: "11px", color: "#b4b2a9" }}>{st.mapel.nama}</span><ChevronRight size={10} color="#d4d0c8" /></>}
+    {st.topik?.nama   && <><span style={{ fontSize: "11px", color: "#b4b2a9" }}>{st.topik.nama}</span><ChevronRight size={10} color="#d4d0c8" /></>}
+    <span style={{ fontSize: "13px", fontWeight: "700", color: "#0f0e17" }}>{st.nama}</span>
+  </div>
+);
+
 function SubtopikPicker({ subtopikId, onSelect, onClear, struktur, loadingStruktur }) {
   const [query, setQuery] = useState("");
   const [open,  setOpen]  = useState(false);
@@ -84,16 +94,6 @@ function SubtopikPicker({ subtopikId, onSelect, onClear, struktur, loadingStrukt
 
   const handleSelect = st => { onSelect(st.id); setQuery(""); setOpen(false); };
   const handleClear  = () => { onClear(); setQuery(""); setTimeout(() => inputRef.current?.focus(), 50); };
-
-  const Crumb = ({ st }) => (
-    <div style={{ display: "flex", alignItems: "center", gap: "4px", flexWrap: "wrap" }}>
-      {st.jenjang?.nama && <><span style={{ fontSize: "11px", color: "#b4b2a9" }}>{st.jenjang.nama}</span><ChevronRight size={10} color="#d4d0c8" /></>}
-      {st.subj?.nama    && <><span style={{ fontSize: "11px", color: "#b4b2a9" }}>{st.subj.nama}</span><ChevronRight size={10} color="#d4d0c8" /></>}
-      {st.mapel?.nama   && <><span style={{ fontSize: "11px", color: "#b4b2a9" }}>{st.mapel.nama}</span><ChevronRight size={10} color="#d4d0c8" /></>}
-      {st.topik?.nama   && <><span style={{ fontSize: "11px", color: "#b4b2a9" }}>{st.topik.nama}</span><ChevronRight size={10} color="#d4d0c8" /></>}
-      <span style={{ fontSize: "13px", fontWeight: "700", color: "#0f0e17" }}>{st.nama}</span>
-    </div>
-  );
 
   return (
     <div>

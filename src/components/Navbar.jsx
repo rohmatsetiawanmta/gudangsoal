@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Search, X, BookOpen, User, LogOut, ChevronDown,
   LayoutDashboard, Warehouse, Flame, Shuffle, MessageSquarePlus,
-  TrendingUp, Menu, Zap, GraduationCap, Lightbulb,
+  TrendingUp, Menu, Zap, GraduationCap, Lightbulb, Package, Dumbbell,
 } from "lucide-react";
 import { useAuthStore } from "../features/auth/authStore";
 import RandomSoal from "./RandomSoal";
@@ -13,10 +13,13 @@ import useWindowWidth from "../hooks/useWindowWidth";
 import { useTheme } from "../contexts/ThemeContext";
 import FeedbackModal from "../features/feedback/FeedbackModal";
 import RequestSoalModal from "../features/request/RequestSoalModal";
+import { useSiteSettings } from "../contexts/SiteSettingsContext";
 
-const JELAJAHI_LINKS = [
-  { to: "/browse",  label: "Soal",   icon: BookOpen,      color: "#2563eb" },
-  { to: "/materi",  label: "Materi", icon: GraduationCap, color: "#1a8a6e" },
+const ALL_JELAJAHI_LINKS = [
+  { to: "/browse",   label: "Soal",    icon: BookOpen,      color: "#2563eb", settingKey: "menu_soal" },
+  { to: "/materi",   label: "Materi",  icon: GraduationCap, color: "#1a8a6e", settingKey: "menu_materi" },
+  { to: "/latihan",  label: "Latihan", icon: Dumbbell,      color: "#e84c2b", settingKey: "menu_latihan" },
+  { to: "/paket",    label: "Paket",   icon: Package,       color: "#7c3aed", settingKey: "menu_paket" },
 ];
 
 const NAV_LINKS = [];
@@ -28,6 +31,8 @@ export default function Navbar() {
   const width     = useWindowWidth();
   const isMobile  = width <= 480;
   const { user, isLoggedIn, logout } = useAuthStore();
+  const siteSettings = useSiteSettings();
+  const jelajahiLinks = ALL_JELAJAHI_LINKS.filter(l => siteSettings?.[l.settingKey] !== false);
 
   const [searchOpen,   setSearchOpen]   = useState(false);
   const [searchQuery,  setSearchQuery]  = useState("");
@@ -105,16 +110,7 @@ export default function Navbar() {
 
         {/* ── Logo ── */}
         <Link to={isLoggedIn ? "/home" : "/"} style={{ display: "flex", alignItems: "center", gap: "9px", textDecoration: "none", flexShrink: 0 }}>
-          <div style={{
-            width: "34px", height: "34px",
-            background: "linear-gradient(135deg, #e84c2b 0%, #c0391a 100%)",
-            borderRadius: "10px",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            color: "white", flexShrink: 0,
-            boxShadow: "0 2px 10px rgba(232,76,43,.35), inset 0 1px 0 rgba(255,255,255,.15)",
-          }}>
-            <Warehouse size={17} />
-          </div>
+          <img src="/logo.png" alt="Gudang Soal" style={{ width: "34px", height: "34px", flexShrink: 0 }} />
           <span style={{ fontWeight: "800", fontSize: "16.5px", color: "var(--gs-text)", letterSpacing: "-0.4px" }}>
             Gudang<span style={{ color: "#e84c2b" }}> Soal</span>
           </span>
@@ -144,7 +140,7 @@ export default function Navbar() {
               );
             })}
 
-            {JELAJAHI_LINKS.map(({ to, label, icon: Icon }) => {
+            {jelajahiLinks.map(({ to, label, icon: Icon }) => {
               const active = isActive(to);
               return (
                 <Link key={to} to={to} style={{
@@ -424,7 +420,7 @@ export default function Navbar() {
                     {/* Jelajahi section */}
                     <div style={{ borderTop: "1px solid var(--gs-divider)", paddingTop: "8px", marginBottom: "4px" }}>
                       <div style={{ fontSize: "10px", fontWeight: "700", color: "var(--gs-text-hint)", letterSpacing: "0.08em", textTransform: "uppercase", padding: "0 12px 6px" }}>Jelajahi</div>
-                      {[...JELAJAHI_LINKS, { to: "/populer", label: "Soal Populer", icon: TrendingUp, color: "#e84c2b" }].map(({ to, label, icon: Icon, color }) => (
+                      {[...jelajahiLinks, { to: "/populer", label: "Soal Populer", icon: TrendingUp, color: "#e84c2b" }].map(({ to, label, icon: Icon, color }) => (
                         <button key={to} onClick={() => { navigate(to); setMenuOpen(false); }}
                           style={{ ...menuItemStyle, color: isActive(to) ? "#e84c2b" : "var(--gs-text)", background: isActive(to) ? "#fff3f0" : "none", fontWeight: isActive(to) ? "600" : "500" }}
                           onMouseEnter={(e) => (e.currentTarget.style.background = isActive(to) ? "#fff3f0" : "var(--gs-hover)")}

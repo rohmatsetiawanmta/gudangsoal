@@ -23,7 +23,8 @@ Dokumen ini menjelaskan format JSON untuk import soal, baik satu per satu maupun
 |---|---|---|
 | `tipe` | `pilihan_ganda` · `isian_singkat` · `isian_numerik` · `checklist` · `multiple_choice_table` · `menjodohkan` · `isian_multi` | `pilihan_ganda` |
 | `difficulty` | `"easy"` / `1` · `"medium"` / `2` · `"hard"` / `3` | `easy` |
-| `explanation` | String teks bebas | *(kosong)* |
+| `explanation` | String teks biasa **atau** JSON terstruktur (lihat bagian Pembahasan Terstruktur) | *(kosong)* |
+| `materi_ids` | Array ID materi terkait (integer), misal `[3, 7]` | *(kosong)* |
 
 > `difficulty` juga menerima: `mudah`, `sedang`, `sulit`, `susah`.
 
@@ -224,3 +225,85 @@ Setiap soal boleh punya `tipe` dan `difficulty` yang berbeda-beda.
 | `multiple_choice_table` | `[{label, text, cols}]` | `{"1": "Benar", "2": "Salah"}` |
 | `menjodohkan` | `{left: [], right: []}` | `{"0": 1, "1": 0}` (index→index) |
 | `isian_multi` | `[{label, satuan}]` | `["val1", "val2"]` (array string) |
+
+---
+
+## Pembahasan Terstruktur (Steps)
+
+Field `explanation` mendukung dua format:
+
+### Format 1 — Teks Biasa (plain text)
+
+String biasa, bisa mengandung Markdown dan LaTeX.
+
+```json
+"explanation": "Substitusi $x = 2$ ke persamaan: $y = 2^2 + 3 = 7$"
+```
+
+### Format 2 — Terstruktur (steps + recap)
+
+JSON string dengan `steps` (array langkah-langkah) dan `recap` (kesimpulan akhir).  
+Dirender sebagai kartu bertahap di aplikasi.
+
+```json
+"explanation": "{\"steps\":[{\"title\":\"Langkah 1: Tentukan nilai a dan b\",\"content\":\"Dari $2x + 3 = 11$, kita punya $a = 2$, $b = 3$, hasil $= 11$\"},{\"title\":\"Langkah 2: Isolasi x\",\"content\":\"$2x = 11 - 3 = 8$, maka $x = 4$\"}],\"recap\":\"Jadi nilai $x = 4$\"}"
+```
+
+Atau dalam bentuk yang lebih mudah dibaca (sebelum di-stringify):
+
+```json
+{
+  "steps": [
+    {
+      "title": "Langkah 1: Tentukan nilai a dan b",
+      "content": "Dari $2x + 3 = 11$, kita punya $a = 2$, $b = 3$, hasil $= 11$"
+    },
+    {
+      "title": "Langkah 2: Isolasi x",
+      "content": "$2x = 11 - 3 = 8$, maka $x = 4$"
+    }
+  ],
+  "recap": "Jadi nilai $x = 4$"
+}
+```
+
+> Catatan: dalam JSON soal yang di-import, `explanation` harus berupa **string**. Jika menggunakan format terstruktur, stringify dulu objek tersebut sebelum memasukkannya ke field `explanation`.
+
+---
+
+## Materi Terkait
+
+Untuk menghubungkan soal ke materi, gunakan salah satu field berikut:
+
+| Field | Format | Keterangan |
+|---|---|---|
+| `materi_ids` | `[3, 7]` (array integer) | ID materi langsung — paling akurat |
+| `materi_terkait` | `["Teorema Pythagoras", "Trigonometri"]` (array string judul) | Dicari berdasarkan judul materi yang persis sama |
+
+Contoh dengan `materi_ids`:
+
+```json
+{
+  "tipe": "pilihan_ganda",
+  "body": "...",
+  "options": [...],
+  "answer": "B",
+  "explanation": "...",
+  "materi_ids": [3, 7]
+}
+```
+
+Contoh dengan `materi_terkait` (untuk bulk import — judul harus persis sama dengan judul materi di database):
+
+```json
+{
+  "tipe": "pilihan_ganda",
+  "body": "...",
+  "options": [...],
+  "answer": "B",
+  "explanation": "...",
+  "materi_terkait": ["Teorema Pythagoras", "Persamaan Linear"]
+}
+```
+
+> Jika keduanya ada, `materi_ids` diutamakan. `materi_terkait` hanya tersedia untuk bulk import.

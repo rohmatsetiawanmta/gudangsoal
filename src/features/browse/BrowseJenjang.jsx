@@ -112,16 +112,19 @@ export default function BrowseJenjang() {
                     display: "flex", alignItems: "center", gap: "16px",
                     background: "var(--gs-surface)", borderRadius: "14px",
                     border: "1px solid var(--gs-border)",
-                    borderLeft: `3px solid ${j.is_coming_soon == 1 ? "#f5a623" : color}`,
+                    borderLeft: `3px solid ${j.is_coming_soon == 1 ? "#d4d0c8" : color}`,
                     padding: isMobile ? "14px 16px" : "16px 20px",
-                    cursor: "pointer",
+                    cursor: j.is_coming_soon == 1 ? "default" : "pointer",
+                    opacity: j.is_coming_soon == 1 ? 0.55 : 1,
                     transition: "box-shadow .15s, transform .15s",
                   }}
                   onMouseEnter={(e) => {
+                    if (j.is_coming_soon == 1) return;
                     e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.06)";
                     e.currentTarget.style.transform = "translateX(4px)";
                   }}
                   onMouseLeave={(e) => {
+                    if (j.is_coming_soon == 1) return;
                     e.currentTarget.style.boxShadow = "none";
                     e.currentTarget.style.transform = "translateX(0)";
                   }}

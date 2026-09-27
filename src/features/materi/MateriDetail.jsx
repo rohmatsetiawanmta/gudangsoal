@@ -11,6 +11,7 @@ import SEO from "../../components/SEO";
 import MathRenderer from "../../components/MathRenderer";
 import Breadcrumb from "../../components/Breadcrumb";
 import useWindowWidth from "../../hooks/useWindowWidth";
+import { usePresence } from "../../hooks/usePresence";
 import api from "../../lib/api";
 import { useAuthStore } from "../../features/auth/authStore";
 
@@ -374,7 +375,7 @@ function QuizCard({ question, index, answer, onAnswer, isMobile, materiId, isLog
       try {
         const res = await api.post(`/materi/${materiId}/answer`, { question_index: index, user_answer: userAnswer });
         if (res.xp_earned > 0) setXpEarned(res.xp_earned);
-      } catch {}
+      } catch { /* diabaikan: best-effort, boleh gagal senyap */ }
     }
   };
 
@@ -497,6 +498,7 @@ function QuizCard({ question, index, answer, onAnswer, isMobile, materiId, isLog
 
 export default function MateriDetail() {
   const { id }   = useParams();
+  const activeCount = usePresence(`materi/${id}`);
   const navigate = useNavigate();
   const width    = useWindowWidth();
   const isMobile = width <= 480;
@@ -553,7 +555,7 @@ export default function MateriDetail() {
     try {
       const json = await api.post(`/materi/${id}/share`, { platform });
       if (json.share_count !== undefined) setShareCount(json.share_count);
-    } catch {}
+    } catch { /* diabaikan: best-effort, boleh gagal senyap */ }
   };
 
   const handleCopy = () => {
@@ -729,48 +731,57 @@ export default function MateriDetail() {
                   <MathRenderer text={materi.judul} />
                 </h1>
 
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
-                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                    <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: "#6ee7b7", background: "rgba(110,231,183,.12)" }}>
-                      {materi.jenjang}
+                {/* Baris 1 — info chips */}
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "10px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: "#6ee7b7", background: "rgba(110,231,183,.12)" }}>
+                    {materi.jenjang}
+                  </span>
+                  <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: "rgba(255,255,255,.7)", background: "rgba(255,255,255,.1)" }}>
+                    {materi.mapel}
+                  </span>
+                  {highlights.length > 0 && (
+                    <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: "#fcd34d", background: "rgba(252,211,77,.12)" }}>
+                      {highlights.length} Highlight
                     </span>
-                    <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: "rgba(255,255,255,.7)", background: "rgba(255,255,255,.1)" }}>
-                      {materi.mapel}
+                  )}
+                  {pertanyaan.length > 0 && (
+                    <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: "#93c5fd", background: "rgba(147,197,253,.12)" }}>
+                      {pertanyaan.length} Pertanyaan
                     </span>
-                    {highlights.length > 0 && (
-                      <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: "#fcd34d", background: "rgba(252,211,77,.12)" }}>
-                        {highlights.length} Highlight
-                      </span>
-                    )}
-                    {pertanyaan.length > 0 && (
-                      <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: "#93c5fd", background: "rgba(147,197,253,.12)" }}>
-                        {pertanyaan.length} Pertanyaan
-                      </span>
-                    )}
-                  </div>
+                  )}
+                </div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "8px", background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.1)" }}>
-                      <Eye size={13} color="rgba(255,255,255,.5)" />
-                      <span style={{ fontSize: "12px", fontWeight: "600", color: "rgba(255,255,255,.6)" }}>
-                        {parseInt(materi.views || 0).toLocaleString("id-ID")}
+                {/* Baris 2 — stats + actions */}
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "8px", background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.1)" }}>
+                    <Eye size={13} color="rgba(255,255,255,.5)" />
+                    <span style={{ fontSize: "12px", fontWeight: "600", color: "rgba(255,255,255,.6)" }}>
+                      {parseInt(materi.views || 0).toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                  {activeCount > 0 && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "5px 12px", borderRadius: "8px", background: "rgba(110,231,183,.15)", border: "1px solid rgba(110,231,183,.3)" }}>
+                      <span className="presence-dot" />
+                      <span style={{ fontSize: "12px", fontWeight: "600", color: "#6ee7b7" }}>
+                        {isMobile ? activeCount : `${activeCount} orang sedang membaca`}
                       </span>
                     </div>
-                    <button
-                      onClick={() => setShareOpen(true)}
-                      title="Bagikan"
-                      style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "8px", background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.1)", cursor: "pointer", fontFamily: "inherit" }}
-                      onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.13)"; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.07)"; }}
-                    >
-                      <Share2 size={13} color="rgba(255,255,255,.5)" />
-                      {shareCount > 0 && <span style={{ fontSize: "12px", fontWeight: "600", color: "rgba(255,255,255,.6)" }}>{shareCount.toLocaleString("id-ID")}</span>}
-                    </button>
-                    <ActionBtn onClick={() => setReportOpen(true)} icon={Flag} title="Laporkan materi" danger />
-                    {user?.role === "admin" && (
-                      <ActionBtn onClick={() => navigate(`/admin/materi/edit/${id}`)} icon={Pencil} title="Edit materi (admin)" />
-                    )}
-                  </div>
+                  )}
+                  <div style={{ width: "1px", height: "16px", background: "rgba(255,255,255,.12)", margin: "0 2px" }} />
+                  <button
+                    onClick={() => setShareOpen(true)}
+                    title="Bagikan"
+                    style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "8px", background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.1)", cursor: "pointer", fontFamily: "inherit" }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.13)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.07)"; }}
+                  >
+                    <Share2 size={13} color="rgba(255,255,255,.5)" />
+                    {shareCount > 0 && <span style={{ fontSize: "12px", fontWeight: "600", color: "rgba(255,255,255,.6)" }}>{shareCount.toLocaleString("id-ID")}</span>}
+                  </button>
+                  <ActionBtn onClick={() => setReportOpen(true)} icon={Flag} title="Laporkan materi" danger />
+                  {user?.role === "admin" && (
+                    <ActionBtn onClick={() => navigate(`/admin/materi/edit/${id}`)} icon={Pencil} title="Edit materi (admin)" />
+                  )}
                 </div>
               </div>
             </div>
@@ -873,8 +884,8 @@ export default function MateriDetail() {
                   </div>
                 )}
 
-                <PrevNextNav />
-                <LatihanCTA />
+                {PrevNextNav()}
+                {LatihanCTA()}
                 {!showSidebar && <MateriNav siblings={materi.siblings} currentId={materi.id} onNavigate={id => navigate(`/materi/${id}`)} />}
               </>
             ) : (
@@ -888,8 +899,8 @@ export default function MateriDetail() {
                   </div>
                 )}
                 <ContentGate isMobile={isMobile} />
-                <PrevNextNav />
-                <LatihanCTA />
+                {PrevNextNav()}
+                {LatihanCTA()}
                 {!showSidebar && <MateriNav siblings={materi.siblings} currentId={materi.id} onNavigate={id => navigate(`/materi/${id}`)} />}
               </>
             )}

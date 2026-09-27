@@ -14,9 +14,9 @@ $status    = 200;
 $staticRoutes = [
     '/', '/home', '/browse', '/materi', '/latihan', '/games',
     '/faq', '/changelog', '/privacy', '/login', '/register', '/populer',
-    '/search', '/request-soal', '/profile', '/verify-email',
+    '/search', '/request-soal', '/profile', '/verify-email', '/paket',
 ];
-$staticPrefixes = ['/games/', '/admin/', '/latihan/', '/quiz/'];
+$staticPrefixes = ['/games/', '/admin/', '/latihan/', '/quiz/', '/paket/'];
 
 function isStaticRoute($uri, $staticRoutes, $staticPrefixes) {
     if (in_array($uri, $staticRoutes)) return true;
@@ -79,6 +79,27 @@ if ($pdo) {
             $title   = $row['judul'] . ' | Gudang Soal';
             $parts   = array_filter([$row['mapel'], $row['topik'], $row['subtopik']]);
             $desc    = 'Materi belajar: ' . $row['judul'] . ' — ' . implode(', ', $parts) . '. Lengkap dengan rumus dan ringkasan.';
+        }
+
+    // /paket/:id
+    } elseif (preg_match('#^/paket/(\d+)$#', $uri, $m)) {
+        $dbRouteHit = true;
+        $stmt = $pdo->prepare('
+            SELECT p.nama, p.tahun, p.deskripsi, p.jenis,
+                   COUNT(pi.id) AS jumlah_soal
+            FROM paket_soal p
+            LEFT JOIN paket_soal_items pi ON pi.paket_id = p.id
+            WHERE p.id = ? AND p.is_published = 1
+            GROUP BY p.id
+        ');
+        $stmt->execute([(int)$m[1]]);
+        if ($row = $stmt->fetch()) {
+            $dbFound = true;
+            $tahun   = $row['tahun'] ? ' ' . $row['tahun'] : '';
+            $title   = $row['nama'] . $tahun . ' | Gudang Soal';
+            $desc    = $row['deskripsi']
+                ? $row['deskripsi']
+                : $row['jumlah_soal'] . ' soal dari ' . $row['nama'] . $tahun . '.';
         }
 
     // /browse/:j/:sj/:m/:t/:st (halaman daftar soal per subtopik)

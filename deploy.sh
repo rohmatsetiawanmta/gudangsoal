@@ -47,8 +47,9 @@ if $DEPLOY_FRONTEND; then
   scp $SSH_OPTS -P $SSH_PORT dist/.htaccess                      $SSH_USER@$SSH_HOST:$REMOTE_DIR/.htaccess
   scp $SSH_OPTS -P $SSH_PORT sitemap.php                         $SSH_USER@$SSH_HOST:$REMOTE_DIR/sitemap.php
   scp $SSH_OPTS -P $SSH_PORT render.php                          $SSH_USER@$SSH_HOST:$REMOTE_DIR/render.php
+  [ -f dist/logo.png ] && scp $SSH_OPTS -P $SSH_PORT dist/logo.png $SSH_USER@$SSH_HOST:$REMOTE_DIR/logo.png
   echo "→ Fixing permissions..."
-  ssh $SSH_OPTS -p $SSH_PORT $SSH_USER@$SSH_HOST "chmod 644 $REMOTE_DIR/index.html $REMOTE_DIR/robots.txt $REMOTE_DIR/.htaccess $REMOTE_DIR/sitemap.php $REMOTE_DIR/render.php && find $REMOTE_DIR/assets -type f -exec chmod 644 {} + && find $REMOTE_DIR/assets -type d -exec chmod 755 {} +"
+  ssh $SSH_OPTS -p $SSH_PORT $SSH_USER@$SSH_HOST "chmod 644 $REMOTE_DIR/index.html $REMOTE_DIR/robots.txt $REMOTE_DIR/.htaccess $REMOTE_DIR/sitemap.php $REMOTE_DIR/render.php && [ -f $REMOTE_DIR/logo.png ] && chmod 644 $REMOTE_DIR/logo.png; find $REMOTE_DIR/assets -type f -exec chmod 644 {} + && find $REMOTE_DIR/assets -type d -exec chmod 755 {} +"
   echo "✓ Frontend selesai!"
 fi
 

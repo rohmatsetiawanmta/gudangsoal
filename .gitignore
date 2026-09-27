@@ -1,30 +1,31 @@
+# Dependencies
+node_modules/
+api/vendor/
+
+# Build output
+dist/
+
+# Secrets & deploy config
+.env
+*.env
+!deploy.env.example
+deploy.env
+
 # Logs
-logs
 *.log
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# macOS
+.DS_Store
+._*
 
-# Editor directories and files
+# Editor
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+.idea/
+*.swp
 
-api/.env
-deploy.env
+# Tidak ikut repo (sesuai .gitignore repo GitHub)
 .claude
 docs
 schema

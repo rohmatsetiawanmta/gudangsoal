@@ -176,7 +176,7 @@ export default function AdminUsers() {
     try {
       const data = await api.get(`/admin/users/detail?id=${user.id}`);
       setDetail(data);
-    } catch {
+    } catch { /* diabaikan: best-effort, boleh gagal senyap */
     } finally {
       setLoadingDetail(false);
     }
@@ -527,7 +527,7 @@ export default function AdminUsers() {
                 <VerifiedBadge verified={u.email_verified == 1} />
                 <div style={{ fontSize: "12px", color: "#6b6860" }}>{fmtDate(u.created_at)}</div>
                 <div style={{ fontSize: "12px", color: "#6b6860" }}>{fmtDate(u.verified_at)}</div>
-                <ActionButtons u={u} />
+                {ActionButtons({ u })}
               </div>
             ))}
 
@@ -655,7 +655,7 @@ export default function AdminUsers() {
                 </div>
 
                 {/* Aksi */}
-                <ActionButtons u={u} />
+                {ActionButtons({ u })}
               </div>
             ))}
         </div>

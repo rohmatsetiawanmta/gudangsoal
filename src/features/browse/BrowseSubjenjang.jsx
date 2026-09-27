@@ -130,12 +130,14 @@ export default function BrowseSubjenjang() {
                   display: "flex", alignItems: "center", gap: "14px",
                   background: "var(--gs-surface)", borderRadius: "14px",
                   border: "1px solid var(--gs-border)",
-                  borderLeft: `3px solid ${sj.is_coming_soon == 1 ? "#f5a623" : jenjangColor}`,
+                  borderLeft: `3px solid ${sj.is_coming_soon == 1 ? "#d4d0c8" : jenjangColor}`,
                   padding: isMobile ? "14px 16px" : "16px 20px",
-                  cursor: "pointer", transition: "transform .15s, box-shadow .15s",
+                  cursor: sj.is_coming_soon == 1 ? "default" : "pointer",
+                  opacity: sj.is_coming_soon == 1 ? 0.55 : 1,
+                  transition: "transform .15s, box-shadow .15s",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.06)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
+                onMouseEnter={(e) => { if (sj.is_coming_soon == 1) return; e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.06)"; }}
+                onMouseLeave={(e) => { if (sj.is_coming_soon == 1) return; e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
               >
                 <div style={{
                   width: isMobile ? "36px" : "40px", height: isMobile ? "36px" : "40px",

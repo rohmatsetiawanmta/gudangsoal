@@ -96,6 +96,19 @@ function StepBar({ current }) {
 
 // ── SubtopikPicker ────────────────────────────────────────────────────────────
 
+const Crumb = ({text,dim}) => (
+  <span style={{fontSize:"11px",color:dim?"#b4b2a9":"#6b6860",fontWeight:dim?400:500}}>{text}</span>
+);
+const Breadcrumb = ({st,large}) => (
+  <div style={{display:"flex",alignItems:"center",gap:"4px",flexWrap:"wrap"}}>
+    {st.jenjang?.nama&&<><Crumb text={st.jenjang.nama} dim/><ChevronRight size={10} color="#d4d0c8"/></>}
+    {st.subj?.nama&&<><Crumb text={st.subj.nama} dim/><ChevronRight size={10} color="#d4d0c8"/></>}
+    {st.mapel?.nama&&<><Crumb text={st.mapel.nama} dim/><ChevronRight size={10} color="#d4d0c8"/></>}
+    {st.topik?.nama&&<><Crumb text={st.topik.nama} dim/><ChevronRight size={10} color="#d4d0c8"/></>}
+    <span style={{fontSize:large?"14px":"12px",fontWeight:"700",color:"#0f0e17"}}>{st.nama}</span>
+  </div>
+);
+
 function SubtopikPicker({ struktur, subtopikId, onChange }) {
   const [query, setQuery]   = useState("");
   const [open, setOpen]     = useState(false);
@@ -135,19 +148,6 @@ function SubtopikPicker({ struktur, subtopikId, onChange }) {
 
   const handleSelect = st => { onChange(st.id); setQuery(""); setOpen(false); };
   const handleClear  = () => { onChange(""); setQuery(""); setTimeout(()=>inputRef.current?.focus(),50); };
-
-  const Crumb = ({text,dim}) => (
-    <span style={{fontSize:"11px",color:dim?"#b4b2a9":"#6b6860",fontWeight:dim?400:500}}>{text}</span>
-  );
-  const Breadcrumb = ({st,large}) => (
-    <div style={{display:"flex",alignItems:"center",gap:"4px",flexWrap:"wrap"}}>
-      {st.jenjang?.nama&&<><Crumb text={st.jenjang.nama} dim/><ChevronRight size={10} color="#d4d0c8"/></>}
-      {st.subj?.nama&&<><Crumb text={st.subj.nama} dim/><ChevronRight size={10} color="#d4d0c8"/></>}
-      {st.mapel?.nama&&<><Crumb text={st.mapel.nama} dim/><ChevronRight size={10} color="#d4d0c8"/></>}
-      {st.topik?.nama&&<><Crumb text={st.topik.nama} dim/><ChevronRight size={10} color="#d4d0c8"/></>}
-      <span style={{fontSize:large?"14px":"12px",fontWeight:"700",color:"#0f0e17"}}>{st.nama}</span>
-    </div>
-  );
 
   return (
     <div>
@@ -431,6 +431,12 @@ function SoalCard({soal,index,onChange,onDelete,status,materiList=[]}){
         <div style={{flex:1,fontSize:"13px",color:"#0f0e17",fontWeight:"500",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
           {preview}{soal.body?.length>80?"…":""}
         </div>
+        {soal._kodeStatus === "checking"
+          ? <span style={{fontSize:"10px",fontWeight:"700",padding:"2px 8px",borderRadius:"99px",background:"#f2efe8",color:"#b4b2a9",border:"1.5px solid #e2ddd5",flexShrink:0,letterSpacing:".04em"}}>...</span>
+          : soal._kodeStatus === "edit"
+          ? <span style={{fontSize:"10px",fontWeight:"700",padding:"2px 8px",borderRadius:"99px",background:"#eff6ff",color:"#2563eb",border:"1.5px solid #bfdbfe",flexShrink:0,letterSpacing:".04em"}}>EDIT · {soal.kode}</span>
+          : <span style={{fontSize:"10px",fontWeight:"700",padding:"2px 8px",borderRadius:"99px",background:"#e4f5f0",color:"#1a8a6e",border:"1.5px solid #9FE1CB",flexShrink:0,letterSpacing:".04em"}}>BARU</span>
+        }
         <TipeBadge tipe={soal.tipe}/>
         <button type="button" onClick={e=>{e.stopPropagation();onDelete(index);}}
           style={{background:"none",border:"none",cursor:"pointer",color:"#b4b2a9",display:"flex",padding:"2px",borderRadius:"6px",transition:"all .15s"}}
@@ -554,7 +560,7 @@ export default function AdminSoalBulkImport({ struktur }) {
   }
 ]`;
 
-  const handleImport = () => {
+  const handleImport = async () => {
     setParseError(""); setParseSnippet("");
     if (!subtopikId) { setParseError("Pilih subtopik tujuan dulu"); return; }
     if (!jsonInput.trim()) { setParseError("Paste JSON array dulu"); return; }
@@ -574,6 +580,8 @@ export default function AdminSoalBulkImport({ struktur }) {
         const tipe = parseTipe(s.tipe) ?? "pilihan_ganda";
         return {
           _key: i,
+          ...(s.kode ? { kode: String(s.kode).toUpperCase() } : {}),
+          _kodeStatus: s.kode ? "checking" : "new",
           subtopik_id: Number(subtopikId),
           tipe,
           difficulty: parseDiff(s.difficulty) ?? 1,
@@ -584,10 +592,30 @@ export default function AdminSoalBulkImport({ struktur }) {
           materi_ids: resolveMateri(s.materi_terkait),
         };
       });
+
       setSoalList(soal);
       setCardStatus({});
       setSaveError("");
       setStep("review");
+
+      // Batch-check kodes against DB
+      const kodes = soal.filter(s => s.kode).map(s => s.kode);
+      if (kodes.length > 0) {
+        try {
+          const res = await api.post("/admin/soal/check-kodes", { kodes });
+          const foundSet = new Set(res.found || []);
+          setSoalList(prev => prev.map(s =>
+            s.kode
+              ? { ...s, _kodeStatus: foundSet.has(s.kode) ? "edit" : "new" }
+              : s
+          ));
+        } catch {
+          // Kalau gagal, anggap semua kode sebagai "new" (fallback)
+          setSoalList(prev => prev.map(s =>
+            s._kodeStatus === "checking" ? { ...s, _kodeStatus: "new" } : s
+          ));
+        }
+      }
     } catch(e) {
       const msg = e.message || "";
       const posMatch = msg.match(/position (\d+)/i) || msg.match(/at (\d+)/i);

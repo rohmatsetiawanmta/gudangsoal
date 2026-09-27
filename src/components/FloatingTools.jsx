@@ -232,7 +232,7 @@ function beep() {
     gain.gain.setValueAtTime(0.3, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
     osc.start(); osc.stop(ctx.currentTime + 0.8);
-  } catch {}
+  } catch { /* diabaikan: best-effort, boleh gagal senyap */ }
 }
 
 function fmtSec(s) {

@@ -701,7 +701,7 @@ export default function JawabanInput({
                   color: "var(--gs-text)",
                 }}
               >
-                {opt.label}
+                <MathRenderer text={opt.label} />
               </label>
             )}
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>

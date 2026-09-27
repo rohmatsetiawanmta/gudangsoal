@@ -230,9 +230,7 @@ export default function RegisterPage() {
                 marginBottom: "16px",
               }}
             >
-              Mulai belajar hari ini,
-              <br />
-              gratis selamanya.
+              Mulai belajar hari ini.
             </h1>
             <p
               style={{
@@ -241,7 +239,7 @@ export default function RegisterPage() {
                 lineHeight: "1.65",
               }}
             >
-              Daftar dalam 30 detik. Tidak perlu kartu kredit.
+              Daftar dalam 30 detik, langsung bisa latihan.
             </p>
           </div>
           <div
