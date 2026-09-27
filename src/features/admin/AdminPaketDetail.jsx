@@ -202,8 +202,8 @@ export default function AdminPaketDetail() {
       </div>
 
       {/* Search & Add */}
-      <div style={{ background: "white", borderRadius: "14px", border: "1px solid #e2ddd5", borderLeft: "3px solid #2563eb", overflow: "hidden", marginBottom: "16px" }}>
-        <div style={{ padding: "14px 20px", borderBottom: "1px solid #f0ede6", fontSize: "13px", fontWeight: "700", color: "#0f0e17", background: "linear-gradient(to right, #faf9f6, white)", display: "flex", alignItems: "center", gap: "8px" }}>
+      <div style={{ background: "white", borderRadius: "14px", border: "1px solid #e2ddd5", borderLeft: "3px solid #2563eb", marginBottom: "16px" }}>
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid #f0ede6", fontSize: "13px", fontWeight: "700", color: "#0f0e17", background: "linear-gradient(to right, #faf9f6, white)", borderTopLeftRadius: "13px", borderTopRightRadius: "13px", display: "flex", alignItems: "center", gap: "8px" }}>
           <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#2563eb" }} />
           Tambah Soal ke Paket
         </div>
