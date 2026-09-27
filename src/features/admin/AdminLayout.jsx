@@ -4,7 +4,7 @@ import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, FolderTree, LogOut, ChevronRight,
   PanelLeftClose, PanelLeftOpen, Users, Flag, Inbox,
-  ScrollText, Menu, X, MessageCircle, Dumbbell, GraduationCap, BarChart2, Share2, Map, Bug, Activity, PenTool,
+  ScrollText, Menu, X, MessageCircle, Dumbbell, GraduationCap, BarChart2, Share2, Map, Bug, Activity, PenTool, Package, Settings,
 } from "lucide-react";
 import { useAuthStore } from "../auth/authStore";
 import useWindowWidth from "../../hooks/useWindowWidth";
@@ -19,6 +19,7 @@ const MENU = [
   { type: "link", to: "/admin/struktur", label: "Struktur", icon: FolderTree },
   { type: "link", to: "/admin/soal",     label: "Soal",     icon: BookOpen,      end: true, activeFor: ["/admin/soal/tambah", "/admin/soal/edit", "/admin/soal/bulk-import"] },
   { type: "link", to: "/admin/materi",   label: "Materi",   icon: GraduationCap, end: true, activeFor: ["/admin/materi/tambah", "/admin/materi/edit", "/admin/materi/bulk-import"] },
+  { type: "link", to: "/admin/paket",    label: "Paket",    icon: Package,       end: true, activeFor: ["/admin/paket/tambah", "/admin/paket/"] },
   { type: "link", to: "/admin/latihan",  label: "Latihan",  icon: Dumbbell },
   { type: "section", label: "Analitik" },
   { type: "link", to: "/admin/views",        label: "Views",        icon: BarChart2 },
@@ -32,10 +33,11 @@ const MENU = [
   { type: "link", to: "/admin/feedback",     label: "Masukan User",  icon: MessageCircle },
 
   { type: "section", label: "Sistem" },
-  { type: "link", to: "/admin/changelog", label: "Changelog", icon: ScrollText },
-  { type: "link", to: "/admin/roadmap",   label: "Roadmap",   icon: Map },
-  { type: "link", to: "/admin/bugs",      label: "Bug List",  icon: Bug },
-  { type: "link", to: "/admin/whiteboard",label: "Whiteboard",icon: PenTool },
+  { type: "link", to: "/admin/changelog", label: "Changelog",  icon: ScrollText },
+  { type: "link", to: "/admin/roadmap",   label: "Roadmap",    icon: Map },
+  { type: "link", to: "/admin/bugs",      label: "Bug List",   icon: Bug },
+  { type: "link", to: "/admin/whiteboard",label: "Whiteboard", icon: PenTool },
+  { type: "link", to: "/admin/settings",  label: "Pengaturan", icon: Settings },
 ];
 
 // ── SidebarLink ───────────────────────────────────────────────────────────────
@@ -175,8 +177,13 @@ export default function AdminLayout() {
     if (location.pathname.startsWith("/admin/materi/tambah"))   return "Tambah Materi";
     if (location.pathname.startsWith("/admin/materi/edit"))     return "Edit Materi";
     if (location.pathname.startsWith("/admin/materi"))          return "Kelola Materi";
+    if (location.pathname.startsWith("/admin/paket/tambah"))   return "Buat Paket";
+    if (location.pathname.match(/\/admin\/paket\/\d+\/edit/))  return "Edit Paket";
+    if (location.pathname.match(/\/admin\/paket\/\d+/))        return "Detail Paket";
+    if (location.pathname.startsWith("/admin/paket"))          return "Kelola Paket";
     if (location.pathname.startsWith("/admin/views"))           return "Views";
     if (location.pathname.startsWith("/admin/shares"))          return "Shares";
+    if (location.pathname.startsWith("/admin/settings"))        return "Pengaturan";
     return "Panel";
   };
 
@@ -246,7 +253,7 @@ export default function AdminLayout() {
       {/* ── DESKTOP SIDEBAR ── */}
       {!isMobile && (
         <aside style={{ width: collapsed ? "64px" : "220px", background: "#0f0e17", display: "flex", flexDirection: "column", flexShrink: 0, position: "sticky", top: 0, height: "100vh", transition: "width .2s ease", overflow: "hidden" }}>
-          <SidebarContent />
+          {SidebarContent({})}
         </aside>
       )}
 
@@ -255,7 +262,7 @@ export default function AdminLayout() {
         <>
           <div onClick={() => setDrawerOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 400 }} />
           <aside style={{ position: "fixed", top: 0, left: 0, width: "260px", height: "100vh", background: "#0f0e17", display: "flex", flexDirection: "column", zIndex: 401, overflowY: "auto" }}>
-            <SidebarContent isDrawer />
+            {SidebarContent({ isDrawer: true })}
           </aside>
         </>
       )}

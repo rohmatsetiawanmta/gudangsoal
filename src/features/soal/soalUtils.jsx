@@ -101,13 +101,10 @@ export const formatAnswer = (tipe, answer) => {
       }
       return String(answer);
     case "menjodohkan":
-      if (typeof chosen !== "object" || typeof answer !== "object")
-        return false;
-      const leftCount = Object.keys(answer).length;
-      if (Object.keys(chosen).length !== leftCount) return false;
-      return Object.keys(answer).every(
-        (k) => String(chosen[k]) === String(answer[k])
-      );
+      if (typeof answer !== "object") return String(answer);
+      return Object.entries(answer)
+        .map(([k, v]) => `${k} → ${v}`)
+        .join(", ");
     default:
       return String(answer);
   }

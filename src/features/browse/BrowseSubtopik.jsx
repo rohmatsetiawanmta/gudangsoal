@@ -130,12 +130,14 @@ export default function BrowseSubtopik() {
                   style={{
                     background: "var(--gs-surface)", borderRadius: "14px",
                     border: "1px solid var(--gs-border)",
-                    borderLeft: `3px solid ${st.is_coming_soon == 1 ? "#f5a623" : done ? "#1a8a6e" : "#7c3aed"}`,
+                    borderLeft: `3px solid ${st.is_coming_soon == 1 ? "#d4d0c8" : done ? "#1a8a6e" : "#7c3aed"}`,
                     padding: isMobile ? "14px 16px" : "16px 20px",
-                    cursor: "pointer", transition: "transform .15s, box-shadow .15s",
+                    cursor: st.is_coming_soon == 1 ? "default" : "pointer",
+                    opacity: st.is_coming_soon == 1 ? 0.55 : 1,
+                    transition: "transform .15s, box-shadow .15s",
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.06)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
+                  onMouseEnter={(e) => { if (st.is_coming_soon == 1) return; e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.06)"; }}
+                  onMouseLeave={(e) => { if (st.is_coming_soon == 1) return; e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
                 >
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>

@@ -119,12 +119,14 @@ export default function BrowseTopik() {
                   display: "flex", alignItems: "center", gap: "14px",
                   background: "var(--gs-surface)", borderRadius: "14px",
                   border: "1px solid var(--gs-border)",
-                  borderLeft: `3px solid ${t.is_coming_soon == 1 ? "#f5a623" : "#1a8a6e"}`,
+                  borderLeft: `3px solid ${t.is_coming_soon == 1 ? "#d4d0c8" : "#1a8a6e"}`,
                   padding: isMobile ? "14px 16px" : "16px 20px",
-                  cursor: "pointer", transition: "transform .15s, box-shadow .15s",
+                  cursor: t.is_coming_soon == 1 ? "default" : "pointer",
+                  opacity: t.is_coming_soon == 1 ? 0.55 : 1,
+                  transition: "transform .15s, box-shadow .15s",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.06)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
+                onMouseEnter={(e) => { if (t.is_coming_soon == 1) return; e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.06)"; }}
+                onMouseLeave={(e) => { if (t.is_coming_soon == 1) return; e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
               >
                 <div style={{
                   width: isMobile ? "36px" : "40px", height: isMobile ? "36px" : "40px",

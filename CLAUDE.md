@@ -24,15 +24,15 @@ Setiap admin page harus pakai dark gradient hero header ini sebagai bagian palin
   position: "relative",
   overflow: "hidden",
 }}>
-  {/* Watermark — teks besar sangat transparan di kanan */}
+  {/* Watermark — icon Lucide besar sangat transparan di kanan */}
   <div style={{
     position: "absolute", right: isMobile ? "-10px" : "24px", top: "50%",
     transform: "translateY(-50%)",
-    fontSize: isMobile ? "72px" : "100px",
-    fontWeight: "900", color: "rgba(255,255,255,.03)",
-    letterSpacing: "-4px", userSelect: "none", lineHeight: 1,
-    pointerEvents: "none",
-  }}>KEYWORD</div>
+    opacity: 0.06, userSelect: "none", lineHeight: 1,
+    pointerEvents: "none", color: "white",
+  }}>
+    <RelevantIcon size={isMobile ? 80 : 110} />
+  </div>
 
   <div style={{
     display: "flex",
@@ -76,14 +76,15 @@ Setiap admin page harus pakai dark gradient hero header ini sebagai bagian palin
 ```
 
 **Accent warna per section** (ujung kanan gradient `#0f0e17 → #1a1830 → <accent>`):
-| Halaman | Accent | Watermark |
+| Halaman | Accent | Icon Watermark |
 |---|---|---|
-| Kelola Soal | `#0c1a2e` (biru gelap) | `SOAL` |
-| Kelola Latihan | `#0d2210` (hijau gelap) | `QUIZ` |
-| Kelola Struktur | `#1a0e2c` (ungu gelap) | `TREE` |
-| Tambah/Edit Soal | `#2c1810` (merah gelap) | `NEW` / `EDIT` |
-| Tambah/Edit Quiz | `#0d2210` (hijau gelap) | `NEW` / `EDIT` |
-| Halaman baru | pilih accent warna sesuai tema | kata singkat CAPS |
+| Kelola Soal | `#0c1a2e` (biru gelap) | `BookOpen` |
+| Kelola Latihan | `#0d2210` (hijau gelap) | `ClipboardList` |
+| Kelola Struktur | `#1a0e2c` (ungu gelap) | `GitBranch` |
+| Tambah/Edit Soal | `#2c1810` (merah gelap) | `FileText` |
+| Tambah/Edit Quiz | `#0d2210` (hijau gelap) | `ClipboardList` |
+| Kelola Paket | `#1a0a2e` (ungu gelap) | `Package` |
+| Halaman baru | pilih accent warna sesuai tema | icon Lucide relevan |
 
 **Stat chip colors** (di atas background gelap):
 ```js

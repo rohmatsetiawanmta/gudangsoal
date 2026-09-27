@@ -173,3 +173,14 @@ h3 {
 .math-content tr:nth-child(even) td {
   background: #faf9f6;
 }
+
+@keyframes presence-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: .4; transform: scale(.75); }
+}
+.presence-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #6ee7b7;
+  animation: presence-pulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}

@@ -1,11 +1,25 @@
 // src/features/admin/SoalPreviewModal.jsx
 import { useEffect, useState } from "react";
-import { X, ChevronRight } from "lucide-react";
+import { X, ChevronRight, Tag } from "lucide-react";
 import api from "../../lib/api";
 import MathRenderer from "../../components/MathRenderer";
 import { DIFFICULTY_MAP, TIPE_SOAL } from "./soal-form/constants";
 import { normalizeMenjodohkan } from "../soal/soalUtils";
 import useWindowWidth from "../../hooks/useWindowWidth";
+
+function parseStructuredExplanation(text) {
+  if (!text) return null;
+  try {
+    const p = JSON.parse(text);
+    if (p && Array.isArray(p.steps)) {
+      return {
+        steps: p.steps.map(s => ({ title: String(s?.title ?? ""), content: String(s?.content ?? "") })),
+        recap: String(p.recap ?? ""),
+      };
+    }
+  } catch { /* diabaikan: best-effort, boleh gagal senyap */ }
+  return null;
+}
 
 export function DifficultyBadge({ level }) {
   const d = DIFFICULTY_MAP[level] || DIFFICULTY_MAP[1];
@@ -576,6 +590,17 @@ export default function SoalPreviewModal({ soalId, onClose }) {
                 </div>
               </div>
 
+              {/* Tags */}
+              {soal.tags && soal.tags.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+                  {soal.tags.map((tag, i) => (
+                    <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: "600", padding: "3px 8px", borderRadius: "99px", background: "#ede9fe", color: "#6d28d9" }}>
+                      <Tag size={9} />{tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               {/* Soal */}
               <div>
                 <div
@@ -623,31 +648,43 @@ export default function SoalPreviewModal({ soalId, onClose }) {
               </div>
 
               {/* Pembahasan */}
-              {soal.explanation && (
-                <div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: "700",
-                      letterSpacing: ".08em",
-                      textTransform: "uppercase",
-                      color: "#6b6860",
-                      marginBottom: "12px",
-                    }}
-                  >
-                    Pembahasan
+              {soal.explanation && (() => {
+                const structured = parseStructuredExplanation(soal.explanation);
+                return (
+                  <div>
+                    <div style={{ fontSize: "12px", fontWeight: "700", letterSpacing: ".08em", textTransform: "uppercase", color: "#6b6860", marginBottom: "12px" }}>
+                      Pembahasan
+                    </div>
+                    {structured ? (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        {structured.steps.map((step, i) => (
+                          <div key={i} style={{ borderRadius: "10px", border: "1px solid #e2ddd5", overflow: "hidden" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", background: "#faf9f6", borderBottom: step.content ? "1px solid #f0ede6" : "none" }}>
+                              <span style={{ width: "22px", height: "22px", borderRadius: "50%", background: "#2563eb", color: "white", fontSize: "11px", fontWeight: "800", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
+                              <span style={{ fontSize: "13px", fontWeight: "700", color: "#0f0e17", flex: 1 }}><MathRenderer text={step.title} /></span>
+                            </div>
+                            {step.content && (
+                              <div style={{ padding: "12px 14px", fontSize: "14px", color: "#0f0e17" }}>
+                                <MathRenderer text={step.content} block />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        {structured.recap && (
+                          <div style={{ borderRadius: "10px", padding: "12px 14px", background: "#e4f5f0", border: "1px solid #9FE1CB" }}>
+                            <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: ".08em", textTransform: "uppercase", color: "#1a8a6e", marginBottom: "6px" }}>Kesimpulan</div>
+                            <div style={{ fontSize: "14px", color: "#0f0e17" }}><MathRenderer text={structured.recap} block /></div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: "14px", color: "#0f0e17", lineHeight: "1.7" }}>
+                        <MathRenderer text={soal.explanation} block />
+                      </div>
+                    )}
                   </div>
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      color: "#0f0e17",
-                      lineHeight: "1.7",
-                    }}
-                  >
-                    <MathRenderer text={soal.explanation} block />
-                  </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Video */}
               {soal.video_url && (

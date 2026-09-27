@@ -31,6 +31,7 @@ export const defaultForm = {
   video_url: "",
   is_public_explanation: 0,
   materi_ids: [],
+  tags: [],
 };
 
 export const getYouTubeId = (url) => {

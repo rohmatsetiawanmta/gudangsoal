@@ -20,6 +20,137 @@ if ($userRole !== 'admin') {
 }
 
 // ==================
+// PAKET SOAL
+// ==================
+
+// GET /admin/paket — list semua paket
+if ($uri === '/admin/paket' && $method === 'GET') {
+  $stmt = $pdo->query('
+    SELECT p.id, p.nama, p.tahun, p.jenis, p.is_published, p.created_at,
+           COUNT(pi.id) as jumlah_soal
+    FROM paket_soal p
+    LEFT JOIN paket_soal_items pi ON pi.paket_id = p.id
+    GROUP BY p.id
+    ORDER BY p.tahun DESC, p.nama ASC
+  ');
+  echo json_encode($stmt->fetchAll());
+  exit;
+}
+
+// POST /admin/paket — buat paket baru
+if ($uri === '/admin/paket' && $method === 'POST') {
+  $nama   = trim($body['nama']   ?? '');
+  $tahun  = !empty($body['tahun'])  ? intval($body['tahun'])  : null;
+  $jenis  = $body['jenis']  ?? 'lainnya';
+  $deskripsi = trim($body['deskripsi'] ?? '');
+  if (!$nama) { http_response_code(400); echo json_encode(['error' => 'Nama wajib diisi']); exit; }
+  $stmt = $pdo->prepare('INSERT INTO paket_soal (nama, tahun, jenis, deskripsi) VALUES (?, ?, ?, ?)');
+  $stmt->execute([$nama, $tahun, $jenis, $deskripsi ?: null]);
+  echo json_encode(['id' => $pdo->lastInsertId(), 'message' => 'Paket berhasil dibuat']);
+  exit;
+}
+
+// GET /admin/paket/:id — detail paket
+if (preg_match('#^/admin/paket/(\d+)$#', $uri, $m) && $method === 'GET') {
+  $id = $m[1];
+  $stmt = $pdo->prepare('SELECT * FROM paket_soal WHERE id = ?');
+  $stmt->execute([$id]);
+  $paket = $stmt->fetch();
+  if (!$paket) { http_response_code(404); echo json_encode(['error' => 'Tidak ditemukan']); exit; }
+  echo json_encode($paket);
+  exit;
+}
+
+// PUT /admin/paket/:id — update paket
+if (preg_match('#^/admin/paket/(\d+)$#', $uri, $m) && $method === 'PUT') {
+  $id    = $m[1];
+  $nama  = trim($body['nama']  ?? '');
+  $tahun = !empty($body['tahun']) ? intval($body['tahun']) : null;
+  $jenis = $body['jenis'] ?? 'lainnya';
+  $deskripsi = trim($body['deskripsi'] ?? '');
+  if (!$nama) { http_response_code(400); echo json_encode(['error' => 'Nama wajib diisi']); exit; }
+  $pdo->prepare('UPDATE paket_soal SET nama=?, tahun=?, jenis=?, deskripsi=? WHERE id=?')
+      ->execute([$nama, $tahun, $jenis, $deskripsi ?: null, $id]);
+  echo json_encode(['message' => 'Paket diperbarui']);
+  exit;
+}
+
+// PATCH /admin/paket/:id/publish — toggle publish
+if (preg_match('#^/admin/paket/(\d+)/publish$#', $uri, $m) && $method === 'PATCH') {
+  $id  = $m[1];
+  $val = intval($body['is_published'] ?? 0);
+  $pdo->prepare('UPDATE paket_soal SET is_published=? WHERE id=?')->execute([$val, $id]);
+  echo json_encode(['message' => 'Status diperbarui']);
+  exit;
+}
+
+// DELETE /admin/paket/:id — hapus paket
+if (preg_match('#^/admin/paket/(\d+)$#', $uri, $m) && $method === 'DELETE') {
+  $id = $m[1];
+  $pdo->prepare('DELETE FROM paket_soal WHERE id=?')->execute([$id]);
+  echo json_encode(['message' => 'Paket dihapus']);
+  exit;
+}
+
+// GET /admin/paket/:id/soal — daftar soal dalam paket
+if (preg_match('#^/admin/paket/(\d+)/soal$#', $uri, $m) && $method === 'GET') {
+  $id = $m[1];
+  $stmt = $pdo->prepare('
+    SELECT s.id, s.kode, s.body, s.tipe, s.difficulty, s.is_published,
+           st.nama as subtopik, t.nama as topik, m.nama as mapel,
+           pi.urutan
+    FROM paket_soal_items pi
+    JOIN soal s ON pi.soal_id = s.id
+    JOIN subtopik st ON s.subtopik_id = st.id
+    JOIN topik t ON st.topik_id = t.id
+    JOIN mapel m ON t.mapel_id = m.id
+    WHERE pi.paket_id = ?
+    ORDER BY pi.urutan ASC
+  ');
+  $stmt->execute([$id]);
+  echo json_encode($stmt->fetchAll());
+  exit;
+}
+
+// POST /admin/paket/:id/soal — tambah soal ke paket (by soal_id)
+if (preg_match('#^/admin/paket/(\d+)/soal$#', $uri, $m) && $method === 'POST') {
+  $paketId = $m[1];
+  $soalId  = intval($body['soal_id'] ?? 0);
+  if (!$soalId) { http_response_code(400); echo json_encode(['error' => 'soal_id wajib']); exit; }
+  // Cek duplikat
+  $cek = $pdo->prepare('SELECT id FROM paket_soal_items WHERE paket_id=? AND soal_id=?');
+  $cek->execute([$paketId, $soalId]);
+  if ($cek->fetch()) { http_response_code(409); echo json_encode(['error' => 'Soal sudah ada di paket']); exit; }
+  // Urutan berikutnya
+  $stmt = $pdo->prepare('SELECT COALESCE(MAX(urutan),0)+1 FROM paket_soal_items WHERE paket_id=?');
+  $stmt->execute([$paketId]);
+  $urutan = (int)$stmt->fetchColumn();
+  $pdo->prepare('INSERT INTO paket_soal_items (paket_id, soal_id, urutan) VALUES (?,?,?)')
+      ->execute([$paketId, $soalId, $urutan]);
+  echo json_encode(['message' => 'Soal ditambahkan', 'urutan' => $urutan]);
+  exit;
+}
+
+// DELETE /admin/paket/:id/soal/:soal_id — hapus soal dari paket
+if (preg_match('#^/admin/paket/(\d+)/soal/(\d+)$#', $uri, $m) && $method === 'DELETE') {
+  $pdo->prepare('DELETE FROM paket_soal_items WHERE paket_id=? AND soal_id=?')->execute([$m[1], $m[2]]);
+  echo json_encode(['message' => 'Soal dihapus dari paket']);
+  exit;
+}
+
+// PUT /admin/paket/:id/soal/reorder — update urutan
+if (preg_match('#^/admin/paket/(\d+)/soal/reorder$#', $uri, $m) && $method === 'PUT') {
+  $paketId = $m[1];
+  $items   = $body['items'] ?? []; // [{soal_id, urutan}]
+  $stmt    = $pdo->prepare('UPDATE paket_soal_items SET urutan=? WHERE paket_id=? AND soal_id=?');
+  foreach ($items as $item) {
+    $stmt->execute([$item['urutan'], $paketId, $item['soal_id']]);
+  }
+  echo json_encode(['message' => 'Urutan diperbarui']);
+  exit;
+}
+
+// ==================
 // SOAL
 // ==================
 
@@ -95,6 +226,63 @@ if ($uri === '/admin/soal' && $method === 'GET') {
   exit;
 }
 
+// GET /admin/soal/export — download soal as bulk-import JSON
+if ($uri === '/admin/soal/export' && $method === 'GET') {
+  $subtopik_id = isset($_GET['subtopik_id']) && $_GET['subtopik_id'] !== '' ? (int) $_GET['subtopik_id'] : null;
+  $search      = trim($_GET['search']     ?? '');
+  $difficulty  = isset($_GET['difficulty']) && $_GET['difficulty'] !== '' ? (int) $_GET['difficulty'] : null;
+  $published   = isset($_GET['published'])  && $_GET['published']  !== '' ? (int) $_GET['published']  : null;
+
+  $where = ['s.is_exclusive = 0']; $params = [];
+  if ($subtopik_id !== null) { $where[] = 's.subtopik_id = ?'; $params[] = $subtopik_id; }
+  if ($search !== '')        { $where[] = 's.body LIKE ?';      $params[] = "%$search%"; }
+  if ($difficulty !== null)  { $where[] = 's.difficulty = ?';   $params[] = $difficulty; }
+  if ($published !== null)   { $where[] = 's.is_published = ?'; $params[] = $published; }
+  $whereClause = 'WHERE ' . implode(' AND ', $where);
+
+  $stmt = $pdo->prepare("
+    SELECT s.id, s.kode, s.tipe, s.body, s.options, s.answer, s.explanation, s.difficulty, s.materi_ids, s.tags
+    FROM soal s
+    $whereClause
+    ORDER BY s.created_at ASC
+    LIMIT 1000
+  ");
+  $stmt->execute($params);
+  $rows = $stmt->fetchAll();
+
+  // Batch-fetch materi titles
+  $allMateriIds = [];
+  foreach ($rows as $r) {
+    $ids = $r['materi_ids'] ? json_decode($r['materi_ids'], true) : [];
+    if (is_array($ids)) $allMateriIds = array_merge($allMateriIds, $ids);
+  }
+  $allMateriIds = array_values(array_unique($allMateriIds));
+  $materiTitleMap = [];
+  if (!empty($allMateriIds)) {
+    $ph = implode(',', array_fill(0, count($allMateriIds), '?'));
+    $mStmt = $pdo->prepare("SELECT id, judul FROM materi WHERE id IN ($ph)");
+    $mStmt->execute($allMateriIds);
+    foreach ($mStmt->fetchAll() as $m) $materiTitleMap[$m['id']] = $m['judul'];
+  }
+
+  $diffMap = [1 => 'easy', 2 => 'medium', 3 => 'hard'];
+  foreach ($rows as &$r) {
+    $r['options']    = json_decode($r['options'] ?? 'null');
+    $r['answer']     = json_decode($r['answer']  ?? 'null');
+    $r['difficulty'] = $diffMap[(int) $r['difficulty']] ?? 'easy';
+    if (!$r['explanation']) unset($r['explanation']);
+    $ids = $r['materi_ids'] ? json_decode($r['materi_ids'], true) : [];
+    if (is_array($ids) && !empty($ids)) {
+      $r['materi_terkait'] = array_values(array_filter(array_map(fn($id) => $materiTitleMap[$id] ?? null, $ids)));
+    }
+    unset($r['materi_ids']);
+    $r['tags'] = $r['tags'] ? json_decode($r['tags']) : [];
+  }
+
+  echo json_encode($rows, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+  exit;
+}
+
 // GET /admin/soal/detail?id=1  atau  ?kode=A6E5M9
 if ($uri === '/admin/soal/detail' && $method === 'GET') {
   $id   = $_GET['id']   ?? null;
@@ -122,19 +310,18 @@ if ($uri === '/admin/soal/detail' && $method === 'GET') {
   $soal['options']    = json_decode($soal['options']);
   $soal['answer']     = json_decode($soal['answer']);
   $soal['materi_ids'] = $soal['materi_ids'] ? json_decode($soal['materi_ids']) : [];
+  $soal['tags']       = $soal['tags'] ? json_decode($soal['tags']) : [];
   echo json_encode($soal);
   exit;
 }
 
 // POST /admin/soal
 if ($uri === '/admin/soal' && $method === 'POST') {
-  $required = ['subtopik_id', 'body', 'options', 'answer'];
-  foreach ($required as $field) {
-    if (empty($body[$field])) {
-      http_response_code(400);
-      echo json_encode(['error' => "$field wajib diisi"]);
-      exit;
-    }
+  if (empty($body['subtopik_id']) || empty($body['body']) || !isset($body['options']) || !isset($body['answer']) || $body['answer'] === '' || $body['answer'] === null) {
+    http_response_code(400);
+    $missing = empty($body['subtopik_id']) ? 'subtopik_id' : (empty($body['body']) ? 'body' : (!isset($body['options']) ? 'options' : 'answer'));
+    echo json_encode(['error' => "$missing wajib diisi"]);
+    exit;
   }
 
   // Generate kode unik 6 karakter
@@ -150,10 +337,11 @@ if ($uri === '/admin/soal' && $method === 'POST') {
   } while ($cek->fetch()); // ulangi kalau bentrok
 
   $stmt = $pdo->prepare('
-    INSERT INTO soal (kode, subtopik_id, tipe, body, options, answer, explanation, difficulty, video_url, is_public_explanation, materi_ids)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO soal (kode, subtopik_id, tipe, body, options, answer, explanation, difficulty, video_url, is_public_explanation, materi_ids, tags)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   ');
   $materi_ids = !empty($body['materi_ids']) ? json_encode($body['materi_ids']) : null;
+  $tags_val   = !empty($body['tags']) && is_array($body['tags']) ? json_encode(array_values($body['tags'])) : null;
   $stmt->execute([
     $kode,
     $body['subtopik_id'],
@@ -166,10 +354,27 @@ if ($uri === '/admin/soal' && $method === 'POST') {
     $body['video_url']   ?? null,
     $body['is_public_explanation'] ?? 0,
     $materi_ids,
+    $tags_val,
   ]);
 
   http_response_code(201);
   echo json_encode(['id' => $pdo->lastInsertId(), 'kode' => $kode, 'message' => 'Soal berhasil ditambahkan']);
+  exit;
+}
+
+// POST /admin/soal/check-kodes  — batch check kodes exist in DB
+if ($uri === '/admin/soal/check-kodes' && $method === 'POST') {
+  $kodes = $body['kodes'] ?? [];
+  if (empty($kodes) || !is_array($kodes)) {
+    echo json_encode(['found' => []]);
+    exit;
+  }
+  $kodes = array_values(array_unique(array_map('strtoupper', $kodes)));
+  $ph = implode(',', array_fill(0, count($kodes), '?'));
+  $stmt = $pdo->prepare("SELECT kode FROM soal WHERE kode IN ($ph)");
+  $stmt->execute($kodes);
+  $found = array_column($stmt->fetchAll(), 'kode');
+  echo json_encode(['found' => $found]);
   exit;
 }
 
@@ -186,30 +391,83 @@ if ($uri === '/admin/soal/bulk' && $method === 'POST') {
   $errors = [];
   $chars  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-  foreach ($soalList as $i => $s) {
-    $required = ['subtopik_id', 'body', 'options', 'answer'];
-    $missing = false;
-    foreach ($required as $field) {
-      if (empty($s[$field])) { $missing = true; break; }
+  // Batch-resolve materi_terkait titles → IDs
+  $allTitles = [];
+  foreach ($soalList as $s) {
+    if (!empty($s['materi_terkait']) && is_array($s['materi_terkait'])) {
+      foreach ($s['materi_terkait'] as $t) { $allTitles[] = $t; }
     }
-    if ($missing) {
+  }
+  $titleToId = [];
+  if (!empty($allTitles)) {
+    $allTitles = array_unique($allTitles);
+    $ph = implode(',', array_fill(0, count($allTitles), '?'));
+    $mStmt = $pdo->prepare("SELECT id, judul FROM materi WHERE judul IN ($ph)");
+    $mStmt->execute(array_values($allTitles));
+    foreach ($mStmt->fetchAll() as $m) { $titleToId[$m['judul']] = (int)$m['id']; }
+  }
+
+  foreach ($soalList as $i => $s) {
+    if (empty($s['subtopik_id']) || empty($s['body']) || !isset($s['options']) || !isset($s['answer']) || $s['answer'] === '' || $s['answer'] === null) {
       $errors[] = ['index' => $i, 'reason' => 'Field tidak lengkap'];
       continue;
     }
 
-    // Generate kode unik
-    $kode = '';
-    do {
-      $kode = '';
-      for ($j = 0; $j < 6; $j++) {
-        $kode .= $chars[random_int(0, strlen($chars) - 1)];
-      }
-      $cek = $pdo->prepare('SELECT id FROM soal WHERE kode = ?');
-      $cek->execute([$kode]);
-    } while ($cek->fetch());
-
     try {
-      $materi_ids_bulk = !empty($s['materi_ids']) ? json_encode($s['materi_ids']) : null;
+      if (!empty($s['materi_ids']) && is_array($s['materi_ids'])) {
+        $materi_ids_bulk = json_encode($s['materi_ids']);
+      } elseif (!empty($s['materi_terkait']) && is_array($s['materi_terkait'])) {
+        $resolved = array_values(array_filter(array_map(fn($t) => $titleToId[$t] ?? null, $s['materi_terkait'])));
+        $materi_ids_bulk = !empty($resolved) ? json_encode($resolved) : null;
+      } else {
+        $materi_ids_bulk = null;
+      }
+
+      $expValue = isset($s['explanation']) ? (is_array($s['explanation']) || is_object($s['explanation']) ? json_encode($s['explanation']) : $s['explanation']) : null;
+
+      // === MODE EDIT: ada kode ===
+      if (!empty($s['kode'])) {
+        $kodeUpper = strtoupper((string)$s['kode']);
+        $check = $pdo->prepare('SELECT id, kode FROM soal WHERE kode = ?');
+        $check->execute([$kodeUpper]);
+        $existing = $check->fetch();
+        if ($existing) {
+          // Kode ada di DB → UPDATE
+          $upd = $pdo->prepare('
+            UPDATE soal SET subtopik_id=?, tipe=?, body=?, options=?, answer=?, explanation=?, difficulty=?, video_url=?, materi_ids=?
+            WHERE id=?
+          ');
+          $upd->execute([
+            $s['subtopik_id'],
+            $s['tipe']       ?? 'pilihan_ganda',
+            $s['body'],
+            json_encode($s['options']),
+            json_encode($s['answer']),
+            $expValue,
+            $s['difficulty'] ?? 1,
+            $s['video_url']  ?? null,
+            $materi_ids_bulk,
+            $existing['id'],
+          ]);
+          $saved[] = ['index' => $i, 'id' => (int)$existing['id'], 'kode' => $existing['kode'], 'action' => 'updated'];
+          continue;
+        }
+        // Kode tidak ada di DB → INSERT baru dengan kode tersebut
+        $kode = $kodeUpper;
+      } else {
+        // Generate kode unik baru
+        $kode = '';
+        do {
+          $kode = '';
+          for ($j = 0; $j < 6; $j++) {
+            $kode .= $chars[random_int(0, strlen($chars) - 1)];
+          }
+          $cek = $pdo->prepare('SELECT id FROM soal WHERE kode = ?');
+          $cek->execute([$kode]);
+        } while ($cek->fetch());
+      }
+
+      // INSERT (kode sudah ditentukan di atas)
       $stmt = $pdo->prepare('
         INSERT INTO soal (kode, subtopik_id, tipe, body, options, answer, explanation, difficulty, video_url, is_public_explanation, materi_ids)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -221,13 +479,13 @@ if ($uri === '/admin/soal/bulk' && $method === 'POST') {
         $s['body'],
         json_encode($s['options']),
         json_encode($s['answer']),
-        $s['explanation'] ?? null,
+        $expValue,
         $s['difficulty']  ?? 1,
         $s['video_url']   ?? null,
         $s['is_public_explanation'] ?? 0,
         $materi_ids_bulk,
       ]);
-      $saved[] = ['index' => $i, 'id' => $pdo->lastInsertId(), 'kode' => $kode];
+      $saved[] = ['index' => $i, 'id' => $pdo->lastInsertId(), 'kode' => $kode, 'action' => 'created'];
     } catch (Exception $e) {
       $errors[] = ['index' => $i, 'reason' => $e->getMessage()];
     }
@@ -247,21 +505,20 @@ if ($uri === '/admin/soal' && $method === 'PUT') {
   $id = $_GET['id'] ?? null;
   if (!$id) { http_response_code(400); echo json_encode(['error' => 'id wajib']); exit; }
 
-  $required = ['subtopik_id', 'body', 'options', 'answer'];
-  foreach ($required as $field) {
-    if (empty($body[$field])) {
-      http_response_code(400);
-      echo json_encode(['error' => "$field wajib diisi"]);
-      exit;
-    }
+  if (empty($body['subtopik_id']) || empty($body['body']) || !isset($body['options']) || !isset($body['answer']) || $body['answer'] === '' || $body['answer'] === null) {
+    http_response_code(400);
+    $missing = empty($body['subtopik_id']) ? 'subtopik_id' : (empty($body['body']) ? 'body' : (!isset($body['options']) ? 'options' : 'answer'));
+    echo json_encode(['error' => "$missing wajib diisi"]);
+    exit;
   }
 
   $stmt = $pdo->prepare('
     UPDATE soal
-    SET subtopik_id=?, tipe=?, body=?, options=?, answer=?, explanation=?, difficulty=?, video_url=?, is_public_explanation=?, materi_ids=?
+    SET subtopik_id=?, tipe=?, body=?, options=?, answer=?, explanation=?, difficulty=?, video_url=?, is_public_explanation=?, materi_ids=?, tags=?
     WHERE id=?
   ');
   $materi_ids = !empty($body['materi_ids']) ? json_encode($body['materi_ids']) : null;
+  $tags_val   = !empty($body['tags']) && is_array($body['tags']) ? json_encode(array_values($body['tags'])) : null;
   $stmt->execute([
     $body['subtopik_id'],
     $body['tipe']        ?? 'pilihan_ganda',
@@ -273,6 +530,7 @@ if ($uri === '/admin/soal' && $method === 'PUT') {
     $body['video_url']   ?? null,
     $body['is_public_explanation'] ?? 0,
     $materi_ids,
+    $tags_val,
     $id,
   ]);
 
@@ -2373,5 +2631,30 @@ if ($uri === '/admin/analytics/active-users' && $method === 'GET') {
   }
 
   echo json_encode(compact('daily', 'weekly', 'monthly', 'registrations', 'avgSessionsPerUser'));
+  exit;
+}
+
+// GET /admin/site-settings
+if ($uri === '/admin/site-settings' && $method === 'GET') {
+  $rows = $pdo->query("SELECT `key`, `value` FROM site_settings")->fetchAll();
+  $out = [];
+  foreach ($rows as $r) $out[$r['key']] = (bool)(int)$r['value'];
+  echo json_encode($out);
+  exit;
+}
+
+// POST /admin/site-settings
+if ($uri === '/admin/site-settings' && $method === 'POST') {
+  $allowed = ['menu_soal', 'menu_materi', 'menu_paket', 'menu_latihan'];
+  $stmt = $pdo->prepare("UPDATE site_settings SET `value` = ? WHERE `key` = ?");
+  foreach ($allowed as $k) {
+    if (array_key_exists($k, $body ?? [])) {
+      $stmt->execute([$body[$k] ? '1' : '0', $k]);
+    }
+  }
+  $rows = $pdo->query("SELECT `key`, `value` FROM site_settings")->fetchAll();
+  $out = [];
+  foreach ($rows as $r) $out[$r['key']] = (bool)(int)$r['value'];
+  echo json_encode($out);
   exit;
 }

@@ -548,7 +548,6 @@ export default function AdminQuizDetail() {
               onDragOver={(e) => handleDragOver(e, i)}
               onDragEnd={handleDragEnd}
               style={{
-                background: "white",
                 borderRadius: "12px",
                 border: `1px solid ${dragIdx === i ? "#e84c2b" : isSelected ? "#e84c2b" : "#e2ddd5"}`,
                 borderLeft: `3px solid ${diff.color}`,

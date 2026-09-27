@@ -2,6 +2,20 @@
 import MathRenderer from "../../../components/MathRenderer";
 import { TIPE_SOAL, DIFFICULTY_MAP } from "./constants";
 
+function parseStructured(text) {
+  if (!text) return null;
+  try {
+    const p = JSON.parse(text);
+    if (p && Array.isArray(p.steps)) {
+      return {
+        steps: p.steps.map(s => ({ title: String(s?.title ?? ""), content: String(s?.content ?? "") })),
+        recap: String(p.recap ?? ""),
+      };
+    }
+  } catch { /* diabaikan: best-effort, boleh gagal senyap */ }
+  return null;
+}
+
 // Helper normalize menjodohkan — handle format lama {id,text} dan baru string
 const normalizeMenjodohkan = (options) => {
   if (!options) return { left: [], right: [] };
@@ -531,38 +545,47 @@ export default function PreviewPanel({ form }) {
       )}
 
       {/* Pembahasan */}
-      <div
-        style={{
-          background: "white",
-          borderRadius: "14px",
-          border: "1px solid #e2ddd5",
-          padding: "24px",
-        }}
-      >
-        <div
-          style={{
-            fontSize: "12px",
-            fontWeight: "700",
-            letterSpacing: ".08em",
-            textTransform: "uppercase",
-            color: "#6b6860",
-            marginBottom: "12px",
-          }}
-        >
-          Pembahasan
-        </div>
-        {form.explanation ? (
-          <div style={{ fontSize: "14px", color: "#0f0e17" }}>
-            <MathRenderer text={form.explanation} block />
+      {(() => {
+        const structured = parseStructured(form.explanation);
+        return (
+          <div style={{ background: "white", borderRadius: "14px", border: "1px solid #e2ddd5", padding: "24px" }}>
+            <div style={{ fontSize: "12px", fontWeight: "700", letterSpacing: ".08em", textTransform: "uppercase", color: "#6b6860", marginBottom: "12px" }}>
+              Pembahasan
+            </div>
+            {structured ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                {structured.steps.map((step, i) => (
+                  <div key={i} style={{ borderRadius: "10px", border: "1px solid #e2ddd5", overflow: "hidden" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", background: "#faf9f6", borderBottom: step.content ? "1px solid #f0ede6" : "none" }}>
+                      <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: "#2563eb", color: "white", fontSize: "11px", fontWeight: "800", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
+                      <span style={{ fontSize: "13px", fontWeight: "700", color: "#0f0e17", flex: 1 }}>
+                        {step.title ? <MathRenderer text={step.title} /> : <span style={{ color: "#b4b2a9", fontStyle: "italic" }}>Judul langkah {i + 1}...</span>}
+                      </span>
+                    </div>
+                    {step.content && (
+                      <div style={{ padding: "12px 14px", fontSize: "14px", color: "#0f0e17" }}>
+                        <MathRenderer text={step.content} block />
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {structured.recap && (
+                  <div style={{ borderRadius: "10px", padding: "12px 14px", background: "#e4f5f0", border: "1px solid #9FE1CB" }}>
+                    <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: ".06em", textTransform: "uppercase", color: "#1a8a6e", marginBottom: "6px" }}>Kesimpulan</div>
+                    <div style={{ fontSize: "14px", color: "#0f0e17" }}><MathRenderer text={structured.recap} block /></div>
+                  </div>
+                )}
+              </div>
+            ) : form.explanation ? (
+              <div style={{ fontSize: "14px", color: "#0f0e17" }}>
+                <MathRenderer text={form.explanation} block />
+              </div>
+            ) : (
+              <div style={{ fontSize: "14px", color: "#b4b2a9", fontStyle: "italic" }}>Pembahasan belum diisi...</div>
+            )}
           </div>
-        ) : (
-          <div
-            style={{ fontSize: "14px", color: "#b4b2a9", fontStyle: "italic" }}
-          >
-            Pembahasan belum diisi...
-          </div>
-        )}
-      </div>
+        );
+      })()}
     </div>
   );
 }

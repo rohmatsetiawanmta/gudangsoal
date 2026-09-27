@@ -119,12 +119,14 @@ export default function BrowseMapel() {
                   display: "flex", alignItems: "center", gap: "14px",
                   background: "var(--gs-surface)", borderRadius: "14px",
                   border: "1px solid var(--gs-border)",
-                  borderLeft: `3px solid ${m.is_coming_soon == 1 ? "#f5a623" : "#2563eb"}`,
+                  borderLeft: `3px solid ${m.is_coming_soon == 1 ? "#d4d0c8" : "#2563eb"}`,
                   padding: isMobile ? "14px 16px" : "16px 20px",
-                  cursor: "pointer", transition: "transform .15s, box-shadow .15s",
+                  cursor: m.is_coming_soon == 1 ? "default" : "pointer",
+                  opacity: m.is_coming_soon == 1 ? 0.55 : 1,
+                  transition: "transform .15s, box-shadow .15s",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.06)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
+                onMouseEnter={(e) => { if (m.is_coming_soon == 1) return; e.currentTarget.style.transform = "translateX(4px)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.06)"; }}
+                onMouseLeave={(e) => { if (m.is_coming_soon == 1) return; e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = "none"; }}
               >
                 <div style={{
                   width: isMobile ? "36px" : "40px", height: isMobile ? "36px" : "40px",

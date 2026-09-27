@@ -12,6 +12,23 @@ import MathRenderer from "../../../components/MathRenderer";
 import MateriTerkaitBanner from "../../../components/MateriTerkaitBanner";
 import { formatAnswer, getYouTubeId, normalizeMenjodohkan } from "../soalUtils";
 
+function parseStructuredExplanation(text) {
+  if (!text) return null;
+  try {
+    const p = JSON.parse(text);
+    if (p && Array.isArray(p.steps)) {
+      return {
+        steps: p.steps.map(s => ({
+          title: String(s?.title ?? ""),
+          content: String(s?.content ?? ""),
+        })),
+        recap: String(p.recap ?? ""),
+      };
+    }
+  } catch { /* diabaikan: best-effort, boleh gagal senyap */ }
+  return null;
+}
+
 export default function PembahasanPanel({
   soal,
   submitted,
@@ -38,6 +55,7 @@ export default function PembahasanPanel({
       : {};
 
   const isBenar = isCorrect || alreadyCorrect;
+  const structured = parseStructuredExplanation(soal.explanation);
 
   // Belum submit
   if (!submitted) {
@@ -140,7 +158,7 @@ export default function PembahasanPanel({
               }}
             >
               <span style={{ fontWeight: "600" }}>
-                {opt.label || `Sub-jawaban ${idx + 1}`}:
+                <MathRenderer text={opt.label || `Sub-jawaban ${idx + 1}`} />:
               </span>
               <span style={{ fontWeight: "700" }}>
                 {Array.isArray(soal.answer) ? soal.answer[idx] : "—"}
@@ -327,9 +345,39 @@ export default function PembahasanPanel({
           >
             Pembahasan
           </div>
-          <div style={{ fontSize: "14px", color: "var(--gs-text)" }}>
-            <MathRenderer text={soal.explanation} block />
-          </div>
+          {structured ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {structured.steps.map((step, i) => (
+                <div key={i} style={{ borderRadius: "10px", border: "1px solid var(--gs-border)", overflow: "hidden" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", background: "var(--gs-surface-subtle)", borderBottom: step.content ? "1px solid var(--gs-border)" : "none" }}>
+                    <span style={{ width: "22px", height: "22px", borderRadius: "50%", background: "#2563eb", color: "white", fontSize: "11px", fontWeight: "800", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      {i + 1}
+                    </span>
+                    <span style={{ fontSize: "13px", fontWeight: "700", color: "var(--gs-text)", flex: 1 }}>
+                      <MathRenderer text={step.title} />
+                    </span>
+                  </div>
+                  {step.content && (
+                    <div style={{ padding: "12px 14px", fontSize: "14px", color: "var(--gs-text)" }}>
+                      <MathRenderer text={step.content} block />
+                    </div>
+                  )}
+                </div>
+              ))}
+              {structured.recap && (
+                <div style={{ borderRadius: "10px", padding: "12px 14px", background: "#e4f5f0", border: "1px solid #9FE1CB" }}>
+                  <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: ".08em", textTransform: "uppercase", color: "#1a8a6e", marginBottom: "6px" }}>Kesimpulan</div>
+                  <div style={{ fontSize: "14px", color: "var(--gs-text)" }}>
+                    <MathRenderer text={structured.recap} block />
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ fontSize: "14px", color: "var(--gs-text)" }}>
+              <MathRenderer text={soal.explanation} block />
+            </div>
+          )}
         </div>
       )}
       {showPembahasan && !soal.explanation && (

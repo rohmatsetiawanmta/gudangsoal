@@ -72,6 +72,13 @@ import MateriList from "./features/materi/MateriList";
 import AdminMateriBulkImport from "./features/admin/AdminMateriBulkImport";
 import AdminViews from "./features/admin/AdminViews";
 import AdminShares from "./features/admin/AdminShares";
+import AdminPaket from "./features/admin/AdminPaket";
+import AdminPaketForm from "./features/admin/AdminPaketForm";
+import AdminPaketDetail from "./features/admin/AdminPaketDetail";
+import PaketList from "./features/paket/PaketList";
+import PaketDetail from "./features/paket/PaketDetail";
+import AdminSiteSettings from "./features/admin/AdminSiteSettings";
+import { SiteSettingsProvider } from "./contexts/SiteSettingsContext";
 
 export default function App() {
   const { isLoggedIn, checkSessionExpiry } = useAuthStore();
@@ -82,6 +89,7 @@ export default function App() {
   }, []);
 
   return (
+    <SiteSettingsProvider>
     <>
     <ScrollToTop />
     <FloatingTools />
@@ -133,6 +141,13 @@ export default function App() {
       <Route path="/soal/:kode" element={<SoalDetail />} />
       <Route path="/materi" element={<MateriList />} />
       <Route path="/materi/:id" element={<MateriDetail />} />
+      <Route path="/paket" element={<PaketList />} />
+      <Route path="/paket/:id" element={<PaketDetail />} />
+      <Route path="/latihan" element={<LatihanPage />} />
+      <Route path="/latihan/:id" element={<LatihanDetail />} />
+      <Route path="/latihan/:id/quiz" element={<QuizPage />} />
+      <Route path="/latihan/:id/hasil" element={<QuizHasil />} />
+      <Route path="/latihan/:id/review" element={<QuizReview />} />
       <Route path="/populer" element={<PopulerPage />} />
 
       <Route path="*" element={<Navigate to="/" />} />
@@ -177,11 +192,18 @@ export default function App() {
           <Route path="materi/tambah" element={<AdminMateriForm />} />
           <Route path="materi/edit/:id" element={<AdminMateriForm />} />
           <Route path="materi/bulk-import" element={<AdminMateriBulkImport />} />
+
+          <Route path="paket" element={<AdminPaket />} />
+          <Route path="paket/tambah" element={<AdminPaketForm />} />
+          <Route path="paket/:id" element={<AdminPaketDetail />} />
+          <Route path="paket/:id/edit" element={<AdminPaketForm />} />
+          <Route path="settings" element={<AdminSiteSettings />} />
         </Route>
       </Route>
 
     </Routes>
     </div>
     </>
+    </SiteSettingsProvider>
   );
 }

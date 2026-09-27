@@ -69,10 +69,10 @@ function LineChart({ data, period, accentColor, unit = "user" }) {
         </defs>
 
         {/* Grid lines */}
-        {gridLines.map(val => {
+        {gridLines.map((val, i) => {
           const y = py(val);
           return (
-            <g key={val}>
+            <g key={i}>
               <line x1={padL} x2={padL + plotW} y1={y} y2={y} stroke="#e2ddd5" strokeWidth={1} strokeDasharray={val === 0 ? "none" : "3 3"} />
               <text x={padL - 4} y={y + 4} textAnchor="end" fill="#b4b2a9" fontSize={10}>{val}</text>
             </g>

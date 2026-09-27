@@ -3,7 +3,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
   GraduationCap, Search, X, ChevronRight, ChevronLeft,
-  BookOpen, Loader2, SlidersHorizontal, ChevronDown,
+  BookOpen, Loader2, SlidersHorizontal,
 } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -19,34 +19,37 @@ function fmtDate(str) {
   });
 }
 
-function FilterSelect({ label, value, onChange, options, disabled }) {
+function ChipLevel({ label, color, items, selected, onSelect, loading = false }) {
   return (
-    <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
-        disabled={disabled}
-        style={{
-          width: "100%", appearance: "none",
-          padding: "9px 32px 9px 12px",
-          border: "1px solid var(--gs-border)", borderRadius: "10px",
-          fontSize: "13.5px", fontFamily: "inherit",
-          color: value ? "var(--gs-text)" : "var(--gs-text-hint)",
-          background: disabled ? "var(--gs-surface-subtle)" : "var(--gs-surface)",
-          cursor: disabled ? "not-allowed" : "pointer",
-          outline: "none", boxSizing: "border-box",
-        }}
-      >
-        <option value="">{label}</option>
-        {options.map((o) => (
-          <option key={o.id} value={o.id}>{o.nama}</option>
-        ))}
-      </select>
-      <ChevronDown size={13} style={{
-        position: "absolute", right: "10px", top: "50%",
-        transform: "translateY(-50%)", pointerEvents: "none",
-        color: disabled ? "var(--gs-border)" : "var(--gs-text-hint)",
-      }} />
+    <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+      <div style={{
+        fontSize: "10px", fontWeight: "700", color,
+        textTransform: "uppercase", letterSpacing: ".08em",
+        paddingTop: "6px", flexShrink: 0, width: "54px", textAlign: "right",
+      }}>
+        {label}
+      </div>
+      <div style={{ flex: 1, display: "flex", flexWrap: "wrap", gap: "6px" }}>
+        {loading ? (
+          <span style={{ fontSize: "12px", color: "var(--gs-text-hint)", paddingTop: "5px" }}>Memuat...</span>
+        ) : items.length === 0 ? (
+          <span style={{ fontSize: "12px", color: "var(--gs-text-hint)", paddingTop: "5px", fontStyle: "italic" }}>Belum tersedia</span>
+        ) : items.map((item) => {
+          const active = selected === item.id;
+          return (
+            <button key={item.id} onClick={() => onSelect(item.id)} style={{
+              padding: "5px 13px", borderRadius: "99px",
+              fontSize: "12.5px", fontWeight: active ? "700" : "500",
+              border: `1px solid ${active ? color : "var(--gs-border)"}`,
+              background: active ? color + "18" : "var(--gs-surface)",
+              color: active ? color : "var(--gs-text-muted)",
+              cursor: "pointer", fontFamily: "inherit", transition: "all .12s",
+            }}>
+              {item.nama}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -255,42 +258,39 @@ export default function MateriList() {
             )}
           </div>
 
-          {/* Cascade dropdowns */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)",
-            gap: "8px",
-          }}>
-            <FilterSelect label="Semua Jenjang" value={selJenjang ?? ""} onChange={setSelJenjang} options={jenjangList} disabled={false} />
-            <FilterSelect label={loadingSubjenjang ? "Memuat..." : "Semua Kelas"} value={selSubjenjang ?? ""} onChange={setSelSubjenjang} options={subjenjangList} disabled={!selJenjang || loadingSubjenjang} />
-            <FilterSelect label={loadingMapel ? "Memuat..." : "Semua Mapel"} value={selMapel ?? ""} onChange={setSelMapel} options={mapelList} disabled={!selSubjenjang || loadingMapel} />
-            <FilterSelect label={loadingTopik ? "Memuat..." : "Semua Topik"} value={selTopik ?? ""} onChange={setSelTopik} options={topikList} disabled={!selMapel || loadingTopik} />
+          {/* Progressive chip filter */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <ChipLevel label="Jenjang" color="#e84c2b" items={jenjangList} selected={selJenjang} loading={false}
+              onSelect={(id) => setSelJenjang(id === selJenjang ? null : id)} />
+            {selJenjang && (
+              <>
+                <div style={{ borderTop: "1px solid var(--gs-divider)", margin: "0 0 0 64px" }} />
+                <ChipLevel label="Kelas" color="#f5a623" items={subjenjangList} selected={selSubjenjang} loading={loadingSubjenjang}
+                  onSelect={(id) => setSelSubjenjang(id === selSubjenjang ? null : id)} />
+              </>
+            )}
+            {selSubjenjang && (
+              <>
+                <div style={{ borderTop: "1px solid var(--gs-divider)", margin: "0 0 0 64px" }} />
+                <ChipLevel label="Mapel" color="#2563eb" items={mapelList} selected={selMapel} loading={loadingMapel}
+                  onSelect={(id) => setSelMapel(id === selMapel ? null : id)} />
+              </>
+            )}
+            {selMapel && (
+              <>
+                <div style={{ borderTop: "1px solid var(--gs-divider)", margin: "0 0 0 64px" }} />
+                <ChipLevel label="Topik" color="#1a8a6e" items={topikList} selected={selTopik} loading={loadingTopik}
+                  onSelect={(id) => setSelTopik(id === selTopik ? null : id)} />
+              </>
+            )}
+            {selTopik && (
+              <>
+                <div style={{ borderTop: "1px solid var(--gs-divider)", margin: "0 0 0 64px" }} />
+                <ChipLevel label="Subtopik" color="#7c3aed" items={subtopikList} selected={selSubtopik} loading={loadingSubtopik}
+                  onSelect={(id) => setSelSubtopik(id === selSubtopik ? null : id)} />
+              </>
+            )}
           </div>
-
-          {/* Subtopik chips */}
-          {subtopikList.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "10px" }}>
-              {loadingSubtopik ? (
-                <span style={{ fontSize: "12px", color: "var(--gs-text-hint)" }}>Memuat subtopik...</span>
-              ) : (
-                subtopikList.map((st) => {
-                  const active = selSubtopik === st.id;
-                  return (
-                    <button key={st.id} onClick={() => setSelSubtopik(active ? null : st.id)} style={{
-                      padding: "5px 12px", borderRadius: "99px",
-                      fontSize: "12.5px", fontWeight: "600",
-                      border: active ? "1px solid #1a8a6e" : "1px solid var(--gs-border)",
-                      background: active ? "#e4f5f0" : "var(--gs-surface)",
-                      color: active ? "#1a8a6e" : "var(--gs-text-muted)",
-                      cursor: "pointer", fontFamily: "inherit", transition: "all .12s",
-                    }}>
-                      {st.nama}
-                    </button>
-                  );
-                })
-              )}
-            </div>
-          )}
 
           {/* Active filter summary */}
           {hasFilter && (

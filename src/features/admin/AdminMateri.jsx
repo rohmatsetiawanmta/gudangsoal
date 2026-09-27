@@ -524,7 +524,7 @@ export default function AdminMateri() {
       setDeleteTarget(null);
       setSelected(prev => { const n = new Set(prev); n.delete(deleteTarget.id); return n; });
       fetchData();
-    } catch {
+    } catch { /* diabaikan: best-effort, boleh gagal senyap */
     } finally {
       setDeleting(false);
     }
@@ -538,7 +538,7 @@ export default function AdminMateri() {
       setSelected(new Set());
       setConfirmBulkDelete(false);
       fetchData();
-    } catch {
+    } catch { /* diabaikan: best-effort, boleh gagal senyap */
     } finally {
       setBulkDeleting(false);
     }
@@ -587,7 +587,7 @@ export default function AdminMateri() {
       });
       setReorderDirty(false);
       fetchData();
-    } catch {
+    } catch { /* diabaikan: best-effort, boleh gagal senyap */
     } finally {
       setSavingOrder(false);
     }

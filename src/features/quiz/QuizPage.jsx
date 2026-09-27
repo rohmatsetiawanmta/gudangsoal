@@ -256,7 +256,7 @@ export default function QuizPage() {
         answersRef.current,
         sisaWaktuRef.current
       );
-    } catch {}
+    } catch { /* diabaikan: best-effort, boleh gagal senyap */ }
   }, []);
 
   useEffect(() => {
@@ -409,7 +409,7 @@ export default function QuizPage() {
       await saveQuizProgress(sessionIdRef.current, answersRef.current, 0);
       await finishQuiz(sessionIdRef.current);
       navigate(`/latihan/${id}/hasil/${sessionIdRef.current}`);
-    } catch {}
+    } catch { /* diabaikan: best-effort, boleh gagal senyap */ }
   };
 
   const jumlahDijawab = soalList.filter((sid) => {
