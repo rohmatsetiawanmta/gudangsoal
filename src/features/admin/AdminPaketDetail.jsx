@@ -9,6 +9,7 @@ import { Helmet } from "react-helmet-async";
 import useWindowWidth from "../../hooks/useWindowWidth";
 import MathRenderer from "../../components/MathRenderer";
 import api from "../../lib/api";
+import { SubtopikFilter, FilterChip } from "./AdminSoal";
 
 const DIFF_LABEL = { 1: "Mudah", 2: "Sedang", 3: "Sulit" };
 const DIFF_COLOR = { 1: "#1a8a6e", 2: "#854F0B", 3: "#e84c2b" };
@@ -26,9 +27,13 @@ export default function AdminPaketDetail() {
   const [paket,        setPaket]        = useState(null);
   const [soalList,     setSoalList]     = useState([]);
   const [loadingPage,  setLoadingPage]  = useState(true);
+  const [struktur,     setStruktur]     = useState({ jenjang: [], subjenjang: [], mapel: [], topik: [], subtopik: [] });
 
   // Search & add
-  const [searchQuery,  setSearchQuery]  = useState("");
+  const [searchQuery,     setSearchQuery]     = useState("");
+  const [filterSubtopikId, setFilterSubtopikId] = useState(null);
+  const [filterDifficulty, setFilterDifficulty] = useState("");
+  const [filterPublished,  setFilterPublished]  = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [searching,    setSearching]    = useState(false);
   const [addingId,     setAddingId]     = useState(null);
@@ -42,26 +47,33 @@ export default function AdminPaketDetail() {
     Promise.all([
       api.get(`/admin/paket/${id}`),
       api.get(`/admin/paket/${id}/soal`),
+      api.get(`/admin/struktur`),
     ])
-      .then(([p, s]) => { setPaket(p); setSoalList(Array.isArray(s) ? s : []); })
+      .then(([p, s, st]) => { setPaket(p); setSoalList(Array.isArray(s) ? s : []); setStruktur(st); })
       .catch(() => {})
       .finally(() => setLoadingPage(false));
   }, [id]);
 
-  // Debounced search
+  // Debounced search — jalan kalau ada teks pencarian ATAU filter aktif
+  const hasFilter = !!searchQuery.trim() || !!filterSubtopikId || !!filterDifficulty || !!filterPublished;
   useEffect(() => {
     clearTimeout(debRef.current);
-    if (!searchQuery.trim()) { setSearchResult([]); return; }
+    if (!hasFilter) { setSearchResult([]); return; }
     debRef.current = setTimeout(async () => {
       setSearching(true);
       try {
-        const res = await api.get(`/admin/soal?search=${encodeURIComponent(searchQuery)}&limit=10`);
+        const params = new URLSearchParams({ limit: "20" });
+        if (searchQuery.trim())  params.set("search", searchQuery.trim());
+        if (filterSubtopikId)    params.set("subtopik_id", filterSubtopikId);
+        if (filterDifficulty)    params.set("difficulty", filterDifficulty);
+        if (filterPublished)     params.set("published", filterPublished);
+        const res = await api.get(`/admin/soal?${params}`);
         const existing = new Set(soalList.map((s) => s.id));
         setSearchResult((res.data ?? []).filter((s) => !existing.has(s.id)));
       } catch { setSearchResult([]); }
       finally { setSearching(false); }
     }, 350);
-  }, [searchQuery, soalList]);
+  }, [searchQuery, filterSubtopikId, filterDifficulty, filterPublished, hasFilter, soalList]);
 
   const handleAdd = async (soal) => {
     setAddingId(soal.id);
@@ -219,6 +231,26 @@ export default function AdminPaketDetail() {
             )}
           </div>
 
+          {/* Filter */}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginTop: "10px" }}>
+            <SubtopikFilter struktur={struktur} filterSubtopikId={filterSubtopikId} onChange={setFilterSubtopikId} />
+            <span style={{ width: "1px", height: "18px", background: "#e2ddd5", flexShrink: 0 }} />
+            <FilterChip label="Mudah" active={filterDifficulty === "1"} color="#1a8a6e" onClick={() => setFilterDifficulty((v) => v === "1" ? "" : "1")} />
+            <FilterChip label="Sedang" active={filterDifficulty === "2"} color="#854F0B" onClick={() => setFilterDifficulty((v) => v === "2" ? "" : "2")} />
+            <FilterChip label="Sulit" active={filterDifficulty === "3"} color="#e84c2b" onClick={() => setFilterDifficulty((v) => v === "3" ? "" : "3")} />
+            <span style={{ width: "1px", height: "18px", background: "#e2ddd5", flexShrink: 0 }} />
+            <FilterChip label="Published" active={filterPublished === "1"} color="#1a8a6e" onClick={() => setFilterPublished((v) => v === "1" ? "" : "1")} />
+            <FilterChip label="Draft" active={filterPublished === "0"} color="#6b6860" onClick={() => setFilterPublished((v) => v === "0" ? "" : "0")} />
+            {(filterSubtopikId || filterDifficulty || filterPublished) && (
+              <button
+                onClick={() => { setFilterSubtopikId(null); setFilterDifficulty(""); setFilterPublished(""); }}
+                style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "4px", padding: "5px 10px", borderRadius: "20px", border: "none", background: "none", color: "#b4b2a9", fontSize: "12px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit" }}
+              >
+                <X size={12} /> Reset filter
+              </button>
+            )}
+          </div>
+
           {searching && (
             <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 0", color: "#b4b2a9", fontSize: "13px" }}>
               <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Mencari...
@@ -260,7 +292,7 @@ export default function AdminPaketDetail() {
             </div>
           )}
 
-          {searchQuery && !searching && searchResult.length === 0 && (
+          {hasFilter && !searching && searchResult.length === 0 && (
             <div style={{ padding: "10px 0", fontSize: "13px", color: "#b4b2a9" }}>Tidak ada soal yang cocok (atau sudah ada di paket).</div>
           )}
         </div>
