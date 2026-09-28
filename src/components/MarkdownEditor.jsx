@@ -12,7 +12,7 @@ import {
   Eye,
   X,
 } from "lucide-react";
-import api from "../lib/api";
+import { API_BASE_URL } from "../lib/api";
 import MathRenderer from "./MathRenderer";
 
 const TOOLS = [
@@ -103,7 +103,7 @@ export default function MarkdownEditor({
       const formData = new FormData();
       formData.append("image", file);
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/upload/image`, {
+      const res = await fetch(`${API_BASE_URL}/upload/image`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,

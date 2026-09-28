@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import MarkdownEditor from "../../components/MarkdownEditor";
-import api from "../../lib/api";
+import api, { API_BASE_URL } from "../../lib/api";
 
 export default function RequestSoalModal({ onClose, onSuccess }) {
   const [form, setForm]               = useState({ body: "", catatan: "", foto_url: "" });
@@ -19,7 +19,7 @@ export default function RequestSoalModal({ onClose, onSuccess }) {
     try {
       const fd = new FormData();
       fd.append("image", file);
-      const res  = await fetch(`${import.meta.env.VITE_API_URL}/upload/image?folder=uploads/request`, {
+      const res  = await fetch(`${API_BASE_URL}/upload/image?folder=uploads/request`, {
         method: "POST",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         body: fd,
