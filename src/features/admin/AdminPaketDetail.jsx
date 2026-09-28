@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft, Search, Plus, Trash2, GripVertical,
-  Package, Loader2, X, ChevronUp, ChevronDown,
+  Package, Loader2, X, ChevronUp, ChevronDown, Lock, Unlock,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import useWindowWidth from "../../hooks/useWindowWidth";
@@ -38,6 +38,7 @@ export default function AdminPaketDetail() {
   const [searching,    setSearching]    = useState(false);
   const [addingId,     setAddingId]     = useState(null);
   const [removing,     setRemoving]     = useState({});
+  const [togglingExcl, setTogglingExcl] = useState({});
   const debRef = useRef(null);
 
   // Drag state
@@ -96,6 +97,18 @@ export default function AdminPaketDetail() {
       setSoalList((l) => l.filter((s) => s.id !== soal.id).map((s, i) => ({ ...s, urutan: i + 1 })));
     } catch { alert("Gagal menghapus soal"); }
     finally { setRemoving((r) => ({ ...r, [soal.id]: false })); }
+  };
+
+  const handleToggleExclusive = async (soal) => {
+    setTogglingExcl((t) => ({ ...t, [soal.id]: true }));
+    try {
+      const res = await api.put(`/admin/soal/exclusive?id=${soal.id}`);
+      setSoalList((l) => l.map((s) => s.id === soal.id ? { ...s, is_exclusive: res.is_exclusive ? 1 : 0 } : s));
+    } catch {
+      alert("Gagal mengubah status eksklusif");
+    } finally {
+      setTogglingExcl((t) => ({ ...t, [soal.id]: false }));
+    }
   };
 
   const moveItem = async (fromIdx, toIdx) => {
@@ -309,6 +322,13 @@ export default function AdminPaketDetail() {
           <span style={{ marginLeft: "auto", fontSize: "12px", fontWeight: "500", color: "#b4b2a9" }}>Drag untuk reorder</span>
         </div>
 
+        {soalList.length > 0 && (
+          <p style={{ fontSize: "12px", color: "#6b6860", margin: 0, padding: "12px 20px 0" }}>
+            <Lock size={11} style={{ verticalAlign: "-1px", marginRight: "4px" }} />
+            <b>Eksklusif</b> = soal tidak ikut muncul di direktori soal publik, hanya bisa diakses lewat paket ini.
+          </p>
+        )}
+
         {soalList.length === 0 ? (
           <div style={{ padding: "48px 32px", textAlign: "center" }}>
             <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "#e4f5f0", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
@@ -360,6 +380,28 @@ export default function AdminPaketDetail() {
                     <MathRenderer text={soal.body} />
                   </div>
                 </div>
+
+                {/* Toggle eksklusif */}
+                <button
+                  onClick={() => handleToggleExclusive(soal)}
+                  disabled={!!togglingExcl[soal.id]}
+                  title={soal.is_exclusive
+                    ? "Eksklusif — tidak muncul di direktori soal publik. Klik untuk jadikan publik lagi."
+                    : "Publik — juga muncul di direktori soal. Klik untuk jadikan eksklusif paket ini."}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "5px",
+                    padding: "6px 10px", borderRadius: "8px",
+                    border: soal.is_exclusive ? "1px solid #fde68a" : "1px solid #e2ddd5",
+                    background: soal.is_exclusive ? "#fef9ee" : "white",
+                    color: soal.is_exclusive ? "#854F0B" : "#b4b2a9",
+                    fontSize: "11px", fontWeight: "700", fontFamily: "inherit",
+                    cursor: togglingExcl[soal.id] ? "not-allowed" : "pointer",
+                    flexShrink: 0, opacity: togglingExcl[soal.id] ? 0.5 : 1,
+                  }}
+                >
+                  {soal.is_exclusive ? <Lock size={11} /> : <Unlock size={11} />}
+                  {!isMobile && (soal.is_exclusive ? "Eksklusif" : "Publik")}
+                </button>
 
                 {/* Tombol naik/turun (mobile-friendly) */}
                 {!isMobile && (
