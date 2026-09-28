@@ -6,7 +6,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import MarkdownEditor from "../../components/MarkdownEditor";
 import MathRenderer from "../../components/MathRenderer";
-import api from "../../lib/api";
+import api, { API_BASE_URL } from "../../lib/api";
 import SEO from "../../components/SEO";
 import useWindowWidth from "../../hooks/useWindowWidth";
 
@@ -76,7 +76,7 @@ export default function RequestSoalPage() {
       const formData = new FormData();
       formData.append("image", file);
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/upload/image?folder=uploads/request`,
+        `${API_BASE_URL}/upload/image?folder=uploads/request`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
