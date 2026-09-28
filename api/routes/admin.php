@@ -98,7 +98,7 @@ if (preg_match('#^/admin/paket/(\d+)$#', $uri, $m) && $method === 'DELETE') {
 if (preg_match('#^/admin/paket/(\d+)/soal$#', $uri, $m) && $method === 'GET') {
   $id = $m[1];
   $stmt = $pdo->prepare('
-    SELECT s.id, s.kode, s.body, s.tipe, s.difficulty, s.is_published,
+    SELECT s.id, s.kode, s.body, s.tipe, s.difficulty, s.is_published, s.is_exclusive,
            st.nama as subtopik, t.nama as topik, m.nama as mapel,
            pi.urutan
     FROM paket_soal_items pi
@@ -135,8 +135,34 @@ if (preg_match('#^/admin/paket/(\d+)/soal$#', $uri, $m) && $method === 'POST') {
 
 // DELETE /admin/paket/:id/soal/:soal_id — hapus soal dari paket
 if (preg_match('#^/admin/paket/(\d+)/soal/(\d+)$#', $uri, $m) && $method === 'DELETE') {
-  $pdo->prepare('DELETE FROM paket_soal_items WHERE paket_id=? AND soal_id=?')->execute([$m[1], $m[2]]);
+  $paketId = $m[1]; $soalId = $m[2];
+  $pdo->prepare('DELETE FROM paket_soal_items WHERE paket_id=? AND soal_id=?')->execute([$paketId, $soalId]);
+  // Kalau soal ini eksklusif dan sudah tidak ada di paket manapun, buka lagi ke direktori soal
+  $cekPaket = $pdo->prepare('SELECT COUNT(*) FROM paket_soal_items WHERE soal_id=?');
+  $cekPaket->execute([$soalId]);
+  if ((int) $cekPaket->fetchColumn() === 0) {
+    $pdo->prepare('UPDATE soal SET is_exclusive=0 WHERE id=? AND is_exclusive=1')->execute([$soalId]);
+  }
   echo json_encode(['message' => 'Soal dihapus dari paket']);
+  exit;
+}
+
+// PUT /admin/soal/exclusive?id=1 — toggle status eksklusif soal (sembunyikan dari direktori soal publik)
+if ($uri === '/admin/soal/exclusive' && $method === 'PUT') {
+  $id = $_GET['id'] ?? null;
+  if (!$id) { http_response_code(400); echo json_encode(['error' => 'id wajib']); exit; }
+
+  $stmt = $pdo->prepare('UPDATE soal SET is_exclusive = NOT is_exclusive WHERE id = ?');
+  $stmt->execute([$id]);
+
+  $stmt = $pdo->prepare('SELECT is_exclusive FROM soal WHERE id = ?');
+  $stmt->execute([$id]);
+  $status = $stmt->fetchColumn();
+
+  echo json_encode([
+    'is_exclusive' => (bool) $status,
+    'message'      => $status ? 'Soal dijadikan eksklusif' : 'Soal tidak lagi eksklusif',
+  ]);
   exit;
 }
 
