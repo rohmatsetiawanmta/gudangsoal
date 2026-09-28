@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  ChevronLeft, ChevronRight, Package, List, Check, RotateCcw,
+  ChevronLeft, ChevronRight, Package, List, Check, RotateCcw, Lock, Loader2,
 } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -10,6 +10,7 @@ import SEO from "../../components/SEO";
 import MathRenderer from "../../components/MathRenderer";
 import useWindowWidth from "../../hooks/useWindowWidth";
 import api from "../../lib/api";
+import { loadMidtransSnap } from "../../lib/midtrans";
 import JawabanInput from "../soal/components/JawabanInput";
 import PembahasanPanel from "../soal/components/PembahasanPanel";
 import { checkCorrect, initChosen } from "../soal/soalUtils";
@@ -104,8 +105,15 @@ export default function PaketDetail() {
   const [submitted,      setSubmitted]      = useState({}); // { soalId: bool }
   const [alreadyCorrect, setAlreadyCorrect] = useState({}); // { soalId: bool }
 
-  useEffect(() => {
-    api.get(`/paket/${id}`)
+  // Checkout state
+  const [checkingOut,  setCheckingOut]  = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
+
+  // Ambil data paket + soal. Tidak menyentuh `loading` sama sekali — pemanggil
+  // yang memutuskan mau tampilkan full-page loader (mount awal) atau diam-diam
+  // refresh di background (setelah checkout sukses).
+  const fetchPaket = () => {
+    return api.get(`/paket/${id}`)
       .then((d) => {
         setPaket(d.paket);
         const soal = Array.isArray(d.soal) ? d.soal : [];
@@ -133,10 +141,33 @@ export default function PaketDetail() {
           navigate(`/paket/${id}`, { replace: true });
         }
       })
-      .catch(() => setError("Paket tidak ditemukan atau belum dipublikasikan."))
-      .finally(() => setLoading(false));
+      .catch(() => setError("Paket tidak ditemukan atau belum dipublikasikan."));
+  };
+
+  useEffect(() => {
+    fetchPaket().finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  const handleCheckout = async () => {
+    if (!user) { navigate("/login"); return; }
+    setCheckingOut(true);
+    setCheckoutError("");
+    try {
+      const res = await api.post(`/paket/${id}/checkout`);
+      const snap = await loadMidtransSnap();
+      snap.pay(res.snap_token, {
+        onSuccess:  () => fetchPaket(),
+        onPending:  () => fetchPaket(),
+        onError:    () => setCheckoutError("Pembayaran gagal, silakan coba lagi."),
+        onClose:    () => {},
+      });
+    } catch (e) {
+      setCheckoutError(e?.error || e?.message || "Gagal memulai pembayaran");
+    } finally {
+      setCheckingOut(false);
+    }
+  };
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -201,6 +232,8 @@ export default function PaketDetail() {
   );
 
   const answeredCount = soalList.filter((s) => submitted[s.id] || alreadyCorrect[s.id]).length;
+  const isLocked = Number(paket.harga) > 0 && !paket.has_access;
+  const jumlahSoal = isLocked ? (paket.jumlah_soal ?? 0) : soalList.length;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
@@ -247,16 +280,20 @@ export default function PaketDetail() {
                 )}
                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                   <span style={{ fontSize: "12px", fontWeight: "700", padding: "3px 10px", borderRadius: "99px", color: "rgba(255,255,255,.8)", background: "rgba(255,255,255,.1)" }}>
-                    {soalList.length} soal
+                    {jumlahSoal} soal
                   </span>
-                  {answeredCount > 0 && (
+                  {isLocked ? (
+                    <span style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", fontWeight: "700", padding: "3px 10px", borderRadius: "99px", color: "#fcd34d", background: "rgba(252,211,77,.12)" }}>
+                      <Lock size={11} /> Rp {Number(paket.harga).toLocaleString("id-ID")}
+                    </span>
+                  ) : answeredCount > 0 && (
                     <span style={{ fontSize: "12px", fontWeight: "700", padding: "3px 10px", borderRadius: "99px", color: "#6ee7b7", background: "rgba(110,231,183,.12)" }}>
                       {answeredCount} dijawab
                     </span>
                   )}
                 </div>
               </div>
-              {view === "soal" && (
+              {!isLocked && view === "soal" && (
                 <button
                   onClick={() => navigate(`/paket/${id}`)}
                   style={{ display: "flex", alignItems: "center", gap: "6px", background: "rgba(255,255,255,.1)", color: "rgba(255,255,255,.85)", border: "1px solid rgba(255,255,255,.15)", borderRadius: "9px", padding: "8px 14px", fontSize: "13px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit" }}
@@ -268,6 +305,50 @@ export default function PaketDetail() {
           </div>
         </div>
 
+        {isLocked ? (
+          <div style={{ background: "var(--gs-surface)", borderRadius: "16px", border: "1px solid var(--gs-border)", padding: isMobile ? "36px 20px" : "56px 40px", textAlign: "center" }}>
+            <div style={{ width: "56px", height: "56px", borderRadius: "16px", background: "#fff3f0", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 18px" }}>
+              <Lock size={26} color="#e84c2b" />
+            </div>
+            <div style={{ fontSize: "17px", fontWeight: "800", color: "var(--gs-text)", marginBottom: "8px" }}>
+              Paket ini berbayar
+            </div>
+            <p style={{ fontSize: "14px", color: "var(--gs-text-muted)", maxWidth: "380px", margin: "0 auto 24px", lineHeight: "1.6" }}>
+              Beli paket ini untuk membuka akses ke {jumlahSoal} soal beserta pembahasan lengkapnya.
+            </p>
+            {checkoutError && (
+              <div style={{ background: "#fff3f0", border: "1px solid #fca5a5", color: "#b91c1c", fontSize: "13px", borderRadius: "10px", padding: "10px 14px", marginBottom: "16px", maxWidth: "380px", marginLeft: "auto", marginRight: "auto" }}>
+                {checkoutError}
+              </div>
+            )}
+            <button
+              onClick={handleCheckout}
+              disabled={checkingOut}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: "8px",
+                padding: "13px 28px", borderRadius: "12px", border: "none",
+                background: checkingOut ? "#f5a07a" : "#e84c2b", color: "white",
+                fontSize: "15px", fontWeight: "700", cursor: checkingOut ? "not-allowed" : "pointer",
+                fontFamily: "inherit", boxShadow: checkingOut ? "none" : "0 4px 16px rgba(232,76,43,.3)",
+              }}
+            >
+              {checkingOut ? (
+                <>
+                  <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
+                  Memproses...
+                </>
+              ) : (
+                <>Beli Sekarang — Rp {Number(paket.harga).toLocaleString("id-ID")}</>
+              )}
+            </button>
+            {!user && (
+              <p style={{ fontSize: "12px", color: "var(--gs-text-hint)", marginTop: "14px" }}>
+                Kamu akan diminta masuk terlebih dahulu.
+              </p>
+            )}
+          </div>
+        ) : (
+        <>
         {/* LIST VIEW */}
         {view === "list" && (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -447,9 +528,12 @@ export default function PaketDetail() {
             </div>
           );
         })()}
+        </>
+        )}
       </main>
 
       <Footer />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

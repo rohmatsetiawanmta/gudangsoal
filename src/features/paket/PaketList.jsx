@@ -1,7 +1,7 @@
 // src/features/paket/PaketList.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Package, ChevronRight, BookOpen } from "lucide-react";
+import { Package, ChevronRight, Lock, CheckCircle } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
@@ -159,6 +159,17 @@ export default function PaketList() {
                             {p.jumlah_soal} soal{p.tahun ? ` · ${p.tahun}` : ""}
                           </div>
                         </div>
+                        {p.harga > 0 && (
+                          p.has_access ? (
+                            <span style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: "700", padding: "3px 9px", borderRadius: "99px", color: "#1a8a6e", background: "#e4f5f0", flexShrink: 0 }}>
+                              <CheckCircle size={11} /> Dibeli
+                            </span>
+                          ) : (
+                            <span style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: "700", padding: "3px 9px", borderRadius: "99px", color: "#854F0B", background: "#fef9ee", flexShrink: 0 }}>
+                              <Lock size={11} /> Rp {Number(p.harga).toLocaleString("id-ID")}
+                            </span>
+                          )
+                        )}
                         <ChevronRight size={17} color="var(--gs-text-hint)" />
                       </div>
                     ))}

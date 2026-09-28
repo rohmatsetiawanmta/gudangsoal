@@ -180,6 +180,11 @@ export default function AdminPaket() {
                     <span style={{ fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "99px", color: jc.color, background: jc.bg }}>
                       {JENIS_LABEL[p.jenis] || p.jenis}
                     </span>
+                    {p.harga > 0 && (
+                      <span style={{ fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "99px", color: "#854F0B", background: "#fef9ee" }}>
+                        Rp {Number(p.harga).toLocaleString("id-ID")}
+                      </span>
+                    )}
                   </div>
                   <div style={{ fontSize: "12px", color: "#b4b2a9" }}>
                     {p.jumlah_soal} soal

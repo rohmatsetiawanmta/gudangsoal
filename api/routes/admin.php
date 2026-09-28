@@ -26,7 +26,7 @@ if ($userRole !== 'admin') {
 // GET /admin/paket — list semua paket
 if ($uri === '/admin/paket' && $method === 'GET') {
   $stmt = $pdo->query('
-    SELECT p.id, p.nama, p.tahun, p.jenis, p.is_published, p.created_at,
+    SELECT p.id, p.nama, p.tahun, p.jenis, p.harga, p.is_published, p.created_at,
            COUNT(pi.id) as jumlah_soal
     FROM paket_soal p
     LEFT JOIN paket_soal_items pi ON pi.paket_id = p.id
@@ -42,10 +42,11 @@ if ($uri === '/admin/paket' && $method === 'POST') {
   $nama   = trim($body['nama']   ?? '');
   $tahun  = !empty($body['tahun'])  ? intval($body['tahun'])  : null;
   $jenis  = $body['jenis']  ?? 'lainnya';
+  $harga  = max(0, intval($body['harga'] ?? 0));
   $deskripsi = trim($body['deskripsi'] ?? '');
   if (!$nama) { http_response_code(400); echo json_encode(['error' => 'Nama wajib diisi']); exit; }
-  $stmt = $pdo->prepare('INSERT INTO paket_soal (nama, tahun, jenis, deskripsi) VALUES (?, ?, ?, ?)');
-  $stmt->execute([$nama, $tahun, $jenis, $deskripsi ?: null]);
+  $stmt = $pdo->prepare('INSERT INTO paket_soal (nama, tahun, jenis, harga, deskripsi) VALUES (?, ?, ?, ?, ?)');
+  $stmt->execute([$nama, $tahun, $jenis, $harga, $deskripsi ?: null]);
   echo json_encode(['id' => $pdo->lastInsertId(), 'message' => 'Paket berhasil dibuat']);
   exit;
 }
@@ -67,10 +68,11 @@ if (preg_match('#^/admin/paket/(\d+)$#', $uri, $m) && $method === 'PUT') {
   $nama  = trim($body['nama']  ?? '');
   $tahun = !empty($body['tahun']) ? intval($body['tahun']) : null;
   $jenis = $body['jenis'] ?? 'lainnya';
+  $harga = max(0, intval($body['harga'] ?? 0));
   $deskripsi = trim($body['deskripsi'] ?? '');
   if (!$nama) { http_response_code(400); echo json_encode(['error' => 'Nama wajib diisi']); exit; }
-  $pdo->prepare('UPDATE paket_soal SET nama=?, tahun=?, jenis=?, deskripsi=? WHERE id=?')
-      ->execute([$nama, $tahun, $jenis, $deskripsi ?: null, $id]);
+  $pdo->prepare('UPDATE paket_soal SET nama=?, tahun=?, jenis=?, harga=?, deskripsi=? WHERE id=?')
+      ->execute([$nama, $tahun, $jenis, $harga, $deskripsi ?: null, $id]);
   echo json_encode(['message' => 'Paket diperbarui']);
   exit;
 }

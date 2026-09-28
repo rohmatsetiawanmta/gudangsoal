@@ -183,6 +183,9 @@ export default function AdminPaketDetail() {
                 <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: paket.is_published ? "#6ee7b7" : "#fcd34d", background: paket.is_published ? "rgba(110,231,183,.12)" : "rgba(252,211,77,.12)" }}>
                   {paket.is_published ? "Published" : "Draft"}
                 </span>
+                <span style={{ fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "99px", color: paket.harga > 0 ? "#fcd34d" : "rgba(255,255,255,.6)", background: paket.harga > 0 ? "rgba(252,211,77,.12)" : "rgba(255,255,255,.08)" }}>
+                  {paket.harga > 0 ? `Rp ${Number(paket.harga).toLocaleString("id-ID")}` : "Gratis"}
+                </span>
               </div>
             </div>
             <button

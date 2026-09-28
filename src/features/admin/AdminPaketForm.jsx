@@ -28,7 +28,7 @@ export default function AdminPaketForm() {
   const width    = useWindowWidth();
   const isMobile = width <= 480;
 
-  const [form, setForm] = useState({ nama: "", tahun: "", jenis: "lainnya", deskripsi: "" });
+  const [form, setForm] = useState({ nama: "", tahun: "", jenis: "lainnya", harga: "", deskripsi: "" });
   const [loading, setLoading] = useState(isEdit);
   const [saving,  setSaving]  = useState(false);
   const [error,   setError]   = useState("");
@@ -40,6 +40,7 @@ export default function AdminPaketForm() {
         nama:      d.nama      || "",
         tahun:     d.tahun     || "",
         jenis:     d.jenis     || "lainnya",
+        harga:     d.harga     || "",
         deskripsi: d.deskripsi || "",
       }))
       .catch(() => setError("Gagal memuat data paket"))
@@ -54,6 +55,7 @@ export default function AdminPaketForm() {
         nama:      form.nama.trim(),
         tahun:     form.tahun ? parseInt(form.tahun) : null,
         jenis:     form.jenis,
+        harga:     form.harga ? parseInt(form.harga) : 0,
         deskripsi: form.deskripsi.trim(),
       };
       if (isEdit) {
@@ -143,7 +145,7 @@ export default function AdminPaketForm() {
             />
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "12px" }}>
             <div>
               <label style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", display: "block", marginBottom: "6px" }}>Tahun</label>
               <input
@@ -171,7 +173,23 @@ export default function AdminPaketForm() {
                 ))}
               </select>
             </div>
+            <div style={{ gridColumn: isMobile ? "1 / -1" : "auto" }}>
+              <label style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", display: "block", marginBottom: "6px" }}>Harga (Rp)</label>
+              <input
+                type="number"
+                value={form.harga}
+                onChange={set("harga")}
+                placeholder="0 = gratis"
+                min="0" step="1000"
+                style={inputStyle}
+                onFocus={(e) => e.target.style.borderColor = "#7c3aed"}
+                onBlur={(e) => e.target.style.borderColor = "#e2ddd5"}
+              />
+            </div>
           </div>
+          <p style={{ fontSize: "12px", color: "#6b6860", margin: "-8px 0 0" }}>
+            Kosongkan atau isi 0 kalau paket ini gratis. Kalau diisi, user harus bayar dulu (Midtrans) sebelum bisa mengerjakan soal di paket ini.
+          </p>
 
           <div>
             <label style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17", display: "block", marginBottom: "6px" }}>Deskripsi</label>
