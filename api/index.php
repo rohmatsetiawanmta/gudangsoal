@@ -17,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require 'config/db.php';
 require 'config/helpers.php';
 require 'config/cache.php';
+require 'config/midtrans.php';
 require 'helpers/jwt.php';
 
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -56,6 +57,8 @@ if (str_starts_with($uri, '/auth/')) {
   require 'routes/game.php';
 } elseif (str_starts_with($uri, '/materi')) {
   require 'routes/materi.php';
+} elseif (str_starts_with($uri, '/midtrans/')) {
+  require 'routes/midtrans.php';
 } elseif (str_starts_with($uri, '/paket')) {
   require 'routes/paket.php';
 } elseif (str_starts_with($uri, '/soal')) {
