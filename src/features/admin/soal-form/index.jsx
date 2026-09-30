@@ -155,8 +155,11 @@ export default function AdminSoalForm() {
           topik: topik.id,
         });
 
-        // Clear import state so refresh doesn't re-apply it
-        if (imp) navigate(location.pathname, { replace: true, state: null });
+        // Clear import state so a later refresh doesn't re-apply it — done via the
+        // History API directly (not navigate()) because navigate() re-triggers React
+        // Router's route matching, which remounts this route element even for a
+        // same-path replace, wiping the just-applied import and reloading from the DB.
+        if (imp) window.history.replaceState(null, "", location.pathname);
       })
       .catch(() => setError("Gagal memuat soal"));
   }, [id, struktur.subtopik.length]);
