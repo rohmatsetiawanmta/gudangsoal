@@ -643,7 +643,7 @@ export default function MateriDetail() {
     );
   };
 
-  const LatihanCTA = () => materi?.subtopik_slug ? (
+  const LatihanCTA = () => materi?.subtopik_slug && materi?.subtopik_soal_count > 0 ? (
     <div style={{ marginTop: "20px", background: "var(--gs-surface)", borderRadius: "14px", border: "1px solid var(--gs-border)", borderLeft: "3px solid #e84c2b", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
       <div>
         <div style={{ fontSize: "13px", fontWeight: "700", color: "var(--gs-text)", marginBottom: "2px" }}>Siap latihan soal?</div>
