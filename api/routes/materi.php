@@ -56,6 +56,10 @@ if (preg_match('#^/materi/(\d+)$#', $uri, $m) && $method === 'GET') {
   $sibStmt->execute([$materi['subtopik_id']]);
   $materi['siblings'] = $sibStmt->fetchAll();
 
+  $soalCountStmt = $pdo->prepare('SELECT COUNT(*) FROM soal WHERE subtopik_id = ? AND is_published = 1 AND is_exclusive = 0');
+  $soalCountStmt->execute([$materi['subtopik_id']]);
+  $materi['subtopik_soal_count'] = (int) $soalCountStmt->fetchColumn();
+
   echo json_encode($materi);
   exit;
 }
