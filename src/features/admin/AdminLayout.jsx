@@ -4,7 +4,7 @@ import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, FolderTree, LogOut, ChevronRight,
   PanelLeftClose, PanelLeftOpen, Users, Flag, Inbox,
-  ScrollText, Menu, X, MessageCircle, Dumbbell, GraduationCap, BarChart2, Share2, Map, Bug, Activity, PenTool, Package, Settings,
+  ScrollText, Menu, X, MessageCircle, Dumbbell, GraduationCap, BarChart2, Share2, Map, Bug, Activity, PenTool, Package, Settings, Receipt,
 } from "lucide-react";
 import { useAuthStore } from "../auth/authStore";
 import useWindowWidth from "../../hooks/useWindowWidth";
@@ -21,6 +21,7 @@ const MENU = [
   { type: "link", to: "/admin/materi",   label: "Materi",   icon: GraduationCap, end: true, activeFor: ["/admin/materi/tambah", "/admin/materi/edit", "/admin/materi/bulk-import"] },
   { type: "link", to: "/admin/paket",    label: "Paket",    icon: Package,       end: true, activeFor: ["/admin/paket/tambah", "/admin/paket/"] },
   { type: "link", to: "/admin/latihan",  label: "Latihan",  icon: Dumbbell },
+  { type: "link", to: "/admin/transaksi", label: "Transaksi", icon: Receipt },
   { type: "section", label: "Analitik" },
   { type: "link", to: "/admin/views",        label: "Views",        icon: BarChart2 },
   { type: "link", to: "/admin/shares",       label: "Shares",       icon: Share2 },
@@ -169,6 +170,7 @@ export default function AdminLayout() {
     if (location.pathname.startsWith("/admin/soal-requests"))    return "Request Soal";
     if (location.pathname.startsWith("/admin/changelog"))        return "Changelog";
     if (location.pathname.startsWith("/admin/roadmap"))          return "Roadmap";
+    if (location.pathname.startsWith("/admin/transaksi"))        return "Transaksi";
     if (location.pathname.startsWith("/admin/bugs"))            return "Bug List";
     if (location.pathname.startsWith("/admin/whiteboard"))       return "Whiteboard";
     if (location.pathname.startsWith("/admin/active-users"))    return "Active Users";

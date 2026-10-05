@@ -178,6 +178,53 @@ if (preg_match('#^/admin/paket/(\d+)/soal/reorder$#', $uri, $m) && $method === '
   exit;
 }
 
+// GET /admin/transactions — daftar transaksi pembelian paket + ringkasan
+if ($uri === '/admin/transactions' && $method === 'GET') {
+  $status = $_GET['status'] ?? '';
+  $page   = max(1, intval($_GET['page'] ?? 1));
+  $limit  = 20;
+  $offset = ($page - 1) * $limit;
+
+  $allowed = ['pending', 'success', 'failed', 'expired', 'cancelled'];
+  $where   = '';
+  $params  = [];
+  if (in_array($status, $allowed, true)) {
+    $where    = 'WHERE t.status = ?';
+    $params[] = $status;
+  }
+
+  $stmt = $pdo->prepare("
+    SELECT t.id, t.order_id, t.amount, t.status, t.payment_type, t.paid_at, t.created_at,
+           u.name AS user_name, u.email AS user_email,
+           p.nama AS paket_nama, p.id AS paket_id
+    FROM paket_soal_transactions t
+    JOIN users u ON u.id = t.user_id
+    JOIN paket_soal p ON p.id = t.paket_id
+    $where
+    ORDER BY t.created_at DESC
+    LIMIT $limit OFFSET $offset
+  ");
+  $stmt->execute($params);
+
+  $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM paket_soal_transactions t $where");
+  $totalStmt->execute($params);
+
+  $summary = $pdo->query("
+    SELECT status, COUNT(*) AS jumlah, COALESCE(SUM(amount), 0) AS total
+    FROM paket_soal_transactions
+    GROUP BY status
+  ")->fetchAll();
+
+  echo json_encode([
+    'data'    => $stmt->fetchAll(),
+    'total'   => (int) $totalStmt->fetchColumn(),
+    'page'    => $page,
+    'limit'   => $limit,
+    'summary' => $summary,
+  ]);
+  exit;
+}
+
 // ==================
 // SOAL
 // ==================

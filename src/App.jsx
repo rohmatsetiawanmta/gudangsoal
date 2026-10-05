@@ -41,6 +41,7 @@ import AdminUsers from "./features/admin/AdminUsers";
 import AdminReports from "./features/admin/AdminReports";
 import AdminSoalRequests from "./features/admin/AdminSoalRequests";
 import AdminChangelog from "./features/admin/AdminChangelog";
+import AdminTransaksi from "./features/admin/AdminTransaksi";
 import AdminRoadmap from "./features/admin/AdminRoadmap";
 import AdminBugList from "./features/admin/AdminBugList";
 import AdminActiveUsers from "./features/admin/AdminActiveUsers";
@@ -167,6 +168,7 @@ export default function App() {
           <Route path="reports" element={<AdminReports />} />
           <Route path="soal-requests" element={<AdminSoalRequests />} />
           <Route path="changelog" element={<AdminChangelog />} />
+          <Route path="transaksi" element={<AdminTransaksi />} />
           <Route path="roadmap" element={<AdminRoadmap />} />
           <Route path="bugs"         element={<AdminBugList />} />
           <Route path="whiteboard"   element={<AdminWhiteboard />} />
