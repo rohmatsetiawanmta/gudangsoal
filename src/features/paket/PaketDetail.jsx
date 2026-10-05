@@ -307,26 +307,13 @@ export default function PaketDetail() {
 
         {isLocked ? (
           <>
-            <div style={{ background: "var(--gs-surface)", borderRadius: "16px", border: "1px solid var(--gs-border)", overflow: "hidden" }}>
-              {Array.from({ length: Math.min(jumlahSoal, 5) }).map((_, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 18px", borderBottom: "1px solid var(--gs-border)" }}>
-                  <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: "var(--gs-bg)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <Lock size={13} color="var(--gs-text-hint)" />
-                  </div>
-                  <div style={{ flex: 1, height: "10px", borderRadius: "5px", background: "var(--gs-border)", maxWidth: `${70 - i * 8}%` }} />
-                </div>
-              ))}
-              <div style={{ padding: "12px 18px", fontSize: "13px", color: "var(--gs-text-muted)" }}>
-                {jumlahSoal} soal dan pembahasan terkunci
-              </div>
-            </div>
-            <div style={{ position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 50, background: "var(--gs-surface)", borderTop: "1px solid var(--gs-border)", boxShadow: "0 -4px 16px rgba(0,0,0,.06)", padding: isMobile ? "12px 16px" : "14px 24px" }}>
+            <div style={{ background: "var(--gs-surface)", borderRadius: "16px", border: "1px solid var(--gs-border)", padding: isMobile ? "14px 16px" : "16px 20px", marginBottom: "16px" }}>
               {checkoutError && (
                 <div style={{ background: "#fff3f0", border: "1px solid #fca5a5", color: "#b91c1c", fontSize: "12px", borderRadius: "8px", padding: "8px 12px", marginBottom: "10px" }}>
                   {checkoutError}
                 </div>
               )}
-              <div style={{ maxWidth: "720px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
                 <div>
                   <div style={{ fontSize: "16px", fontWeight: "800", color: "var(--gs-text)" }}>Rp {Number(paket.harga).toLocaleString("id-ID")}</div>
                   <div style={{ fontSize: "12px", color: "var(--gs-text-muted)" }}>Buka {jumlahSoal} soal + pembahasan</div>
@@ -358,7 +345,19 @@ export default function PaketDetail() {
                 </p>
               )}
             </div>
-            <div style={{ height: "96px" }} />
+            <div style={{ background: "var(--gs-surface)", borderRadius: "16px", border: "1px solid var(--gs-border)", overflow: "hidden" }}>
+              {Array.from({ length: Math.min(jumlahSoal, 5) }).map((_, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 18px", borderBottom: "1px solid var(--gs-border)" }}>
+                  <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: "var(--gs-bg)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Lock size={13} color="var(--gs-text-hint)" />
+                  </div>
+                  <div style={{ flex: 1, height: "10px", borderRadius: "5px", background: "var(--gs-border)", maxWidth: `${70 - i * 8}%` }} />
+                </div>
+              ))}
+              <div style={{ padding: "12px 18px", fontSize: "13px", color: "var(--gs-text-muted)" }}>
+                {jumlahSoal} soal dan pembahasan terkunci
+              </div>
+            </div>
           </>
         ) : (
         <>
