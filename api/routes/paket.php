@@ -1,6 +1,25 @@
 <?php
 // api/routes/paket.php — browse endpoints (public)
 
+// GET /paket/my-transactions — riwayat pembelian paket milik user yang login
+if ($uri === '/paket/my-transactions' && $method === 'GET') {
+  $authUser = getAuthUser();
+  if (!$authUser) { http_response_code(401); echo json_encode(['error' => 'Login dulu']); exit; }
+
+  $stmt = $pdo->prepare('
+    SELECT t.id, t.order_id, t.amount, t.status, t.payment_type, t.paid_at, t.created_at,
+           p.id AS paket_id, p.nama AS paket_nama
+    FROM paket_soal_transactions t
+    JOIN paket_soal p ON p.id = t.paket_id
+    WHERE t.user_id = ?
+    ORDER BY t.created_at DESC
+    LIMIT 50
+  ');
+  $stmt->execute([$authUser['id']]);
+  echo json_encode($stmt->fetchAll());
+  exit;
+}
+
 // GET /paket — list paket published
 if ($uri === '/paket' && $method === 'GET') {
   $stmt = $pdo->query('

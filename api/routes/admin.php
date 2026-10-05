@@ -195,7 +195,7 @@ if ($uri === '/admin/transactions' && $method === 'GET') {
 
   $stmt = $pdo->prepare("
     SELECT t.id, t.order_id, t.amount, t.status, t.payment_type, t.paid_at, t.created_at,
-           u.name AS user_name, u.email AS user_email,
+           t.admin_note, t.updated_at, u.name AS user_name, u.email AS user_email,
            p.nama AS paket_nama, p.id AS paket_id
     FROM paket_soal_transactions t
     JOIN users u ON u.id = t.user_id
@@ -222,6 +222,43 @@ if ($uri === '/admin/transactions' && $method === 'GET') {
     'limit'   => $limit,
     'summary' => $summary,
   ]);
+  exit;
+}
+
+// POST /admin/transactions/:id/sync — ambil status terbaru dari Midtrans
+if (preg_match('#^/admin/transactions/(\d+)/sync$#', $uri, $m) && $method === 'POST') {
+  $stmt = $pdo->prepare('SELECT * FROM paket_soal_transactions WHERE id = ?');
+  $stmt->execute([$m[1]]);
+  $trx = $stmt->fetch();
+  if (!$trx) { http_response_code(404); echo json_encode(['error' => 'Transaksi tidak ditemukan']); exit; }
+
+  $data = midtransFetchStatus($trx['order_id']);
+  if (!$data) { http_response_code(502); echo json_encode(['error' => 'Gagal mengambil status dari Midtrans']); exit; }
+
+  $newStatus = midtransApplyStatus($pdo, $trx, $data, $authUser['id']);
+  if ($newStatus === false) { http_response_code(422); echo json_encode(['error' => 'Nominal di Midtrans tidak sama dengan transaksi']); exit; }
+
+  echo json_encode(['status' => $newStatus, 'message' => 'Status disinkronkan dari Midtrans']);
+  exit;
+}
+
+// POST /admin/transactions/:id/grant — beri akses paket secara manual
+// POST /admin/transactions/:id/revoke — cabut akses paket secara manual
+if (preg_match('#^/admin/transactions/(\d+)/(grant|revoke)$#', $uri, $m) && $method === 'POST') {
+  $note = trim($body['note'] ?? '');
+  if ($note === '') { http_response_code(400); echo json_encode(['error' => 'Catatan wajib diisi']); exit; }
+
+  $newStatus = $m[2] === 'grant' ? 'success' : 'refunded';
+  $stmt = $pdo->prepare("
+    UPDATE paket_soal_transactions
+    SET status = ?, admin_note = ?, updated_by = ?,
+        paid_at = IF(? = 'success' AND paid_at IS NULL, NOW(), paid_at)
+    WHERE id = ?
+  ");
+  $stmt->execute([$newStatus, $note, $authUser['id'], $newStatus, $m[1]]);
+  if ($stmt->rowCount() === 0) { http_response_code(404); echo json_encode(['error' => 'Transaksi tidak ditemukan']); exit; }
+
+  echo json_encode(['status' => $newStatus, 'message' => $m[2] === 'grant' ? 'Akses diberikan' : 'Akses dicabut']);
   exit;
 }
 

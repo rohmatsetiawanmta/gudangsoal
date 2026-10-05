@@ -42,36 +42,8 @@ if ($uri === '/midtrans/notification' && $method === 'POST') {
     exit;
   }
 
-  $transactionStatus = $data['transaction_status'] ?? '';
-  $fraudStatus        = $data['fraud_status'] ?? null;
-
-  if (in_array($transactionStatus, ['capture', 'settlement'], true)) {
-    $newStatus = ($fraudStatus === null || $fraudStatus === 'accept') ? 'success' : $trx['status'];
-  } elseif ($transactionStatus === 'pending') {
-    $newStatus = 'pending';
-  } elseif (in_array($transactionStatus, ['deny', 'cancel'], true)) {
-    $newStatus = 'failed';
-  } elseif ($transactionStatus === 'expire') {
-    $newStatus = 'expired';
-  } else {
-    $newStatus = $trx['status'];
-  }
-
-  $stmt = $pdo->prepare('
-    UPDATE paket_soal_transactions
-    SET status = ?, payment_type = ?, midtrans_transaction_id = ?, raw_notification = ?,
-        paid_at = IF(? = 1 AND paid_at IS NULL, NOW(), paid_at)
-    WHERE order_id = ?
-  ');
   try {
-    $stmt->execute([
-      $newStatus,
-      $data['payment_type'] ?? null,
-      $data['transaction_id'] ?? null,
-      json_encode($data),
-      $newStatus === 'success' ? 1 : 0,
-      $orderId,
-    ]);
+    midtransApplyStatus($pdo, $trx, $data);
   } catch (Throwable $e) {
     error_log('[midtrans] update transaksi gagal: ' . $e->getMessage());
     http_response_code(500);

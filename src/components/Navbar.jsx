@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Search, X, BookOpen, User, LogOut, ChevronDown,
   LayoutDashboard, Warehouse, Flame, Shuffle, MessageSquarePlus,
-  TrendingUp, Menu, Zap, GraduationCap, Lightbulb, Package, Dumbbell,
+  TrendingUp, Menu, Zap, GraduationCap, Lightbulb, Package, Dumbbell, Receipt,
 } from "lucide-react";
 import { useAuthStore } from "../features/auth/authStore";
 import RandomSoal from "./RandomSoal";
@@ -314,6 +314,7 @@ export default function Navbar() {
                   {[
                     ...(user?.role === "admin" ? [{ icon: LayoutDashboard, label: "Admin Panel",    onClick: () => { navigate("/admin");         setDropdownOpen(false); }, danger: false }] : []),
                     { icon: User,              label: "Profile",          onClick: () => { navigate("/profile");      setDropdownOpen(false); }, danger: false },
+                    { icon: Receipt,           label: "Pembelian Saya",   onClick: () => { navigate("/pembelian");    setDropdownOpen(false); }, danger: false },
                     { icon: TrendingUp,        label: "Soal Populer",     onClick: () => { navigate("/populer");      setDropdownOpen(false); }, danger: false },
                     { icon: MessageSquarePlus, label: "Request Soal",  onClick: () => { setDropdownOpen(false); setRequestOpen(true);  }, danger: false },
                     { icon: Lightbulb,         label: "Kirim Masukan", onClick: () => { setDropdownOpen(false); setFeedbackOpen(true); }, danger: false },

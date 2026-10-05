@@ -77,6 +77,7 @@ import AdminPaket from "./features/admin/AdminPaket";
 import AdminPaketForm from "./features/admin/AdminPaketForm";
 import AdminPaketDetail from "./features/admin/AdminPaketDetail";
 import PaketList from "./features/paket/PaketList";
+import PembelianSaya from "./features/paket/PembelianSaya";
 import PaketDetail from "./features/paket/PaketDetail";
 import AdminSiteSettings from "./features/admin/AdminSiteSettings";
 import { SiteSettingsProvider } from "./contexts/SiteSettingsContext";
@@ -143,6 +144,7 @@ export default function App() {
       <Route path="/materi" element={<MateriList />} />
       <Route path="/materi/:id" element={<MateriDetail />} />
       <Route path="/paket" element={<PaketList />} />
+      <Route path="/pembelian" element={<PembelianSaya />} />
       <Route path="/paket/:id" element={<PaketDetail />} />
       <Route path="/paket/:id/soal/:urutan" element={<PaketDetail />} />
       <Route path="/latihan" element={<LatihanPage />} />

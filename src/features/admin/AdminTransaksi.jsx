@@ -1,22 +1,32 @@
 // src/features/admin/AdminTransaksi.jsx
 import { useEffect, useState } from "react";
-import { Receipt, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Receipt, CheckCircle, Clock, XCircle, RefreshCw, Unlock, Lock } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import useWindowWidth from "../../hooks/useWindowWidth";
 import api from "../../lib/api";
 
 const STATUS_META = {
-  success:   { label: "Sukses",     color: "#1a8a6e", bg: "#e4f5f0", border: "#1a8a6e" },
-  pending:   { label: "Menunggu",   color: "#854F0B", bg: "#fef9ee", border: "#f5a623" },
-  failed:    { label: "Gagal",      color: "#b91c1c", bg: "#fff3f0", border: "#e84c2b" },
+  success:   { label: "Sukses",      color: "#1a8a6e", bg: "#e4f5f0", border: "#1a8a6e" },
+  pending:   { label: "Menunggu",    color: "#854F0B", bg: "#fef9ee", border: "#f5a623" },
+  failed:    { label: "Gagal",       color: "#b91c1c", bg: "#fff3f0", border: "#e84c2b" },
   expired:   { label: "Kedaluwarsa", color: "#6b6860", bg: "#f2efe8", border: "#b4b2a9" },
-  cancelled: { label: "Dibatalkan", color: "#6b6860", bg: "#f2efe8", border: "#b4b2a9" },
+  cancelled: { label: "Dibatalkan",  color: "#6b6860", bg: "#f2efe8", border: "#b4b2a9" },
+  refunded:  { label: "Dikembalikan", color: "#6b6860", bg: "#f2efe8", border: "#b4b2a9" },
 };
 
-const FILTERS = ["", "success", "pending", "failed", "expired", "cancelled"];
+const FILTERS = ["", "success", "pending", "failed", "expired", "cancelled", "refunded"];
 
 const formatRp = (n) => `Rp ${Number(n || 0).toLocaleString("id-ID")}`;
 const formatTgl = (s) => (s ? new Date(s.replace(" ", "T") + "+07:00").toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" }) : "-");
+
+const btnStyle = (color, filled) => ({
+  display: "flex", alignItems: "center", gap: "6px",
+  padding: "6px 12px", borderRadius: "8px", fontFamily: "inherit",
+  fontSize: "12px", fontWeight: "700", cursor: "pointer",
+  border: filled ? "none" : `1px solid ${color}`,
+  background: filled ? color : "white",
+  color: filled ? "white" : color,
+});
 
 export default function AdminTransaksi() {
   const width    = useWindowWidth();
@@ -29,6 +39,12 @@ export default function AdminTransaksi() {
   const [summary, setSummary] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState("");
+  const [reload,  setReload]  = useState(0);
+
+  const [panel,   setPanel]   = useState(null); // { id, action: "grant" | "revoke" }
+  const [note,    setNote]    = useState("");
+  const [busy,    setBusy]    = useState(false);
+  const [notice,  setNotice]  = useState("");
 
   useEffect(() => {
     const qs = new URLSearchParams({ page: String(page) });
@@ -42,11 +58,37 @@ export default function AdminTransaksi() {
       })
       .catch(() => setError("Gagal memuat transaksi"))
       .finally(() => setLoading(false));
-  }, [status, page]);
+  }, [status, page, reload]);
+
+  const refresh = () => setReload((r) => r + 1);
 
   const countOf = (s) => summary.find((x) => x.status === s)?.jumlah ?? 0;
   const revenue = summary.find((x) => x.status === "success")?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / 20));
+
+  const runSync = async (t) => {
+    setBusy(true); setNotice("");
+    try {
+      const res = await api.post(`/admin/transactions/${t.id}/sync`);
+      setNotice(`${t.order_id}: ${STATUS_META[res.status]?.label || res.status}`);
+      refresh();
+    } catch (e) {
+      setNotice(e?.error || "Gagal sinkron");
+    } finally { setBusy(false); }
+  };
+
+  const submitPanel = async () => {
+    if (!panel || !note.trim()) return;
+    setBusy(true); setNotice("");
+    try {
+      await api.post(`/admin/transactions/${panel.id}/${panel.action}`, { note: note.trim() });
+      setNotice(panel.action === "grant" ? "Akses diberikan" : "Akses dicabut");
+      setPanel(null); setNote("");
+      refresh();
+    } catch (e) {
+      setNotice(e?.error || "Gagal menyimpan");
+    } finally { setBusy(false); }
+  };
 
   return (
     <div style={{ padding: isMobile ? "16px" : "24px 28px", maxWidth: "960px" }}>
@@ -107,6 +149,11 @@ export default function AdminTransaksi() {
         })}
       </div>
 
+      {notice && (
+        <div style={{ background: "#e4f5f0", border: "1px solid #6ee7b7", color: "#0f5a45", fontSize: "13px", borderRadius: "10px", padding: "10px 14px", marginBottom: "16px" }}>
+          {notice}
+        </div>
+      )}
       {error && (
         <div style={{ background: "#fff3f0", border: "1px solid #fca5a5", color: "#b91c1c", fontSize: "13px", borderRadius: "10px", padding: "10px 14px", marginBottom: "16px" }}>
           {error}
@@ -130,31 +177,71 @@ export default function AdminTransaksi() {
           {rows.map((t) => {
             const meta = STATUS_META[t.status] || STATUS_META.pending;
             const Icon = t.status === "success" ? CheckCircle : t.status === "pending" ? Clock : XCircle;
+            const isOpen = panel?.id === t.id;
             return (
               <div key={t.id} style={{
                 background: "white", borderRadius: "14px", border: "1px solid #e2ddd5",
                 borderLeft: `3px solid ${meta.border}`,
                 padding: isMobile ? "14px 16px" : "16px 20px",
-                display: "flex", alignItems: "center", gap: "14px",
               }}>
-                <div style={{ width: "38px", height: "38px", borderRadius: "11px", background: meta.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Icon size={18} color={meta.color} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: "700", fontSize: "14px", color: "#0f0e17", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {t.paket_nama}
+                <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                  <div style={{ width: "38px", height: "38px", borderRadius: "11px", background: meta.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Icon size={18} color={meta.color} />
                   </div>
-                  <div style={{ fontSize: "12px", color: "#6b6860", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {t.user_name || t.user_email} · {formatTgl(t.created_at)}{t.payment_type ? ` · ${t.payment_type}` : ""}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: "700", fontSize: "14px", color: "#0f0e17", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {t.paket_nama}
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#6b6860", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {t.user_name || t.user_email} · {formatTgl(t.created_at)}{t.payment_type ? ` · ${t.payment_type}` : ""}
+                    </div>
+                    <div style={{ fontSize: "11px", color: "#b4b2a9", marginTop: "2px" }}>{t.order_id}</div>
                   </div>
-                  <div style={{ fontSize: "11px", color: "#b4b2a9", marginTop: "2px" }}>{t.order_id}</div>
+                  <div style={{ textAlign: "right", flexShrink: 0 }}>
+                    <div style={{ fontWeight: "800", fontSize: "14px", color: "#0f0e17", marginBottom: "4px" }}>{formatRp(t.amount)}</div>
+                    <span style={{ fontSize: "11px", fontWeight: "700", padding: "3px 9px", borderRadius: "99px", color: meta.color, background: meta.bg }}>
+                      {meta.label}
+                    </span>
+                  </div>
                 </div>
-                <div style={{ textAlign: "right", flexShrink: 0 }}>
-                  <div style={{ fontWeight: "800", fontSize: "14px", color: "#0f0e17", marginBottom: "4px" }}>{formatRp(t.amount)}</div>
-                  <span style={{ fontSize: "11px", fontWeight: "700", padding: "3px 9px", borderRadius: "99px", color: meta.color, background: meta.bg }}>
-                    {meta.label}
-                  </span>
+
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "12px", paddingTop: "12px", borderTop: "1px solid #f0ede6" }}>
+                  <button disabled={busy} onClick={() => runSync(t)} style={btnStyle("#2563eb", false)}>
+                    <RefreshCw size={13} /> Sinkron Midtrans
+                  </button>
+                  {t.status !== "success" && (
+                    <button disabled={busy} onClick={() => { setPanel({ id: t.id, action: "grant" }); setNote(""); }} style={btnStyle("#1a8a6e", false)}>
+                      <Unlock size={13} /> Beri akses
+                    </button>
+                  )}
+                  {t.status === "success" && (
+                    <button disabled={busy} onClick={() => { setPanel({ id: t.id, action: "revoke" }); setNote(""); }} style={btnStyle("#e84c2b", false)}>
+                      <Lock size={13} /> Cabut akses
+                    </button>
+                  )}
+                  {t.admin_note && (
+                    <span style={{ fontSize: "12px", color: "#6b6860", alignSelf: "center" }}>Catatan: {t.admin_note}</span>
+                  )}
                 </div>
+
+                {isOpen && (
+                  <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <textarea
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      placeholder={panel.action === "grant" ? "Alasan memberi akses (wajib)..." : "Alasan mencabut akses (wajib)..."}
+                      rows={2}
+                      style={{ padding: "9px 12px", borderRadius: "9px", border: "1.5px solid #e2ddd5", fontSize: "13px", fontFamily: "inherit", resize: "vertical" }}
+                    />
+                    <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                      <button onClick={() => { setPanel(null); setNote(""); }} style={btnStyle("#6b6860", false)}>Batal</button>
+                      <button disabled={busy || !note.trim()} onClick={submitPanel}
+                        style={{ ...btnStyle(panel.action === "grant" ? "#1a8a6e" : "#e84c2b", true), opacity: busy || !note.trim() ? 0.5 : 1 }}>
+                        Simpan
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
