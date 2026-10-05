@@ -306,47 +306,60 @@ export default function PaketDetail() {
         </div>
 
         {isLocked ? (
-          <div style={{ background: "var(--gs-surface)", borderRadius: "16px", border: "1px solid var(--gs-border)", padding: isMobile ? "36px 20px" : "56px 40px", textAlign: "center" }}>
-            <div style={{ width: "56px", height: "56px", borderRadius: "16px", background: "#fff3f0", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 18px" }}>
-              <Lock size={26} color="#e84c2b" />
-            </div>
-            <div style={{ fontSize: "17px", fontWeight: "800", color: "var(--gs-text)", marginBottom: "8px" }}>
-              Paket ini berbayar
-            </div>
-            <p style={{ fontSize: "14px", color: "var(--gs-text-muted)", maxWidth: "380px", margin: "0 auto 24px", lineHeight: "1.6" }}>
-              Beli paket ini untuk membuka akses ke {jumlahSoal} soal beserta pembahasan lengkapnya.
-            </p>
-            {checkoutError && (
-              <div style={{ background: "#fff3f0", border: "1px solid #fca5a5", color: "#b91c1c", fontSize: "13px", borderRadius: "10px", padding: "10px 14px", marginBottom: "16px", maxWidth: "380px", marginLeft: "auto", marginRight: "auto" }}>
-                {checkoutError}
+          <>
+            <div style={{ background: "var(--gs-surface)", borderRadius: "16px", border: "1px solid var(--gs-border)", overflow: "hidden" }}>
+              {Array.from({ length: Math.min(jumlahSoal, 5) }).map((_, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 18px", borderBottom: "1px solid var(--gs-border)" }}>
+                  <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: "var(--gs-bg)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Lock size={13} color="var(--gs-text-hint)" />
+                  </div>
+                  <div style={{ flex: 1, height: "10px", borderRadius: "5px", background: "var(--gs-border)", maxWidth: `${70 - i * 8}%` }} />
+                </div>
+              ))}
+              <div style={{ padding: "12px 18px", fontSize: "13px", color: "var(--gs-text-muted)" }}>
+                {jumlahSoal} soal dan pembahasan terkunci
               </div>
-            )}
-            <button
-              onClick={handleCheckout}
-              disabled={checkingOut}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: "8px",
-                padding: "13px 28px", borderRadius: "12px", border: "none",
-                background: checkingOut ? "#f5a07a" : "#e84c2b", color: "white",
-                fontSize: "15px", fontWeight: "700", cursor: checkingOut ? "not-allowed" : "pointer",
-                fontFamily: "inherit", boxShadow: checkingOut ? "none" : "0 4px 16px rgba(232,76,43,.3)",
-              }}
-            >
-              {checkingOut ? (
-                <>
-                  <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
-                  Memproses...
-                </>
-              ) : (
-                <>Beli Sekarang — Rp {Number(paket.harga).toLocaleString("id-ID")}</>
+            </div>
+            <div style={{ position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 50, background: "var(--gs-surface)", borderTop: "1px solid var(--gs-border)", boxShadow: "0 -4px 16px rgba(0,0,0,.06)", padding: isMobile ? "12px 16px" : "14px 24px" }}>
+              {checkoutError && (
+                <div style={{ background: "#fff3f0", border: "1px solid #fca5a5", color: "#b91c1c", fontSize: "12px", borderRadius: "8px", padding: "8px 12px", marginBottom: "10px" }}>
+                  {checkoutError}
+                </div>
               )}
-            </button>
-            {!user && (
-              <p style={{ fontSize: "12px", color: "var(--gs-text-hint)", marginTop: "14px" }}>
-                Kamu akan diminta masuk terlebih dahulu.
-              </p>
-            )}
-          </div>
+              <div style={{ maxWidth: "720px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+                <div>
+                  <div style={{ fontSize: "16px", fontWeight: "800", color: "var(--gs-text)" }}>Rp {Number(paket.harga).toLocaleString("id-ID")}</div>
+                  <div style={{ fontSize: "12px", color: "var(--gs-text-muted)" }}>Buka {jumlahSoal} soal + pembahasan</div>
+                </div>
+                <button
+                  onClick={handleCheckout}
+                  disabled={checkingOut}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "8px",
+                    padding: "12px 22px", borderRadius: "12px", border: "none",
+                    background: checkingOut ? "#f5a07a" : "#e84c2b", color: "white",
+                    fontSize: "14px", fontWeight: "700", cursor: checkingOut ? "not-allowed" : "pointer",
+                    fontFamily: "inherit", flexShrink: 0,
+                  }}
+                >
+                  {checkingOut ? (
+                    <>
+                      <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
+                      Memproses...
+                    </>
+                  ) : (
+                    "Beli Sekarang"
+                  )}
+                </button>
+              </div>
+              {!user && (
+                <p style={{ fontSize: "11px", color: "var(--gs-text-hint)", textAlign: "center", margin: "8px 0 0" }}>
+                  Kamu akan diminta masuk terlebih dahulu.
+                </p>
+              )}
+            </div>
+            <div style={{ height: "96px" }} />
+          </>
         ) : (
         <>
         {/* LIST VIEW */}
