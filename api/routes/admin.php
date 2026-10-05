@@ -249,13 +249,13 @@ if (preg_match('#^/admin/transactions/(\d+)/(grant|revoke)$#', $uri, $m) && $met
   if ($note === '') { http_response_code(400); echo json_encode(['error' => 'Catatan wajib diisi']); exit; }
 
   $newStatus = $m[2] === 'grant' ? 'success' : 'refunded';
-  $stmt = $pdo->prepare("
+  $stmt = $pdo->prepare('
     UPDATE paket_soal_transactions
     SET status = ?, admin_note = ?, updated_by = ?,
-        paid_at = IF(? = 'success' AND paid_at IS NULL, NOW(), paid_at)
+        paid_at = IF(? = 1 AND paid_at IS NULL, NOW(), paid_at)
     WHERE id = ?
-  ");
-  $stmt->execute([$newStatus, $note, $authUser['id'], $newStatus, $m[1]]);
+  ');
+  $stmt->execute([$newStatus, $note, $authUser['id'], $newStatus === 'success' ? 1 : 0, $m[1]]);
   if ($stmt->rowCount() === 0) { http_response_code(404); echo json_encode(['error' => 'Transaksi tidak ditemukan']); exit; }
 
   echo json_encode(['status' => $newStatus, 'message' => $m[2] === 'grant' ? 'Akses diberikan' : 'Akses dicabut']);
