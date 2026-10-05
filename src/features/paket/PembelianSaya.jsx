@@ -1,7 +1,7 @@
 // src/features/paket/PembelianSaya.jsx
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Receipt, CheckCircle, Clock, XCircle, ChevronRight } from "lucide-react";
+import { Receipt, CheckCircle, Clock, XCircle } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
@@ -87,43 +87,37 @@ export default function PembelianSaya() {
         )}
 
         {!loading && !unauth && list.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {list.map((t) => {
-              const meta = STATUS_META[t.status] || STATUS_META.pending;
-              const Icon = meta.icon;
-              return (
-                <div
-                  key={t.id}
-                  onClick={() => navigate(`/paket/${t.paket_id}`)}
-                  style={{
-                    display: "flex", alignItems: "center", gap: "14px",
-                    background: "var(--gs-surface)", borderRadius: "14px", border: "1px solid var(--gs-border)",
-                    borderLeft: `3px solid ${meta.color}`, padding: isMobile ? "14px 16px" : "16px 20px", cursor: "pointer",
-                  }}
-                >
-                  <div style={{ width: "38px", height: "38px", borderRadius: "11px", background: meta.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <Icon size={18} color={meta.color} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: "700", fontSize: "14.5px", color: "var(--gs-text)", marginBottom: "3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {t.paket_nama}
-                    </div>
-                    <div style={{ fontSize: "12px", color: "var(--gs-text-hint)" }}>
-                      {formatTgl(t.created_at)} · {formatRp(t.amount)}
-                    </div>
-                  </div>
-                  <div style={{ textAlign: "right", flexShrink: 0 }}>
-                    <span style={{ fontSize: "11px", fontWeight: "700", padding: "3px 9px", borderRadius: "99px", color: meta.color, background: meta.bg }}>
-                      {meta.label}
-                    </span>
-                    <div style={{ fontSize: "11px", color: "var(--gs-text-hint)", marginTop: "4px" }}>
-                      {t.status === "pending" ? "Lanjutkan pembayaran" : t.status === "success" ? "Buka paket" : ""}
-                    </div>
-                  </div>
-                  <ChevronRight size={17} color="var(--gs-text-hint)" />
-                </div>
-              );
-            })}
+          <div style={{ background: "var(--gs-surface)", borderRadius: "14px", border: "1px solid var(--gs-border)", overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", minWidth: "480px" }}>
+              <thead>
+                <tr style={{ textAlign: "left" }}>
+                  {["Tanggal", "Paket", "Nominal", "Status"].map((h) => (
+                    <th key={h} style={{ padding: "12px 14px", fontSize: "12px", fontWeight: "700", color: "var(--gs-text-muted)", borderBottom: "1px solid var(--gs-border)", textAlign: h === "Nominal" ? "right" : "left", whiteSpace: "nowrap" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {list.map((t) => {
+                  const meta = STATUS_META[t.status] || STATUS_META.pending;
+                  return (
+                    <tr
+                      key={t.id}
+                      onClick={() => navigate(`/paket/${t.paket_id}`)}
+                      style={{ borderBottom: "1px solid var(--gs-border)", cursor: "pointer" }}
+                    >
+                      <td style={{ padding: "12px 14px", color: "var(--gs-text-muted)", whiteSpace: "nowrap" }}>{formatTgl(t.created_at)}</td>
+                      <td style={{ padding: "12px 14px", fontWeight: "700", color: "var(--gs-text)" }}>{t.paket_nama}</td>
+                      <td style={{ padding: "12px 14px", fontWeight: "700", color: "var(--gs-text)", textAlign: "right", whiteSpace: "nowrap" }}>{formatRp(t.amount)}</td>
+                      <td style={{ padding: "12px 14px", whiteSpace: "nowrap" }}>
+                        <span style={{ fontSize: "11px", fontWeight: "700", padding: "3px 9px", borderRadius: "99px", color: meta.color, background: meta.bg }}>{meta.label}</span>
+                        {t.status === "pending" && <div style={{ fontSize: "11px", color: "var(--gs-text-hint)", marginTop: "4px" }}>Klik untuk lanjut bayar</div>}
+                        {t.status === "success" && <div style={{ fontSize: "11px", color: "var(--gs-text-hint)", marginTop: "4px" }}>Klik untuk buka paket</div>}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </main>
