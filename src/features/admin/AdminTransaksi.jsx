@@ -1,6 +1,6 @@
 // src/features/admin/AdminTransaksi.jsx
-import { useEffect, useState } from "react";
-import { Receipt, CheckCircle, Clock, XCircle, RefreshCw, Unlock, Lock } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Receipt, RefreshCw, Unlock, Lock } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import useWindowWidth from "../../hooks/useWindowWidth";
 import api from "../../lib/api";
@@ -173,78 +173,78 @@ export default function AdminTransaksi() {
       )}
 
       {!loading && rows.length > 0 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          {rows.map((t) => {
-            const meta = STATUS_META[t.status] || STATUS_META.pending;
-            const Icon = t.status === "success" ? CheckCircle : t.status === "pending" ? Clock : XCircle;
-            const isOpen = panel?.id === t.id;
-            return (
-              <div key={t.id} style={{
-                background: "white", borderRadius: "14px", border: "1px solid #e2ddd5",
-                borderLeft: `3px solid ${meta.border}`,
-                padding: isMobile ? "14px 16px" : "16px 20px",
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                  <div style={{ width: "38px", height: "38px", borderRadius: "11px", background: meta.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <Icon size={18} color={meta.color} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: "700", fontSize: "14px", color: "#0f0e17", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {t.paket_nama}
-                    </div>
-                    <div style={{ fontSize: "12px", color: "#6b6860", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {t.user_name || t.user_email} · {formatTgl(t.created_at)}{t.payment_type ? ` · ${t.payment_type}` : ""}
-                    </div>
-                    <div style={{ fontSize: "11px", color: "#b4b2a9", marginTop: "2px" }}>{t.order_id}</div>
-                  </div>
-                  <div style={{ textAlign: "right", flexShrink: 0 }}>
-                    <div style={{ fontWeight: "800", fontSize: "14px", color: "#0f0e17", marginBottom: "4px" }}>{formatRp(t.amount)}</div>
-                    <span style={{ fontSize: "11px", fontWeight: "700", padding: "3px 9px", borderRadius: "99px", color: meta.color, background: meta.bg }}>
-                      {meta.label}
-                    </span>
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "12px", paddingTop: "12px", borderTop: "1px solid #f0ede6" }}>
-                  <button disabled={busy} onClick={() => runSync(t)} style={btnStyle("#2563eb", false)}>
-                    <RefreshCw size={13} /> Sinkron Midtrans
-                  </button>
-                  {t.status !== "success" && (
-                    <button disabled={busy} onClick={() => { setPanel({ id: t.id, action: "grant" }); setNote(""); }} style={btnStyle("#1a8a6e", false)}>
-                      <Unlock size={13} /> Beri akses
-                    </button>
-                  )}
-                  {t.status === "success" && (
-                    <button disabled={busy} onClick={() => { setPanel({ id: t.id, action: "revoke" }); setNote(""); }} style={btnStyle("#e84c2b", false)}>
-                      <Lock size={13} /> Cabut akses
-                    </button>
-                  )}
-                  {t.admin_note && (
-                    <span style={{ fontSize: "12px", color: "#6b6860", alignSelf: "center" }}>Catatan: {t.admin_note}</span>
-                  )}
-                </div>
-
-                {isOpen && (
-                  <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <textarea
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      placeholder={panel.action === "grant" ? "Alasan memberi akses (wajib)..." : "Alasan mencabut akses (wajib)..."}
-                      rows={2}
-                      style={{ padding: "9px 12px", borderRadius: "9px", border: "1.5px solid #e2ddd5", fontSize: "13px", fontFamily: "inherit", resize: "vertical" }}
-                    />
-                    <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-                      <button onClick={() => { setPanel(null); setNote(""); }} style={btnStyle("#6b6860", false)}>Batal</button>
-                      <button disabled={busy || !note.trim()} onClick={submitPanel}
-                        style={{ ...btnStyle(panel.action === "grant" ? "#1a8a6e" : "#e84c2b", true), opacity: busy || !note.trim() ? 0.5 : 1 }}>
-                        Simpan
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        <div style={{ background: "white", borderRadius: "14px", border: "1px solid #e2ddd5", overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", minWidth: "760px" }}>
+            <thead>
+              <tr style={{ background: "linear-gradient(to right, #faf9f6, white)", textAlign: "left" }}>
+                {["Waktu", "Paket", "User", "Order ID", "Nominal", "Status", "Aksi"].map((h) => (
+                  <th key={h} style={{ padding: "12px 14px", fontSize: "12px", fontWeight: "700", color: "#6b6860", borderBottom: "1px solid #f0ede6", textAlign: h === "Nominal" ? "right" : "left", whiteSpace: "nowrap" }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((t) => {
+                const meta = STATUS_META[t.status] || STATUS_META.pending;
+                const isOpen = panel?.id === t.id;
+                return (
+                  <React.Fragment key={t.id}>
+                    <tr style={{ borderBottom: "1px solid #f0ede6", verticalAlign: "top" }}>
+                      <td style={{ padding: "12px 14px", color: "#6b6860", whiteSpace: "nowrap" }}>{formatTgl(t.created_at)}</td>
+                      <td style={{ padding: "12px 14px", fontWeight: "700", color: "#0f0e17", minWidth: "160px" }}>
+                        {t.paket_nama}
+                        {t.admin_note && <div style={{ fontSize: "11px", fontWeight: "500", color: "#6b6860", marginTop: "4px" }}>Catatan: {t.admin_note}</div>}
+                      </td>
+                      <td style={{ padding: "12px 14px", color: "#0f0e17" }}>{t.user_name || t.user_email}</td>
+                      <td style={{ padding: "12px 14px", color: "#b4b2a9", fontSize: "12px", whiteSpace: "nowrap" }}>{t.order_id}</td>
+                      <td style={{ padding: "12px 14px", fontWeight: "700", textAlign: "right", whiteSpace: "nowrap" }}>{formatRp(t.amount)}</td>
+                      <td style={{ padding: "12px 14px", whiteSpace: "nowrap" }}>
+                        <span style={{ fontSize: "11px", fontWeight: "700", padding: "3px 9px", borderRadius: "99px", color: meta.color, background: meta.bg }}>{meta.label}</span>
+                      </td>
+                      <td style={{ padding: "12px 14px", whiteSpace: "nowrap" }}>
+                        <div style={{ display: "flex", gap: "6px" }}>
+                          <button title="Sinkron Midtrans" disabled={busy} onClick={() => runSync(t)} style={btnStyle("#2563eb", false)}>
+                            <RefreshCw size={13} />
+                          </button>
+                          {t.status !== "success" && (
+                            <button disabled={busy} onClick={() => { setPanel({ id: t.id, action: "grant" }); setNote(""); }} style={btnStyle("#1a8a6e", false)}>
+                              <Unlock size={13} /> Beri akses
+                            </button>
+                          )}
+                          {t.status === "success" && (
+                            <button disabled={busy} onClick={() => { setPanel({ id: t.id, action: "revoke" }); setNote(""); }} style={btnStyle("#e84c2b", false)}>
+                              <Lock size={13} /> Cabut akses
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                    {isOpen && (
+                      <tr style={{ borderBottom: "1px solid #f0ede6", background: "#faf9f6" }}>
+                        <td colSpan={7} style={{ padding: "12px 14px" }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "560px" }}>
+                            <textarea
+                              value={note}
+                              onChange={(e) => setNote(e.target.value)}
+                              placeholder={panel.action === "grant" ? "Alasan memberi akses (wajib)..." : "Alasan mencabut akses (wajib)..."}
+                              rows={2}
+                              style={{ padding: "9px 12px", borderRadius: "9px", border: "1.5px solid #e2ddd5", fontSize: "13px", fontFamily: "inherit", resize: "vertical" }}
+                            />
+                            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                              <button onClick={() => { setPanel(null); setNote(""); }} style={btnStyle("#6b6860", false)}>Batal</button>
+                              <button disabled={busy || !note.trim()} onClick={submitPanel}
+                                style={{ ...btnStyle(panel.action === "grant" ? "#1a8a6e" : "#e84c2b", true), opacity: busy || !note.trim() ? 0.5 : 1 }}>
+                                Simpan
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
 
