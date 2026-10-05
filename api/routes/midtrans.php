@@ -60,17 +60,24 @@ if ($uri === '/midtrans/notification' && $method === 'POST') {
   $stmt = $pdo->prepare('
     UPDATE paket_soal_transactions
     SET status = ?, payment_type = ?, midtrans_transaction_id = ?, raw_notification = ?,
-        paid_at = CASE WHEN ? = "success" AND paid_at IS NULL THEN NOW() ELSE paid_at END
+        paid_at = IF(? = 1 AND paid_at IS NULL, NOW(), paid_at)
     WHERE order_id = ?
   ');
-  $stmt->execute([
-    $newStatus,
-    $data['payment_type'] ?? null,
-    $data['transaction_id'] ?? null,
-    json_encode($data),
-    $newStatus,
-    $orderId,
-  ]);
+  try {
+    $stmt->execute([
+      $newStatus,
+      $data['payment_type'] ?? null,
+      $data['transaction_id'] ?? null,
+      json_encode($data),
+      $newStatus === 'success' ? 1 : 0,
+      $orderId,
+    ]);
+  } catch (Throwable $e) {
+    error_log('[midtrans] update transaksi gagal: ' . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['error' => 'Gagal update transaksi']);
+    exit;
+  }
 
   echo json_encode(['message' => 'OK']);
   exit;
