@@ -48,8 +48,10 @@ if $DEPLOY_FRONTEND; then
   scp $SSH_OPTS -P $SSH_PORT sitemap.php                         $SSH_USER@$SSH_HOST:$REMOTE_DIR/sitemap.php
   scp $SSH_OPTS -P $SSH_PORT render.php                          $SSH_USER@$SSH_HOST:$REMOTE_DIR/render.php
   [ -f dist/logo.png ] && scp $SSH_OPTS -P $SSH_PORT dist/logo.png $SSH_USER@$SSH_HOST:$REMOTE_DIR/logo.png
+  echo "→ Uploading PWA files..."
+  rsync -az -e "ssh -p $SSH_PORT $SSH_OPTS" dist/manifest.webmanifest dist/sw.js dist/registerSW.js dist/workbox-*.js dist/favicon.svg dist/apple-touch-icon.png dist/pwa-192.png dist/pwa-512.png dist/pwa-maskable-512.png $SSH_USER@$SSH_HOST:$REMOTE_DIR/
   echo "→ Fixing permissions..."
-  ssh $SSH_OPTS -p $SSH_PORT $SSH_USER@$SSH_HOST "chmod 644 $REMOTE_DIR/index.html $REMOTE_DIR/robots.txt $REMOTE_DIR/.htaccess $REMOTE_DIR/sitemap.php $REMOTE_DIR/render.php && [ -f $REMOTE_DIR/logo.png ] && chmod 644 $REMOTE_DIR/logo.png; find $REMOTE_DIR/assets -type f -exec chmod 644 {} + && find $REMOTE_DIR/assets -type d -exec chmod 755 {} +"
+  ssh $SSH_OPTS -p $SSH_PORT $SSH_USER@$SSH_HOST "chmod 644 $REMOTE_DIR/index.html $REMOTE_DIR/robots.txt $REMOTE_DIR/.htaccess $REMOTE_DIR/sitemap.php $REMOTE_DIR/render.php $REMOTE_DIR/manifest.webmanifest $REMOTE_DIR/sw.js $REMOTE_DIR/registerSW.js $REMOTE_DIR/workbox-*.js $REMOTE_DIR/favicon.svg $REMOTE_DIR/apple-touch-icon.png $REMOTE_DIR/pwa-192.png $REMOTE_DIR/pwa-512.png $REMOTE_DIR/pwa-maskable-512.png && [ -f $REMOTE_DIR/logo.png ] && chmod 644 $REMOTE_DIR/logo.png; find $REMOTE_DIR/assets -type f -exec chmod 644 {} + && find $REMOTE_DIR/assets -type d -exec chmod 755 {} +"
   echo "✓ Frontend selesai!"
 fi
 
