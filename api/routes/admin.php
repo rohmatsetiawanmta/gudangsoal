@@ -353,7 +353,7 @@ if ($uri === '/admin/soal/export' && $method === 'GET') {
   $whereClause = 'WHERE ' . implode(' AND ', $where);
 
   $stmt = $pdo->prepare("
-    SELECT s.id, s.kode, s.tipe, s.body, s.options, s.answer, s.explanation, s.difficulty, s.materi_ids, s.tags
+    SELECT s.id, s.kode, s.tipe, s.body, s.options, s.answer, s.explanation, s.difficulty, s.materi_ids, s.tags, s.stimulus
     FROM soal s
     $whereClause
     ORDER BY s.created_at ASC
@@ -383,6 +383,7 @@ if ($uri === '/admin/soal/export' && $method === 'GET') {
     $r['answer']     = json_decode($r['answer']  ?? 'null');
     $r['difficulty'] = $diffMap[(int) $r['difficulty']] ?? 'easy';
     if (!$r['explanation']) unset($r['explanation']);
+    if (!$r['stimulus']) unset($r['stimulus']);
     $ids = $r['materi_ids'] ? json_decode($r['materi_ids'], true) : [];
     if (is_array($ids) && !empty($ids)) {
       $r['materi_terkait'] = array_values(array_filter(array_map(fn($id) => $materiTitleMap[$id] ?? null, $ids)));
@@ -449,8 +450,8 @@ if ($uri === '/admin/soal' && $method === 'POST') {
   } while ($cek->fetch()); // ulangi kalau bentrok
 
   $stmt = $pdo->prepare('
-    INSERT INTO soal (kode, subtopik_id, tipe, body, options, answer, explanation, difficulty, video_url, is_public_explanation, materi_ids, tags)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO soal (kode, subtopik_id, tipe, body, options, answer, explanation, difficulty, video_url, is_public_explanation, materi_ids, tags, stimulus)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   ');
   $materi_ids = !empty($body['materi_ids']) ? json_encode($body['materi_ids']) : null;
   $tags_val   = !empty($body['tags']) && is_array($body['tags']) ? json_encode(array_values($body['tags'])) : null;
@@ -467,6 +468,7 @@ if ($uri === '/admin/soal' && $method === 'POST') {
     $body['is_public_explanation'] ?? 0,
     $materi_ids,
     $tags_val,
+    $body['stimulus'] ?? null,
   ]);
 
   http_response_code(201);
@@ -536,6 +538,7 @@ if ($uri === '/admin/soal/bulk' && $method === 'POST') {
       }
 
       $expValue = isset($s['explanation']) ? (is_array($s['explanation']) || is_object($s['explanation']) ? json_encode($s['explanation']) : $s['explanation']) : null;
+      $stimulusValue = $s['stimulus'] ?? null;
 
       // === MODE EDIT: ada kode ===
       if (!empty($s['kode'])) {
@@ -546,7 +549,7 @@ if ($uri === '/admin/soal/bulk' && $method === 'POST') {
         if ($existing) {
           // Kode ada di DB → UPDATE
           $upd = $pdo->prepare('
-            UPDATE soal SET subtopik_id=?, tipe=?, body=?, options=?, answer=?, explanation=?, difficulty=?, video_url=?, materi_ids=?
+            UPDATE soal SET subtopik_id=?, tipe=?, body=?, options=?, answer=?, explanation=?, difficulty=?, video_url=?, materi_ids=?, stimulus=?
             WHERE id=?
           ');
           $upd->execute([
@@ -559,6 +562,7 @@ if ($uri === '/admin/soal/bulk' && $method === 'POST') {
             $s['difficulty'] ?? 1,
             $s['video_url']  ?? null,
             $materi_ids_bulk,
+            $stimulusValue,
             $existing['id'],
           ]);
           $saved[] = ['index' => $i, 'id' => (int)$existing['id'], 'kode' => $existing['kode'], 'action' => 'updated'];
@@ -581,8 +585,8 @@ if ($uri === '/admin/soal/bulk' && $method === 'POST') {
 
       // INSERT (kode sudah ditentukan di atas)
       $stmt = $pdo->prepare('
-        INSERT INTO soal (kode, subtopik_id, tipe, body, options, answer, explanation, difficulty, video_url, is_public_explanation, materi_ids)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO soal (kode, subtopik_id, tipe, body, options, answer, explanation, difficulty, video_url, is_public_explanation, materi_ids, stimulus)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ');
       $stmt->execute([
         $kode,
@@ -596,6 +600,7 @@ if ($uri === '/admin/soal/bulk' && $method === 'POST') {
         $s['video_url']   ?? null,
         $s['is_public_explanation'] ?? 0,
         $materi_ids_bulk,
+        $stimulusValue,
       ]);
       $saved[] = ['index' => $i, 'id' => $pdo->lastInsertId(), 'kode' => $kode, 'action' => 'created'];
     } catch (Exception $e) {
@@ -626,7 +631,7 @@ if ($uri === '/admin/soal' && $method === 'PUT') {
 
   $stmt = $pdo->prepare('
     UPDATE soal
-    SET subtopik_id=?, tipe=?, body=?, options=?, answer=?, explanation=?, difficulty=?, video_url=?, is_public_explanation=?, materi_ids=?, tags=?
+    SET subtopik_id=?, tipe=?, body=?, options=?, answer=?, explanation=?, difficulty=?, video_url=?, is_public_explanation=?, materi_ids=?, tags=?, stimulus=?
     WHERE id=?
   ');
   $materi_ids = !empty($body['materi_ids']) ? json_encode($body['materi_ids']) : null;
@@ -643,6 +648,7 @@ if ($uri === '/admin/soal' && $method === 'PUT') {
     $body['is_public_explanation'] ?? 0,
     $materi_ids,
     $tags_val,
+    $body['stimulus'] ?? null,
     $id,
   ]);
 
@@ -1737,8 +1743,8 @@ if ($uri === '/admin/soal/salin' && $method === 'POST') {
 
   // Insert soal baru — is_published = 0 (draft)
   $stmt = $pdo->prepare('
-    INSERT INTO soal (kode, subtopik_id, tipe, body, options, answer, explanation, difficulty, video_url, is_public_explanation, is_published, is_exclusive)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
+    INSERT INTO soal (kode, subtopik_id, tipe, body, options, answer, explanation, difficulty, video_url, is_public_explanation, is_published, is_exclusive, stimulus)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
   ');
   $stmt->execute([
     $kode,
@@ -1752,6 +1758,7 @@ if ($uri === '/admin/soal/salin' && $method === 'POST') {
     $soal['video_url'],
     $soal['is_public_explanation'],
     $soal['is_exclusive'],
+    $soal['stimulus'],
   ]);
 
   $newId = $pdo->lastInsertId();

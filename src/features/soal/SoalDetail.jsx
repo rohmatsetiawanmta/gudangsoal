@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 import MathRenderer from "../../components/MathRenderer";
+import StimulusCard from "../../components/StimulusCard";
 import Breadcrumb from "../../components/Breadcrumb";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -661,6 +662,9 @@ export default function SoalDetail() {
                   ))}
                 </div>
               )}
+
+              {/* Stimulus */}
+              <StimulusCard text={soal.stimulus} isMobile={isMobile} />
 
               {/* Body */}
               <div

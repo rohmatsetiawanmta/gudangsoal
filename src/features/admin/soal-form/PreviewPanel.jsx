@@ -92,6 +92,34 @@ export default function PreviewPanel({ form }) {
           padding: "24px",
         }}
       >
+        {form.stimulus?.trim() && (
+          <div
+            style={{
+              background: "#faf9f6",
+              border: "1px solid #e2ddd5",
+              borderLeft: "3px solid #7c3aed",
+              borderRadius: "10px",
+              padding: "14px 16px",
+              marginBottom: "16px",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "11px",
+                fontWeight: "700",
+                letterSpacing: ".08em",
+                textTransform: "uppercase",
+                color: "#7c3aed",
+                marginBottom: "8px",
+              }}
+            >
+              Stimulus
+            </div>
+            <div style={{ fontSize: "14px", color: "#0f0e17" }}>
+              <MathRenderer text={form.stimulus} block />
+            </div>
+          </div>
+        )}
         <div
           style={{
             fontSize: "12px",

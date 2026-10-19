@@ -22,6 +22,7 @@ export default function TeksSoal({ form, setForm, isMobile }) {
                   setForm((f) => ({
                     ...defaultForm,
                     subtopik_id: f.subtopik_id,
+                    stimulus: f.stimulus,
                     body: f.body,
                     difficulty: f.difficulty,
                     explanation: f.explanation,
@@ -49,6 +50,24 @@ export default function TeksSoal({ form, setForm, isMobile }) {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Stimulus (opsional) */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          <label
+            style={{ fontSize: "13px", fontWeight: "600", color: "#0f0e17" }}
+          >
+            Stimulus{" "}
+            <span style={{ fontWeight: "400", color: "#b4b2a9" }}>
+              (opsional — konteks/bacaan sebelum soal, gaya ANBK/TKA)
+            </span>
+          </label>
+          <MarkdownEditor
+            value={form.stimulus}
+            onChange={(v) => setForm((f) => ({ ...f, stimulus: v }))}
+            placeholder="Opsional. Tulis konteks/stimulus yang tampil sebelum teks soal..."
+            rows={3}
+          />
         </div>
 
         {/* Teks soal */}

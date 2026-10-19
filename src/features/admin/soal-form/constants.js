@@ -23,6 +23,7 @@ export const DIFFICULTY_MAP = {
 export const defaultForm = {
   subtopik_id: "",
   tipe: "pilihan_ganda",
+  stimulus: "",
   body: "",
   options: LABELS.slice(0, 4).map(emptyOption),
   answer: "",

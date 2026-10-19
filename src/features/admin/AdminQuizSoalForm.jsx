@@ -82,6 +82,7 @@ export default function AdminQuizSoalForm() {
         setForm({
           subtopik_id: data.subtopik_id,
           tipe: data.tipe || "pilihan_ganda",
+          stimulus: data.stimulus || "",
           body: data.body,
           options: data.options,
           answer: answer,

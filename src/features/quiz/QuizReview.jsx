@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import MathRenderer from "../../components/MathRenderer";
+import StimulusCard from "../../components/StimulusCard";
 import useWindowWidth from "../../hooks/useWindowWidth";
 import { getQuizResult } from "./quizApi";
 import JawabanInput from "../soal/components/JawabanInput";
@@ -371,6 +372,9 @@ export default function QuizReview() {
                   )}
                 </div>
               </div>
+
+              {/* Stimulus */}
+              <StimulusCard text={currentSoal.stimulus} isMobile={isMobile} />
 
               {/* Body soal */}
               <div
