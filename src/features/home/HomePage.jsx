@@ -14,7 +14,6 @@ import { getProfile } from "../profile/profileApi";
 import RandomSoal from "../../components/RandomSoal";
 import SEO from "../../components/SEO";
 import useWindowWidth from "../../hooks/useWindowWidth";
-import SoalHariIni from "./components/SoalHariIni";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -199,8 +198,7 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* ── Soal Hari Ini ── */}
-        <SoalHariIni isMobile={isMobile} />
+        {/* ── Soal Hari Ini — disembunyikan sementara */}
 
         {/* ── Sesi Terakhir ── */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
