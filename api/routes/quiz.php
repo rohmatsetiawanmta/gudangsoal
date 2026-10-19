@@ -346,7 +346,7 @@ if (preg_match('#^/quiz/session/(\d+)/result$#', $uri, $m) && $method === 'GET')
   $soalDetails = [];
   foreach ($soalIds as $soalId) {
     $stmt = $pdo->prepare('
-      SELECT s.id, s.kode, s.body, s.tipe, s.options, s.difficulty, s.answer, s.explanation,
+      SELECT s.id, s.kode, s.body, s.tipe, s.options, s.difficulty, s.answer, s.explanation, s.stimulus,
              st.id as subtopik_id, st.nama as subtopik, st.urutan as subtopik_urutan, t.nama as topik, m.nama as mapel
       FROM soal s
       JOIN subtopik st ON s.subtopik_id = st.id
@@ -517,6 +517,7 @@ if (preg_match('#^/admin/quiz/(\d+)/soal$#', $uri, $m) && $method === 'POST') {
   $difficulty  = $body['difficulty']   ?? 1;
   $video_url   = $body['video_url']    ?? null;
   $is_public_explanation = $body['is_public_explanation'] ?? 0;
+  $stimulus    = $body['stimulus']     ?? null;
 
   // Generate kode unik
   do {
@@ -528,14 +529,14 @@ if (preg_match('#^/admin/quiz/(\d+)/soal$#', $uri, $m) && $method === 'POST') {
   } while ($cek->fetch());
 
   $stmt = $pdo->prepare('
-    INSERT INTO soal (kode, subtopik_id, tipe, body, options, answer, explanation, difficulty, video_url, is_public_explanation, is_published, is_exclusive)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1)
+    INSERT INTO soal (kode, subtopik_id, tipe, body, options, answer, explanation, difficulty, video_url, is_public_explanation, is_published, is_exclusive, stimulus)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1, ?)
   ');
   $stmt->execute([
     $kode, $subtopikId, $tipe, $bodyText,
     $options ? json_encode($options) : null,
     $answer  ? json_encode($answer)  : null,
-    $explanation, $difficulty, $video_url, $is_public_explanation,
+    $explanation, $difficulty, $video_url, $is_public_explanation, $stimulus,
   ]);
   $soalId = $pdo->lastInsertId();
 
@@ -552,7 +553,7 @@ if (preg_match('#^/admin/quiz/(\d+)/soal/(\d+)$#', $uri, $m) && $method === 'PUT
   $soalId = $m[2];
 
   $pdo->prepare('
-    UPDATE soal SET tipe = ?, body = ?, options = ?, answer = ?, explanation = ?, difficulty = ?, video_url = ?, is_public_explanation = ?, subtopik_id = ?
+    UPDATE soal SET tipe = ?, body = ?, options = ?, answer = ?, explanation = ?, difficulty = ?, video_url = ?, is_public_explanation = ?, subtopik_id = ?, stimulus = ?
     WHERE id = ? AND is_exclusive = 1
   ')->execute([
     $body['tipe']        ?? 'pilihan_ganda',
@@ -564,6 +565,7 @@ if (preg_match('#^/admin/quiz/(\d+)/soal/(\d+)$#', $uri, $m) && $method === 'PUT
     $body['video_url']   ?? null,
     $body['is_public_explanation'] ?? 0,
     $body['subtopik_id'] ?? null,
+    $body['stimulus']    ?? null,
     $soalId,
   ]);
 
@@ -707,7 +709,7 @@ if (preg_match('#^/quiz/soal/(\d+)$#', $uri, $m) && $method === 'GET') {
 
   // Ambil detail soal — tanpa answer
   $stmt = $pdo->prepare('
-    SELECT s.id, s.kode, s.body, s.tipe, s.options, s.difficulty,
+    SELECT s.id, s.kode, s.body, s.tipe, s.options, s.difficulty, s.stimulus,
            st.nama as subtopik, t.nama as topik, m.nama as mapel
     FROM soal s
     JOIN subtopik st ON s.subtopik_id = st.id

@@ -25,6 +25,7 @@ import {
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import MathRenderer from "../../components/MathRenderer";
+import StimulusCard from "../../components/StimulusCard";
 import useWindowWidth from "../../hooks/useWindowWidth";
 import { getQuizResult, finalizeQuiz, startQuiz } from "./quizApi";
 import PembahasanPanel from "../soal/components/PembahasanPanel";
@@ -1280,6 +1281,9 @@ export default function QuizHasil() {
                     {DURASI_FORMAT(s.waktu_detik || 0)}
                   </span>
                 </div>
+
+                {/* Stimulus */}
+                <StimulusCard text={s.stimulus} isMobile={isMobile} />
 
                 {/* Body soal */}
                 <div

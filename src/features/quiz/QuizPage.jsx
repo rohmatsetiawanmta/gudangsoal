@@ -8,6 +8,7 @@ import {
   Warehouse,
 } from "lucide-react";
 import MathRenderer from "../../components/MathRenderer";
+import StimulusCard from "../../components/StimulusCard";
 import SEO from "../../components/SEO";
 import useWindowWidth from "../../hooks/useWindowWidth";
 import {
@@ -863,6 +864,9 @@ export default function QuizPage() {
                 </span>
               </div>
             </div>
+
+            {/* Stimulus */}
+            <StimulusCard text={currentSoal.stimulus} isMobile={isMobile} />
 
             {/* Body soal */}
             <div

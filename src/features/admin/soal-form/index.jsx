@@ -128,6 +128,7 @@ export default function AdminSoalForm() {
         setForm({
           subtopik_id:           data.subtopik_id,
           tipe,
+          stimulus:              imp?.stimulus ?? data.stimulus ?? "",
           body:                  imp?.body ?? data.body,
           options:               imp?.options ?? data.options,
           answer,

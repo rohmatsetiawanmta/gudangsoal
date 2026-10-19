@@ -8,6 +8,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
 import MathRenderer from "../../components/MathRenderer";
+import StimulusCard from "../../components/StimulusCard";
 import useWindowWidth from "../../hooks/useWindowWidth";
 import api from "../../lib/api";
 import { loadMidtransSnap } from "../../lib/midtrans";
@@ -437,6 +438,9 @@ export default function PaketDetail() {
                       </span>
                     )}
                   </div>
+
+                  {/* Stimulus */}
+                  <StimulusCard text={soal.stimulus} isMobile={isMobile} />
 
                   {/* Body */}
                   <div style={{ fontSize: isMobile ? "14px" : "15px", lineHeight: "1.75", color: "var(--gs-text)", fontWeight: "500" }}>

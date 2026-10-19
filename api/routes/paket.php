@@ -87,7 +87,7 @@ if (preg_match('#^/paket/(\d+)$#', $uri, $m) && $method === 'GET') {
 
   $stmt = $pdo->prepare('
     SELECT s.id, s.kode, s.body, s.tipe, s.options, s.answer, s.explanation,
-           s.difficulty, s.video_url, s.is_public_explanation,
+           s.difficulty, s.video_url, s.is_public_explanation, s.stimulus,
            st.nama as subtopik, t.nama as topik, m.nama as mapel,
            pi.urutan
     FROM paket_soal_items pi
