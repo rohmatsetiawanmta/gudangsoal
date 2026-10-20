@@ -22,27 +22,23 @@ const MENU = [
   { type: "link", to: "/admin/paket",    label: "Paket",    icon: Package,       end: true, activeFor: ["/admin/paket/tambah", "/admin/paket/"] },
   { type: "link", to: "/admin/latihan",  label: "Latihan",  icon: Dumbbell },
   { type: "link", to: "/admin/transaksi", label: "Transaksi", icon: Receipt },
+  { type: "section", label: "Analitik" },
+  { type: "link", to: "/admin/views",        label: "Views",        icon: BarChart2 },
+  { type: "link", to: "/admin/shares",       label: "Shares",       icon: Share2 },
+  { type: "link", to: "/admin/active-users", label: "Active Users", icon: Activity },
 
-  { type: "group", label: "Analitik", icon: BarChart2, children: [
-    { to: "/admin/views",        label: "Views",        icon: BarChart2 },
-    { to: "/admin/shares",       label: "Shares",       icon: Share2 },
-    { to: "/admin/active-users", label: "Active Users", icon: Activity },
-  ] },
+  { type: "section", label: "Komunitas" },
+  { type: "link", to: "/admin/users",        label: "Kelola User",   icon: Users },
+  { type: "link", to: "/admin/reports",      label: "Laporan Soal",  icon: Flag },
+  { type: "link", to: "/admin/soal-requests",label: "Request Soal",  icon: Inbox },
+  { type: "link", to: "/admin/feedback",     label: "Masukan User",  icon: MessageCircle },
 
-  { type: "group", label: "Komunitas", icon: Users, children: [
-    { to: "/admin/users",         label: "Kelola User",  icon: Users },
-    { to: "/admin/reports",       label: "Laporan Soal", icon: Flag },
-    { to: "/admin/soal-requests", label: "Request Soal", icon: Inbox },
-    { to: "/admin/feedback",      label: "Masukan User", icon: MessageCircle },
-  ] },
-
-  { type: "group", label: "Sistem", icon: Settings, children: [
-    { to: "/admin/changelog",  label: "Changelog",  icon: ScrollText },
-    { to: "/admin/roadmap",    label: "Roadmap",    icon: Map },
-    { to: "/admin/bugs",       label: "Bug List",   icon: Bug },
-    { to: "/admin/whiteboard", label: "Whiteboard", icon: PenTool },
-    { to: "/admin/settings",   label: "Pengaturan", icon: Settings },
-  ] },
+  { type: "section", label: "Sistem" },
+  { type: "link", to: "/admin/changelog", label: "Changelog",  icon: ScrollText },
+  { type: "link", to: "/admin/roadmap",   label: "Roadmap",    icon: Map },
+  { type: "link", to: "/admin/bugs",      label: "Bug List",   icon: Bug },
+  { type: "link", to: "/admin/whiteboard",label: "Whiteboard", icon: PenTool },
+  { type: "link", to: "/admin/settings",  label: "Pengaturan", icon: Settings },
 ];
 
 // ── SidebarLink ───────────────────────────────────────────────────────────────
