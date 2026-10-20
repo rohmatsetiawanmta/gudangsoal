@@ -26,7 +26,7 @@ npm-debug.log*
 *.swp
 
 # Tidak ikut repo (sesuai .gitignore repo GitHub)
-.claude
+.claude/settings.local.json
 docs
 schema
 sitemap.php
