@@ -9,6 +9,10 @@
   # Sitemap — taruh paling atas sebelum kondisi lain
   RewriteRule ^sitemap\.xml$ sitemap.php [L]
 
+  # Short link Instagram — taruh sebelum catch-all SPA
+  RewriteRule ^ig/story/?$ https://gudangsoal.com/?utm_source=instagram&utm_medium=story&utm_campaign=profile [L,R=302]
+  RewriteRule ^ig/?$ https://gudangsoal.com/?utm_source=instagram&utm_medium=bio&utm_campaign=profile [L,R=302]
+
   # Jangan redirect kalau file/folder ada
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
