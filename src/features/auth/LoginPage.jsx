@@ -7,6 +7,7 @@ import { login, resendVerification } from "./authApi";
 import Navbar from "../../components/Navbar";
 import SEO from "../../components/SEO";
 import useWindowWidth from "../../hooks/useWindowWidth";
+import { trackContinueAsGuest } from "../../lib/analytics";
 
 function InputField({
   label,
@@ -371,7 +372,10 @@ export default function LoginPage() {
             {/* Browse tanpa login */}
             <div style={{ marginTop: "20px", textAlign: "center" }}>
               <button
-                onClick={() => navigate("/browse")}
+                onClick={() => {
+                  trackContinueAsGuest();
+                  navigate("/browse");
+                }}
                 style={{
                   background: "none",
                   border: "none",

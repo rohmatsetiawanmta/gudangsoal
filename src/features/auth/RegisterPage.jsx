@@ -7,6 +7,7 @@ import { register, resendVerification } from "./authApi";
 import Navbar from "../../components/Navbar";
 import SEO from "../../components/SEO";
 import useWindowWidth from "../../hooks/useWindowWidth";
+import { trackSignUp, trackContinueAsGuest } from "../../lib/analytics";
 
 function InputField({
   label,
@@ -109,6 +110,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await register(form.name, form.email, form.password);
+      trackSignUp();
       setDone({ email: form.email });
     } catch (err) {
       setError(err.error || "Terjadi kesalahan, coba lagi");
@@ -424,7 +426,10 @@ export default function RegisterPage() {
             {/* Browse tanpa login */}
             <div style={{ marginTop: "20px", textAlign: "center" }}>
               <button
-                onClick={() => navigate("/browse")}
+                onClick={() => {
+                  trackContinueAsGuest();
+                  navigate("/browse");
+                }}
                 style={{
                   background: "none",
                   border: "none",
