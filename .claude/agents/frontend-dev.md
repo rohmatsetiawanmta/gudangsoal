@@ -12,6 +12,7 @@ Konvensi project:
 - `useWindowWidth()` buat responsive, `isMobile = width <= 480`.
 - Panggil API lewat `src/lib/api.js` (axios instance, auto-attach JWT, auto-redirect ke `/login` pas 401).
 - Komponen yang dipakai berkali-kali (3+ tempat) jadi shared component di `src/components/`, bukan copy-paste.
+- GA4/gtag: GA_ID & load-script logic ada di `src/components/CookieConsent.jsx` (Consent Mode v2 — default denied di-set di `index.html` sebelum stub dataLayer dipakai, GA script selalu dimuat terlepas status consent, consent cuma ngatur `gtag('consent','update',...)`). Helper reusable (capture UTM dari query string, kirim custom event `gtag('event', ...)`) ditaruh di `src/lib/analytics.js` — tambah fungsi baru di situ kalau butuh event GA lain, jangan panggil `window.gtag` manual tersebar di komponen.
 
 Hindari pola yang udah kebukti bermasalah di project ini:
 - Jangan panggil `setState` sinkron langsung di body `useEffect` (termasuk lewat fungsi yang dipanggil effect) — lint rule `react-hooks/set-state-in-effect` bakal nangkep ini. Taruh `setLoading(true)` dkk di luar fungsi fetch, atau pakai `.finally()` di caller. Catatan: puluhan file lama di project ini masih melanggar rule ini (pre-existing debt, bukan baru) — jangan coba "fix semua" sekalian, cukup pastiin file yang kamu sentuh gak nambah pelanggaran baru.

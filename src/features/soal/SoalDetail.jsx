@@ -32,6 +32,7 @@ import { getSoalDetail, getSoalStatus } from "./soalApi";
 import { saveSession } from "../profile/profileApi";
 import { useAuthStore } from "../auth/authStore";
 import api from "../../lib/api";
+import { trackFirstQuestionAnswered } from "../../lib/analytics";
 import {
   checkCorrect,
   initChosen,
@@ -331,6 +332,7 @@ export default function SoalDetail() {
   const handleSubmit = async () => {
     if (!isChosenValid() || alreadyCorrect) return;
     setSubmitted(true);
+    trackFirstQuestionAnswered();
     if (user) {
       try {
         await saveSession({

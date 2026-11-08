@@ -93,6 +93,7 @@ const SECTIONS = [
       { bold: "Cookies sesi:", text: " digunakan untuk menjaga status login dan preferensi dasar pengguna selama sesi aktif." },
       { bold: "Google Analytics 4:", text: " mengumpulkan data penggunaan anonim seperti halaman yang dikunjungi, durasi kunjungan, dan jenis perangkat. Data ini tidak mengidentifikasi individu secara langsung." },
       { bold: "Opt-out:", text: " kamu dapat menonaktifkan pelacakan Google Analytics melalui ekstensi browser resmi di tools.google.com/dlpage/gaoptout." },
+      { bold: "Mode Persetujuan (Consent Mode):", text: " jika kamu memilih \"Tolak\", kami tetap dapat mengirim sinyal kunjungan anonim dan teragregasi ke Google (tanpa cookie, tanpa pengenal pribadi) untuk estimasi statistik dasar, sesuai mekanisme resmi Google Consent Mode. Sinyal ini tidak dapat digunakan untuk mengidentifikasi kamu secara individu." },
     ],
   },
   {

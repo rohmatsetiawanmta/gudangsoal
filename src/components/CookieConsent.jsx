@@ -1,8 +1,23 @@
 import { useState, useEffect } from "react";
 import { Cookie, X } from "lucide-react";
+import { sendStoredUtmEvent } from "../lib/analytics";
 
 const GA_ID = "G-WGC1NZRJZP";
 const STORAGE_KEY = "gs_cookie_consent";
+
+const CONSENT_GRANTED = {
+  analytics_storage: "granted",
+  ad_storage: "granted",
+  ad_user_data: "granted",
+  ad_personalization: "granted",
+};
+
+const CONSENT_DENIED = {
+  analytics_storage: "denied",
+  ad_storage: "denied",
+  ad_user_data: "denied",
+  ad_personalization: "denied",
+};
 
 function loadGA() {
   if (document.getElementById("ga-script")) return;
@@ -14,6 +29,7 @@ function loadGA() {
   s.onload = () => {
     window.gtag("js", new Date());
     window.gtag("config", GA_ID);
+    sendStoredUtmEvent();
   };
 }
 
@@ -22,9 +38,14 @@ export default function CookieConsent() {
 
   useEffect(() => {
     const consent = localStorage.getItem(STORAGE_KEY);
+    // Consent Mode v2: default sudah "denied" (index.html), jadi script GA selalu
+    // boleh dimuat dari awal — tanpa consent, GA cuma kirim cookieless ping anonim.
+    loadGA();
     if (consent === "accepted") {
-      loadGA();
-    } else if (!consent) {
+      window.gtag("consent", "update", CONSENT_GRANTED);
+    } else if (consent === "declined") {
+      window.gtag("consent", "update", CONSENT_DENIED);
+    } else {
       const t = setTimeout(() => setVisible(true), 1200);
       return () => clearTimeout(t);
     }
@@ -33,11 +54,14 @@ export default function CookieConsent() {
   function accept() {
     localStorage.setItem(STORAGE_KEY, "accepted");
     loadGA();
+    window.gtag("consent", "update", CONSENT_GRANTED);
     setVisible(false);
   }
 
   function decline() {
     localStorage.setItem(STORAGE_KEY, "declined");
+    loadGA();
+    window.gtag("consent", "update", CONSENT_DENIED);
     setVisible(false);
   }
 

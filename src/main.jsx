@@ -6,6 +6,10 @@ import { HelmetProvider } from "react-helmet-async";
 import "./index.css";
 import App from "./App";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { captureUtmParams } from "./lib/analytics";
+
+// Capture UTM params SEBELUM SPA routing (React Router) sempat strip query string.
+captureUtmParams();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
