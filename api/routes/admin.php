@@ -999,11 +999,11 @@ if (str_starts_with($uri, '/admin/set-status/') && $method === 'PUT') {
 if ($uri === '/admin/stats' && $method === 'GET') {
   $totalSoal          = $pdo->query('SELECT COUNT(*) FROM soal')->fetchColumn();
   $totalSoalPublished = $pdo->query('SELECT COUNT(*) FROM soal WHERE is_published = 1')->fetchColumn();
-  $totalUser          = $pdo->query('SELECT COUNT(*) FROM users WHERE role = "user"')->fetchColumn();
+  $totalUser          = $pdo->query('SELECT COUNT(*) FROM users WHERE role = "user" AND is_demo_seeded = 0')->fetchColumn();
   $totalJenjang       = $pdo->query('SELECT COUNT(*) FROM jenjang')->fetchColumn();
   $totalSubtopik      = $pdo->query('SELECT COUNT(*) FROM subtopik')->fetchColumn();
-  $totalSesi          = $pdo->query('SELECT COUNT(*) FROM sessions')->fetchColumn();
-  $totalBenar         = $pdo->query('SELECT COUNT(*) FROM sessions WHERE is_correct = 1')->fetchColumn();
+  $totalSesi          = $pdo->query('SELECT COUNT(*) FROM sessions se JOIN users u ON u.id = se.user_id WHERE u.is_demo_seeded = 0')->fetchColumn();
+  $totalBenar         = $pdo->query('SELECT COUNT(*) FROM sessions se JOIN users u ON u.id = se.user_id WHERE se.is_correct = 1 AND u.is_demo_seeded = 0')->fetchColumn();
 
   // Soal terbaru
   $soalTerbaru = $pdo->query('
@@ -1021,7 +1021,7 @@ if ($uri === '/admin/stats' && $method === 'GET') {
   $userTerbaru = $pdo->query('
     SELECT id, name, email, xp, streak, created_at
     FROM users
-    WHERE role = "user"
+    WHERE role = "user" AND is_demo_seeded = 0
     ORDER BY created_at DESC
     LIMIT 5
   ')->fetchAll();
@@ -1042,10 +1042,12 @@ if ($uri === '/admin/stats' && $method === 'GET') {
 
   // User aktif 7 hari terakhir
   $userAktif = $pdo->query('
-    SELECT DATE(created_at) as tanggal, COUNT(DISTINCT user_id) as aktif
-    FROM sessions
-    WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-    GROUP BY DATE(created_at)
+    SELECT DATE(se.created_at) as tanggal, COUNT(DISTINCT se.user_id) as aktif
+    FROM sessions se
+    JOIN users u ON u.id = se.user_id
+    WHERE se.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    AND u.is_demo_seeded = 0
+    GROUP BY DATE(se.created_at)
     ORDER BY tanggal ASC
   ')->fetchAll();
 
@@ -1056,6 +1058,8 @@ if ($uri === '/admin/stats' && $method === 'GET') {
       SUM(se.is_correct) as benar
     FROM sessions se
     JOIN soal s ON se.soal_id = s.id
+    JOIN users u ON u.id = se.user_id
+    WHERE u.is_demo_seeded = 0
     GROUP BY s.difficulty
     ORDER BY s.difficulty ASC
   ')->fetchAll();
@@ -1081,7 +1085,9 @@ $soalPalingSalah = $pdo->query('
   JOIN subtopik st ON s.subtopik_id = st.id
   JOIN topik t ON st.topik_id = t.id
   JOIN mapel m ON t.mapel_id = m.id
+  JOIN users u ON u.id = se.user_id
   WHERE s.is_published = 1
+  AND u.is_demo_seeded = 0
   GROUP BY s.id, s.kode, s.body, s.difficulty, st.nama, m.nama
   HAVING total_attempt >= 5
   ORDER BY error_rate DESC
@@ -1094,6 +1100,7 @@ $registrasiHarian = $pdo->query('
   FROM users
   WHERE role = "user"
   AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+  AND is_demo_seeded = 0
   GROUP BY DATE(created_at)
   ORDER BY tanggal ASC
 ')->fetchAll();
@@ -1108,16 +1115,19 @@ $registrasiMingguan = $pdo->query('
   FROM users
   WHERE role = "user"
   AND created_at >= DATE_SUB(NOW(), INTERVAL 12 WEEK)
+  AND is_demo_seeded = 0
   GROUP BY YEAR(created_at), WEEK(created_at, 1)
   ORDER BY tahun ASC, minggu ASC
 ')->fetchAll();
 
 // 3. XP didistribusikan per hari 30 hari terakhir
 $xpPerHari = $pdo->query('
-  SELECT DATE(created_at) as tanggal, SUM(xp) as total_xp, COUNT(*) as total_transaksi
+  SELECT DATE(xp_history.created_at) as tanggal, SUM(xp_history.xp) as total_xp, COUNT(*) as total_transaksi
   FROM xp_history
-  WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-  GROUP BY DATE(created_at)
+  JOIN users u ON u.id = xp_history.user_id
+  WHERE xp_history.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+  AND u.is_demo_seeded = 0
+  GROUP BY DATE(xp_history.created_at)
   ORDER BY tanggal ASC
 ')->fetchAll();
 
@@ -1130,7 +1140,7 @@ $soalTerpopuler = $pdo->query('
          COUNT(DISTINCT se.user_id) as total_user,
          ROUND(SUM(se.is_correct) / NULLIF(COUNT(*), 0) * 100) as akurasi
   FROM soal s
-  LEFT JOIN sessions se ON se.soal_id = s.id
+  LEFT JOIN sessions se ON se.soal_id = s.id AND se.user_id NOT IN (SELECT id FROM users WHERE is_demo_seeded = 1)
   JOIN subtopik st ON s.subtopik_id = st.id
   JOIN topik t ON st.topik_id = t.id
   JOIN mapel m ON t.mapel_id = m.id
@@ -1196,7 +1206,7 @@ if ($uri === '/admin/users' && $method === 'GET') {
 
   if ($search) {
     $stmt = $pdo->prepare('
-      SELECT id, name, email, role, xp, streak, soal_streak, created_at, email_verified, verified_at
+      SELECT id, name, email, role, xp, streak, soal_streak, created_at, email_verified, verified_at, is_demo_seeded
       FROM users
       WHERE (name LIKE ? OR email LIKE ?)
       ORDER BY created_at DESC
@@ -1208,7 +1218,7 @@ if ($uri === '/admin/users' && $method === 'GET') {
     $totalStmt->execute(["%$search%", "%$search%"]);
   } else {
     $stmt = $pdo->prepare('
-      SELECT id, name, email, role, xp, streak, soal_streak, created_at, email_verified, verified_at
+      SELECT id, name, email, role, xp, streak, soal_streak, created_at, email_verified, verified_at, is_demo_seeded
       FROM users
       ORDER BY created_at DESC
       LIMIT ' . $limit . ' OFFSET ' . $offset . '
@@ -1233,7 +1243,7 @@ if ($uri === '/admin/users/detail' && $method === 'GET') {
   if (!$id) { http_response_code(400); echo json_encode(['error' => 'id wajib']); exit; }
 
   $stmt = $pdo->prepare('
-    SELECT id, name, email, role, xp, streak, soal_streak, soal_streak_best, created_at
+    SELECT id, name, email, role, xp, streak, soal_streak, soal_streak_best, created_at, is_demo_seeded
     FROM users WHERE id = ?
   ');
   $stmt->execute([$id]);
@@ -1291,6 +1301,219 @@ if ($uri === '/admin/users/reset-password' && $method === 'POST') {
   $stmt->execute([password_hash($newPassword, PASSWORD_DEFAULT), $id]);
 
   echo json_encode(['message' => 'Password berhasil direset']);
+  exit;
+}
+
+// PUT /admin/users/seed-demo?id=1 — seed xp/streak/sessions/xp_history akun demo
+// untuk kebutuhan screenshot konten (misal Instagram), TANPA mencemari statistik global.
+// Dipisah dari PUT /admin/users (generik) karena field di sini sensitif (streak,
+// soal_streak, last_active) dan hanya boleh menyasar 1 akun yang di-whitelist via .env.
+if ($uri === '/admin/users/seed-demo' && $method === 'PUT') {
+  $id = $_GET['id'] ?? null;
+  if (!$id) { http_response_code(400); echo json_encode(['error' => 'id wajib']); exit; }
+
+  // Gate pertama: whitelist di level config (DEMO_SEED_USER_ID), bukan di level kolom.
+  if (!DEMO_SEED_USER_ID || (int) $id !== DEMO_SEED_USER_ID) {
+    http_response_code(403);
+    echo json_encode(['error' => 'User ini tidak diizinkan untuk di-seed sebagai akun demo']);
+    exit;
+  }
+
+  $xp             = (int) ($body['xp'] ?? 0);
+  $streakDays     = (int) ($body['streak_days'] ?? 0);
+  $soalStreak     = (int) ($body['soal_streak'] ?? 0);
+  $accuracyTarget = (int) ($body['accuracy_target'] ?? 0);
+  $totalAttempts  = (int) ($body['total_attempts'] ?? 0);
+
+  if ($accuracyTarget < 0 || $accuracyTarget > 100) {
+    http_response_code(400); echo json_encode(['error' => 'accuracy_target harus 0-100']); exit;
+  }
+  if ($totalAttempts < 0) {
+    http_response_code(400); echo json_encode(['error' => 'total_attempts tidak valid']); exit;
+  }
+
+  // Validasi target user ada dan bukan admin (cegah salah seed akun admin)
+  $stmt = $pdo->prepare('SELECT id, role FROM users WHERE id = ?');
+  $stmt->execute([$id]);
+  $targetUser = $stmt->fetch();
+  if (!$targetUser) { http_response_code(404); echo json_encode(['error' => 'User tidak ditemukan']); exit; }
+  if ($targetUser['role'] !== 'user') {
+    http_response_code(400);
+    echo json_encode(['error' => 'Hanya akun dengan role user yang bisa di-seed sebagai demo']);
+    exit;
+  }
+
+  $pdo->beginTransaction();
+  try {
+    // Idempotent — bersihkan data lama dulu supaya re-run (ganti skenario screenshot)
+    // tidak numpuk data lama.
+    $pdo->prepare('DELETE FROM sessions WHERE user_id = ?')->execute([$id]);
+    $pdo->prepare('DELETE FROM xp_history WHERE user_id = ?')->execute([$id]);
+
+    // Set angka utama + flag demo. last_active = CURDATE() WAJIB bareng karena
+    // effectiveStreak() di api/config/helpers.php nampilin streak 0 kalau last_active
+    // bukan hari ini.
+    $stmt = $pdo->prepare('
+      UPDATE users
+      SET xp = ?, streak = ?, last_active = CURDATE(), soal_streak = ?,
+          soal_streak_best = GREATEST(soal_streak_best, ?),
+          is_demo_seeded = 1, demo_seeded_at = NOW()
+      WHERE id = ?
+    ');
+    $stmt->execute([$xp, $streakDays, $soalStreak, $soalStreak, $id]);
+
+    // Hitung distribusi benar/salah dari accuracy_target
+    $benar = (int) round($totalAttempts * $accuracyTarget / 100);
+    $salah = $totalAttempts - $benar;
+
+    // Soal "retry" (salah dulu baru benar, replikasi pola retry asli di schema.sql) sebanyak
+    // mungkin; sisanya benar langsung (single-correct) atau tetap salah (single-wrong).
+    $retryCount         = min($salah, $benar);
+    $singleCorrectCount = $benar - $retryCount;
+    $singleWrongCount   = $salah - $retryCount;
+    $neededSoal         = $retryCount + $singleCorrectCount + $singleWrongCount;
+
+    $soalPool = [];
+    if ($neededSoal > 0) {
+      // Defense-in-depth: utamakan soal yang sudah punya cukup banyak attempt asli lain
+      // (mirip query soalPalingSalah, HAVING total_attempt >= 5), biar dampaknya ke
+      // statistik soal nyaris nggak kelihatan kalaupun ada 1 titik exclude yang kelewat.
+      $stmt = $pdo->prepare('
+        SELECT s.id, COUNT(se.id) as attempt_count
+        FROM soal s
+        LEFT JOIN sessions se ON se.soal_id = s.id
+          AND se.user_id NOT IN (SELECT id FROM users WHERE is_demo_seeded = 1)
+        WHERE s.is_published = 1 AND s.is_exclusive = 0
+        GROUP BY s.id
+        HAVING attempt_count >= 5
+        ORDER BY RAND()
+        LIMIT ' . (int) $neededSoal . '
+      ');
+      $stmt->execute();
+      $soalPool = $stmt->fetchAll();
+
+      if (count($soalPool) < $neededSoal) {
+        $existingIds  = array_column($soalPool, 'id');
+        $remaining    = $neededSoal - count($soalPool);
+        $excludeClause = empty($existingIds)
+          ? ''
+          : ' AND id NOT IN (' . implode(',', array_fill(0, count($existingIds), '?')) . ')';
+        $fallbackStmt = $pdo->prepare('
+          SELECT id FROM soal
+          WHERE is_published = 1 AND is_exclusive = 0' . $excludeClause . '
+          ORDER BY RAND()
+          LIMIT ' . (int) $remaining . '
+        ');
+        $fallbackStmt->execute($existingIds);
+        $soalPool = array_merge($soalPool, $fallbackStmt->fetchAll());
+      }
+    }
+
+    // Ambil kode + difficulty soal yang terpilih
+    $soalIds = array_column($soalPool, 'id');
+    $kodeMap = [];
+    if (!empty($soalIds)) {
+      $placeholders = implode(',', array_fill(0, count($soalIds), '?'));
+      $kodeStmt = $pdo->prepare("SELECT id, kode, difficulty FROM soal WHERE id IN ($placeholders)");
+      $kodeStmt->execute($soalIds);
+      foreach ($kodeStmt->fetchAll() as $row) $kodeMap[$row['id']] = $row;
+    }
+
+    // Bagi soal terpilih ke 3 kelompok sesuai urutan di atas
+    $retrySoal         = array_slice($soalPool, 0, $retryCount);
+    $singleCorrectSoal = array_slice($soalPool, $retryCount, $singleCorrectCount);
+    $singleWrongSoal   = array_slice($soalPool, $retryCount + $singleCorrectCount, $singleWrongCount);
+
+    // Sebar created_at ke streak_days hari terakhir (minimal 1 hari), jam wajar 08:00-20:00
+    $spreadDays  = max(1, $streakDays);
+    $totalRows   = $retryCount * 2 + $singleCorrectCount + $singleWrongCount;
+    $rowsPerDay  = max(1, (int) ceil($totalRows / $spreadDays));
+
+    $makeCreatedAt = function ($rowIndex) use ($spreadDays, $rowsPerDay) {
+      $dayOffset    = min((int) floor($rowIndex / $rowsPerDay), $spreadDays - 1);
+      $rowInDay     = $rowIndex % $rowsPerDay;
+      $date         = date('Y-m-d', strtotime('-' . ($spreadDays - 1 - $dayOffset) . ' days'));
+      $secondsOfDay = (8 * 3600) + (($rowInDay * 900 + rand(0, 299)) % (12 * 3600)); // 08:00-20:00
+      $hour = intdiv($secondsOfDay, 3600);
+      $min  = intdiv($secondsOfDay % 3600, 60);
+      $sec  = $secondsOfDay % 60;
+      return sprintf('%s %02d:%02d:%02d', $date, $hour, $min, $sec);
+    };
+
+    // XP hanya dihitung untuk first-time correct — replikasi logic asli di
+    // api/routes/profile.php baris ~141-197 (base by difficulty + bonus streak%)
+    $insertXp = function ($soalInfo, $createdAt) use ($id, $streakDays, $soalStreak, $pdo) {
+      $baseXP = match((int) $soalInfo['difficulty']) {
+        1 => 10, 2 => 20, 3 => 30, default => 10,
+      };
+      $dayBonusPercent = match(true) {
+        $streakDays >= 30 => 50,
+        $streakDays >= 21 => 40,
+        $streakDays >= 11 => 30,
+        $streakDays >= 6  => 20,
+        $streakDays >= 3  => 10,
+        default           => 0,
+      };
+      $soalBonusPercent = match(true) {
+        $soalStreak >= 75 => 50,
+        $soalStreak >= 51 => 40,
+        $soalStreak >= 31 => 30,
+        $soalStreak >= 16 => 20,
+        $soalStreak >= 6  => 10,
+        default           => 0,
+      };
+      $totalBonusPercent = $dayBonusPercent + $soalBonusPercent;
+      $bonus    = (int) ceil($baseXP * $totalBonusPercent / 100);
+      $xpEarned = $baseXP + $bonus;
+
+      $diffLabel = match((int) $soalInfo['difficulty']) {
+        1 => 'Easy', 2 => 'Medium', 3 => 'Hard', default => 'Easy',
+      };
+      $reason = "Soal $diffLabel";
+      if ($totalBonusPercent > 0) $reason .= " (+{$totalBonusPercent}% bonus streak)";
+
+      $xpStmt = $pdo->prepare('INSERT INTO xp_history (user_id, xp, reason, soal_kode, created_at) VALUES (?, ?, ?, ?, ?)');
+      $xpStmt->execute([$id, $xpEarned, $reason, $soalInfo['kode'], $createdAt]);
+    };
+
+    $sessionStmt = $pdo->prepare('INSERT INTO sessions (user_id, soal_id, kode, is_correct, created_at) VALUES (?, ?, ?, ?, ?)');
+    $rowIndex = 0;
+
+    foreach ($retrySoal as $s) {
+      $soalInfo = $kodeMap[$s['id']];
+      // Row 1: salah
+      $sessionStmt->execute([$id, $s['id'], $soalInfo['kode'], 0, $makeCreatedAt($rowIndex)]);
+      $rowIndex++;
+      // Row 2: benar (first-time correct karena attempt pertama salah)
+      $createdAt = $makeCreatedAt($rowIndex);
+      $sessionStmt->execute([$id, $s['id'], $soalInfo['kode'], 1, $createdAt]);
+      $rowIndex++;
+      $insertXp($soalInfo, $createdAt);
+    }
+
+    foreach ($singleCorrectSoal as $s) {
+      $soalInfo  = $kodeMap[$s['id']];
+      $createdAt = $makeCreatedAt($rowIndex);
+      $sessionStmt->execute([$id, $s['id'], $soalInfo['kode'], 1, $createdAt]);
+      $rowIndex++;
+      $insertXp($soalInfo, $createdAt);
+    }
+
+    foreach ($singleWrongSoal as $s) {
+      $soalInfo = $kodeMap[$s['id']];
+      $sessionStmt->execute([$id, $s['id'], $soalInfo['kode'], 0, $makeCreatedAt($rowIndex)]);
+      $rowIndex++;
+    }
+
+    $pdo->commit();
+  } catch (Exception $e) {
+    $pdo->rollBack();
+    http_response_code(500);
+    echo json_encode(['error' => 'Gagal seed data demo: ' . $e->getMessage()]);
+    exit;
+  }
+
+  echo json_encode(['message' => 'Statistik demo berhasil di-seed', 'id' => (int) $id]);
   exit;
 }
 
@@ -1790,13 +2013,17 @@ if ($uri === '/admin/soal/views/raw' && $method === 'GET') {
     JOIN topik     t ON st.topik_id   = t.id
     JOIN mapel    mp ON t.mapel_id    = mp.id
     LEFT JOIN users u ON sv.user_id = u.id
-    WHERE sv.viewed_at >= ?
+    WHERE sv.viewed_at >= ? AND IFNULL(u.is_demo_seeded, 0) = 0
     ORDER BY sv.viewed_at DESC
     LIMIT $limit OFFSET $offset
   ");
   $stmt->execute([$since]);
 
-  $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM soal_views WHERE viewed_at >= ?");
+  $totalStmt = $pdo->prepare("
+    SELECT COUNT(*) FROM soal_views sv
+    LEFT JOIN users u ON sv.user_id = u.id
+    WHERE sv.viewed_at >= ? AND IFNULL(u.is_demo_seeded, 0) = 0
+  ");
   $totalStmt->execute([$since]);
 
   echo json_encode([
@@ -1813,10 +2040,10 @@ if ($uri === '/admin/soal/views' && $method === 'GET') {
   $days  = isset($_GET['days']) ? (int)$_GET['days'] : 30;
   $since = $days > 0 ? date('Y-m-d H:i:s', strtotime("-{$days} days")) : '1970-01-01 00:00:00';
 
-  $total     = (int) $pdo->query("SELECT COUNT(*) FROM soal_views")->fetchColumn();
-  $today     = (int) $pdo->query("SELECT COUNT(*) FROM soal_views WHERE viewed_at >= CURDATE()")->fetchColumn();
-  $week      = (int) $pdo->query("SELECT COUNT(*) FROM soal_views WHERE viewed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)")->fetchColumn();
-  $month     = (int) $pdo->query("SELECT COUNT(*) FROM soal_views WHERE viewed_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")->fetchColumn();
+  $total     = (int) $pdo->query("SELECT COUNT(*) FROM soal_views sv LEFT JOIN users u ON sv.user_id = u.id WHERE IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
+  $today     = (int) $pdo->query("SELECT COUNT(*) FROM soal_views sv LEFT JOIN users u ON sv.user_id = u.id WHERE sv.viewed_at >= CURDATE() AND IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
+  $week      = (int) $pdo->query("SELECT COUNT(*) FROM soal_views sv LEFT JOIN users u ON sv.user_id = u.id WHERE sv.viewed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
+  $month     = (int) $pdo->query("SELECT COUNT(*) FROM soal_views sv LEFT JOIN users u ON sv.user_id = u.id WHERE sv.viewed_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) AND IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
   $anonymous = (int) $pdo->query("SELECT COUNT(*) FROM soal_views WHERE user_id IS NULL")->fetchColumn();
   $logged_in = $total - $anonymous;
 
@@ -1824,13 +2051,14 @@ if ($uri === '/admin/soal/views' && $method === 'GET') {
     SELECT s.id, s.kode, s.difficulty,
            st.nama AS subtopik, mp.nama AS mapel,
            COUNT(sv.id) AS views_in_range,
-           (SELECT COUNT(*) FROM soal_views WHERE soal_id = s.id) AS views_total
+           (SELECT COUNT(*) FROM soal_views sv2 LEFT JOIN users u2 ON sv2.user_id = u2.id WHERE sv2.soal_id = s.id AND IFNULL(u2.is_demo_seeded, 0) = 0) AS views_total
     FROM soal_views sv
     JOIN soal s ON sv.soal_id = s.id
     JOIN subtopik st ON s.subtopik_id = st.id
     JOIN topik     t ON st.topik_id   = t.id
     JOIN mapel    mp ON t.mapel_id    = mp.id
-    WHERE sv.viewed_at >= ?
+    LEFT JOIN users u ON sv.user_id = u.id
+    WHERE sv.viewed_at >= ? AND IFNULL(u.is_demo_seeded, 0) = 0
     GROUP BY s.id, s.kode, s.difficulty, st.nama, mp.nama
     ORDER BY views_in_range DESC
     LIMIT 50
@@ -1838,13 +2066,14 @@ if ($uri === '/admin/soal/views' && $method === 'GET') {
   $topStmt->execute([$since]);
 
   $dailyStmt = $pdo->prepare("
-    SELECT DATE(viewed_at) AS date,
+    SELECT DATE(sv.viewed_at) AS date,
            COUNT(*) AS total,
-           SUM(CASE WHEN user_id IS NULL THEN 1 ELSE 0 END) AS anonymous,
-           SUM(CASE WHEN user_id IS NOT NULL THEN 1 ELSE 0 END) AS logged_in
-    FROM soal_views
-    WHERE viewed_at >= ?
-    GROUP BY DATE(viewed_at)
+           SUM(CASE WHEN sv.user_id IS NULL THEN 1 ELSE 0 END) AS anonymous,
+           SUM(CASE WHEN sv.user_id IS NOT NULL THEN 1 ELSE 0 END) AS logged_in
+    FROM soal_views sv
+    LEFT JOIN users u ON sv.user_id = u.id
+    WHERE sv.viewed_at >= ? AND IFNULL(u.is_demo_seeded, 0) = 0
+    GROUP BY DATE(sv.viewed_at)
     ORDER BY date ASC
   ");
   $dailyStmt->execute([$since]);
@@ -1862,28 +2091,29 @@ if ($uri === '/admin/soal/shares' && $method === 'GET') {
   $days  = isset($_GET['days']) ? (int)$_GET['days'] : 30;
   $since = $days > 0 ? date('Y-m-d H:i:s', strtotime("-{$days} days")) : '1970-01-01 00:00:00';
 
-  $total     = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares")->fetchColumn();
-  $today     = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE created_at >= CURDATE()")->fetchColumn();
-  $week      = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)")->fetchColumn();
-  $whatsapp  = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE platform = 'whatsapp'")->fetchColumn();
-  $telegram  = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE platform = 'telegram'")->fetchColumn();
-  $facebook  = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE platform = 'facebook'")->fetchColumn();
-  $twitter   = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE platform = 'twitter'")->fetchColumn();
-  $threads   = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE platform = 'threads'")->fetchColumn();
-  $email     = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE platform = 'email'")->fetchColumn();
-  $copy      = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares WHERE platform = 'copy'")->fetchColumn();
+  $total     = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares ss LEFT JOIN users u ON ss.user_id = u.id WHERE IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
+  $today     = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares ss LEFT JOIN users u ON ss.user_id = u.id WHERE ss.created_at >= CURDATE() AND IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
+  $week      = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares ss LEFT JOIN users u ON ss.user_id = u.id WHERE ss.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
+  $whatsapp  = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares ss LEFT JOIN users u ON ss.user_id = u.id WHERE ss.platform = 'whatsapp' AND IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
+  $telegram  = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares ss LEFT JOIN users u ON ss.user_id = u.id WHERE ss.platform = 'telegram' AND IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
+  $facebook  = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares ss LEFT JOIN users u ON ss.user_id = u.id WHERE ss.platform = 'facebook' AND IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
+  $twitter   = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares ss LEFT JOIN users u ON ss.user_id = u.id WHERE ss.platform = 'twitter' AND IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
+  $threads   = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares ss LEFT JOIN users u ON ss.user_id = u.id WHERE ss.platform = 'threads' AND IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
+  $email     = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares ss LEFT JOIN users u ON ss.user_id = u.id WHERE ss.platform = 'email' AND IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
+  $copy      = (int) $pdo->query("SELECT COUNT(*) FROM soal_shares ss LEFT JOIN users u ON ss.user_id = u.id WHERE ss.platform = 'copy' AND IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
 
   $topStmt = $pdo->prepare("
     SELECT s.id, s.kode, s.difficulty,
            st.nama AS subtopik, mp.nama AS mapel,
            COUNT(sh.id) AS shares_in_range,
-           (SELECT COUNT(*) FROM soal_shares WHERE soal_id = s.id) AS shares_total
+           (SELECT COUNT(*) FROM soal_shares sh2 LEFT JOIN users u2 ON sh2.user_id = u2.id WHERE sh2.soal_id = s.id AND IFNULL(u2.is_demo_seeded, 0) = 0) AS shares_total
     FROM soal_shares sh
     JOIN soal s ON sh.soal_id = s.id
     JOIN subtopik st ON s.subtopik_id = st.id
     JOIN topik     t ON st.topik_id   = t.id
     JOIN mapel    mp ON t.mapel_id    = mp.id
-    WHERE sh.created_at >= ?
+    LEFT JOIN users u ON sh.user_id = u.id
+    WHERE sh.created_at >= ? AND IFNULL(u.is_demo_seeded, 0) = 0
     GROUP BY s.id, s.kode, s.difficulty, st.nama, mp.nama
     ORDER BY shares_in_range DESC
     LIMIT 50
@@ -1891,15 +2121,16 @@ if ($uri === '/admin/soal/shares' && $method === 'GET') {
   $topStmt->execute([$since]);
 
   $dailyStmt = $pdo->prepare("
-    SELECT DATE(created_at) AS date,
+    SELECT DATE(sh.created_at) AS date,
            COUNT(*) AS total,
-           SUM(CASE WHEN platform = 'whatsapp' THEN 1 ELSE 0 END) AS whatsapp,
-           SUM(CASE WHEN platform = 'twitter'  THEN 1 ELSE 0 END) AS twitter,
-           SUM(CASE WHEN platform = 'threads'  THEN 1 ELSE 0 END) AS threads,
-           SUM(CASE WHEN platform = 'copy'     THEN 1 ELSE 0 END) AS copy
-    FROM soal_shares
-    WHERE created_at >= ?
-    GROUP BY DATE(created_at)
+           SUM(CASE WHEN sh.platform = 'whatsapp' THEN 1 ELSE 0 END) AS whatsapp,
+           SUM(CASE WHEN sh.platform = 'twitter'  THEN 1 ELSE 0 END) AS twitter,
+           SUM(CASE WHEN sh.platform = 'threads'  THEN 1 ELSE 0 END) AS threads,
+           SUM(CASE WHEN sh.platform = 'copy'     THEN 1 ELSE 0 END) AS copy
+    FROM soal_shares sh
+    LEFT JOIN users u ON sh.user_id = u.id
+    WHERE sh.created_at >= ? AND IFNULL(u.is_demo_seeded, 0) = 0
+    GROUP BY DATE(sh.created_at)
     ORDER BY date ASC
   ");
   $dailyStmt->execute([$since]);
@@ -1932,13 +2163,17 @@ if (str_starts_with($uri, '/admin/soal/shares/raw') && $method === 'GET') {
     JOIN topik     t ON st.topik_id   = t.id
     JOIN mapel    mp ON t.mapel_id    = mp.id
     LEFT JOIN users u ON sh.user_id = u.id
-    WHERE sh.created_at >= ?
+    WHERE sh.created_at >= ? AND IFNULL(u.is_demo_seeded, 0) = 0
     ORDER BY sh.created_at DESC
     LIMIT $limit OFFSET $offset
   ");
   $stmt->execute([$since]);
 
-  $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM soal_shares WHERE created_at >= ?");
+  $totalStmt = $pdo->prepare("
+    SELECT COUNT(*) FROM soal_shares sh
+    LEFT JOIN users u ON sh.user_id = u.id
+    WHERE sh.created_at >= ? AND IFNULL(u.is_demo_seeded, 0) = 0
+  ");
   $totalStmt->execute([$since]);
 
   echo json_encode([
@@ -2015,7 +2250,7 @@ if ($uri === '/admin/materi' && $method === 'GET') {
 
   $stmt = $pdo->prepare("
     SELECT m.id, m.judul, m.is_published, m.urutan, m.created_at, m.updated_at,
-           (SELECT COUNT(*) FROM materi_views WHERE materi_id = m.id) AS views,
+           (SELECT COUNT(*) FROM materi_views mv LEFT JOIN users u ON mv.user_id = u.id WHERE mv.materi_id = m.id AND IFNULL(u.is_demo_seeded, 0) = 0) AS views,
            st.nama AS subtopik, t.nama AS topik,
            mp.nama AS mapel, sj.nama AS subjenjang, j.nama AS jenjang,
            COALESCE(JSON_LENGTH(m.highlights), 0)  AS jumlah_highlights,
@@ -2063,13 +2298,17 @@ if ($uri === '/admin/materi/views/raw' && $method === 'GET') {
     FROM materi_views mv
     JOIN materi m ON mv.materi_id = m.id
     LEFT JOIN users u ON mv.user_id = u.id
-    WHERE mv.viewed_at >= ?
+    WHERE mv.viewed_at >= ? AND IFNULL(u.is_demo_seeded, 0) = 0
     ORDER BY mv.viewed_at DESC
     LIMIT $limit OFFSET $offset
   ");
   $stmt->execute([$since]);
 
-  $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM materi_views WHERE viewed_at >= ?");
+  $totalStmt = $pdo->prepare("
+    SELECT COUNT(*) FROM materi_views mv
+    LEFT JOIN users u ON mv.user_id = u.id
+    WHERE mv.viewed_at >= ? AND IFNULL(u.is_demo_seeded, 0) = 0
+  ");
   $totalStmt->execute([$since]);
 
   echo json_encode([
@@ -2089,10 +2328,10 @@ if ($uri === '/admin/materi/views' && $method === 'GET') {
     : '1970-01-01 00:00:00';
 
   // Summary stats
-  $total      = (int) $pdo->query("SELECT COUNT(*) FROM materi_views")->fetchColumn();
-  $today      = (int) $pdo->query("SELECT COUNT(*) FROM materi_views WHERE viewed_at >= CURDATE()")->fetchColumn();
-  $week       = (int) $pdo->query("SELECT COUNT(*) FROM materi_views WHERE viewed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)")->fetchColumn();
-  $month      = (int) $pdo->query("SELECT COUNT(*) FROM materi_views WHERE viewed_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")->fetchColumn();
+  $total      = (int) $pdo->query("SELECT COUNT(*) FROM materi_views mv LEFT JOIN users u ON mv.user_id = u.id WHERE IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
+  $today      = (int) $pdo->query("SELECT COUNT(*) FROM materi_views mv LEFT JOIN users u ON mv.user_id = u.id WHERE mv.viewed_at >= CURDATE() AND IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
+  $week       = (int) $pdo->query("SELECT COUNT(*) FROM materi_views mv LEFT JOIN users u ON mv.user_id = u.id WHERE mv.viewed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
+  $month      = (int) $pdo->query("SELECT COUNT(*) FROM materi_views mv LEFT JOIN users u ON mv.user_id = u.id WHERE mv.viewed_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) AND IFNULL(u.is_demo_seeded, 0) = 0")->fetchColumn();
   $anonymous  = (int) $pdo->query("SELECT COUNT(*) FROM materi_views WHERE user_id IS NULL")->fetchColumn();
   $logged_in  = $total - $anonymous;
 
@@ -2101,13 +2340,14 @@ if ($uri === '/admin/materi/views' && $method === 'GET') {
     SELECT m.id, m.judul, m.is_published,
            st.nama AS subtopik, mp.nama AS mapel,
            COUNT(mv.id) AS views_in_range,
-           (SELECT COUNT(*) FROM materi_views WHERE materi_id = m.id) AS views_total
+           (SELECT COUNT(*) FROM materi_views mv2 LEFT JOIN users u2 ON mv2.user_id = u2.id WHERE mv2.materi_id = m.id AND IFNULL(u2.is_demo_seeded, 0) = 0) AS views_total
     FROM materi_views mv
     JOIN materi m ON mv.materi_id = m.id
     JOIN subtopik st ON m.subtopik_id = st.id
     JOIN topik     t ON st.topik_id   = t.id
     JOIN mapel    mp ON t.mapel_id    = mp.id
-    WHERE mv.viewed_at >= ?
+    LEFT JOIN users u ON mv.user_id = u.id
+    WHERE mv.viewed_at >= ? AND IFNULL(u.is_demo_seeded, 0) = 0
     GROUP BY m.id, m.judul, m.is_published, st.nama, mp.nama
     ORDER BY views_in_range DESC
     LIMIT 50
@@ -2116,13 +2356,14 @@ if ($uri === '/admin/materi/views' && $method === 'GET') {
 
   // Daily views (last N days)
   $dailyStmt = $pdo->prepare("
-    SELECT DATE(viewed_at) AS date,
+    SELECT DATE(mv.viewed_at) AS date,
            COUNT(*) AS total,
-           SUM(CASE WHEN user_id IS NULL THEN 1 ELSE 0 END) AS anonymous,
-           SUM(CASE WHEN user_id IS NOT NULL THEN 1 ELSE 0 END) AS logged_in
-    FROM materi_views
-    WHERE viewed_at >= ?
-    GROUP BY DATE(viewed_at)
+           SUM(CASE WHEN mv.user_id IS NULL THEN 1 ELSE 0 END) AS anonymous,
+           SUM(CASE WHEN mv.user_id IS NOT NULL THEN 1 ELSE 0 END) AS logged_in
+    FROM materi_views mv
+    LEFT JOIN users u ON mv.user_id = u.id
+    WHERE mv.viewed_at >= ? AND IFNULL(u.is_demo_seeded, 0) = 0
+    GROUP BY DATE(mv.viewed_at)
     ORDER BY date ASC
   ");
   $dailyStmt->execute([$since]);
@@ -2667,11 +2908,11 @@ if ($uri === '/admin/whiteboard/by-soal-kode' && $method === 'GET') {
 if ($uri === '/admin/analytics/active-users' && $method === 'GET') {
 
   $activityUnion = "
-    SELECT user_id, DATE(created_at) AS d FROM sessions
+    SELECT user_id, DATE(created_at) AS d FROM sessions WHERE user_id NOT IN (SELECT id FROM users WHERE is_demo_seeded = 1)
     UNION ALL
-    SELECT user_id, DATE(created_at) AS d FROM materi_sessions
+    SELECT user_id, DATE(created_at) AS d FROM materi_sessions WHERE user_id NOT IN (SELECT id FROM users WHERE is_demo_seeded = 1)
     UNION ALL
-    SELECT user_id, DATE(viewed_at)  AS d FROM soal_views WHERE user_id IS NOT NULL
+    SELECT user_id, DATE(viewed_at)  AS d FROM soal_views WHERE user_id IS NOT NULL AND user_id NOT IN (SELECT id FROM users WHERE is_demo_seeded = 1)
   ";
 
   // Daily — last 30 days (fill gaps with 0)
@@ -2720,9 +2961,9 @@ if ($uri === '/admin/analytics/active-users' && $method === 'GET') {
 
   // Avg sessions per active user per day (last 30 days) — attempts only, no views
   $attemptsUnion = "
-    SELECT user_id, DATE(created_at) AS d FROM sessions
+    SELECT user_id, DATE(created_at) AS d FROM sessions WHERE user_id NOT IN (SELECT id FROM users WHERE is_demo_seeded = 1)
     UNION ALL
-    SELECT user_id, DATE(created_at) AS d FROM materi_sessions
+    SELECT user_id, DATE(created_at) AS d FROM materi_sessions WHERE user_id NOT IN (SELECT id FROM users WHERE is_demo_seeded = 1)
   ";
   $sessRows = $pdo->query("
     SELECT d, COUNT(*) AS sessions, COUNT(DISTINCT user_id) AS users
@@ -2743,6 +2984,7 @@ if ($uri === '/admin/analytics/active-users' && $method === 'GET') {
     SELECT DATE(created_at) AS date, COUNT(*) AS count
     FROM users
     WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 29 DAY)
+    AND is_demo_seeded = 0
     GROUP BY DATE(created_at)
   ")->fetchAll();
   $regMap = array_column($regRows, 'count', 'date');
