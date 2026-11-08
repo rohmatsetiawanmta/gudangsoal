@@ -12,6 +12,7 @@ import {
   Users,
   CheckCircle,
   Clock,
+  Sparkles,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import api from "../../lib/api";
@@ -42,6 +43,14 @@ function VerifiedBadge({ verified }) {
   ) : (
     <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px", background: "#fef9ee", color: "#f5a623" }}>
       <Clock size={11} /> Unverified
+    </span>
+  );
+}
+
+function DemoBadge() {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px", background: "#ede9fe", color: "#7c3aed" }}>
+      <Sparkles size={11} /> Demo
     </span>
   );
 }
@@ -128,6 +137,13 @@ export default function AdminUsers() {
   const [success, setSuccess] = useState("");
   const [editForm, setEditForm] = useState({ name: "", role: "user" });
   const [resetForm, setResetForm] = useState({ password: "", confirm: "" });
+  const [seedForm, setSeedForm] = useState({
+    xp: 0,
+    streak_days: 0,
+    soal_streak: 0,
+    accuracy_target: 0,
+    total_attempts: 0,
+  });
   const [detail, setDetail] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
@@ -165,6 +181,19 @@ export default function AdminUsers() {
   const openReset = (user) => {
     setModal({ type: "reset", user });
     setResetForm({ password: "", confirm: "" });
+    setError("");
+    setSuccess("");
+  };
+
+  const openSeed = (user) => {
+    setModal({ type: "seed", user });
+    setSeedForm({
+      xp: 0,
+      streak_days: 0,
+      soal_streak: 0,
+      accuracy_target: 0,
+      total_attempts: 0,
+    });
     setError("");
     setSuccess("");
   };
@@ -237,6 +266,36 @@ export default function AdminUsers() {
     }
   };
 
+  const handleSeedDemo = async () => {
+    const accuracy = Number(seedForm.accuracy_target);
+    if (Number.isNaN(accuracy) || accuracy < 0 || accuracy > 100) {
+      setError("Target akurasi harus antara 0-100");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      await api.put(`/admin/users/seed-demo?id=${modal.user.id}`, {
+        xp: Number(seedForm.xp) || 0,
+        streak_days: Number(seedForm.streak_days) || 0,
+        soal_streak: Number(seedForm.soal_streak) || 0,
+        accuracy_target: accuracy,
+        total_attempts: Number(seedForm.total_attempts) || 0,
+      });
+      setSuccess("Statistik demo berhasil di-seed!");
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === modal.user.id ? { ...u, is_demo_seeded: 1 } : u
+        )
+      );
+      setTimeout(() => closeModal(), 1000);
+    } catch (err) {
+      setError(err.error || "Gagal seed statistik demo");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const totalPages = Math.ceil(total / limit);
 
   const ActionButtons = ({ u }) => (
@@ -295,6 +354,26 @@ export default function AdminUsers() {
       >
         <Shield size={12} />
       </button>
+      {u.role !== "admin" && (
+        <button
+          onClick={() => openSeed(u)}
+          title="Seed Demo"
+          style={{
+            width: "28px",
+            height: "28px",
+            borderRadius: "7px",
+            border: "1px solid #c4b5fd",
+            background: "#ede9fe",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#7c3aed",
+          }}
+        >
+          <Sparkles size={12} />
+        </button>
+      )}
     </div>
   );
 
@@ -523,7 +602,10 @@ export default function AdminUsers() {
                 >
                   {u.email}
                 </div>
-                <RoleBadge role={u.role} />
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px", alignItems: "flex-start" }}>
+                  <RoleBadge role={u.role} />
+                  {u.is_demo_seeded ? <DemoBadge /> : null}
+                </div>
                 <VerifiedBadge verified={u.email_verified == 1} />
                 <div style={{ fontSize: "12px", color: "#6b6860" }}>{fmtDate(u.created_at)}</div>
                 <div style={{ fontSize: "12px", color: "#6b6860" }}>{fmtDate(u.verified_at)}</div>
@@ -635,6 +717,7 @@ export default function AdminUsers() {
                       {u.name}
                     </div>
                     <RoleBadge role={u.role} />
+                    {u.is_demo_seeded ? <DemoBadge /> : null}
                   </div>
                   <div
                     style={{
@@ -1003,6 +1086,149 @@ export default function AdminUsers() {
         </Modal>
       )}
 
+      {/* Modal Seed Demo */}
+      {modal?.type === "seed" && (
+        <Modal
+          title={`Seed Statistik Demo — ${modal.user.name}`}
+          onClose={closeModal}
+        >
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "14px" }}
+          >
+            {error && (
+              <div
+                style={{
+                  background: "#fff3f0",
+                  border: "1px solid #fca5a5",
+                  color: "#b91c1c",
+                  fontSize: "13px",
+                  borderRadius: "10px",
+                  padding: "10px 14px",
+                }}
+              >
+                {error}
+              </div>
+            )}
+            {success && (
+              <div
+                style={{
+                  background: "#e4f5f0",
+                  border: "1px solid #9FE1CB",
+                  color: "#0F6E56",
+                  fontSize: "13px",
+                  borderRadius: "10px",
+                  padding: "10px 14px",
+                }}
+              >
+                {success}
+              </div>
+            )}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "8px",
+                background: "#ede9fe",
+                borderRadius: "10px",
+                padding: "12px 14px",
+                fontSize: "13px",
+                color: "#6d28d9",
+              }}
+            >
+              <Sparkles size={15} style={{ flexShrink: 0, marginTop: "1px" }} />
+              <span>
+                Statistik ini khusus untuk kebutuhan konten/screenshot akun
+                demo, tidak memengaruhi data analitik user asli lainnya.
+              </span>
+            </div>
+            {[
+              { key: "xp", label: "XP" },
+              { key: "streak_days", label: "Streak Hari" },
+              { key: "soal_streak", label: "Streak Soal" },
+              { key: "accuracy_target", label: "Target Akurasi (%)" },
+              { key: "total_attempts", label: "Total Attempt" },
+            ].map(({ key, label }) => (
+              <div
+                key={key}
+                style={{ display: "flex", flexDirection: "column", gap: "6px" }}
+              >
+                <label
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    color: "#0f0e17",
+                  }}
+                >
+                  {label}
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={key === "accuracy_target" ? 100 : undefined}
+                  value={seedForm[key]}
+                  onChange={(e) =>
+                    setSeedForm((f) => ({ ...f, [key]: e.target.value }))
+                  }
+                  style={{
+                    padding: "10px 14px",
+                    borderRadius: "10px",
+                    border: "1px solid #e2ddd5",
+                    fontSize: "14px",
+                    outline: "none",
+                    fontFamily: "inherit",
+                    color: "#0f0e17",
+                  }}
+                  onFocus={(e) => (e.target.style.borderColor = "#7c3aed")}
+                  onBlur={(e) => (e.target.style.borderColor = "#e2ddd5")}
+                />
+              </div>
+            ))}
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                justifyContent: "flex-end",
+                marginTop: "8px",
+              }}
+            >
+              <button
+                onClick={closeModal}
+                style={{
+                  padding: "9px 20px",
+                  borderRadius: "10px",
+                  border: "1px solid #e2ddd5",
+                  background: "white",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  color: "#0f0e17",
+                }}
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleSeedDemo}
+                disabled={saving}
+                style={{
+                  padding: "9px 20px",
+                  borderRadius: "10px",
+                  border: "none",
+                  background: saving ? "#c4b5fd" : "#7c3aed",
+                  color: "white",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: saving ? "not-allowed" : "pointer",
+                  fontFamily: "inherit",
+                }}
+              >
+                {saving ? "Menyimpan..." : "Seed Statistik"}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
       {/* Modal Detail */}
       {modal?.type === "detail" && (
         <Modal title={`Detail — ${modal.user.name}`} onClose={closeModal}>
@@ -1073,8 +1299,9 @@ export default function AdminUsers() {
                   >
                     {detail.user.email}
                   </div>
-                  <div style={{ marginTop: "6px" }}>
+                  <div style={{ marginTop: "6px", display: "flex", gap: "6px" }}>
                     <RoleBadge role={detail.user.role} />
+                    {detail.user.is_demo_seeded ? <DemoBadge /> : null}
                   </div>
                 </div>
               </div>
