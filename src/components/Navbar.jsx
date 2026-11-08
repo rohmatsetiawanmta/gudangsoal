@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Search, X, BookOpen, User, LogOut, ChevronDown,
   LayoutDashboard, Warehouse, Flame, Shuffle, MessageSquarePlus,
-  TrendingUp, Menu, Zap, GraduationCap, Lightbulb, Package, Dumbbell, Receipt,
+  TrendingUp, Menu, Zap, GraduationCap, Lightbulb, Package, Dumbbell, Receipt, Instagram,
 } from "lucide-react";
 import { useAuthStore } from "../features/auth/authStore";
 import RandomSoal from "./RandomSoal";
@@ -446,6 +446,13 @@ export default function Navbar() {
                       >
                         <MessageSquarePlus size={15} color="var(--gs-text-muted)" /> Kirim Masukan
                       </button>
+                      <a href="https://www.instagram.com/gudangsoalcom/" target="_blank" rel="noopener"
+                        style={{ ...menuItemStyle, textDecoration: "none" }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "var(--gs-hover)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+                      >
+                        <Instagram size={15} color="var(--gs-text-muted)" /> @gudangsoalcom
+                      </a>
                     </div>
 
                     {/* Auth */}

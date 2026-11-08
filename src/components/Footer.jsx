@@ -1,5 +1,5 @@
 // src/components/Footer.jsx
-import { Warehouse } from "lucide-react";
+import { Warehouse, Instagram } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import useWindowWidth from "../hooks/useWindowWidth";
 
@@ -57,7 +57,7 @@ export default function Footer() {
           </div>
 
           {/* Links */}
-          <div style={{ display: "flex", gap: isMobile ? "20px" : "36px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "20px" : "36px", flexWrap: "wrap" }}>
             {links.map((l) => {
               const active = location.pathname === l.path;
               return (
@@ -75,6 +75,17 @@ export default function Footer() {
                 </button>
               );
             })}
+            <a href="https://www.instagram.com/gudangsoalcom/" target="_blank" rel="noopener" style={{
+              display: "flex", alignItems: "center", gap: "6px",
+              fontSize: "13px", fontFamily: "inherit", textDecoration: "none",
+              color: "rgba(255,255,255,.4)", fontWeight: "400",
+              transition: "color .15s",
+            }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,.8)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,.4)")}
+            >
+              <Instagram size={14} /> @gudangsoalcom
+            </a>
           </div>
         </div>
 
