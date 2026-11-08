@@ -8,6 +8,11 @@ define('DB_NAME', $env['DB_NAME']);
 define('DB_USER', $env['DB_USER']);
 define('DB_PASS', $env['DB_PASS']);
 
+// ID user yang boleh di-seed statistiknya untuk kebutuhan screenshot demo
+// (lihat PUT /admin/users/seed-demo di api/routes/admin.php). Whitelist di
+// level config, bukan di level kolom DB.
+define('DEMO_SEED_USER_ID', isset($env['DEMO_SEED_USER_ID']) ? (int) $env['DEMO_SEED_USER_ID'] : 0);
+
 try {
   $pdo = new PDO(
     "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",

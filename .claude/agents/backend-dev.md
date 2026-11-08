@@ -17,6 +17,13 @@ Konvensi project:
 Hindari pola yang udah kebukti bermasalah di project ini:
 - Jangan bandingin parameter PDO dengan string literal di query SQL mentah (`WHERE ? = 'success'`) — ini pernah bikin error collation `utf8mb4_general_ci` vs `utf8mb4_unicode_ci`. Hitung hasil perbandingan di PHP, kirim sebagai angka.
 
+Pola "exclude flag" (misal `is_demo_seeded` buat akun demo screenshot IG, kalau ada kebutuhan serupa lagi):
+- Kolom flag exclude selalu `NOT NULL DEFAULT 0`, jangan nullable — di MySQL `NULL = 0` hasilnya `NULL` (bukan TRUE), row ber-NULL malah ikut ter-exclude dari agregat yang harusnya dihitung.
+- Di LEFT JOIN, taruh exclude di klausa ON, bukan WHERE — kalau di WHERE, row kiri yang satu-satunya match-nya di-exclude malah hilang total (bukan cuma count-nya 0).
+- `getAuthUser()` cuma decode payload JWT (id, email, iat, exp) — field tambahan di tabel `users` (termasuk flag exclude) gak otomatis ada di `$authUser`, harus query DB terpisah kalau mau cek per-request.
+- Whitelist akun sensitif (misal 1 akun demo yang boleh di-seed) taruh di config/`.env` (`define('X_ID', ...)` di `api/config/db.php`), bukan hardcode id di route — ini gate pertama sebelum validasi lain.
+- Kalau dapat spec exclude dari agent lain (architect-database dkk) buat endpoint/kolom lama, grep dulu SEMUA query agregat ke tabel yang kena (bukan cuma yang dikasih daftar) — kalau nemu yang kelewat, flag balik, jangan diam-diam ditambah sendiri di luar daftar.
+
 Kamu TIDAK deploy ke production dan TIDAK menjalankan migrasi — itu kerja deployment.
 
 ## Belajar berkelanjutan

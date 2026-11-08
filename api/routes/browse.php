@@ -221,15 +221,25 @@ if ($uri === '/browse/soal/detail' && $method === 'GET') {
   }
 
   // Increment views counter + track in soal_views for analytics
-  $pdo->prepare('UPDATE soal SET views = views + 1 WHERE kode = ?')->execute([$kode]);
+  // (skip semuanya kalau yang login akun demo-seeded, biar gak nambahin
+  // views/soal_views palsu ke statistik soal yang tampil ke publik)
   $authUser = getAuthUser();
-  $pdo->prepare('INSERT INTO soal_views (soal_id, user_id) SELECT id, ? FROM soal WHERE kode = ?')
-      ->execute([$authUser ? $authUser['id'] : null, $kode]);
+  $isDemoSeededViewer = false;
+  if ($authUser) {
+    $demoCheckStmt = $pdo->prepare('SELECT is_demo_seeded FROM users WHERE id = ?');
+    $demoCheckStmt->execute([$authUser['id']]);
+    $isDemoSeededViewer = (bool) $demoCheckStmt->fetchColumn();
+  }
+  if (!$isDemoSeededViewer) {
+    $pdo->prepare('UPDATE soal SET views = views + 1 WHERE kode = ?')->execute([$kode]);
+    $pdo->prepare('INSERT INTO soal_views (soal_id, user_id) SELECT id, ? FROM soal WHERE kode = ?')
+        ->execute([$authUser ? $authUser['id'] : null, $kode]);
+  }
 
   $stmt = $pdo->prepare('
     SELECT s.*,
-           (SELECT COUNT(*) FROM soal_views  WHERE soal_id = s.id) AS view_count,
-           (SELECT COUNT(*) FROM soal_shares WHERE soal_id = s.id) AS share_count,
+           (SELECT COUNT(*) FROM soal_views sv LEFT JOIN users u ON u.id = sv.user_id WHERE sv.soal_id = s.id AND IFNULL(u.is_demo_seeded, 0) = 0) AS view_count,
+           (SELECT COUNT(*) FROM soal_shares ss LEFT JOIN users u ON u.id = ss.user_id WHERE ss.soal_id = s.id AND IFNULL(u.is_demo_seeded, 0) = 0) AS share_count,
            st.nama as subtopik_nama, st.slug as subtopik_slug,
            t.nama  as topik_nama,    t.slug  as topik_slug,
            m.nama  as mapel_nama,    m.slug  as mapel_slug,
@@ -276,6 +286,7 @@ if ($uri === '/browse/soal/detail' && $method === 'GET') {
       COUNT(DISTINCT CASE WHEN is_correct = 1 THEN user_id END) as total_benar
     FROM sessions
     WHERE soal_id = ?
+    AND user_id NOT IN (SELECT id FROM users WHERE is_demo_seeded = 1)
   ');
   $stmt->execute([$soal['id']]);
   $stats = $stmt->fetch();
@@ -319,8 +330,16 @@ if ($uri === '/soal/share' && $method === 'POST') {
   $user_id  = $authUser ? $authUser['id'] : null;
   $ip       = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? null;
 
-  $pdo->prepare('INSERT INTO soal_shares (soal_id, user_id, platform, ip_address) VALUES (?, ?, ?, ?)')
-      ->execute([$soal['id'], $user_id, $platform, $ip]);
+  $isDemoSeededSharer = false;
+  if ($authUser) {
+    $demoCheckStmt = $pdo->prepare('SELECT is_demo_seeded FROM users WHERE id = ?');
+    $demoCheckStmt->execute([$authUser['id']]);
+    $isDemoSeededSharer = (bool) $demoCheckStmt->fetchColumn();
+  }
+  if (!$isDemoSeededSharer) {
+    $pdo->prepare('INSERT INTO soal_shares (soal_id, user_id, platform, ip_address) VALUES (?, ?, ?, ?)')
+        ->execute([$soal['id'], $user_id, $platform, $ip]);
+  }
 
   $cntStmt = $pdo->prepare('SELECT COUNT(*) FROM soal_shares WHERE soal_id = ?');
   $cntStmt->execute([$soal['id']]);
@@ -492,7 +511,7 @@ if ($uri === '/browse/soal/status' && $method === 'GET') {
 // GET /browse/stats
 if ($uri === '/browse/stats' && $method === 'GET') {
   $totalSoal     = $pdo->query('SELECT COUNT(*) FROM soal WHERE is_published = 1')->fetchColumn();
-  $totalUser     = $pdo->query('SELECT COUNT(*) FROM users WHERE role = "user"')->fetchColumn();
+  $totalUser     = $pdo->query('SELECT COUNT(*) FROM users WHERE role = "user" AND is_demo_seeded = 0')->fetchColumn();
   $totalJenjang  = $pdo->query('SELECT COUNT(*) FROM jenjang WHERE is_published = 1')->fetchColumn();
   $totalSubtopik = $pdo->query('SELECT COUNT(*) FROM subtopik WHERE is_published = 1')->fetchColumn();
   $totalMateri   = $pdo->query('SELECT COUNT(*) FROM materi WHERE is_published = 1')->fetchColumn();
@@ -582,7 +601,7 @@ if ($uri === '/browse/populer' && $method === 'GET') {
     JOIN mapel m ON t.mapel_id = m.id
     JOIN subjenjang sj ON m.subjenjang_id = sj.id
     JOIN jenjang j ON sj.jenjang_id = j.id
-    JOIN sessions se ON se.soal_id = s.id
+    JOIN sessions se ON se.soal_id = s.id AND se.user_id NOT IN (SELECT id FROM users WHERE is_demo_seeded = 1)
     WHERE s.is_published = 1
     GROUP BY s.id
     ORDER BY skor_populer DESC

@@ -70,8 +70,18 @@ if (preg_match('#^/materi/(\d+)/view$#', $uri, $m) && $method === 'POST') {
   $auth    = getAuthUser();
   $user_id = $auth ? $auth['id'] : null;
 
+  // Skip tracking kalau yang login akun demo-seeded, biar gak nambahin views palsu
+  $isDemoSeededViewer = false;
+  if ($user_id) {
+    $demoCheckStmt = $pdo->prepare('SELECT is_demo_seeded FROM users WHERE id = ?');
+    $demoCheckStmt->execute([$user_id]);
+    $isDemoSeededViewer = (bool) $demoCheckStmt->fetchColumn();
+  }
+
   // Insert into tracking table (user_id = NULL for anonymous)
-  $pdo->prepare('INSERT INTO materi_views (materi_id, user_id) VALUES (?, ?)')->execute([$id, $user_id]);
+  if (!$isDemoSeededViewer) {
+    $pdo->prepare('INSERT INTO materi_views (materi_id, user_id) VALUES (?, ?)')->execute([$id, $user_id]);
+  }
 
   echo json_encode(['ok' => true]);
   exit;
