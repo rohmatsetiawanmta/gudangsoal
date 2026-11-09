@@ -123,6 +123,7 @@ if ($uri === '/browse/subtopik' && $method === 'GET') {
       AND j.is_published = 1 AND sj.is_published = 1
       AND m.is_published = 1 AND t.is_published = 1 AND st.is_published = 1
     GROUP BY st.id
+    HAVING COUNT(DISTINCT s.id) >= 1
     ORDER BY st.urutan ASC, st.id ASC
   ');
   $stmt->execute([$user_id, $jenjang_slug, $subjenjang_slug, $mapel_slug, $topik_slug]);
@@ -449,6 +450,7 @@ $stmt->execute($soalParams);
       JOIN subjenjang sj ON m.subjenjang_id = sj.id
       JOIN jenjang j ON sj.jenjang_id = j.id
       WHERE st.is_published = 1 AND st.nama LIKE ?
+        AND (SELECT COUNT(*) FROM soal s WHERE s.subtopik_id = st.id AND s.is_published = 1 AND s.is_exclusive = 0) >= 1
       LIMIT 10)
     ');
     $stmt->execute([$like, $like]);
@@ -694,7 +696,12 @@ if ($uri === '/browse/topik-list' && $method === 'GET') {
 if ($uri === '/browse/subtopik-list' && $method === 'GET') {
   $topik_id = (int) ($_GET['topik_id'] ?? 0);
   if (!$topik_id) { echo json_encode([]); exit; }
-  $stmt = $pdo->prepare('SELECT id, nama FROM subtopik WHERE topik_id = ? AND is_published = 1 ORDER BY urutan ASC, id ASC');
+  $stmt = $pdo->prepare('
+    SELECT id, nama FROM subtopik st
+    WHERE st.topik_id = ? AND st.is_published = 1
+      AND (SELECT COUNT(*) FROM soal s WHERE s.subtopik_id = st.id AND s.is_published = 1 AND s.is_exclusive = 0) >= 1
+    ORDER BY st.urutan ASC, st.id ASC
+  ');
   $stmt->execute([$topik_id]);
   echo json_encode($stmt->fetchAll());
   exit;
