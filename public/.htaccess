@@ -21,3 +21,12 @@
   # Semua route lain → render.php (inject meta tags per URL, lalu serve index.html)
   RewriteRule . /render.php [L]
 </IfModule>
+
+<IfModule mod_headers.c>
+  # sw.js/registerSW.js/index.html HARUS selalu di-revalidate — kalau di-cache CDN
+  # lama (default Hostinger), deploy baru bisa tertahan sampai cache lama expire.
+  # File di /assets/ (nama ber-hash) TIDAK kena rule ini, tetap boleh di-cache lama.
+  <FilesMatch "^(sw\.js|registerSW\.js|index\.html)$">
+    Header set Cache-Control "no-cache, max-age=0, must-revalidate"
+  </FilesMatch>
+</IfModule>

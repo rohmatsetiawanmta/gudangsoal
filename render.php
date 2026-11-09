@@ -140,6 +140,9 @@ if ($dbRouteHit && !$dbFound) {
 }
 
 http_response_code($status);
+// HTML halaman (lewat render.php untuk hampir semua route) harus selalu
+// di-revalidate, sama alasannya dengan sw.js/registerSW.js di .htaccess.
+header('Cache-Control: no-cache, max-age=0, must-revalidate');
 
 // ── Load & inject index.html ──────────────────────────────────────────────────
 $html = file_get_contents(__DIR__ . '/index.html');
