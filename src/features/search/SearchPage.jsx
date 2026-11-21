@@ -166,7 +166,7 @@ export default function SearchPage() {
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-bg)" }}>
       <SEO
         title={q ? `Hasil pencarian "${q}"` : "Cari Soal"}
-        description={q ? `Hasil pencarian soal matematika untuk "${q}" di Gudang Soal.` : "Cari soal, topik, dan jenjang di Gudang Soal."}
+        description={q ? `Hasil pencarian soal matematika untuk "${q}" di matrohmatmath.` : "Cari soal, topik, dan jenjang di matrohmatmath."}
         url={q ? `/search?q=${encodeURIComponent(q)}` : "/search"}
       />
       <Navbar />

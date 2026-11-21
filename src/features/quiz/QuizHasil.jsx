@@ -299,7 +299,7 @@ export default function QuizHasil() {
       }}
     >
       <Helmet>
-        <title>Hasil Latihan | Gudang Soal</title>
+        <title>Hasil Latihan | matrohmatmath</title>
       </Helmet>
       <Navbar />
 

@@ -57,7 +57,7 @@ export default function PopulerPage() {
     <div style={{ minHeight: "100vh", background: "var(--gs-bg)" }}>
       <SEO
         title="Soal Populer"
-        description="Soal matematika yang paling banyak dikerjakan di Gudang Soal."
+        description="Soal matematika yang paling banyak dikerjakan di matrohmatmath."
         url="/populer"
       />
       <Navbar />

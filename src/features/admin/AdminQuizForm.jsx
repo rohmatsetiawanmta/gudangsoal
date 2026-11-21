@@ -228,7 +228,7 @@ export default function AdminQuizForm() {
   return (
     <div>
       <Helmet>
-        <title>{`${isEdit ? "Edit" : "Buat"} Set Soal | Admin Gudang Soal`}</title>
+        <title>{`${isEdit ? "Edit" : "Buat"} Set Soal | Admin matrohmatmath`}</title>
       </Helmet>
 
       {/* ── Hero header ── */}

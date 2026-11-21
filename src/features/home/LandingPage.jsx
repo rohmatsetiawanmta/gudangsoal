@@ -511,7 +511,7 @@ export default function LandingPage() {
               color: "rgba(255,255,255,.5)",
               marginBottom: "32px", lineHeight: "1.7",
             }}>
-              Bergabung dengan ribuan pelajar di Gudang Soal.
+              Bergabung dengan ribuan pelajar di matrohmatmath.
             </p>
             <button
               onClick={() => navigate("/register")}

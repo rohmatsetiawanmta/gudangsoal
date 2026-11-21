@@ -219,7 +219,7 @@ export default function AdminChangelog() {
   return (
     <div>
       <Helmet>
-        <title>Changelog | Admin Gudang Soal</title>
+        <title>Changelog | Admin matrohmatmath</title>
       </Helmet>
 
       {/* ── Hero header ── */}

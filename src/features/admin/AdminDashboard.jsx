@@ -359,7 +359,7 @@ export default function AdminDashboard() {
   return (
     <div>
       <Helmet>
-        <title>Dashboard | Admin Gudang Soal</title>
+        <title>Dashboard | Admin matrohmatmath</title>
       </Helmet>
 
       {/* ── Hero Header ── */}

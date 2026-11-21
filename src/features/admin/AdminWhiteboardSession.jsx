@@ -768,7 +768,7 @@ export default function AdminWhiteboardSession() {
 
   return (
     <>
-      <Helmet><title>{`${title} | Whiteboard | Admin Gudang Soal`}</title></Helmet>
+      <Helmet><title>{`${title} | Whiteboard | Admin matrohmatmath`}</title></Helmet>
 
       <div ref={pageRef} style={isFullscreen ? {
         position: "relative", height: "100vh", background: "#0f0e17",

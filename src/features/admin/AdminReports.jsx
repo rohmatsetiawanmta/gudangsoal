@@ -349,7 +349,7 @@ export default function AdminReports() {
   return (
     <div>
       <Helmet>
-        <title>Laporan Soal | Admin Gudang Soal</title>
+        <title>Laporan Soal | Admin matrohmatmath</title>
       </Helmet>
 
       {/* ── Hero header ── */}

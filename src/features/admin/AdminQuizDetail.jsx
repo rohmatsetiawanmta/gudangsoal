@@ -219,7 +219,7 @@ export default function AdminQuizDetail() {
   return (
     <div>
       <Helmet>
-        <title>{`${quizSet.judul} | Admin Gudang Soal`}</title>
+        <title>{`${quizSet.judul} | Admin matrohmatmath`}</title>
       </Helmet>
 
       {/* ── Hero header ── */}

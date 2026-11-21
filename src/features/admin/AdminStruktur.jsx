@@ -459,7 +459,7 @@ export default function AdminStruktur() {
   return (
     <div>
       <Helmet>
-        <title>Kelola Struktur | Admin Gudang Soal</title>
+        <title>Kelola Struktur | Admin matrohmatmath</title>
       </Helmet>
 
       {/* ── Hero header ── */}

@@ -292,7 +292,7 @@ export default function AdminMateriBulkImport() {
   return (
     <>
       <Helmet>
-        <title>Import Bulk Materi | Admin Gudang Soal</title>
+        <title>Import Bulk Materi | Admin matrohmatmath</title>
       </Helmet>
 
       {/* Hero */}

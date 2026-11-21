@@ -207,7 +207,7 @@ export default function AdminQuizSoalForm() {
       <Helmet>
         <title>{`${
           isEdit ? "Edit" : "Tambah"
-        } Soal | Admin Gudang Soal`}</title>
+        } Soal | Admin matrohmatmath`}</title>
       </Helmet>
 
       {/* Header */}

@@ -245,7 +245,7 @@ export default function AdminSoalForm() {
   return (
     <div>
       <Helmet>
-        <title>{`${isEdit ? "Edit Soal" : "Tambah Soal"} | Admin Gudang Soal`}</title>
+        <title>{`${isEdit ? "Edit Soal" : "Tambah Soal"} | Admin matrohmatmath`}</title>
       </Helmet>
 
       {/* ── Hero header ── */}

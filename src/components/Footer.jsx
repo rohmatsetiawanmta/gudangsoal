@@ -1,5 +1,5 @@
 // src/components/Footer.jsx
-import { Warehouse, Instagram } from "lucide-react";
+import { Instagram } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import useWindowWidth from "../hooks/useWindowWidth";
 
@@ -36,16 +36,13 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <div style={{
-                width: "32px", height: "32px", background: "#e84c2b",
-                borderRadius: "9px", display: "flex", alignItems: "center",
-                justifyContent: "center",
+              <img src="/logo.png" alt="matrohmatmath" style={{
+                width: "32px", height: "32px",
                 boxShadow: "0 2px 8px rgba(232,76,43,.3)",
-              }}>
-                <Warehouse size={17} color="white" />
-              </div>
+                borderRadius: "9px",
+              }} />
               <span style={{ fontWeight: "800", fontSize: "16px", color: "white", letterSpacing: "-0.3px" }}>
-                Gudang Soal
+                matrohmat<span style={{ color: "#e84c2b" }}>math</span>
               </span>
             </div>
             <p style={{
@@ -100,7 +97,7 @@ export default function Footer() {
           flexWrap: "wrap",
         }}>
           <span style={{ fontSize: "12px", color: "rgba(255,255,255,.18)" }}>
-            © {year} Gudang Soal
+            © {year} matrohmatmath
           </span>
         </div>
       </div>

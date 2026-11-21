@@ -2,7 +2,7 @@
 import { Helmet } from "react-helmet-async";
 
 export default function SEO({ title, description, url, image }) {
-  const siteName = "Gudang Soal";
+  const siteName = "matrohmatmath";
   const baseUrl = "https://gudangsoal.com";
   const defImage = `${baseUrl}/og-image.png`;
   const defDesc =

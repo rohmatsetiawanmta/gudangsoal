@@ -625,7 +625,7 @@ export default function AdminMateri() {
   return (
     <>
       <Helmet>
-        <title>Kelola Materi | Admin Gudang Soal</title>
+        <title>Kelola Materi | Admin matrohmatmath</title>
       </Helmet>
 
       {/* ── Hero Header ── */}

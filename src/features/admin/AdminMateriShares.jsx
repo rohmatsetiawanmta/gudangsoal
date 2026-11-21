@@ -92,7 +92,7 @@ export default function AdminMateriShares() {
 
   return (
     <>
-      <Helmet><title>Shares Materi | Admin Gudang Soal</title></Helmet>
+      <Helmet><title>Shares Materi | Admin matrohmatmath</title></Helmet>
 
       {/* ── Hero Header ── */}
       <div style={{
