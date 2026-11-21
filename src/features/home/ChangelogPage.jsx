@@ -61,7 +61,7 @@ export default function ChangelogPage() {
     <div style={{ minHeight: "100vh", background: "var(--gs-bg)" }}>
       <SEO
         title="Changelog"
-        description="Daftar pembaruan dan fitur baru yang dirilis di Gudang Soal."
+        description="Daftar pembaruan dan fitur baru yang dirilis di matrohmatmath."
         url="/changelog"
       />
       <Navbar />
@@ -80,7 +80,7 @@ export default function ChangelogPage() {
             fontSize: isMobile ? "14px" : "16px",
             color: "var(--gs-text-muted)", lineHeight: "1.7", marginBottom: "20px",
           }}>
-            Semua pembaruan, fitur baru, dan perbaikan yang dirilis di Gudang Soal.
+            Semua pembaruan, fitur baru, dan perbaikan yang dirilis di matrohmatmath.
           </p>
 
           {/* Filter tipe */}

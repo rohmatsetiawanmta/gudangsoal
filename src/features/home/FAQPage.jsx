@@ -12,15 +12,15 @@ const FAQ_DATA = [
     kategori: "Umum",
     items: [
       {
-        q: "Apa itu Gudang Soal?",
-        a: "Gudang Soal adalah platform latihan soal matematika dari SD hingga persiapan UTBK, CPNS, dan OSN. Semua soal dilengkapi pembahasan langkah per langkah dengan rumus matematika yang rapi.",
+        q: "Apa itu matrohmatmath?",
+        a: "matrohmatmath adalah platform latihan soal matematika dari SD hingga persiapan UTBK, CPNS, dan OSN. Semua soal dilengkapi pembahasan langkah per langkah dengan rumus matematika yang rapi.",
       },
       {
-        q: "Apakah Gudang Soal gratis?",
+        q: "Apakah matrohmatmath gratis?",
         a: "Ya, sepenuhnya gratis. Tidak ada biaya langganan atau kartu kredit yang dibutuhkan.",
       },
       {
-        q: "Siapa yang bisa menggunakan Gudang Soal?",
+        q: "Siapa yang bisa menggunakan matrohmatmath?",
         a: "Semua pelajar, mahasiswa, dan siapapun yang ingin berlatih matematika — dari siswa SD hingga yang sedang mempersiapkan seleksi nasional.",
       },
     ],
@@ -99,8 +99,8 @@ const FAQ_DATA = [
         a: 'Klik tombol "Laporkan soal" di bagian bawah halaman detail soal. Pilih kategori laporan (soal salah, jawaban salah, typo, dll) dan tambahkan deskripsi jika perlu.',
       },
       {
-        q: "Dari mana soal-soal di Gudang Soal berasal?",
-        a: "Soal dikurasi dan dibuat oleh tim Gudang Soal, dengan sebagian berasal dari kontribusi pengguna yang telah diverifikasi oleh admin.",
+        q: "Dari mana soal-soal di matrohmatmath berasal?",
+        a: "Soal dikurasi dan dibuat oleh tim matrohmatmath, dengan sebagian berasal dari kontribusi pengguna yang telah diverifikasi oleh admin.",
       },
       {
         q: "Apakah ada soal untuk persiapan SNBT/UTBK?",
@@ -124,11 +124,11 @@ const FAQ_DATA = [
         a: "Chrome, Firefox, Safari, atau Edge versi terbaru untuk pengalaman terbaik.",
       },
       {
-        q: "Apakah Gudang Soal bisa diakses di HP?",
-        a: "Bisa, Gudang Soal dapat diakses melalui browser di HP. Belum ada aplikasi mobile khusus saat ini.",
+        q: "Apakah matrohmatmath bisa diakses di HP?",
+        a: "Bisa, matrohmatmath dapat diakses melalui browser di HP. Belum ada aplikasi mobile khusus saat ini.",
       },
       {
-        q: "Bagaimana cara menghubungi tim Gudang Soal?",
+        q: "Bagaimana cara menghubungi tim matrohmatmath?",
         a: "Gunakan fitur Request Soal untuk pertanyaan seputar konten soal. Untuk hal lain, kamu bisa menghubungi kami melalui email yang tertera di footer.",
       },
     ],
@@ -200,7 +200,7 @@ export default function FAQPage() {
     <div style={{ minHeight: "100vh", background: "var(--gs-bg)" }}>
       <SEO
         title="FAQ"
-        description="Pertanyaan yang sering ditanyakan seputar Gudang Soal — platform latihan soal matematika gratis."
+        description="Pertanyaan yang sering ditanyakan seputar matrohmatmath — platform latihan soal matematika gratis."
         url="/faq"
       />
       <Navbar />

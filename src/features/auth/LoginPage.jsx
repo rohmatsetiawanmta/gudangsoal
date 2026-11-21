@@ -163,7 +163,7 @@ export default function LoginPage() {
     <div>
       <SEO
         title="Masuk"
-        description="Masuk ke akun Gudang Soal untuk melanjutkan belajar, melihat progress, dan mendapatkan XP."
+        description="Masuk ke akun matrohmatmath untuk melanjutkan belajar, melihat progress, dan mendapatkan XP."
         url="/login"
       />
       <Navbar />

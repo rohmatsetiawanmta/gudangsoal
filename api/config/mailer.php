@@ -12,7 +12,7 @@ define('SMTP_PORT',      465);
 define('SMTP_USER',      'noreply@gudangsoal.com');
 define('SMTP_PASS',      $_env['SMTP_PASS'] ?? '');
 define('SMTP_FROM',      'noreply@gudangsoal.com');
-define('SMTP_FROM_NAME', 'Gudang Soal');
+define('SMTP_FROM_NAME', 'matrohmatmath');
 define('APP_URL',        'https://gudangsoal.com');
 
 function sendVerificationEmail(string $toEmail, string $toName, string $token): bool {
@@ -33,9 +33,9 @@ function sendVerificationEmail(string $toEmail, string $toName, string $token): 
     $verifyUrl = APP_URL . '/verify-email?token=' . $token;
 
     $mail->isHTML(true);
-    $mail->Subject = 'Konfirmasi Email — Gudang Soal';
+    $mail->Subject = 'Konfirmasi Email — matrohmatmath';
     $mail->Body    = buildEmailHtml($toName, $verifyUrl);
-    $mail->AltBody = "Halo $toName,\n\nKlik link ini untuk konfirmasi email kamu:\n$verifyUrl\n\nLink berlaku 24 jam.\n\nJika kamu tidak mendaftar di Gudang Soal, abaikan email ini.";
+    $mail->AltBody = "Halo $toName,\n\nKlik link ini untuk konfirmasi email kamu:\n$verifyUrl\n\nLink berlaku 24 jam.\n\nJika kamu tidak mendaftar di matrohmatmath, abaikan email ini.";
 
     $mail->send();
     return true;
@@ -61,7 +61,7 @@ function buildEmailHtml(string $name, string $url): string {
     <!-- Logo -->
     <div style="text-align:center;padding:28px 0 20px;">
       <span style="font-size:21px;font-weight:400;color:#0f0e17;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;letter-spacing:-0.3px;">
-        Gudang <span style="color:#e84c2b;">Soal</span>
+        matrohmat<span style="color:#e84c2b;">math</span>
       </span>
     </div>
 
@@ -72,7 +72,7 @@ function buildEmailHtml(string $name, string $url): string {
         Konfirmasi email kamu
       </h1>
       <p style="font-size:15px;color:#6b6860;line-height:1.65;margin:0 0 28px;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;">
-        Halo <strong style="color:#0f0e17;">$name</strong>, terima kasih sudah daftar di Gudang Soal!<br>
+        Halo <strong style="color:#0f0e17;">$name</strong>, terima kasih sudah daftar di matrohmatmath!<br>
         Klik tombol di bawah untuk mengaktifkan akun kamu dan mulai belajar.
       </p>
 
@@ -90,13 +90,13 @@ function buildEmailHtml(string $name, string $url): string {
 
       <p style="font-size:13px;color:#b4b2a9;margin:0;line-height:1.65;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;">
         Link ini berlaku selama <strong style="color:#6b6860;">24 jam</strong>.<br>
-        Jika kamu tidak mendaftar di Gudang Soal, abaikan email ini.
+        Jika kamu tidak mendaftar di matrohmatmath, abaikan email ini.
       </p>
     </div>
 
     <!-- Footer -->
     <p style="text-align:center;font-size:12px;color:#b4b2a9;margin-top:20px;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;">
-      © 2026 Gudang Soal &nbsp;·&nbsp;
+      © 2026 matrohmatmath &nbsp;·&nbsp;
       <a href="https://gudangsoal.com" style="color:#b4b2a9;text-decoration:none;">gudangsoal.com</a>
     </p>
   </div>

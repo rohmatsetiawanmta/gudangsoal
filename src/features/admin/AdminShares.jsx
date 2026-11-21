@@ -108,7 +108,7 @@ export default function AdminShares() {
 
   return (
     <>
-      <Helmet><title>Shares | Admin Gudang Soal</title></Helmet>
+      <Helmet><title>Shares | Admin matrohmatmath</title></Helmet>
 
       {/* Hero */}
       <div style={{ borderRadius: "18px", background: "linear-gradient(135deg, #0f0e17 0%, #1a1830 55%, #1a0e2c 100%)", padding: isMobile ? "24px 20px" : "28px 32px", marginBottom: "24px", position: "relative", overflow: "hidden" }}>

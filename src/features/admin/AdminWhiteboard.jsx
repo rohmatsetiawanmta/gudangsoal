@@ -115,7 +115,7 @@ export default function AdminWhiteboard() {
 
   return (
     <>
-      <Helmet><title>Whiteboard | Admin Gudang Soal</title></Helmet>
+      <Helmet><title>Whiteboard | Admin matrohmatmath</title></Helmet>
 
       {/* Hero Header */}
       <div style={{

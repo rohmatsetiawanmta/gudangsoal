@@ -195,12 +195,10 @@ export default function AdminLayout() {
       <>
         {/* Logo */}
         <div style={{ padding: isCollapsed ? "20px 12px" : "20px", borderBottom: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", gap: "10px", justifyContent: isCollapsed ? "center" : "flex-start", transition: "padding .2s" }}>
-          <div style={{ width: "32px", height: "32px", background: "#e84c2b", borderRadius: "9px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: "800", fontSize: "12px", flexShrink: 0 }}>
-            GS
-          </div>
+          <img src="/logo.png" alt="matrohmatmath" style={{ width: "32px", height: "32px", borderRadius: "9px", flexShrink: 0 }} />
           {!isCollapsed && (
             <div>
-              <div style={{ color: "white", fontWeight: "700", fontSize: "14px", whiteSpace: "nowrap" }}>Gudang Soal</div>
+              <div style={{ color: "white", fontWeight: "700", fontSize: "14px", whiteSpace: "nowrap" }}>matrohmatmath</div>
               <div style={{ color: "rgba(255,255,255,0.35)", fontSize: "11px", marginTop: "1px" }}>Admin Panel</div>
             </div>
           )}

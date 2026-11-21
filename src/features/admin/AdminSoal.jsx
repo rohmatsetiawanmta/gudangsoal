@@ -581,7 +581,7 @@ export default function AdminSoal() {
 
   return (
     <div>
-      <Helmet><title>Kelola Soal | Admin Gudang Soal</title></Helmet>
+      <Helmet><title>Kelola Soal | Admin matrohmatmath</title></Helmet>
       <style>{`
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
         @keyframes spin{to{transform:rotate(360deg)}}

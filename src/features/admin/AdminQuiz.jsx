@@ -89,7 +89,7 @@ export default function AdminQuiz() {
   return (
     <div>
       <Helmet>
-        <title>Kelola Latihan | Admin Gudang Soal</title>
+        <title>Kelola Latihan | Admin matrohmatmath</title>
       </Helmet>
 
       {/* ── Hero header ── */}

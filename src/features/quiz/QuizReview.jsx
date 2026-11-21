@@ -6,7 +6,6 @@ import {
   ChevronRight,
   CheckCircle,
   XCircle,
-  Warehouse,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import MathRenderer from "../../components/MathRenderer";
@@ -116,7 +115,7 @@ export default function QuizReview() {
       }}
     >
       <Helmet>
-        <title>Review Soal | Gudang Soal</title>
+        <title>Review Soal | matrohmatmath</title>
       </Helmet>
 
       {/* Navbar */}
@@ -157,20 +156,9 @@ export default function QuizReview() {
           >
             <ChevronLeft size={20} />
           </button>
-          <div
-            style={{
-              width: "30px",
-              height: "30px",
-              background: "#e84c2b",
-              borderRadius: "8px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <Warehouse size={16} color="white" />
-          </div>
+          <img src="/logo.png" alt="matrohmatmath" style={{
+            width: "30px", height: "30px", borderRadius: "8px", flexShrink: 0,
+          }} />
           {!isMobile && (
             <span
               style={{

@@ -91,7 +91,7 @@ export default function AdminMateriViews() {
 
   return (
     <>
-      <Helmet><title>Views Materi | Admin Gudang Soal</title></Helmet>
+      <Helmet><title>Views Materi | Admin matrohmatmath</title></Helmet>
 
       {/* ── Hero Header ── */}
       <div style={{

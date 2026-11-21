@@ -149,7 +149,7 @@ export default function ProfilePage() {
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-hover)" }}>
       <SEO
         title="Profil"
-        description="Lihat progress belajar, riwayat soal, XP, dan streak harianmu di Gudang Soal."
+        description="Lihat progress belajar, riwayat soal, XP, dan streak harianmu di matrohmatmath."
         url="/profile"
       />
       <Navbar />

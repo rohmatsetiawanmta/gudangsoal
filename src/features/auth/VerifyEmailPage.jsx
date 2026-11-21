@@ -32,7 +32,7 @@ export default function VerifyEmailPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--gs-bg)" }}>
-      <SEO title="Konfirmasi Email" description="Verifikasi email akun Gudang Soal." url="/verify-email" />
+      <SEO title="Konfirmasi Email" description="Verifikasi email akun matrohmatmath." url="/verify-email" />
       <Navbar />
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "80vh", padding: "32px 20px" }}>

@@ -568,15 +568,15 @@ export default function MateriDetail() {
   const rawUrl    = `https://gudangsoal.com/materi/${id}`;
   const shareUrl  = encodeURIComponent(rawUrl);
   const judulLabel = materi?.judul ? `"${materi.judul}"` : "ini";
-  const shareMsg  = `Lagi belajar ${judulLabel} di Gudang Soal! Materinya lengkap banget, cobain deh!\n${rawUrl}`;
+  const shareMsg  = `Lagi belajar ${judulLabel} di matrohmatmath! Materinya lengkap banget, cobain deh!\n${rawUrl}`;
   const shareText = encodeURIComponent(shareMsg);
   const SHARE_OPTIONS = [
     { label: "WhatsApp",   icon: <WhatsAppIcon />,  color: "#25D366", bg: "#f0fdf4", platform: "whatsapp", url: `https://wa.me/?text=${shareText}` },
-    { label: "Telegram",   icon: <TelegramIcon />,  color: "#2AABEE", bg: "#e8f4fd", platform: "telegram", url: `https://t.me/share/url?url=${shareUrl}&text=${encodeURIComponent(`Lagi belajar ${judulLabel} di Gudang Soal! Materinya lengkap banget, cobain deh!`)}` },
+    { label: "Telegram",   icon: <TelegramIcon />,  color: "#2AABEE", bg: "#e8f4fd", platform: "telegram", url: `https://t.me/share/url?url=${shareUrl}&text=${encodeURIComponent(`Lagi belajar ${judulLabel} di matrohmatmath! Materinya lengkap banget, cobain deh!`)}` },
     { label: "Facebook",   icon: <FacebookIcon />,  color: "#1877F2", bg: "#edf3fb", platform: "facebook", url: `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}` },
     { label: "Twitter / X", icon: <XIcon />,        color: "#000",    bg: "#f5f5f5", platform: "twitter",  url: `https://twitter.com/intent/tweet?text=${shareText}` },
     { label: "Threads",    icon: <ThreadsIcon />,   color: "#000",    bg: "#f5f5f5", platform: "threads",  url: `https://www.threads.net/intent/post?text=${shareText}` },
-    { label: "Email",      icon: <Mail size={15} />, color: "#6b6860", bg: "#f5f3ef", platform: "email",   url: `mailto:?subject=${encodeURIComponent(`Materi ${materi?.judul || "dari Gudang Soal"}`)}&body=${shareText}` },
+    { label: "Email",      icon: <Mail size={15} />, color: "#6b6860", bg: "#f5f3ef", platform: "email",   url: `mailto:?subject=${encodeURIComponent(`Materi ${materi?.judul || "dari matrohmatmath"}`)}&body=${shareText}` },
   ];
 
   const breadcrumbItems = materi ? [

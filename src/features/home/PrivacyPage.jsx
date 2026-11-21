@@ -16,7 +16,7 @@ const SECTIONS = [
     num: "1",
     title: "Ketentuan Umum",
     prose: [
-      "Kebijakan Privasi ini menjelaskan bagaimana Gudang Soal (\"Platform\") mengumpulkan, menggunakan, menyimpan, dan melindungi data pribadi pengguna. Kebijakan ini berlaku bagi seluruh pengguna yang mengakses platform melalui situs web gudangsoal.com.",
+      "Kebijakan Privasi ini menjelaskan bagaimana matrohmatmath (\"Platform\") mengumpulkan, menggunakan, menyimpan, dan melindungi data pribadi pengguna. Kebijakan ini berlaku bagi seluruh pengguna yang mengakses platform melalui situs web gudangsoal.com.",
       "Kami berkomitmen mematuhi Undang-Undang No. 27 Tahun 2022 tentang Perlindungan Data Pribadi (UU PDP) beserta peraturan pelaksanaannya yang berlaku di Indonesia.",
     ],
   },
@@ -112,7 +112,7 @@ const SECTIONS = [
   {
     num: "10",
     title: "Perlindungan Data Pengguna di Bawah Umur",
-    intro: "Gudang Soal digunakan oleh pelajar dari berbagai jenjang, termasuk yang berusia di bawah 18 tahun. Kami menerapkan perlindungan khusus:",
+    intro: "matrohmatmath digunakan oleh pelajar dari berbagai jenjang, termasuk yang berusia di bawah 18 tahun. Kami menerapkan perlindungan khusus:",
     items: [
       { bold: "Persetujuan orang tua:", text: " pengguna di bawah 18 tahun disarankan mendapatkan persetujuan orang tua atau wali sebelum mendaftar." },
       { bold: "Data minimal:", text: " kami hanya mengumpulkan data yang benar-benar diperlukan untuk menjalankan layanan pendidikan." },
@@ -183,7 +183,7 @@ export default function PrivacyPage() {
     <div style={{ minHeight: "100vh", background: "var(--gs-bg)", display: "flex", flexDirection: "column" }}>
       <SEO
         title="Kebijakan Privasi"
-        description="Kebijakan privasi Gudang Soal: informasi tentang data yang dikumpulkan, cara penggunaannya, hak pengguna, dan perlindungan data sesuai UU PDP No. 27/2022."
+        description="Kebijakan privasi matrohmatmath: informasi tentang data yang dikumpulkan, cara penggunaannya, hak pengguna, dan perlindungan data sesuai UU PDP No. 27/2022."
         url="/privacy"
       />
       <Navbar />

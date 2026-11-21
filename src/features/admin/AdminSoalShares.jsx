@@ -98,7 +98,7 @@ export default function AdminSoalShares() {
 
   return (
     <>
-      <Helmet><title>Shares Soal | Admin Gudang Soal</title></Helmet>
+      <Helmet><title>Shares Soal | Admin matrohmatmath</title></Helmet>
 
       {/* ── Hero Header ── */}
       <div style={{

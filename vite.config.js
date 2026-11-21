@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
-        name: "Gudang Soal",
-        short_name: "Gudang Soal",
+        name: "matrohmatmath",
+        short_name: "matrohmatmath",
         description: "Latihan soal matematika dari SD hingga UTBK, CPNS, dan OSN. Gratis selamanya.",
         lang: "id",
         start_url: "/",

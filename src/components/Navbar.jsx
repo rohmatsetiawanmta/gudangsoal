@@ -110,9 +110,9 @@ export default function Navbar() {
 
         {/* ── Logo ── */}
         <Link to={isLoggedIn ? "/home" : "/"} style={{ display: "flex", alignItems: "center", gap: "9px", textDecoration: "none", flexShrink: 0 }}>
-          <img src="/logo.png" alt="Gudang Soal" style={{ width: "34px", height: "34px", flexShrink: 0 }} />
+          <img src="/logo.png" alt="matrohmatmath" style={{ width: "34px", height: "34px", flexShrink: 0 }} />
           <span style={{ fontWeight: "800", fontSize: "16.5px", color: "var(--gs-text)", letterSpacing: "-0.4px" }}>
-            Gudang<span style={{ color: "#e84c2b" }}> Soal</span>
+            matrohmat<span style={{ color: "#e84c2b" }}>math</span>
           </span>
         </Link>
 

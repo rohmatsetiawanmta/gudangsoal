@@ -66,7 +66,7 @@ export default function FeedbackPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--gs-hover)" }}>
-      <SEO title="Kirim Masukan" description="Kirim saran, laporan bug, atau request topik ke tim Gudang Soal." url="/masukan" />
+      <SEO title="Kirim Masukan" description="Kirim saran, laporan bug, atau request topik ke tim matrohmatmath." url="/masukan" />
       <Navbar />
 
       <main style={{ flex: 1, maxWidth: "600px", width: "100%", margin: "0 auto", padding: isMobile ? "24px 16px" : "40px 24px" }}>

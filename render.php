@@ -3,7 +3,7 @@
 $base = 'https://gudangsoal.com';
 $uri  = strtok($_SERVER['REQUEST_URI'] ?? '/', '?');
 
-$title     = 'Gudang Soal — Platform Latihan Matematika Terlengkap';
+$title     = 'matrohmatmath — Platform Latihan Matematika Terlengkap';
 $desc      = 'Latihan soal matematika dari SD hingga UTBK, CPNS, dan OSN. Dilengkapi pembahasan detail, sistem XP, dan tracking progress belajarmu. Gratis selamanya.';
 $canonical = $base . $uri;
 $robots    = 'index, follow';
@@ -57,7 +57,7 @@ if ($pdo) {
         $stmt->execute([$m[1]]);
         if ($row = $stmt->fetch()) {
             $dbFound = true;
-            $title   = 'Soal ' . $row['mapel'] . ' (#' . $row['kode'] . ') | Gudang Soal';
+            $title   = 'Soal ' . $row['mapel'] . ' (#' . $row['kode'] . ') | matrohmatmath';
             $plain   = preg_replace(['/\$\$?[^$]+\$\$?/', '/[*_~`#\[\]>]/'], '', $row['body']);
             $desc    = mb_substr(trim($plain), 0, 155) . '…';
         }
@@ -76,7 +76,7 @@ if ($pdo) {
         $stmt->execute([(int)$m[1]]);
         if ($row = $stmt->fetch()) {
             $dbFound = true;
-            $title   = $row['judul'] . ' | Gudang Soal';
+            $title   = $row['judul'] . ' | matrohmatmath';
             $parts   = array_filter([$row['mapel'], $row['topik'], $row['subtopik']]);
             $desc    = 'Materi belajar: ' . $row['judul'] . ' — ' . implode(', ', $parts) . '. Lengkap dengan rumus dan ringkasan.';
         }
@@ -96,7 +96,7 @@ if ($pdo) {
         if ($row = $stmt->fetch()) {
             $dbFound = true;
             $tahun   = $row['tahun'] ? ' ' . $row['tahun'] : '';
-            $title   = $row['nama'] . $tahun . ' | Gudang Soal';
+            $title   = $row['nama'] . $tahun . ' | matrohmatmath';
             $desc    = $row['deskripsi']
                 ? $row['deskripsi']
                 : $row['jumlah_soal'] . ' soal dari ' . $row['nama'] . $tahun . '.';
@@ -119,7 +119,7 @@ if ($pdo) {
         $stmt->execute([$m[1], $m[2], $m[3], $m[4], $m[5]]);
         if ($row = $stmt->fetch()) {
             $dbFound = true;
-            $title   = $row['subtopik'] . ' — ' . $row['mapel'] . ' | Gudang Soal';
+            $title   = $row['subtopik'] . ' — ' . $row['mapel'] . ' | matrohmatmath';
             $desc    = $row['total'] . ' soal latihan ' . $row['subtopik'] . ' ' . $row['mapel']
                      . ' jenjang ' . $row['jenjang'] . '. Lengkap dengan pembahasan detail.';
         }
@@ -151,7 +151,7 @@ if ($html === false) {
     header('Content-Type: text/html; charset=utf-8');
     echo '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8">'
        . '<meta name="robots" content="noindex">'
-       . '<title>Gudang Soal</title></head><body><div id="root"></div></body></html>';
+       . '<title>matrohmatmath</title></head><body><div id="root"></div></body></html>';
     exit;
 }
 

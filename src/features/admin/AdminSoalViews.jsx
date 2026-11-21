@@ -95,7 +95,7 @@ export default function AdminSoalViews() {
 
   return (
     <>
-      <Helmet><title>Views Soal | Admin Gudang Soal</title></Helmet>
+      <Helmet><title>Views Soal | Admin matrohmatmath</title></Helmet>
 
       {/* ── Hero Header ── */}
       <div style={{

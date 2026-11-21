@@ -137,7 +137,7 @@ export default function RegisterPage() {
   if (done) {
     return (
       <div>
-        <SEO title="Cek Email" description="Konfirmasi email untuk mengaktifkan akun Gudang Soal." url="/register" />
+        <SEO title="Cek Email" description="Konfirmasi email untuk mengaktifkan akun matrohmatmath." url="/register" />
         <Navbar />
         <div style={{ minHeight: "90vh", display: "flex", alignItems: "center", justifyContent: "center", padding: isMobile ? "32px 20px" : "48px 32px", background: "var(--gs-bg)" }}>
           <div style={{ width: "100%", maxWidth: "400px", textAlign: "center" }}>
@@ -203,7 +203,7 @@ export default function RegisterPage() {
     <div>
       <SEO
         title="Daftar"
-        description="Buat akun Gudang Soal gratis dan mulai latihan soal matematika dengan sistem XP dan tracking progress."
+        description="Buat akun matrohmatmath gratis dan mulai latihan soal matematika dengan sistem XP dan tracking progress."
         url="/register"
       />
       <Navbar />

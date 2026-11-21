@@ -237,7 +237,7 @@ export default function AdminSoalRequests() {
   return (
     <div>
       <Helmet>
-        <title>Request Soal | Admin Gudang Soal</title>
+        <title>Request Soal | Admin matrohmatmath</title>
       </Helmet>
 
       {/* ── Hero header ── */}

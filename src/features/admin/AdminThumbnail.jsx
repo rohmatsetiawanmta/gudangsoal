@@ -168,7 +168,7 @@ function draw3Section(ctx, { judul, mapel, kode, channel, eyebrow, scheme, bgFn,
   // channel
   ctx.font = `500 20px ${F}`;
   ctx.fillStyle = "rgba(255,255,255,0.28)";
-  ctx.fillText(channel || "Gudang Soal", cx, CH - 44);
+  ctx.fillText(channel || "matrohmatmath", cx, CH - 44);
   ctx.textAlign = "left";
 }
 
@@ -571,7 +571,7 @@ function drawEditorialBase(ctx, { judul, mapel, kode, channel, eyebrow, scheme, 
 
   ctx.font = `500 14px ${F}`;
   ctx.fillStyle = `rgba(${inkRgb},0.32)`;
-  ctx.fillText(channel || "Gudang Soal", marginX, CH - 40);
+  ctx.fillText(channel || "matrohmatmath", marginX, CH - 40);
 }
 
 // ── Template 6: PAPER ────────────────────────────────────────────────────────
@@ -718,7 +718,7 @@ export default function AdminThumbnail() {
   const [judul, setJudul] = useState("Persamaan Garis Singgung Lingkaran");
   const [mapel, setMapel] = useState("Matematika");
   const [kode, setKode] = useState("");
-  const [channel, setChannel] = useState("Gudang Soal");
+  const [channel, setChannel] = useState("matrohmatmath");
   const [eyebrow, setEyebrow] = useState("PEMBAHASAN");
   const [schemeId, setSchemeId] = useState("red");
   const [template, setTemplate] = useState("dark");

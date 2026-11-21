@@ -465,7 +465,7 @@ export default function AdminMateriForm() {
   return (
     <div>
       <Helmet>
-        <title>{`${isEdit ? "Edit Materi" : "Tambah Materi"} | Admin Gudang Soal`}</title>
+        <title>{`${isEdit ? "Edit Materi" : "Tambah Materi"} | Admin matrohmatmath`}</title>
       </Helmet>
 
       {/* ── Hero header ── */}

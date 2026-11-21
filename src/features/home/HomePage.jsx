@@ -79,7 +79,7 @@ export default function HomePage() {
     <div style={{ minHeight: "100vh", background: "var(--gs-bg)" }}>
       <SEO
         title="Beranda"
-        description="Selamat datang di Gudang Soal. Lanjutkan belajar, kerjakan soal baru, dan pantau progress XP-mu."
+        description="Selamat datang di matrohmatmath. Lanjutkan belajar, kerjakan soal baru, dan pantau progress XP-mu."
         url="/home"
       />
       <Navbar />
