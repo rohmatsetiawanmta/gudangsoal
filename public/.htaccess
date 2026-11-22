@@ -2,16 +2,24 @@
   RewriteEngine On
   RewriteBase /
 
+  # Cutover domain: gudangsoal.com (lama) -> matrohmatmath.com (final).
+  # /api/ dikecualikan: folder sama persis (symlink), biarin dilayani
+  # langsung supaya request lama/cache lama yang masih manggil API di
+  # domain lama tetap jalan normal tanpa kena redirect.
+  RewriteCond %{HTTP_HOST} ^(www\.)?gudangsoal\.com$ [NC]
+  RewriteCond %{REQUEST_URI} !^/api/
+  RewriteRule ^(.*)$ https://matrohmatmath.com/$1 [L,R=301]
+
   # Redirect www -> non-www (301)
-  RewriteCond %{HTTP_HOST} ^www\.gudangsoal\.com$ [NC]
-  RewriteRule ^(.*)$ https://gudangsoal.com/$1 [L,R=301]
+  RewriteCond %{HTTP_HOST} ^www\.matrohmatmath\.com$ [NC]
+  RewriteRule ^(.*)$ https://matrohmatmath.com/$1 [L,R=301]
 
   # Sitemap — taruh paling atas sebelum kondisi lain
   RewriteRule ^sitemap\.xml$ sitemap.php [L]
 
   # Short link Instagram — taruh sebelum catch-all SPA
-  RewriteRule ^ig/story/?$ https://gudangsoal.com/?utm_source=instagram&utm_medium=story&utm_campaign=profile [L,R=302]
-  RewriteRule ^ig/?$ https://gudangsoal.com/?utm_source=instagram&utm_medium=bio&utm_campaign=profile [L,R=302]
+  RewriteRule ^ig/story/?$ https://matrohmatmath.com/?utm_source=instagram&utm_medium=story&utm_campaign=profile [L,R=302]
+  RewriteRule ^ig/?$ https://matrohmatmath.com/?utm_source=instagram&utm_medium=bio&utm_campaign=profile [L,R=302]
 
   # Jangan redirect kalau file/folder ada
   RewriteCond %{REQUEST_FILENAME} !-f
