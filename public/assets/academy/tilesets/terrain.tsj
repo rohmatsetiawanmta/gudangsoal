@@ -1,0 +1,1880 @@
+{
+  "type": "tileset",
+  "version": "1.10",
+  "name": "academy-terrain-01",
+  "tilewidth": 32,
+  "tileheight": 32,
+  "columns": 8,
+  "tilecount": 64,
+  "margin": 0,
+  "spacing": 0,
+  "image": "terrain.png",
+  "imagewidth": 256,
+  "imageheight": 256,
+  "tiles": [
+    {
+      "id": 0,
+      "type": "grass",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "grass_00"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "grass"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-001"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "type": "grass",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "grass_01"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "grass"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-002"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "grass",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "grass_02"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "grass"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-002"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "grass",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "grass_03"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "grass"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-002"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "grass",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "grass_04"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "grass"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-002"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "grass",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "grass_05"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "grass"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-002"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "grass",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "grass_06"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "grass"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-002"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "grass",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "grass_07"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "grass"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-002"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_fill_00"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-003"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_fill_01"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-003"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_fill_02"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-003"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_fill_03"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-003"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_fill_04"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-003"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_fill_05"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-003"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_fill_06"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-003"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_fill_07"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-003"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_edge_00"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_edge_01"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_edge_02"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_edge_03"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_edge_04"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_edge_05"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_edge_06"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_edge_07"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 7
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_edge_08"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_edge_09"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_edge_10"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_edge_11"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 11
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_edge_12"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 12
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_edge_13"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 13
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_edge_14"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 14
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_edge_15"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 15
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_fill_00"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-005"
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_fill_01"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-005"
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_fill_02"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-005"
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_fill_03"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-005"
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_fill_04"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-005"
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_fill_05"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-005"
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_fill_06"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-005"
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_fill_07"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "fill"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-005"
+        }
+      ]
+    },
+    {
+      "id": 40,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_edge_00"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 41,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_edge_01"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_edge_02"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 43,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_edge_03"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_edge_04"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_edge_05"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_edge_06"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_edge_07"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 7
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_edge_08"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 49,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_edge_09"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 50,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_edge_10"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_edge_11"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 11
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 52,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_edge_12"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 12
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 53,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_edge_13"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 13
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 54,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_edge_14"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 14
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 55,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_edge_15"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "edge"
+        },
+        {
+          "name": "neighborMask",
+          "type": "int",
+          "value": 15
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 56,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_inner_nw"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "inner-corner"
+        },
+        {
+          "name": "corner",
+          "type": "string",
+          "value": "nw"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 57,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_inner_ne"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "inner-corner"
+        },
+        {
+          "name": "corner",
+          "type": "string",
+          "value": "ne"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 58,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_inner_sw"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "inner-corner"
+        },
+        {
+          "name": "corner",
+          "type": "string",
+          "value": "sw"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 59,
+      "type": "path",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "path_inner_se"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "path"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "inner-corner"
+        },
+        {
+          "name": "corner",
+          "type": "string",
+          "value": "se"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-004"
+        }
+      ]
+    },
+    {
+      "id": 60,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_inner_nw"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "inner-corner"
+        },
+        {
+          "name": "corner",
+          "type": "string",
+          "value": "nw"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 61,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_inner_ne"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "inner-corner"
+        },
+        {
+          "name": "corner",
+          "type": "string",
+          "value": "ne"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 62,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_inner_sw"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "inner-corner"
+        },
+        {
+          "name": "corner",
+          "type": "string",
+          "value": "sw"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    },
+    {
+      "id": 63,
+      "type": "plaza",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "plaza_inner_se"
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "value": "plaza"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "value": "inner-corner"
+        },
+        {
+          "name": "corner",
+          "type": "string",
+          "value": "se"
+        },
+        {
+          "name": "assetId",
+          "type": "string",
+          "value": "TER-006"
+        }
+      ]
+    }
+  ]
+}

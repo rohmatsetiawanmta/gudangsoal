@@ -29,6 +29,9 @@ export default defineConfig({
       },
       workbox: {
         navigateFallbackDenylist: [/^\/api\//],
+        // Academy is opt-in: the service worker must not pre-download its lazy
+        // chunk, stylesheet, or future world assets for Standard Mode visitors.
+        globIgnores: ["**/AcademyPage-*", "**/academy/**"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },
     }),

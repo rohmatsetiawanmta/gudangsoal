@@ -7,6 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "test:academy": "node --test tests/academy*.test.mjs",
+    "assets:academy": "python3 scripts/build_academy_terrain.py && node scripts/build-academy-terrain-map.mjs && python3 scripts/build_academy_terrain.py --check --review-map",
+    "check:academy-assets": "python3 scripts/build_academy_terrain.py --check && node scripts/build-academy-terrain-map.mjs --check",
     "preview": "vite preview"
   },
   "dependencies": {

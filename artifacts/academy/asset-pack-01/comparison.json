@@ -1,0 +1,15 @@
+{
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "beforePlayer": {
+    "x": "1296",
+    "y": "1255.012"
+  },
+  "afterPlayer": {
+    "x": "1296",
+    "y": "1255.012"
+  },
+  "artStatus": "programmatic-placeholder-awaiting-visual-review"
+}

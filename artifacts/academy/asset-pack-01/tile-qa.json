@@ -1,0 +1,31 @@
+{
+  "status": "automated-checks-passed-visual-review-pending",
+  "tileSize": [
+    32,
+    32
+  ],
+  "atlasSize": [
+    256,
+    256
+  ],
+  "tileCount": 64,
+  "fillEdgeComparisons": 384,
+  "connectedEdgeCoreComparisons": 1024,
+  "edgeMasksChecked": 32,
+  "alphaValues": [
+    0,
+    255
+  ],
+  "paletteColorsIncludingTransparent": 41,
+  "note": "Matching edge pixels and binary alpha are automated checks, not a production-art approval. Inspect the in-game screenshots and repeated surfaces.",
+  "composedMap": {
+    "size": [
+      2560,
+      1920
+    ],
+    "alphaMin": 255,
+    "alphaMax": 255,
+    "visualLayers": 7
+  },
+  "pngSha256": "ec2c9cd639d9d7f5a1961dd6a8dfeb39709fb825b6bdb8a3f44af8c0f17fe7c7"
+}

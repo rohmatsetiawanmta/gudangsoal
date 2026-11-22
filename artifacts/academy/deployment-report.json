@@ -1,0 +1,106 @@
+{
+  "status": "deployed-and-HTTP-verified",
+  "date": "2026-11-22T12:02:19.282736+00:00",
+  "url": "https://matrohmatmath.com/academy",
+  "scope": "frontend only; no API/database changes",
+  "backup": "/home/u848421989/domains/gudangsoal.com/deploy-backups/academy-20261122-120023",
+  "checks": [
+    {
+      "url": "https://matrohmatmath.com/index.html",
+      "status": 200,
+      "bytes": 4254,
+      "sha256": "c72ef5084b5ae8f9e1741302838631cf22b1227177e9e1981a723463f89dabc4",
+      "fileMatch": true
+    },
+    {
+      "url": "https://matrohmatmath.com/assets/academy/environment/environment.png",
+      "status": 200,
+      "bytes": 853060,
+      "sha256": "20952ebc44ab9f952292166d92608d6ce8eab9c2e11c35b82b42a05f343b28ad",
+      "fileMatch": false,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "rgbaPixelMatch": true,
+      "rgbaSHA256": "53d074f657326f14f4f31ccba71726d38a28b777ed3b78ceae4cd93f9cd7a2f4"
+    },
+    {
+      "url": "https://matrohmatmath.com/assets/academy/buildings/question_hall.png",
+      "status": 200,
+      "bytes": 1355217,
+      "sha256": "f98dfbe288b53736046406325e31d15a5b8ede87d63168e97464f368187bb4c6",
+      "fileMatch": false,
+      "dimensions": [
+        1595,
+        986
+      ],
+      "rgbaPixelMatch": true,
+      "rgbaSHA256": "fe29ac01582bf58ac965773bd383c9f1ef11dfab564f4f7cb650fe4c9026d398"
+    },
+    {
+      "url": "https://matrohmatmath.com/assets/academy/buildings/profile_center.png",
+      "status": 200,
+      "bytes": 1636560,
+      "sha256": "1a5decd88921eafd2dab3a10661c015d9ecaf1a65c94ff081cc178a00f1c382a",
+      "fileMatch": false,
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "rgbaPixelMatch": true,
+      "rgbaSHA256": "43ac79dd3c85dad588e4fd6fda2362fdae6a0af0a161725f269d1a246427692a"
+    },
+    {
+      "url": "https://matrohmatmath.com/assets/academy/buildings/dormitory.png",
+      "status": 200,
+      "bytes": 1828266,
+      "sha256": "a3483c96602347928e81a16df04d16f205fd20313646f9a82ea688d8244e5055",
+      "fileMatch": false,
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "rgbaPixelMatch": true,
+      "rgbaSHA256": "c20dc355680ad68032bab5a90755e7b58c702a6f8a5e3f974a846014c76b5b0c"
+    },
+    {
+      "url": "https://matrohmatmath.com/assets/academy/tilesets/terrain.png",
+      "status": 200,
+      "bytes": 5689,
+      "sha256": "2d27853972d5ec8e4f2c80b8d36b1eafb92b1202c866e99a01ff14b5fe5205b5",
+      "fileMatch": false,
+      "dimensions": [
+        256,
+        256
+      ],
+      "rgbaPixelMatch": true,
+      "rgbaSHA256": "321174527d857bdd9b40b566297fa1d37d2cc1b3ae72c3d3a320007aab01d649"
+    },
+    {
+      "url": "https://matrohmatmath.com/assets/academy/maps/academy_plaza_terrain.json",
+      "status": 200,
+      "bytes": 86976,
+      "sha256": "fa57877a41e48ce8637c5052c2de58128fde17cd14f6142659bae542ed2442f6",
+      "fileMatch": true
+    },
+    {
+      "url": "https://matrohmatmath.com/academy",
+      "status": 200
+    },
+    {
+      "url": "https://matrohmatmath.com/browse",
+      "status": 200
+    },
+    {
+      "url": "https://matrohmatmath.com/profile",
+      "status": 200
+    },
+    {
+      "url": "https://matrohmatmath.com/home",
+      "status": 200
+    }
+  ],
+  "CDN": "PNG files are re-encoded by hosting CDN; dimensions and every RGBA pixel including alpha match local originals",
+  "productionAuthenticatedGameplay": "not tested; local simulated-account runtime QA supplied separately"
+}

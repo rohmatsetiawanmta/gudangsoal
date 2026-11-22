@@ -1,0 +1,969 @@
+{
+  "source": "assets/academy/environment/environment.png",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "sprites": [
+    {
+      "id": "ENV-001",
+      "key": "oak_green",
+      "source": {
+        "x": 74,
+        "y": 62,
+        "width": 292,
+        "height": 309
+      },
+      "frame": {
+        "width": 128,
+        "height": 160
+      },
+      "origin": {
+        "x": 64,
+        "y": 152
+      },
+      "scale": 0.4383561643835616
+    },
+    {
+      "id": "ENV-002",
+      "key": "oak_olive",
+      "source": {
+        "x": 467,
+        "y": 62,
+        "width": 291,
+        "height": 309
+      },
+      "frame": {
+        "width": 128,
+        "height": 160
+      },
+      "origin": {
+        "x": 64,
+        "y": 152
+      },
+      "scale": 0.43986254295532645
+    },
+    {
+      "id": "ENV-003",
+      "key": "flowering_bush",
+      "source": {
+        "x": 910,
+        "y": 180,
+        "width": 233,
+        "height": 136
+      },
+      "frame": {
+        "width": 64,
+        "height": 40
+      },
+      "origin": {
+        "x": 32,
+        "y": 36
+      },
+      "scale": 0.23529411764705882
+    },
+    {
+      "id": "ENV-004",
+      "key": "hedge",
+      "source": {
+        "x": 52,
+        "y": 579,
+        "width": 319,
+        "height": 119
+      },
+      "frame": {
+        "width": 96,
+        "height": 40
+      },
+      "origin": {
+        "x": 48,
+        "y": 36
+      },
+      "scale": 0.2689075630252101
+    },
+    {
+      "id": "ENV-005",
+      "key": "flowerbed",
+      "source": {
+        "x": 455,
+        "y": 572,
+        "width": 329,
+        "height": 121
+      },
+      "frame": {
+        "width": 96,
+        "height": 40
+      },
+      "origin": {
+        "x": 48,
+        "y": 36
+      },
+      "scale": 0.2644628099173554
+    },
+    {
+      "id": "ENV-006",
+      "key": "fountain",
+      "source": {
+        "x": 883,
+        "y": 475,
+        "width": 295,
+        "height": 297
+      },
+      "frame": {
+        "width": 160,
+        "height": 160
+      },
+      "origin": {
+        "x": 80,
+        "y": 152
+      },
+      "scale": 0.5117845117845118
+    },
+    {
+      "id": "ENV-007",
+      "key": "lamp",
+      "source": {
+        "x": 168,
+        "y": 876,
+        "width": 105,
+        "height": 305
+      },
+      "frame": {
+        "width": 32,
+        "height": 96
+      },
+      "origin": {
+        "x": 16,
+        "y": 88
+      },
+      "scale": 0.28852459016393445
+    },
+    {
+      "id": "ENV-008",
+      "key": "signpost",
+      "source": {
+        "x": 547,
+        "y": 931,
+        "width": 156,
+        "height": 231
+      },
+      "frame": {
+        "width": 48,
+        "height": 72
+      },
+      "origin": {
+        "x": 24,
+        "y": 64
+      },
+      "scale": 0.27705627705627706
+    },
+    {
+      "id": "ENV-009",
+      "key": "pond_patch",
+      "source": {
+        "x": 892,
+        "y": 917,
+        "width": 272,
+        "height": 245
+      },
+      "frame": {
+        "width": 128,
+        "height": 128
+      },
+      "origin": {
+        "x": 64,
+        "y": 120
+      },
+      "scale": 0.47058823529411764
+    }
+  ],
+  "world": {
+    "id": "academy_world",
+    "sceneId": "academy_plaza",
+    "version": 1,
+    "width": 2560,
+    "height": 1920
+  },
+  "water": {
+    "tileSize": 32,
+    "shorelineWidth": 16,
+    "sourceEdge": 40,
+    "rendering": "native Canvas pixel cells with identical base-color borders; nine-slice atlas shoreline"
+  },
+  "trees": [
+    {
+      "key": "oak_green",
+      "x": 112,
+      "y": 112,
+      "depth": 112,
+      "collider": "tree_0"
+    },
+    {
+      "key": "oak_olive",
+      "x": 720,
+      "y": 144,
+      "depth": 144,
+      "collider": "tree_1"
+    },
+    {
+      "key": "oak_green",
+      "x": 1824,
+      "y": 112,
+      "depth": 112,
+      "collider": "tree_2"
+    },
+    {
+      "key": "oak_green",
+      "x": 2400,
+      "y": 128,
+      "depth": 128,
+      "collider": "tree_3"
+    },
+    {
+      "key": "oak_green",
+      "x": 112,
+      "y": 592,
+      "depth": 592,
+      "collider": "tree_4"
+    },
+    {
+      "key": "oak_olive",
+      "x": 768,
+      "y": 576,
+      "depth": 576,
+      "collider": "tree_5"
+    },
+    {
+      "key": "oak_green",
+      "x": 1792,
+      "y": 560,
+      "depth": 560,
+      "collider": "tree_6"
+    },
+    {
+      "key": "oak_green",
+      "x": 2432,
+      "y": 576,
+      "depth": 576,
+      "collider": "tree_7"
+    },
+    {
+      "key": "oak_green",
+      "x": 96,
+      "y": 1312,
+      "depth": 1312,
+      "collider": "tree_8"
+    },
+    {
+      "key": "oak_olive",
+      "x": 832,
+      "y": 1344,
+      "depth": 1344,
+      "collider": "tree_9"
+    },
+    {
+      "key": "oak_green",
+      "x": 1712,
+      "y": 1360,
+      "depth": 1360,
+      "collider": "tree_10"
+    },
+    {
+      "key": "oak_green",
+      "x": 2432,
+      "y": 1312,
+      "depth": 1312,
+      "collider": "tree_11"
+    },
+    {
+      "key": "oak_green",
+      "x": 144,
+      "y": 1648,
+      "depth": 1648,
+      "collider": "tree_12"
+    },
+    {
+      "key": "oak_olive",
+      "x": 736,
+      "y": 1696,
+      "depth": 1696,
+      "collider": "tree_13"
+    },
+    {
+      "key": "oak_green",
+      "x": 1824,
+      "y": 1680,
+      "depth": 1680,
+      "collider": "tree_14"
+    },
+    {
+      "key": "oak_green",
+      "x": 2400,
+      "y": 1664,
+      "depth": 1664,
+      "collider": "tree_15"
+    },
+    {
+      "key": "oak_green",
+      "x": 512,
+      "y": 1760,
+      "depth": 1760,
+      "collider": "tree_16"
+    },
+    {
+      "key": "oak_olive",
+      "x": 2048,
+      "y": 1776,
+      "depth": 1776,
+      "collider": "tree_17"
+    },
+    {
+      "key": "oak_green",
+      "x": 368,
+      "y": 608,
+      "depth": 608,
+      "collider": "tree_18"
+    },
+    {
+      "key": "oak_green",
+      "x": 2192,
+      "y": 608,
+      "depth": 608,
+      "collider": "tree_19"
+    }
+  ],
+  "ponds": [
+    {
+      "x": 176,
+      "y": 176,
+      "width": 384,
+      "height": 256
+    },
+    {
+      "x": 2080,
+      "y": 1424,
+      "width": 288,
+      "height": 176
+    }
+  ],
+  "props": [
+    {
+      "key": "fountain",
+      "x": 1296,
+      "y": 1176,
+      "depth": 1168,
+      "collider": "fountain"
+    },
+    {
+      "key": "lamp",
+      "x": 1078,
+      "y": 1080,
+      "depth": 1084,
+      "collider": "bench_west"
+    },
+    {
+      "key": "lamp",
+      "x": 1514,
+      "y": 1080,
+      "depth": 1084,
+      "collider": "bench_east"
+    },
+    {
+      "key": "lamp",
+      "x": 1204,
+      "y": 1840,
+      "depth": 1872,
+      "collider": "gate_west"
+    },
+    {
+      "key": "lamp",
+      "x": 1388,
+      "y": 1840,
+      "depth": 1872,
+      "collider": "gate_east"
+    },
+    {
+      "key": "signpost",
+      "x": 376,
+      "y": 614,
+      "depth": 620,
+      "collider": "tree_18"
+    },
+    {
+      "key": "signpost",
+      "x": 840,
+      "y": 1350,
+      "depth": 1356,
+      "collider": "tree_9"
+    },
+    {
+      "key": "signpost",
+      "x": 1704,
+      "y": 1366,
+      "depth": 1372,
+      "collider": "tree_10"
+    }
+  ],
+  "groundPlanting": [
+    {
+      "key": "hedge",
+      "x": 112,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 208,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 304,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 400,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 496,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 592,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 688,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 784,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 880,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 976,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 1072,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 1168,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 1264,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 1360,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 1456,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 1552,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 1648,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 1744,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 1840,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 1936,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 2032,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 2128,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 2224,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 2320,
+      "y": 40
+    },
+    {
+      "key": "hedge",
+      "x": 112,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 208,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 304,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 400,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 496,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 592,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 688,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 784,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 880,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 976,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 1072,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 1168,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 1456,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 1552,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 1648,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 1744,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 1840,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 1936,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 2032,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 2128,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 2224,
+      "y": 1900
+    },
+    {
+      "key": "hedge",
+      "x": 2320,
+      "y": 1900
+    },
+    {
+      "key": "flowering_bush",
+      "x": 24,
+      "y": 160
+    },
+    {
+      "key": "flowering_bush",
+      "x": 2536,
+      "y": 160
+    },
+    {
+      "key": "flowering_bush",
+      "x": 24,
+      "y": 352
+    },
+    {
+      "key": "flowering_bush",
+      "x": 2536,
+      "y": 352
+    },
+    {
+      "key": "flowering_bush",
+      "x": 24,
+      "y": 544
+    },
+    {
+      "key": "flowering_bush",
+      "x": 2536,
+      "y": 544
+    },
+    {
+      "key": "flowering_bush",
+      "x": 24,
+      "y": 736
+    },
+    {
+      "key": "flowering_bush",
+      "x": 2536,
+      "y": 736
+    },
+    {
+      "key": "flowering_bush",
+      "x": 24,
+      "y": 928
+    },
+    {
+      "key": "flowering_bush",
+      "x": 2536,
+      "y": 928
+    },
+    {
+      "key": "flowering_bush",
+      "x": 24,
+      "y": 1120
+    },
+    {
+      "key": "flowering_bush",
+      "x": 2536,
+      "y": 1120
+    },
+    {
+      "key": "flowering_bush",
+      "x": 24,
+      "y": 1312
+    },
+    {
+      "key": "flowering_bush",
+      "x": 2536,
+      "y": 1312
+    },
+    {
+      "key": "flowering_bush",
+      "x": 24,
+      "y": 1504
+    },
+    {
+      "key": "flowering_bush",
+      "x": 2536,
+      "y": 1504
+    },
+    {
+      "key": "flowering_bush",
+      "x": 24,
+      "y": 1696
+    },
+    {
+      "key": "flowering_bush",
+      "x": 2536,
+      "y": 1696
+    },
+    {
+      "key": "flowerbed",
+      "x": 1008,
+      "y": 608
+    },
+    {
+      "key": "flowerbed",
+      "x": 1136,
+      "y": 608
+    },
+    {
+      "key": "flowerbed",
+      "x": 1456,
+      "y": 608
+    },
+    {
+      "key": "flowerbed",
+      "x": 1584,
+      "y": 608
+    },
+    {
+      "key": "flowerbed",
+      "x": 240,
+      "y": 1120
+    },
+    {
+      "key": "flowerbed",
+      "x": 368,
+      "y": 1120
+    },
+    {
+      "key": "flowerbed",
+      "x": 688,
+      "y": 1120
+    },
+    {
+      "key": "flowerbed",
+      "x": 1872,
+      "y": 1120
+    },
+    {
+      "key": "flowerbed",
+      "x": 2256,
+      "y": 1120
+    },
+    {
+      "key": "flowerbed",
+      "x": 2384,
+      "y": 1120
+    },
+    {
+      "key": "flowerbed",
+      "x": 1072,
+      "y": 864
+    },
+    {
+      "key": "flowerbed",
+      "x": 1520,
+      "y": 864
+    },
+    {
+      "key": "flowerbed",
+      "x": 1008,
+      "y": 944
+    },
+    {
+      "key": "flowerbed",
+      "x": 1584,
+      "y": 944
+    },
+    {
+      "key": "flowerbed",
+      "x": 1008,
+      "y": 1264
+    },
+    {
+      "key": "flowerbed",
+      "x": 1584,
+      "y": 1264
+    },
+    {
+      "key": "flowerbed",
+      "x": 1120,
+      "y": 1424
+    },
+    {
+      "key": "flowerbed",
+      "x": 1472,
+      "y": 1424
+    },
+    {
+      "key": "flowerbed",
+      "x": 1120,
+      "y": 1552
+    },
+    {
+      "key": "flowerbed",
+      "x": 1472,
+      "y": 1552
+    },
+    {
+      "key": "flowerbed",
+      "x": 1120,
+      "y": 1680
+    },
+    {
+      "key": "flowerbed",
+      "x": 1472,
+      "y": 1680
+    },
+    {
+      "key": "flowering_bush",
+      "x": 672,
+      "y": 352
+    },
+    {
+      "key": "flowering_bush",
+      "x": 800,
+      "y": 400
+    },
+    {
+      "key": "flowering_bush",
+      "x": 1920,
+      "y": 320
+    },
+    {
+      "key": "flowering_bush",
+      "x": 2112,
+      "y": 304
+    },
+    {
+      "key": "flowering_bush",
+      "x": 2272,
+      "y": 368
+    },
+    {
+      "key": "flowering_bush",
+      "x": 256,
+      "y": 544
+    },
+    {
+      "key": "flowering_bush",
+      "x": 592,
+      "y": 592
+    },
+    {
+      "key": "flowering_bush",
+      "x": 1952,
+      "y": 608
+    },
+    {
+      "key": "flowering_bush",
+      "x": 2304,
+      "y": 544
+    },
+    {
+      "key": "flowering_bush",
+      "x": 240,
+      "y": 1328
+    },
+    {
+      "key": "flowering_bush",
+      "x": 432,
+      "y": 1408
+    },
+    {
+      "key": "flowering_bush",
+      "x": 624,
+      "y": 1296
+    },
+    {
+      "key": "flowering_bush",
+      "x": 752,
+      "y": 1504
+    },
+    {
+      "key": "flowering_bush",
+      "x": 960,
+      "y": 1584
+    },
+    {
+      "key": "flowering_bush",
+      "x": 1696,
+      "y": 1552
+    },
+    {
+      "key": "flowering_bush",
+      "x": 1888,
+      "y": 1456
+    },
+    {
+      "key": "flowering_bush",
+      "x": 1984,
+      "y": 1280
+    },
+    {
+      "key": "flowering_bush",
+      "x": 2304,
+      "y": 1248
+    },
+    {
+      "key": "flowering_bush",
+      "x": 2496,
+      "y": 1376
+    },
+    {
+      "key": "flowering_bush",
+      "x": 304,
+      "y": 1648
+    },
+    {
+      "key": "flowering_bush",
+      "x": 448,
+      "y": 1568
+    },
+    {
+      "key": "flowering_bush",
+      "x": 608,
+      "y": 1824
+    },
+    {
+      "key": "flowering_bush",
+      "x": 928,
+      "y": 1808
+    },
+    {
+      "key": "flowering_bush",
+      "x": 1600,
+      "y": 1808
+    },
+    {
+      "key": "flowering_bush",
+      "x": 1984,
+      "y": 1856
+    },
+    {
+      "key": "flowering_bush",
+      "x": 2272,
+      "y": 1760
+    }
+  ]
+}

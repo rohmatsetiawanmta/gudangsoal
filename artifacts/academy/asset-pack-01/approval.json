@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-22",
+  "status": "approved-with-minor-to-medium-visual-refinements",
+  "reviewedBy": "user",
+  "nextStage": "Asset Pack 02 — Buildings concepts",
+  "refinementsAfterBuildings": [
+    "Reduce tile/grid appearance of plaza",
+    "Reduce paving repetition",
+    "Soften grass/path/plaza transitions",
+    "Add restrained color and small-detail variation"
+  ],
+  "frozenAssets": {
+    "public/assets/academy/tilesets/terrain.png": "ec2c9cd639d9d7f5a1961dd6a8dfeb39709fb825b6bdb8a3f44af8c0f17fe7c7",
+    "public/assets/academy/tilesets/terrain.tsj": "26f90c0cf26553eb1a94b0fd7932b16b23c4e4d1e6c313ece7b5e45aa3e73fd5",
+    "public/assets/academy/maps/academy_plaza_terrain.json": "fa57877a41e48ce8637c5052c2de58128fde17cd14f6142659bae542ed2442f6"
+  }
+}

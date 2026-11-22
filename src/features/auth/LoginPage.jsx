@@ -1,6 +1,6 @@
 // src/features/auth/LoginPage.jsx
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LogIn, Mail, Lock, Eye, EyeOff, Send } from "lucide-react";
 import { useAuthStore } from "./authStore";
 import { login, resendVerification } from "./authApi";
@@ -8,6 +8,7 @@ import Navbar from "../../components/Navbar";
 import SEO from "../../components/SEO";
 import useWindowWidth from "../../hooks/useWindowWidth";
 import { trackContinueAsGuest } from "../../lib/analytics";
+import { getLoginDestination } from "./loginDestination.js";
 
 function InputField({
   label,
@@ -80,6 +81,7 @@ function InputField({
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setAuth } = useAuthStore();
   const width = useWindowWidth();
   const isMobile = width <= 480;
@@ -116,7 +118,7 @@ export default function LoginPage() {
     try {
       const res = await login(form.email, form.password);
       setAuth(res.user, res.token);
-      navigate("/home");
+      navigate(getLoginDestination(location.state?.returnTo), { replace: true });
     } catch (err) {
       if (err.unverified) {
         setUnverifiedEmail(err.email || form.email);
