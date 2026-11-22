@@ -1,6 +1,6 @@
 <?php
 // render.php — Server-side meta tag injection for SPA routes
-$base = 'https://gudangsoal.com';
+$base = 'https://matrohmatmath.com';
 $uri  = strtok($_SERVER['REQUEST_URI'] ?? '/', '?');
 
 $title     = 'matrohmatmath — Platform Latihan Matematika Terlengkap';

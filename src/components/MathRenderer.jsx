@@ -15,7 +15,7 @@ mermaid.initialize({
   fontSize: 14,
 });
 
-const IMAGE_BASE_URL = "https://gudangsoal.com/uploads/";
+const IMAGE_BASE_URL = "https://matrohmatmath.com/uploads/";
 
 let mermaidCounter = 0;
 
