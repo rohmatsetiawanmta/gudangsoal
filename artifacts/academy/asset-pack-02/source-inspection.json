@@ -1,0 +1,62 @@
+{
+  "question_hall": {
+    "source": "artifacts/academy/asset-pack-02/source/question_hall_concept.png",
+    "size": [
+      1595,
+      986
+    ],
+    "mode": "RGBA",
+    "bytes": 1383272,
+    "sha256": "34f2edd8c9ea24d9a07270e040a918385a4a98316334a7d3dd856ee656471d8e",
+    "alphaZero": 625705,
+    "alphaPartial": 945362,
+    "alphaOpaque": 1603,
+    "displayCropAlpha128": [
+      12,
+      19,
+      1583,
+      930
+    ],
+    "sourceStatus": "concept-only-needs-native-pixel-and-alpha-cleanup"
+  },
+  "profile_center": {
+    "source": "artifacts/academy/asset-pack-02/source/profile_center_concept.png",
+    "size": [
+      1536,
+      1024
+    ],
+    "mode": "RGBA",
+    "bytes": 1635575,
+    "sha256": "ac2260831b36929cbe859aa9c72ff06fbf265436a07735a5905ccd24339b7bc3",
+    "alphaZero": 559191,
+    "alphaPartial": 1013673,
+    "alphaOpaque": 0,
+    "displayCropAlpha128": [
+      52,
+      106,
+      1484,
+      961
+    ],
+    "sourceStatus": "concept-only-needs-native-pixel-and-alpha-cleanup"
+  },
+  "dormitory": {
+    "source": "artifacts/academy/asset-pack-02/source/dormitory_concept.png",
+    "size": [
+      1536,
+      1024
+    ],
+    "mode": "RGBA",
+    "bytes": 1821243,
+    "sha256": "a1a4d7d6a0daa5ee2fb1ece105a0873669d4bd539e79cd532bd9688c21cb4820",
+    "alphaZero": 541455,
+    "alphaPartial": 1031409,
+    "alphaOpaque": 0,
+    "displayCropAlpha128": [
+      41,
+      105,
+      1495,
+      969
+    ],
+    "sourceStatus": "concept-only-needs-native-pixel-and-alpha-cleanup"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "url": "https://matrohmatmath.com/login",
+  "guestRedirectsToLogin": true,
+  "navbarAcademyLinks": 0,
+  "authenticatedGame": "not tested on production; local QA evidence provided"
+}

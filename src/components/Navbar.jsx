@@ -3,14 +3,13 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Search, X, BookOpen, User, LogOut, ChevronDown,
-  LayoutDashboard, Warehouse, Flame, Shuffle, MessageSquarePlus,
+  LayoutDashboard, Flame, Shuffle, MessageSquarePlus,
   TrendingUp, Menu, Zap, GraduationCap, Lightbulb, Package, Dumbbell, Instagram,
 } from "lucide-react";
 import { useAuthStore } from "../features/auth/authStore";
 import RandomSoal from "./RandomSoal";
 import NotificationBell from "../features/notifications/NotificationBell";
 import useWindowWidth from "../hooks/useWindowWidth";
-import { useTheme } from "../contexts/ThemeContext";
 import FeedbackModal from "../features/feedback/FeedbackModal";
 import RequestSoalModal from "../features/request/RequestSoalModal";
 import { useSiteSettings } from "../contexts/SiteSettingsContext";
@@ -22,8 +21,9 @@ const ALL_JELAJAHI_LINKS = [
   { to: "/paket",    label: "Paket",   icon: Package,       color: "#7c3aed", settingKey: "menu_paket" },
 ];
 
+// Academy is temporarily hidden from both desktop and mobile menus.
 const NAV_LINKS = [];
-const NAV_LINKS_LOGGED_IN = [];
+const NAV_LINKS_LOGGED_IN = NAV_LINKS;
 
 export default function Navbar() {
   const navigate  = useNavigate();

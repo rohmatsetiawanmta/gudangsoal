@@ -8,6 +8,8 @@ function ScrollToTop() {
   return null;
 }
 import { useAuthStore } from "./features/auth/authStore";
+import { getLoginDestination } from "./features/auth/loginDestination.js";
+import AcademyRoute from "./components/AcademyRoute";
 import FloatingTools from "./components/FloatingTools";
 import CookieConsent from "./components/CookieConsent";
 
@@ -94,7 +96,7 @@ export default function App() {
     <SiteSettingsProvider>
     <>
     <ScrollToTop />
-    <FloatingTools />
+    <div hidden={location.pathname.replace(/\/+$/, "") === "/academy"}><FloatingTools /></div>
     <CookieConsent />
     <div key={location.key} className="page-fade">
     <Routes>
@@ -104,7 +106,7 @@ export default function App() {
       />
       <Route
         path="/login"
-        element={isLoggedIn ? <Navigate to="/home" /> : <LoginPage />}
+        element={isLoggedIn ? <Navigate to={getLoginDestination(location.state?.returnTo)} replace /> : <LoginPage />}
       />
       <Route
         path="/register"
@@ -114,6 +116,10 @@ export default function App() {
       <Route path="/faq" element={<FAQPage />} />
       <Route path="/changelog" element={<ChangelogPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
+
+      <Route element={<ProtectedRoute returnTo="/academy" />}>
+        <Route path="/academy" element={<AcademyRoute />} />
+      </Route>
 
       <Route element={<ProtectedRoute />}>
         <Route path="/home" element={<HomePage />} />

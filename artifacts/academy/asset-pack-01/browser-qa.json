@@ -1,0 +1,23 @@
+{
+  "account": "local simulated account",
+  "routes": [
+    {
+      "building": "Question Hall",
+      "url": "http://127.0.0.1:5174/browse"
+    },
+    {
+      "building": "Profile Center",
+      "url": "http://127.0.0.1:5174/profile"
+    },
+    {
+      "building": "Dormitory",
+      "url": "http://127.0.0.1:5174/home"
+    }
+  ],
+  "allEntrancesReachedByWalking": true,
+  "allRoutesOpenedWithE": true,
+  "returnPositionRestored": true,
+  "pngFailureShowsError": true,
+  "pngRestoredAfterDevReload": true,
+  "note": "Restoring the map triggered Vite reload before a retry-button click; manual retry recovery was not separately verified in the browser."
+}

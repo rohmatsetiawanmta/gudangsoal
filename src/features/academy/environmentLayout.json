@@ -1,0 +1,180 @@
+{
+  "source": "assets/academy/environment/environment.png",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "sprites": [
+    {
+      "id": "ENV-001",
+      "key": "oak_green",
+      "source": {
+        "x": 74,
+        "y": 62,
+        "width": 292,
+        "height": 309
+      },
+      "frame": {
+        "width": 128,
+        "height": 160
+      },
+      "origin": {
+        "x": 64,
+        "y": 152
+      },
+      "scale": 0.4383561643835616
+    },
+    {
+      "id": "ENV-002",
+      "key": "oak_olive",
+      "source": {
+        "x": 467,
+        "y": 62,
+        "width": 291,
+        "height": 309
+      },
+      "frame": {
+        "width": 128,
+        "height": 160
+      },
+      "origin": {
+        "x": 64,
+        "y": 152
+      },
+      "scale": 0.43986254295532645
+    },
+    {
+      "id": "ENV-003",
+      "key": "flowering_bush",
+      "source": {
+        "x": 910,
+        "y": 180,
+        "width": 233,
+        "height": 136
+      },
+      "frame": {
+        "width": 64,
+        "height": 40
+      },
+      "origin": {
+        "x": 32,
+        "y": 36
+      },
+      "scale": 0.23529411764705882
+    },
+    {
+      "id": "ENV-004",
+      "key": "hedge",
+      "source": {
+        "x": 52,
+        "y": 579,
+        "width": 319,
+        "height": 119
+      },
+      "frame": {
+        "width": 96,
+        "height": 40
+      },
+      "origin": {
+        "x": 48,
+        "y": 36
+      },
+      "scale": 0.2689075630252101
+    },
+    {
+      "id": "ENV-005",
+      "key": "flowerbed",
+      "source": {
+        "x": 455,
+        "y": 572,
+        "width": 329,
+        "height": 121
+      },
+      "frame": {
+        "width": 96,
+        "height": 40
+      },
+      "origin": {
+        "x": 48,
+        "y": 36
+      },
+      "scale": 0.2644628099173554
+    },
+    {
+      "id": "ENV-006",
+      "key": "fountain",
+      "source": {
+        "x": 883,
+        "y": 475,
+        "width": 295,
+        "height": 297
+      },
+      "frame": {
+        "width": 160,
+        "height": 160
+      },
+      "origin": {
+        "x": 80,
+        "y": 152
+      },
+      "scale": 0.5117845117845118
+    },
+    {
+      "id": "ENV-007",
+      "key": "lamp",
+      "source": {
+        "x": 168,
+        "y": 876,
+        "width": 105,
+        "height": 305
+      },
+      "frame": {
+        "width": 32,
+        "height": 96
+      },
+      "origin": {
+        "x": 16,
+        "y": 88
+      },
+      "scale": 0.28852459016393445
+    },
+    {
+      "id": "ENV-008",
+      "key": "signpost",
+      "source": {
+        "x": 547,
+        "y": 931,
+        "width": 156,
+        "height": 231
+      },
+      "frame": {
+        "width": 48,
+        "height": 72
+      },
+      "origin": {
+        "x": 24,
+        "y": 64
+      },
+      "scale": 0.27705627705627706
+    },
+    {
+      "id": "ENV-009",
+      "key": "pond_patch",
+      "source": {
+        "x": 892,
+        "y": 917,
+        "width": 272,
+        "height": 245
+      },
+      "frame": {
+        "width": 128,
+        "height": 128
+      },
+      "origin": {
+        "x": 64,
+        "y": 120
+      },
+      "scale": 0.47058823529411764
+    }
+  ]
+}

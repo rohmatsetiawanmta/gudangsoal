@@ -15,6 +15,7 @@ $staticRoutes = [
     '/', '/home', '/browse', '/materi', '/latihan', '/games',
     '/faq', '/changelog', '/privacy', '/login', '/register', '/populer',
     '/search', '/request-soal', '/profile', '/verify-email', '/paket',
+    '/academy', '/academy/',
 ];
 $staticPrefixes = ['/games/', '/admin/', '/latihan/', '/quiz/', '/paket/'];
 

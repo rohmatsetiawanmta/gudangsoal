@@ -1,0 +1,37 @@
+{
+  "frozen": {
+    "src/features/academy/world.js": {
+      "sha256": "d80ae2270a253467d93bc6ea876bed1760715f7afc78504bdc4f23b47e7aba77",
+      "unchanged": true
+    },
+    "public/assets/academy/tilesets/terrain.png": {
+      "sha256": "ec2c9cd639d9d7f5a1961dd6a8dfeb39709fb825b6bdb8a3f44af8c0f17fe7c7",
+      "unchanged": true
+    },
+    "public/assets/academy/tilesets/terrain.tsj": {
+      "sha256": "26f90c0cf26553eb1a94b0fd7932b16b23c4e4d1e6c313ece7b5e45aa3e73fd5",
+      "unchanged": true
+    },
+    "public/assets/academy/maps/academy_plaza_terrain.json": {
+      "sha256": "fa57877a41e48ce8637c5052c2de58128fde17cd14f6142659bae542ed2442f6",
+      "unchanged": true
+    }
+  },
+  "buildings": {
+    "question_hall": {
+      "approved": "34f2edd8c9ea24d9a07270e040a918385a4a98316334a7d3dd856ee656471d8e",
+      "runtime": "34f2edd8c9ea24d9a07270e040a918385a4a98316334a7d3dd856ee656471d8e"
+    },
+    "profile_center": {
+      "approved": "ac2260831b36929cbe859aa9c72ff06fbf265436a07735a5905ccd24339b7bc3",
+      "runtime": "ac2260831b36929cbe859aa9c72ff06fbf265436a07735a5905ccd24339b7bc3"
+    },
+    "dormitory": {
+      "approved": "a1a4d7d6a0daa5ee2fb1ece105a0873669d4bd539e79cd532bd9688c21cb4820",
+      "runtime": "a1a4d7d6a0daa5ee2fb1ece105a0873669d4bd539e79cd532bd9688c21cb4820"
+    }
+  },
+  "colliderCount": 31,
+  "plantingCount": 112,
+  "treeCount": 20
+}

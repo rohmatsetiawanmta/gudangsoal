@@ -1,0 +1,69 @@
+{
+  "status": "integration QA passed; runtime visual review pending",
+  "date": "2026-11-22",
+  "artwork": "Approved PNG files copied losslessly; no regeneration or artwork changes",
+  "automatedTests": {
+    "passed": 21,
+    "failed": 0
+  },
+  "build": "passed (existing bundle size warning)",
+  "lint": "passed for changed Academy files and review.js",
+  "browser": {
+    "account": "isolated simulated account, local-only API proxy",
+    "positionSetup": "saved-state fixtures, not manual walking",
+    "routes": [
+      {
+        "building": "question_hall",
+        "trigger": "canvas E",
+        "url": "/browse",
+        "returnedPlayer": {
+          "x": 1296,
+          "y": 604
+        }
+      },
+      {
+        "building": "profile_center",
+        "trigger": "canvas E",
+        "url": "/profile",
+        "returnedPlayer": {
+          "x": 496,
+          "y": 1148
+        }
+      },
+      {
+        "building": "dormitory",
+        "trigger": "canvas E",
+        "url": "/home",
+        "returnedPlayer": {
+          "x": 2096,
+          "y": 1148
+        }
+      }
+    ],
+    "restoration": "verified via real navbar return links and canvas DOM attributes",
+    "backendScope": "Routing verified; browse content API intentionally unavailable in fixture",
+    "rendering": "nearest-neighbor source cache, 1:1 integer world frame; front/back order tested; actual entrances inspected"
+  },
+  "frozen": {
+    "src/features/academy/world.js": {
+      "before": "d80ae2270a253467d93bc6ea876bed1760715f7afc78504bdc4f23b47e7aba77",
+      "after": "d80ae2270a253467d93bc6ea876bed1760715f7afc78504bdc4f23b47e7aba77",
+      "unchanged": true
+    },
+    "public/assets/academy/tilesets/terrain.png": {
+      "before": "ec2c9cd639d9d7f5a1961dd6a8dfeb39709fb825b6bdb8a3f44af8c0f17fe7c7",
+      "after": "ec2c9cd639d9d7f5a1961dd6a8dfeb39709fb825b6bdb8a3f44af8c0f17fe7c7",
+      "unchanged": true
+    },
+    "public/assets/academy/tilesets/terrain.tsj": {
+      "before": "26f90c0cf26553eb1a94b0fd7932b16b23c4e4d1e6c313ece7b5e45aa3e73fd5",
+      "after": "26f90c0cf26553eb1a94b0fd7932b16b23c4e4d1e6c313ece7b5e45aa3e73fd5",
+      "unchanged": true
+    },
+    "public/assets/academy/maps/academy_plaza_terrain.json": {
+      "before": "fa57877a41e48ce8637c5052c2de58128fde17cd14f6142659bae542ed2442f6",
+      "after": "fa57877a41e48ce8637c5052c2de58128fde17cd14f6142659bae542ed2442f6",
+      "unchanged": true
+    }
+  }
+}

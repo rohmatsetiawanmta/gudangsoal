@@ -1,0 +1,241 @@
+{
+  "stage": "concept-review-only-not-integrated",
+  "world": {
+    "id": "academy_world",
+    "sceneId": "academy_plaza",
+    "version": 1,
+    "width": 2560,
+    "height": 1920
+  },
+  "tileSize": 32,
+  "buildings": [
+    {
+      "id": "question_hall",
+      "label": "Question Hall",
+      "route": "/browse",
+      "identity": "Hero academic hall · navy, cream stone, cupola, double door, book emblem",
+      "source": "source/question_hall_concept.png",
+      "sourceSize": [
+        1595,
+        986
+      ],
+      "sourceCrop": {
+        "x": 12,
+        "y": 19,
+        "width": 1571,
+        "height": 911
+      },
+      "sourceDoorEstimate": {
+        "x": 798,
+        "y": 914
+      },
+      "proposedSprite": {
+        "x": 896,
+        "y": 32,
+        "width": 768,
+        "height": 544,
+        "origin": {
+          "x": 384,
+          "y": 512
+        },
+        "originRule": "centre of collision front edge; 32px transparent footer",
+        "collisionLocal": {
+          "x": 32,
+          "y": 128,
+          "width": 704,
+          "height": 384
+        },
+        "doorLocal": {
+          "x": 400,
+          "y": 512
+        },
+        "doorOffsetFromOrigin": {
+          "x": 16,
+          "y": 0
+        }
+      },
+      "collisionWorld": {
+        "x": 928,
+        "y": 160,
+        "width": 704,
+        "height": 384
+      },
+      "interactionWorld": {
+        "x": 1296,
+        "y": 592
+      },
+      "doorWorld": {
+        "x": 1296,
+        "y": 544
+      },
+      "depthY": 544,
+      "doorToInteractionDistance": 48,
+      "conceptPlacement": {
+        "uniformScale": 0.45478036175710596,
+        "destination": {
+          "x": 938.5426356589147,
+          "y": 136.9715762273902,
+          "width": 714.4599483204134,
+          "height": 414.3049095607235
+        },
+        "visibleBaseDelta": {
+          "left": 15.090439276485768,
+          "right": 15.090439276485768
+        },
+        "warning": "Concept framing only: source door/base points are estimates; final sprite needs native pixel alignment and alpha cleanup."
+      }
+    },
+    {
+      "id": "profile_center",
+      "label": "Profile Center",
+      "route": "/profile",
+      "identity": "Academic administration cottage · terracotta, plaster/timber, profile plaque",
+      "source": "source/profile_center_concept.png",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "sourceCrop": {
+        "x": 52,
+        "y": 106,
+        "width": 1432,
+        "height": 855
+      },
+      "sourceDoorEstimate": {
+        "x": 850,
+        "y": 942
+      },
+      "proposedSprite": {
+        "x": 128,
+        "y": 640,
+        "width": 672,
+        "height": 480,
+        "origin": {
+          "x": 336,
+          "y": 448
+        },
+        "originRule": "centre of collision front edge; 32px transparent footer",
+        "collisionLocal": {
+          "x": 32,
+          "y": 96,
+          "width": 608,
+          "height": 352
+        },
+        "doorLocal": {
+          "x": 368,
+          "y": 448
+        },
+        "doorOffsetFromOrigin": {
+          "x": 32,
+          "y": 0
+        }
+      },
+      "collisionWorld": {
+        "x": 160,
+        "y": 736,
+        "width": 608,
+        "height": 352
+      },
+      "interactionWorld": {
+        "x": 496,
+        "y": 1136
+      },
+      "doorWorld": {
+        "x": 496,
+        "y": 1088
+      },
+      "depthY": 1088,
+      "doorToInteractionDistance": 48,
+      "conceptPlacement": {
+        "uniformScale": 0.46115288220551376,
+        "destination": {
+          "x": 128,
+          "y": 702.4761904761905,
+          "width": 660.3709273182957,
+          "height": 394.2857142857143
+        },
+        "visibleBaseDelta": {
+          "left": -4.330827067669134,
+          "right": -7.298245614035068
+        },
+        "warning": "Concept framing only: source door/base points are estimates; final sprite needs native pixel alignment and alpha cleanup."
+      }
+    },
+    {
+      "id": "dormitory",
+      "label": "Dormitory",
+      "route": "/home",
+      "identity": "Student cottage · plum, warm timber, bed plaque, chimney, restrained ivy",
+      "source": "source/dormitory_concept.png",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "sourceCrop": {
+        "x": 41,
+        "y": 105,
+        "width": 1454,
+        "height": 864
+      },
+      "sourceDoorEstimate": {
+        "x": 768,
+        "y": 952
+      },
+      "proposedSprite": {
+        "x": 1760,
+        "y": 640,
+        "width": 672,
+        "height": 480,
+        "origin": {
+          "x": 336,
+          "y": 448
+        },
+        "originRule": "centre of collision front edge; 32px transparent footer",
+        "collisionLocal": {
+          "x": 32,
+          "y": 96,
+          "width": 608,
+          "height": 352
+        },
+        "doorLocal": {
+          "x": 336,
+          "y": 448
+        },
+        "doorOffsetFromOrigin": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "collisionWorld": {
+        "x": 1792,
+        "y": 736,
+        "width": 608,
+        "height": 352
+      },
+      "interactionWorld": {
+        "x": 2096,
+        "y": 1136
+      },
+      "doorWorld": {
+        "x": 2096,
+        "y": 1088
+      },
+      "depthY": 1088,
+      "doorToInteractionDistance": 48,
+      "conceptPlacement": {
+        "uniformScale": 0.4621733149931224,
+        "destination": {
+          "x": 1760,
+          "y": 696.5392022008252,
+          "width": 672,
+          "height": 399.3177441540578
+        },
+        "visibleBaseDelta": {
+          "left": 0.8143053645117106,
+          "right": -0.8143053645117106
+        },
+        "warning": "Concept framing only: source door/base points are estimates; final sprite needs native pixel alignment and alpha cleanup."
+      }
+    }
+  ]
+}
