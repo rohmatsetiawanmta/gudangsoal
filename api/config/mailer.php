@@ -9,11 +9,11 @@ $_env = parse_ini_file(__DIR__ . '/../.env') ?: [];
 
 define('SMTP_HOST',      'smtp.hostinger.com');
 define('SMTP_PORT',      465);
-define('SMTP_USER',      'noreply@gudangsoal.com');
+define('SMTP_USER',      'noreply@matrohmatmath.com');
 define('SMTP_PASS',      $_env['SMTP_PASS'] ?? '');
-define('SMTP_FROM',      'noreply@gudangsoal.com');
+define('SMTP_FROM',      'noreply@matrohmatmath.com');
 define('SMTP_FROM_NAME', 'matrohmatmath');
-define('APP_URL',        'https://gudangsoal.com');
+define('APP_URL',        'https://matrohmatmath.com');
 
 function sendVerificationEmail(string $toEmail, string $toName, string $token): bool {
   $mail = new PHPMailer(true);
@@ -97,7 +97,7 @@ function buildEmailHtml(string $name, string $url): string {
     <!-- Footer -->
     <p style="text-align:center;font-size:12px;color:#b4b2a9;margin-top:20px;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;">
       © 2026 matrohmatmath &nbsp;·&nbsp;
-      <a href="https://gudangsoal.com" style="color:#b4b2a9;text-decoration:none;">gudangsoal.com</a>
+      <a href="https://matrohmatmath.com" style="color:#b4b2a9;text-decoration:none;">matrohmatmath.com</a>
     </p>
   </div>
 </body>
