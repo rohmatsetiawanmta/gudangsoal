@@ -446,12 +446,12 @@ export default function Navbar() {
                       >
                         <MessageSquarePlus size={15} color="var(--gs-text-muted)" /> Kirim Masukan
                       </button>
-                      <a href="https://www.instagram.com/gudangsoalcom/" target="_blank" rel="noopener"
+                      <a href="https://instagram.com/matrohmatmath" target="_blank" rel="noopener"
                         style={{ ...menuItemStyle, textDecoration: "none" }}
                         onMouseEnter={(e) => (e.currentTarget.style.background = "var(--gs-hover)")}
                         onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
                       >
-                        <Instagram size={15} color="var(--gs-text-muted)" /> @gudangsoalcom
+                        <Instagram size={15} color="var(--gs-text-muted)" /> @matrohmatmath
                       </a>
                     </div>
 
