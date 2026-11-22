@@ -6,6 +6,9 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import SEO from "../../components/SEO";
 import useWindowWidth from "../../hooks/useWindowWidth";
+import PixelCharacter from "./PixelCharacter";
+
+const PIXEL_FONT = "'Press Start 2P', monospace";
 
 export default function AcademyPage() {
   const navigate = useNavigate();
@@ -48,7 +51,7 @@ export default function AcademyPage() {
           </div>
         </div>
 
-        {/* ── 2D Room ── */}
+        {/* ── 2D Room (8-bit) ── */}
         <div style={{
           background: "var(--gs-surface)",
           borderRadius: "20px",
@@ -57,92 +60,103 @@ export default function AcademyPage() {
         }}>
           <div style={{
             position: "relative",
-            borderRadius: "16px",
             overflow: "hidden",
             background: "linear-gradient(to bottom, #d7cfc0 0%, #d7cfc0 38%, #c9a876 38%, #c9a876 100%)",
-            minHeight: isMobile ? "320px" : "380px",
-            border: "1px solid var(--gs-border)",
+            minHeight: isMobile ? "340px" : "400px",
+            border: "4px solid #0f0e17",
+            borderRadius: "6px",
+            boxShadow: "0 0 0 3px #c9a876, 6px 6px 0 rgba(15,14,23,.15)",
+            imageRendering: "pixelated",
           }}>
             {/* Floor tile pattern */}
             <div style={{
               position: "absolute", left: 0, right: 0, bottom: 0, top: "38%",
               backgroundImage:
-                "repeating-linear-gradient(0deg, rgba(0,0,0,.05) 0 1px, transparent 1px 42px)," +
-                "repeating-linear-gradient(90deg, rgba(0,0,0,.05) 0 1px, transparent 1px 42px)",
+                "repeating-linear-gradient(0deg, rgba(0,0,0,.1) 0 2px, transparent 2px 40px)," +
+                "repeating-linear-gradient(90deg, rgba(0,0,0,.1) 0 2px, transparent 2px 40px)",
             }} />
 
             {/* Blackboard */}
             <div style={{
               position: "absolute", top: isMobile ? "14px" : "20px", left: "50%", transform: "translateX(-50%)",
               width: isMobile ? "140px" : "180px", height: isMobile ? "70px" : "90px",
-              background: "#1a3a2e", borderRadius: "8px",
-              border: "6px solid #8a6d4b",
+              background: "#1a3a2e",
+              border: "4px solid #0f0e17",
+              boxShadow: "0 0 0 3px #8a6d4b, 4px 4px 0 rgba(15,14,23,.25)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: "0 4px 12px rgba(0,0,0,.15)",
             }}>
-              <Presentation size={isMobile ? 26 : 32} color="rgba(255,255,255,.5)" />
+              <Presentation size={isMobile ? 24 : 30} color="rgba(255,255,255,.55)" strokeWidth={2.5} />
             </div>
 
-            {/* Window */}
+            {/* Windows */}
             <div style={{
               position: "absolute", top: isMobile ? "16px" : "24px", left: isMobile ? "16px" : "32px",
               width: isMobile ? "44px" : "58px", height: isMobile ? "44px" : "58px",
-              background: "linear-gradient(135deg, #a8d8e8, #7cb8d8)",
-              borderRadius: "6px", border: "4px solid white",
-              boxShadow: "0 2px 8px rgba(0,0,0,.1)",
+              background: "linear-gradient(135deg, #a8d8e8, #6ba8c8)",
+              border: "4px solid #0f0e17",
+              boxShadow: "0 0 0 3px white, 3px 3px 0 rgba(15,14,23,.2)",
             }} />
             <div style={{
               position: "absolute", top: isMobile ? "16px" : "24px", right: isMobile ? "16px" : "32px",
               width: isMobile ? "44px" : "58px", height: isMobile ? "44px" : "58px",
-              background: "linear-gradient(135deg, #a8d8e8, #7cb8d8)",
-              borderRadius: "6px", border: "4px solid white",
-              boxShadow: "0 2px 8px rgba(0,0,0,.1)",
+              background: "linear-gradient(135deg, #a8d8e8, #6ba8c8)",
+              border: "4px solid #0f0e17",
+              boxShadow: "0 0 0 3px white, 3px 3px 0 rgba(15,14,23,.2)",
             }} />
+
+            {/* Student character */}
+            <div style={{
+              position: "absolute", left: isMobile ? "6%" : "18%", bottom: isMobile ? "16%" : "18%",
+            }}>
+              <PixelCharacter size={isMobile ? 4 : 5} />
+            </div>
 
             {/* Interactive desk → Latihan Soal */}
             <button
               onClick={() => navigate("/browse")}
               style={{
-                position: "absolute", left: isMobile ? "30%" : "50%", bottom: isMobile ? "18%" : "20%", transform: "translateX(-50%)",
-                display: "flex", flexDirection: "column", alignItems: "center", gap: "8px",
+                position: "absolute", left: isMobile ? "38%" : "55%", bottom: isMobile ? "18%" : "20%", transform: "translateX(-50%)",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: "10px",
                 background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "inherit",
               }}
             >
               <div style={{
-                width: isMobile ? "68px" : "84px", height: isMobile ? "68px" : "84px",
-                borderRadius: "16px", background: "#e84c2b",
+                width: isMobile ? "64px" : "80px", height: isMobile ? "64px" : "80px",
+                background: "#e84c2b",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 6px 20px rgba(232,76,43,.45)",
-                border: "3px solid white",
-                animation: "academy-pulse 2.2s ease-in-out infinite",
+                border: "4px solid #0f0e17",
+                boxShadow: "0 0 0 3px #fff, 4px 4px 0 rgba(15,14,23,.3)",
+                animation: "academy-pulse 1.4s steps(2) infinite",
               }}>
-                <BookOpen size={isMobile ? 28 : 36} color="white" />
+                <BookOpen size={isMobile ? 26 : 32} color="white" strokeWidth={2.5} />
               </div>
               <span style={{
-                fontSize: isMobile ? "12px" : "13px", fontWeight: "700", color: "#0f0e17",
-                background: "white", padding: "4px 12px", borderRadius: "99px",
-                border: "1px solid var(--gs-border)", boxShadow: "0 2px 8px rgba(0,0,0,.08)",
+                fontFamily: PIXEL_FONT,
+                fontSize: isMobile ? "8px" : "9px", color: "#0f0e17", lineHeight: 1.6,
+                background: "white", padding: "6px 10px",
+                border: "3px solid #0f0e17",
+                boxShadow: "2px 2px 0 rgba(15,14,23,.3)",
                 whiteSpace: "nowrap",
               }}>
-                Latihan Soal
+                LATIHAN SOAL
               </span>
             </button>
 
             {/* Locked door — teaser for future rooms */}
             <div style={{
-              position: "absolute", right: isMobile ? "14%" : "14%", bottom: isMobile ? "18%" : "20%",
-              display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", opacity: 0.5,
+              position: "absolute", right: isMobile ? "10%" : "12%", bottom: isMobile ? "18%" : "20%",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", opacity: 0.55,
             }}>
               <div style={{
-                width: isMobile ? "52px" : "64px", height: isMobile ? "52px" : "64px",
-                borderRadius: "14px", background: "var(--gs-hover)",
+                width: isMobile ? "50px" : "60px", height: isMobile ? "50px" : "60px",
+                background: "var(--gs-hover)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                border: "2px dashed var(--gs-border)",
+                border: "3px dashed #0f0e17",
               }}>
-                <DoorOpen size={isMobile ? 22 : 26} color="var(--gs-text-hint)" />
+                <DoorOpen size={isMobile ? 20 : 24} color="var(--gs-text-hint)" strokeWidth={2.5} />
               </div>
-              <span style={{ fontSize: "11px", fontWeight: "600", color: "var(--gs-text-hint)" }}>
-                Segera
+              <span style={{ fontFamily: PIXEL_FONT, fontSize: isMobile ? "7px" : "8px", color: "var(--gs-text-hint)" }}>
+                SEGERA
               </span>
             </div>
           </div>
@@ -155,9 +169,15 @@ export default function AcademyPage() {
       </main>
 
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
         @keyframes academy-pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-4px); }
+        }
+        @keyframes pixel-char-bob {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-2px); }
         }
       `}</style>
 
