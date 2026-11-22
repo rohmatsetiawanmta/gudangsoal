@@ -74,7 +74,7 @@ if ($uri === '/upload/image' && $method === 'POST') {
     exit;
   }
 
-  $url = 'https://gudangsoal.com/' . $folder . '/' . $filename;
+  $url = 'https://matrohmatmath.com/' . $folder . '/' . $filename;
   echo json_encode(['url' => $url, 'filename' => $filename]);
   exit;
 }

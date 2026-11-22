@@ -559,13 +559,13 @@ export default function MateriDetail() {
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(`https://gudangsoal.com/materi/${id}`);
+    navigator.clipboard.writeText(`https://matrohmatmath.com/materi/${id}`);
     trackShare("copy");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const rawUrl    = `https://gudangsoal.com/materi/${id}`;
+  const rawUrl    = `https://matrohmatmath.com/materi/${id}`;
   const shareUrl  = encodeURIComponent(rawUrl);
   const judulLabel = materi?.judul ? `"${materi.judul}"` : "ini";
   const shareMsg  = `Lagi belajar ${judulLabel} di matrohmatmath! Materinya lengkap banget, cobain deh!\n${rawUrl}`;
@@ -937,7 +937,7 @@ export default function MateriDetail() {
               ))}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#f5f3ef", borderRadius: "10px", padding: "10px 12px" }}>
-              <span style={{ flex: 1, fontSize: "12px", color: "#6b6860", fontFamily: "monospace", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>gudangsoal.com/materi/{id}</span>
+              <span style={{ flex: 1, fontSize: "12px", color: "#6b6860", fontFamily: "monospace", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>matrohmatmath.com/materi/{id}</span>
               <button onClick={handleCopy} style={{ padding: "5px 10px", borderRadius: "7px", border: "none", background: copied ? "#1a8a6e" : "#e84c2b", color: "white", fontSize: "12px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", flexShrink: 0, transition: "background .15s" }}>
                 {copied ? "Tersalin!" : "Salin"}
               </button>

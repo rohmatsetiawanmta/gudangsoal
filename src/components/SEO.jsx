@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 
 export default function SEO({ title, description, url, image }) {
   const siteName = "matrohmatmath";
-  const baseUrl = "https://gudangsoal.com";
+  const baseUrl = "https://matrohmatmath.com";
   const defImage = `${baseUrl}/og-image.png`;
   const defDesc =
     "Latihan soal matematika dari SD hingga UTBK, CPNS, dan OSN. Dilengkapi pembahasan detail, sistem XP, dan tracking progress belajarmu. Gratis selamanya.";

@@ -352,7 +352,7 @@ export default function SoalDetail() {
     } catch { /* diabaikan: best-effort, boleh gagal senyap */ }
   };
 
-  const soalUrl    = `https://gudangsoal.com/soal/${kode}`;
+  const soalUrl    = `https://matrohmatmath.com/soal/${kode}`;
   const shareUrl   = encodeURIComponent(soalUrl);
   const topikLabel = soal?.subtopik_nama || soal?.topik_nama || soal?.mapel_nama || "Matematika";
   const shareMsg   = `Ada soal ${topikLabel} menarik nih di matrohmatmath! Bisa kamu jawab? Coba deh!\n${soalUrl}`;
@@ -799,7 +799,7 @@ export default function SoalDetail() {
               ))}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "var(--gs-hover)", borderRadius: "10px", padding: "10px 12px" }}>
-              <span style={{ flex: 1, fontSize: "12px", color: "var(--gs-text-muted)", fontFamily: "monospace", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>gudangsoal.com/soal/{kode}</span>
+              <span style={{ flex: 1, fontSize: "12px", color: "var(--gs-text-muted)", fontFamily: "monospace", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>matrohmatmath.com/soal/{kode}</span>
               <button onClick={handleCopy} style={{ padding: "5px 10px", borderRadius: "7px", border: "none", background: copied ? "#1a8a6e" : "#e84c2b", color: "white", fontSize: "12px", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", flexShrink: 0, transition: "background .15s" }}>
                 {copied ? "Tersalin!" : "Salin"}
               </button>
