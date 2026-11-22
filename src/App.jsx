@@ -16,6 +16,7 @@ import HomePage from "./features/home/HomePage";
 import FAQPage from "./features/home/FAQPage";
 import ChangelogPage from "./features/home/ChangelogPage";
 import PrivacyPage from "./features/home/PrivacyPage";
+import AcademyPage from "./features/academy/AcademyPage";
 
 import LoginPage from "./features/auth/LoginPage";
 import RegisterPage from "./features/auth/RegisterPage";
@@ -114,6 +115,7 @@ export default function App() {
       <Route path="/faq" element={<FAQPage />} />
       <Route path="/changelog" element={<ChangelogPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/academy" element={<AcademyPage />} />
 
       <Route element={<ProtectedRoute />}>
         <Route path="/home" element={<HomePage />} />
