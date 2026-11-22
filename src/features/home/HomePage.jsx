@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../auth/authStore";
 import {
   ChevronRight, CheckCircle, XCircle, BookOpen, Shuffle,
-  Zap, Flame, Dumbbell, GraduationCap,
+  Zap, Flame, Dumbbell,
   Target, Award, BarChart2,
 } from "lucide-react";
 
@@ -57,14 +57,6 @@ export default function HomePage() {
       color: "#2563eb",
       bg:    "rgba(37,99,235,.12)",
       to:    "/browse",
-    },
-    {
-      label: "Materi Belajar",
-      desc:  "Teori & rumus per subtopik",
-      icon:  GraduationCap,
-      color: "#1a8a6e",
-      bg:    "rgba(26,138,110,.12)",
-      to:    "/materi",
     },
   ];
 
@@ -164,7 +156,7 @@ export default function HomePage() {
         {/* ── Quick actions ── */}
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
+          gridTemplateColumns: QUICK_ACTIONS.length > 1 ? "repeat(2, 1fr)" : "1fr",
           gap: "10px",
           marginBottom: "32px",
         }}>
