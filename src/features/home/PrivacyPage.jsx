@@ -16,7 +16,7 @@ const SECTIONS = [
     num: "1",
     title: "Ketentuan Umum",
     prose: [
-      "Kebijakan Privasi ini menjelaskan bagaimana matrohmatmath (\"Platform\") mengumpulkan, menggunakan, menyimpan, dan melindungi data pribadi pengguna. Kebijakan ini berlaku bagi seluruh pengguna yang mengakses platform melalui situs web gudangsoal.com.",
+      "Kebijakan Privasi ini menjelaskan bagaimana matrohmatmath (\"Platform\") mengumpulkan, menggunakan, menyimpan, dan melindungi data pribadi pengguna. Kebijakan ini berlaku bagi seluruh pengguna yang mengakses platform melalui situs web matrohmatmath.com.",
       "Kami berkomitmen mematuhi Undang-Undang No. 27 Tahun 2022 tentang Perlindungan Data Pribadi (UU PDP) beserta peraturan pelaksanaannya yang berlaku di Indonesia.",
     ],
   },
@@ -243,11 +243,9 @@ export default function PrivacyPage() {
         }}>
           <h2 style={{ fontSize: "13px", fontWeight: "700", color: "var(--gs-text)", margin: "0 0 8px" }}>Cara Menghubungi Kami</h2>
           <p style={{ fontSize: "14px", color: "var(--gs-text-muted)", margin: "0 0 4px", lineHeight: "1.65" }}>
-            Untuk pertanyaan seputar privasi, permintaan akses data, atau pengajuan penghapusan akun:
+            Untuk pertanyaan seputar privasi, permintaan akses data, atau pengajuan penghapusan akun,
+            silakan gunakan fitur <strong style={{ color: "var(--gs-text)" }}>Kirim Masukan</strong> di dalam platform.
           </p>
-          <a href="mailto:admin@gudangsoal.com" style={{ fontSize: "14px", fontWeight: "600", color: "#e84c2b", textDecoration: "none" }}>
-            admin@gudangsoal.com
-          </a>
           <p style={{ fontSize: "13px", color: "var(--gs-text-hint)", margin: "8px 0 0", lineHeight: "1.6" }}>
             Kami berkomitmen merespons setiap pertanyaan seputar privasi dalam waktu 5 hari kerja.
           </p>
